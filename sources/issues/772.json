@@ -1,0 +1,129 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQwMDI3NjU=",
+    "is_bot": false,
+    "login": "csfreak92",
+    "name": "Ralph Andalis"
+  },
+  "body": "ASVS 4.0 - 1.5.2 verification requirement is:\r\n\r\n`Verify that serialization is not used when communicating with untrusted clients. If this is not possible, ensure that adequate integrity controls (and possibly encryption if sensitive data is sent) are enforced to prevent deserialization attacks including object injection.`\r\n\r\nI would like to clarify from the community/maintainers of this project regarding a few items here: \r\n* serialization for communication\r\n* untrusted clients\r\n* main point of this control\r\n\r\nOn the first sentence of this control, it is problematic since it says `verify that serialization is NOT used when communicating with untrusted clients`, isn't it that serialization is always used to communicate from server to clients? I have not seen any application not using serialization between client and server side for communicating with each other, unless there's another way I am not aware of? This part is a bit confusing. \r\n\r\nAlso, an assumption about the `untrusted clients` term is for `client-side` which is usually web browsers, mobile apps, etc., right? I guess if my assumption is right, we could at least add some statements on the `V1.5 Input and Output Architectural Requirements` some statements explaining the term `untrusted clients` for clarity of testers/developers. \r\n\r\nLastly, this requirement is a bit confusing whether is it referring to round-tripping of serialized data or is it referring about fresh input from the web browser (client-side)? The reason I guess for the preventative control would depend on what this control is preventing.\r\n\r\nAny information from the community would help regarding clearing up this ASVS verification requirement. \r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzMjMxNjA2OA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> serialization for communication\r\n\r\nMaybe we need to be clearer that we mean complex object serialization. i.e. not just take a set of values and considering them like an array or not just taking a simple json structure and reading values but actually passing complex objects which can contain logic. \r\n\r\n> untrusted clients\r\n\r\nHappy for you to suggest some explanatory text for this.\r\n\r\n>main point of this control\r\n\r\nI think this is primarily about accepting input from the client. This could be as a result of a round trip or it could be a new object generated at the client, no?",
+      "createdAt": "2020-05-21T20:07:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/772#issuecomment-632316068",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzNzA5MzgwMQ==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, please see my comments below: \r\n\r\n>`serialization for communication`\r\nMaybe we need to be clearer that we mean complex object serialization. i.e. not just take a set of values and considering them like an array or not just taking a simple json structure and reading values but actually passing complex objects which can contain logic.\r\n>\r\nMaybe we could clarify that in this control or perhaps in an explanatory text in `V1.5 Input and Output Architectural Requirements` to reflect this info about what is meant by object serialization here as exactly as you mentioned because most readers would assume sending input and output over the wire? What do you think? \r\n\r\n> `untrusted clients`\r\nHappy for you to suggest some explanatory text for this.\r\n> \r\nDrafting an explanatory text suggestion for this and will reference this issue with a PR that I will create later. If it makes sense to add explanatory text for `serialization` as mentioned in the previous point, I'll add it as well. Let me know about it. \r\n\r\n> `main point of this control`\r\nI think this is primarily about accepting input from the client. This could be as a result of a round trip or it could be a new object generated at the client, no?\r\n> \r\nI believe this is about accepting input from the client (both a result of round trip values or new objected generated at the client) as well. To prevent deserialization attacks, I would say use hashes or signatures (for round trip values) or encryption on payload/object level. Do you agree with that recommendation for fixing the security issue? \r\n",
+      "createdAt": "2020-06-01T20:48:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/772#issuecomment-637093801",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzNzc1NzU2NQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> serialization for communication\r\n\r\nFeel free to draft explanatory text.\r\n\r\n> untrusted clients\r\n\r\nI will take a look for the PR\r\n\r\n> main point of this control\r\n\r\nI have thought about this more. Regardless of whether we are talking hashes, signatures or encryption, these solutions will only work for round-trip values and not serialized objects from the client. For serialized objects created by the client, we can only rely on a safe deserialization method/process. Do you agree? Do you think we need to reword in light of this?",
+      "createdAt": "2020-06-02T19:25:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/772#issuecomment-637757565",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0NDA0MTc3NA==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, I have submitted a PR for draft explanatory texts including `untrusted clients` and some explanation regarding `serialization`. \r\n\r\n-> main point of this control\r\n\r\n> I have thought about this more. Regardless of whether we are talking hashes, signatures or encryption, these solutions will only work for round-trip values and not serialized objects from the client. For serialized objects created by the client, we can only rely on a safe deserialization method/process. Do you agree? Do you think we need to reword in light of this?\r\n\r\nRegarding your question about this, I totally agree with you on this that most of those solutions only work for round-trip values and not serialized objects from the clients (which is the usual attack vector). I am not sure whether we should rewrite this to make some sense of it because if we will talk about round-tripped values, that's what was discussed on this other issue I had: #775. If we would say that we can only rely on a safe deserialization method/process, does that cover most cases? If you think we need to reword, please hold my PR for a while and I'll make some changes to accommodate that.  ",
+      "createdAt": "2020-06-15T10:21:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/772#issuecomment-644041774",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0NDEwODkwNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Deserialization attacks only matter when untrusted data hits \ndeserialization endpoints. So the use case where we create a JWT or \nother artifact and and sign it, and that artifact is not modified by the \nclient in any way, and then that JWT is deserialized later server side - \nit's tempting to discuss signatures as a defense here but I implore you \nnot to. Signing, encryption or integrity stamps do not fix the problem \nof a vulnerable deserialization endpoint. Period.  So in order to NOT \nconfuse the issue 1.5.2 needs to go away IMO.\n\nWe can certainly talk about signing and similar in the context of JWT's \nand other artifacts, that's where that discussion belongs. But to mix \nsigning with deserialization issues confuses the issues significantly.\n\nRespectfully,\n\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\nOn 6/15/20 6:21 AM, csfreak92 wrote:\n>\n> @tghosth <https://github.com/tghosth>, I have submitted a PR for draft \n> explanatory texts including |untrusted clients| and some explanation \n> regarding |serialization|.\n>\n> -> main point of this control\n>\n>     I have thought about this more. Regardless of whether we are\n>     talking hashes, signatures or encryption, these solutions will\n>     only work for round-trip values and not serialized objects from\n>     the client. For serialized objects created by the client, we can\n>     only rely on a safe deserialization method/process. Do you agree?\n>     Do you think we need to reword in light of this?\n>\n> Regarding your question about this, I totally agree with you on this \n> that most of those solutions only work for round-trip values and not \n> serialized objects from the clients (which is the usual attack \n> vector). I am not sure whether we should rewrite this to make some \n> sense of it because if we will talk about round-tripped values, that's \n> what was discussed on this other issue I had: #775 \n> <https://github.com/OWASP/ASVS/issues/775>. If we would say that we \n> can only rely on a safe deserialization method/process, does that \n> cover most cases? If you think we need to reword, please hold my PR \n> for a while and I'll make some changes to accommodate that.\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/772#issuecomment-644041774>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCOFB6RS42XVEN5IS4DRWXY2LANCNFSM4NGNLUIQ>.\n>\n",
+      "createdAt": "2020-06-15T12:37:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/772#issuecomment-644108907",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0NDk4NjQzNw==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@csfreak92 I made some changes to your PR,  take a look and tell me what you think.\r\n\r\n@jmanico 100% agree. What do you think about the following change to 1.5.2:\r\n> v1.5.2 Verify that serialization is not used when communicating with untrusted clients. If this is not possible, ensure that deserialization is performed safely, for example by only allowing a white-list of object types or not allowing the client to define the object type to deserialize to, in order to prevent deserialization attacks.",
+      "createdAt": "2020-06-16T20:10:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/772#issuecomment-644986437",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0NTAyMDE5Nw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think 1.5.2 changes from Josh are good as is. Perfect. The real nuance here is that the fix is super detailed for each language but this req points people in the right direction.\n\n--\nJim Manico\n@Manicode\n\n\n> On Jun 16, 2020, at 4:10 PM, Josh Grossman <notifications@github.com> wrote:\n> \n> ﻿\n> Assigned #772 to @jmanico.\n> \n> —\n> You are receiving this because you were assigned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-06-16T21:25:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/772#issuecomment-645020197",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-05-21T00:21:51Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    }
+  ],
+  "number": 772,
+  "state": "CLOSED",
+  "title": "[Clarification/For Discussion] Multiple Clarifications for 1.5.2",
+  "url": "https://github.com/OWASP/ASVS/issues/772"
+}

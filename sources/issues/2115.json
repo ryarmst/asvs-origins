@@ -1,0 +1,231 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "We currently have the following requirements which refer to SSRF:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.6** | [GRAMMAR] Verify that the application protects against SSRF attacks, by validating or sanitizing untrusted data or HTTP file metadata, such as filenames and URL input fields, and uses an allowlist of protocols, domains, paths and ports. | ✓ | ✓ | ✓ | 918 |\r\n| **5.5.5** | [MODIFIED, MOVED FROM 13.1.1, LEVEL L1 > L2] Verify that different parsers used in the application for the same data type (e.g. JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks. | | ✓ | ✓ | 436 |\r\n| **12.3.1** | [MODIFIED, MERGED FROM 12.3.2, 12.3.3, 5.3.9] Verify that file operations avoid using user-submitted filenames or file metadata when creating file paths to protect against path traversal, local or remote file inclusion (LFI, RFI), and server-side request forgery (SSRF) attacks. Instead, use internal, trusted data for file I/O. If user-submitted filenames or file metadata must be used, strict validation and sanitization must be applied. | ✓ | ✓ | ✓ | 73 |\r\n\r\nI think that requirements 5.5.5 and 12.3.1 are referring to specific protection mechanisms which are required which have the potential side effect of SSRF as such, I think they are ok as they are.\r\n\r\nI think that 5.2.6 needs to be very slightly clarified to focus on the risk of putting input directly into a URL being accessed. \r\n\r\nI would say:\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.6** | [MODIFIED] Verify that the application protects against SSRF attacks, by checking untrusted data against an allowlist of protocols, domains, paths and ports and sanitizing potentially dangerous characters before using the data to call another service. | ✓ | ✓ | ✓ | 918 |\r\n\r\nThoughts @jmanico @elarlang ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6NcmjU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "5.2.6 \"URL operations\" vs 12.3.1 \"file operations\" (if file operation does not have required protection it may lead to SSRF that is equal to not protected URL operation)\r\n\r\n5.5.5 is about parsers and is a bit different topic.\r\n\r\nFor me, everything works as those are (it does not mean those can not be improved)",
+      "createdAt": "2024-09-25T05:50:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373085396",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NcpuO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do you agree with my 5.2.6 change?",
+      "createdAt": "2024-09-25T05:59:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373098382",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NcywV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is the meaning of \"checking\" here? What is the action and what is the outcome? I think the previous \"validation or sanitizing\" was more precise.\r\n\r\nThe rest of the requirement is probably just moving things around.",
+      "createdAt": "2024-09-25T06:24:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373135381",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Nc-Qw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So maybe matching rather than checking, I don't like validating as it sounds like input validation and I don't like sanitization as I don't think it is exactly what is being done",
+      "createdAt": "2024-09-25T06:52:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373182512",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NdRCc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's go other way - what is the problem with current 5.2.6 you try to solve?",
+      "createdAt": "2024-09-25T07:21:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373259420",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ndkct",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Two problems with 5.2.6:\r\n\r\n* I read it but I found talking about \"_HTTP file metadata, such as filenames and URL input fields,_\" confusing and unnecessary.\r\n* I don't want this to be confused with input validation ",
+      "createdAt": "2024-09-25T07:57:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373338925",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ndq_J",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The term I typically use is “allowlist validation”. It’s definitely a form of validation, IMO.\r\n",
+      "createdAt": "2024-09-25T08:07:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373365705",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NdsP7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So does it need to move into the input validation section? ",
+      "createdAt": "2024-09-25T08:09:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373370875",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NfFM2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Possibly, but if I was trying to fix SSRF I wish I had one section that referenced all SSRF controls.\n\nI think in general some of the categorization we are doing makes consuming ASVS tough. I would suggest that if we put this into the input validation section, we still point to it from a dedicated SSRF section - and do this cross referencing for all of ASVS so its consumable per topic without jumping around.\n\nThis is a big ask, I know.",
+      "createdAt": "2024-09-25T10:47:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2373735222",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqNA8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ultimately this is doing both validation and sanitization so we can probably leave it in the section where it is and I will PR using \"validation\" instead of \"checking\".\r\n\r\n@set-reminder 2 days @tghosth to open a PR",
+      "createdAt": "2024-09-26T11:13:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2376650812",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqNCM",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nSaturday, September 28, 2024 12:00 AM (GMT+02:00)\r\n> @tghosth to open a PR",
+      "createdAt": "2024-09-26T11:13:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2376650892",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N3lty",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/2115#issuecomment-2376650812) @tghosth\n> @tghosth to open a PR",
+      "createdAt": "2024-09-27T22:00:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2380159858",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_L-0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2125 to resolve",
+      "createdAt": "2024-10-08T06:07:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2115#issuecomment-2398928820",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-09-25T05:41:56Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 2115,
+  "state": "CLOSED",
+  "title": "Deduplicate SSRF requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/2115"
+}

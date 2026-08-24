@@ -1,0 +1,216 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "V1 requirements got cleaned up from non-documentation requirements, except V1.6 https://github.com/OWASP/ASVS/issues/2137\r\n\r\nV1.6 has now moved to V6, but 2 requirements do not seem to be security decision documentation requirements:\r\n\r\n* V1.6.2 Verify that consumers of cryptographic services protect key material and other secrets by using key vaults or API based alternatives.\r\n* V1.6.4 Verify that the architecture treats client-side secrets (such as symmetric keys, passwords, or API tokens) as insecure and never uses them to protect or access sensitive data.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6TmpMg",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I wonder if 1.6.2 is of any use anymore? I mean given what we have in V6 now, does it offer much? I guess same goes for 1.6.4 in a way too",
+      "createdAt": "2024-11-14T13:38:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2476380960",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TmuiK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's start from the first one.\r\n\r\nV1.6.2:\r\n> V1.6.2 Verify that consumers of cryptographic services protect key material and other secrets by using key vaults or API based alternatives.\r\n\r\nis it duplicate of 6.4.1 and 6.4.2?\r\n> V6.4.1 Verify that a secrets management solution such as a key vault is used to securely create, store, control access to, and destroy back-end secrets, such as passwords, integrations with databases and third-party systems, seeds and internal secrets, and API keys. Secrets must not be included in source code or be received as CI/CD variables. For a L3 application, this should involved a hardware-backed solution such as an HSM.\r\n\r\n> V6.4.2 Verify that key material is not exposed to the application (neither the front-end nor the back-end) but instead uses an isolated security module like a vault for cryptographic operations.\r\n\r\nIf it is not a duplicate and has it own problem to solve, I propose to move it to V6.4",
+      "createdAt": "2024-11-14T13:48:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2476402826",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T9UnU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note #684 about 1.6.4",
+      "createdAt": "2024-11-18T08:58:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2482325972",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T-iBe",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I dont think it is a duplicate and keep it in V6.4. Cleaner and easier.",
+      "createdAt": "2024-11-18T10:38:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2482643038",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T-srU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I dont think it is a duplicate and keep it in V6.4. Cleaner and easier.\r\n\r\n@danielcuthbert are you sure that 1.6.2 and 6.4.1 are not duplicates? Seems like we could easily merge them as follows:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.6.2** | [DELETED, MERGED TO 6.4.1] | | | | |\r\n| **6.4.1** | [MODIFIED, MERGED FROM 1.6.2, 2.10.4] Verify that a secrets management solution such as a key vault is used to securely create, store, control access to, and destroy back-end secrets. These could include passwords, **key material**, integrations with databases and third-party systems, seeds and internal secrets, and API keys. Secrets must not be included in source code or be received as CI/CD variables. For a L3 application, this should involved a hardware-backed solution such as an HSM. | | ✓ | ✓ | 798 |\r\n\r\nWhat do you think?",
+      "createdAt": "2024-11-18T10:56:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2482686676",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UEe03",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Nitpicking as always:\r\n\r\n> Secrets must not be included in source code or be received as CI/CD variables.\r\n\r\nSecrets must not be included by CI/CD into deliverables/artifacts but CI/CD can receive secrets(/tokens) which are used for running CI tasks (publishing, etc.).\r\n\r\nProposition:\r\n\r\n> [MODIFIED, MERGED FROM 1.6.2, 2.10.4] Verify that a secrets management solution such as a key vault is used to securely create, store, control access to, and destroy back-end secrets. These could include passwords, key material, integrations with databases and third-party systems, seeds and internal secrets, and API keys. Secrets must not be included in source code **or included in build artifacts generated by CI/CD or otherwise**. For a L3 application, this should involve a hardware-backed solution such as an HSM.",
+      "createdAt": "2024-11-18T21:49:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2484202807",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UGgUa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - note that we defined CI/CD and the build process as out of scope from ASVS. In scope is the result of what those built - the application. So we need to have requirements based on that we can do verification from the built application itself.",
+      "createdAt": "2024-11-19T05:21:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2484733210",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UHbo5",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, yes, I was just pointing out that \"received as CI/CD variables\" which was in the previous proposition was probably not completely accurate.\r\n\r\nMaybe this would focus more on the intent:\r\n\r\n> [MODIFIED, MERGED FROM 1.6.2, 2.10.4] Verify that a secrets management solution such as a key vault is used to securely create, store, control access to, and destroy back-end secrets. These could include passwords, key material, integrations with databases and third-party systems, seeds and internal secrets, and API keys. Secrets must not be included in (application ?) source code **or included in build artifacts**. For a L3 application, this should involve a hardware-backed solution such as an HSM.\r\n",
+      "createdAt": "2024-11-19T08:05:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2484976185",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UIBLv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok I am comfortable with that modification. Thanks for the updated proposal @randomstuff.\r\n\r\nAny further thoughts @danielcuthbert ?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.6.2** | [DELETED, MERGED TO 6.4.1] | | | | |\r\n| **6.4.1** | [MODIFIED, MERGED FROM 1.6.2, 2.10.4] Verify that a secrets management solution such as a key vault is used to securely create, store, control access to, and destroy back-end secrets. These could include passwords, key material, integrations with databases and third-party systems, seeds and internal secrets, and API keys. Secrets must not be included in (application ?) source code or included in build artifacts. For a L3 application, this should involve a hardware-backed solution such as an HSM. | | ✓ | ✓ | 798 |",
+      "createdAt": "2024-11-19T09:17:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2485129967",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UX7xv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note: the \"(application ?)\" must either be removes or changed into \"application\" :)",
+      "createdAt": "2024-11-20T18:40:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2489302127",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UX8ou",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yeah I think I fixed that, thanks",
+      "createdAt": "2024-11-20T18:42:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2489305646",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UX9nG",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Oh sorry I missed that :)",
+      "createdAt": "2024-11-20T18:44:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2376#issuecomment-2489309638",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-14T07:13:28Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    }
+  ],
+  "number": 2376,
+  "state": "CLOSED",
+  "title": "V1.6 cleanup from non-documentation requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/2376"
+}

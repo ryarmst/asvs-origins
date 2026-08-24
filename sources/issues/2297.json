@@ -1,0 +1,282 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjYwOTczNjk=",
+    "is_bot": false,
+    "login": "cronchie",
+    "name": "Eden"
+  },
+  "body": "@ImanSharaf just added our first mention of type confusion in [10.4.1](https://github.com/OWASP/ASVS/blob/184bcc511af54245e33e4aaf9a9855206a58b98d/5.0/en/0x18-V10-Coding.md?plain=1#L59). We had a discussion around where type confusion manifests, and I'd like to cover the scenario where we get type confusion as a result of deserializing untrusted data. \r\n\r\nIn [this CVE](https://bishopfox.com/blog/cve-2019-18935-remote-code-execution-in-telerik-ui) for example, attackers were able to specify an arbitrary object in the `rauPostData` param which allowed them to deserialize an RCE gadget; this would have been prevented with a serialization binder.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---:| :---: | :---: |\r\n| **5.5.5** | Verify that deserialization processes enforce strict binding to predefined, safe data types only, to prevent attackers from injecting malicious gadget classes that could lead to type confusion and unauthorized code execution.|  | ✓ | ✓ | 502 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6SnpNp",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Should we mention that we shouldn't use any binary deserialization here?",
+      "createdAt": "2024-11-06T14:13:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2459865961",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Snr8c",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed, I'd suggest something like:\r\n\r\n_Verify that binary deserialization is not used unless absolutely necessary. When required, ensure it strictly enforces binding to predefined, safe data types to prevent malicious gadget injection and unauthorized code execution._",
+      "createdAt": "2024-11-06T14:18:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2459877148",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sn71Z",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think I would suggest clarifying 5.5.3 rather than creating a new requirement. I don't think saying don't use binary serialization is practical unfortunately...",
+      "createdAt": "2024-11-06T14:44:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2459942233",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sn76N",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@cronchie \r\n",
+      "createdAt": "2024-11-06T14:44:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2459942541",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sn_0f",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think I would suggest clarifying 5.5.3 rather than creating a new requirement. I don't think saying don't use binary serialization is practical unfortunately...\r\n\r\nMost of the time it is. You can move from binary serialization to something like JSON in most cases. Binary serialization is inherently bad, even the best defense still leads to DOS some of the time.\r\n\r\nAll I'm saying is that before you try to fix binary serialization, first try to move away from it, when is feasible - which is most of the time.",
+      "createdAt": "2024-11-06T14:50:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2459958559",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SoM_7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We could have it as a recommendation or mention it in section text but it isn't really an actionable or enforceable requirement,",
+      "createdAt": "2024-11-06T15:08:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2460012539",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SpFLa",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Appreciate the debate here :) \r\n\r\nFirst, I think this is an important but separate consideration from serialization binding (after all, the CVE I included involved a JSON deserializer). \r\n\r\nOn the one hand, I agree with @jmanico and @ImanSharaf that this merits a requirement. Binary serialization is [outright banned in some ecosystems](https://learn.microsoft.com/en-us/dotnet/standard/serialization/binaryformatter-security-guide), and a [SAST finding ](https://semgrep.dev/r?q=serialization.pickle.avoid-pickle) in others. On the other hand, [protobuf](https://protobuf.dev/) is a relatively safe binary format because it (by default at least) doesn't allow dynamic deserialization and enforces schema validation.\r\n\r\nHow about:\r\n\r\n`Verify that binary serialization formats are not used unless they enforce schema validation and disallow arbitrary type information to prevent deserialization vulnerabilities.`",
+      "createdAt": "2024-11-06T16:28:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2460242650",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SrexV",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that binary serialization formats are not used unless they enforce schema validation and disallow arbitrary type information to prevent deserialization vulnerabilities.\r\n\r\nI believe there are several things which do not work here.\r\n\r\nWe should focus on the goal which is \"verify that deserialization cannot be used by attacker to trigger RCE\".\r\n\r\nThere are several ways this can be achieved:\r\n\r\n* serialization is only used internally (this case is important as discussed below!);\r\n* serialization is used only for MAC-ed / signed message (→ I don't really trust this approach because obtaining the secret-or-private key would grant [arbitrary code execution power](https://github.com/ch4n3-yoon/django-pickleserializer-rce-poc));\r\n* deserialization cannot trigger arbitrary code execution (which is what is required here).\r\n\r\nIn Java, many mechanisms are based on Java serialization with arbitrary type information and I don't believe this requirement is realistic in this case. Some examples:\r\n\r\n* Java servlet sessions: this is use case is safe because the serialized data is only used internally in the same tier of the application;\r\n* [Spark](https://spark.apache.org/docs/3.5.2/tuning.html#data-serialization), in this case the serialized data is only used within the nodes of the Spark cluster.",
+      "createdAt": "2024-11-06T22:02:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2460871765",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Srk5L",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that *binary* serialization formats are not used unless they enforce schema validation and disallow arbitrary type information to prevent deserialization vulnerabilities.\r\n\r\nMoreover this does not only apply to *binary* serialization formats as exemplified by:\r\n\r\n* [XStream](https://www.cvedetails.com/vulnerability-list/vendor_id-16418/product_id-37475/Xstream-Project-Xstream.html) (XML-based serialization) (RCE, SSRF)\r\n* [PyYaml](https://www.cvedetails.com/vulnerability-list/vendor_id-13115/Pyyaml.html) (YAML-based)\r\n* [Ruby YAML](https://blog.stratumsecurity.com/2021/06/09/blind-remote-code-execution-through-yaml-deserialization/)",
+      "createdAt": "2024-11-06T22:14:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2460896843",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Srn8b",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In summary my proposition would be something such as:\r\n\r\n> Verify that serialization frameworks are configured in order to prevent arbitrary code execution from other external sources or unrelated tiers. This can be achieved by making sure that the framework can only deserialize vetted types when the data does not originate from the same tier.",
+      "createdAt": "2024-11-06T22:20:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2460909339",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SrpjP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In summary my proposition would be something such as:\r\n> \r\n> > Verify that serialization frameworks are configured in order to prevent arbitrary code execution from other external sources or unrelated tiers. This can be achieved by making sure that the framework can only deserialize vetted types when the data does not originate from the same tier.\r\n\r\nDo you think that the current [5.5.3](https://appsecg.host/5.5) is insufficient?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.5.3** | [MODIFIED, MERGED FROM 1.5.2] Verify that if deserialization is used when communicating with untrusted clients, the input is handled safely. For example, by only allowing a allowlist of object types or not allowing the client to define the object type to deserialize to, in order to prevent deserialization attacks. | ✓ | ✓ | ✓ | 502 |",
+      "createdAt": "2024-11-06T22:25:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2460915919",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Srrqo",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Do you think that the current [5.5.3](https://appsecg.host/5.5) is insufficient?\r\n\r\n@tghosth, Oh yes … Then I'm not sure what the proposed requirements adds :)",
+      "createdAt": "2024-11-06T22:31:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2460924584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SsYLC",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@tghosth agree; I came down this road looking for a specific callout of type confusion, but that's just a kind of deserialization attack, so I think the current language suffices after all.\r\n\r\n@randomstuff I learned a lot about serialization formats today that I didn't know existed before :) \r\n\r\nTalked with @ryarmst a bit about this and agree that binary serialization is more of a smell, and we are not in the business of banning smells. \r\n\r\nFinal point of discussion before closing this out--the deserialization cheat sheet recommends signing as part of the serialization process as a defense-in-depth measure; by ignoring unsigned or incorrectly signed payloads, we can protect the parser against novel deserialization exploits. Thoughts on including that as an L3 requirement? ",
+      "createdAt": "2024-11-07T01:00:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2461106882",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SupF5",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My take:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.5.3** | [MODIFIED, MERGED FROM 1.5.2] Verify that deserialization with untrusted clients enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. **_Note that deserialization in some legacy technologies is inherently risky and should be avoided when possible._** | ✓ | ✓ | ✓ | 502 |",
+      "createdAt": "2024-11-07T09:14:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2461700473",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SvsFH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks all for the interesting discussion. I think actively outlawing is unrealistic but I think we are very explicit about what is and is not allowed and it feels like we are in agreement that the current requirement handles this but I think we can be clearer about when it is not acceptable. I have opened a PR based on this.\r\n\r\nPlease let me know thoughts on: #2323",
+      "createdAt": "2024-11-07T11:18:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2297#issuecomment-2461974855",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-11-06T12:56:53Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 2297,
+  "state": "CLOSED",
+  "title": "V5 Add a serialization binding requirement",
+  "url": "https://github.com/OWASP/ASVS/issues/2297"
+}

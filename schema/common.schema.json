@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asvs-origins.local/schema/common.schema.json",
+  "$defs": {
+    "isoDate": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    },
+    "isoDateTime": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "sha256Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "githubLogin": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 39,
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$"
+    },
+    "Author": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "github"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "github": { "$ref": "#/$defs/githubLogin" }
+      }
+    },
+    "Model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "id", "prompt_id", "prompt_version"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 1 },
+        "id": { "type": "string", "minLength": 1 },
+        "prompt_id": { "type": "string", "minLength": 1 },
+        "prompt_version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "by", "at", "note"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "unreviewed",
+            "in_review",
+            "accepted",
+            "changes_requested",
+            "rejected"
+          ]
+        },
+        "by": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/githubLogin" }
+        },
+        "at": {
+          "anyOf": [
+            { "$ref": "#/$defs/isoDateTime" },
+            { "type": "null" }
+          ]
+        },
+        "note": { "type": ["string", "null"] }
+      }
+    },
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "created_at",
+        "updated_at",
+        "authors",
+        "model",
+        "review",
+        "input_digest",
+        "confidence"
+      ],
+      "properties": {
+        "origin": {
+          "type": "string",
+          "enum": ["human", "llm", "llm_reviewed"]
+        },
+        "created_at": { "$ref": "#/$defs/isoDateTime" },
+        "updated_at": { "$ref": "#/$defs/isoDateTime" },
+        "authors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Author" }
+        },
+        "model": {
+          "anyOf": [
+            { "$ref": "#/$defs/Model" },
+            { "type": "null" }
+          ]
+        },
+        "review": { "$ref": "#/$defs/Review" },
+        "input_digest": {
+          "anyOf": [
+            { "$ref": "#/$defs/sha256Digest" },
+            { "type": "null" }
+          ]
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "origin": { "const": "llm" } },
+            "required": ["origin"]
+          },
+          "then": {
+            "properties": { "authors": { "maxItems": 0 } }
+          }
+        },
+        {
+          "if": {
+            "properties": { "origin": { "enum": ["human", "llm_reviewed"] } },
+            "required": ["origin"]
+          },
+          "then": {
+            "properties": { "authors": { "minItems": 1 } }
+          }
+        },
+        {
+          "if": {
+            "properties": { "origin": { "const": "human" } },
+            "required": ["origin"]
+          },
+          "then": {
+            "properties": {
+              "review": {
+                "properties": { "status": { "const": "accepted" } },
+                "required": ["status"]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "url"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "issue_body",
+            "issue_comment",
+            "pr_body",
+            "pr_review_comment",
+            "commit",
+            "mapping",
+            "release_note",
+            "external"
+          ]
+        },
+        "url": { "type": "string", "format": "uri" },
+        "issue": { "type": "integer", "minimum": 1 },
+        "pr": { "type": "integer", "minimum": 1 },
+        "comment_id": { "type": ["string", "null"] },
+        "commit": { "type": ["string", "null"] },
+        "author": { "type": ["string", "null"] },
+        "date": {
+          "anyOf": [
+            { "$ref": "#/$defs/isoDateTime" },
+            { "$ref": "#/$defs/isoDate" },
+            { "type": "null" }
+          ]
+        },
+        "quote": { "type": ["string", "null"] },
+        "edited_after": { "type": ["boolean", "null"] }
+      }
+    },
+    "Summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "body", "citations", "supersedes", "provenance"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^sum-[0-9a-f]{6}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "origin",
+            "evolution",
+            "interpretation",
+            "controversy",
+            "overview",
+            "outcome"
+          ]
+        },
+        "body": { "type": "string", "minLength": 1 },
+        "citations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Citation" }
+        },
+        "supersedes": {
+          "anyOf": [
+            { "type": "string", "pattern": "^sum-[0-9a-f]{6}$" },
+            { "type": "null" }
+          ]
+        },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      }
+    },
+    "ClaimKind": {
+      "type": "string",
+      "enum": ["decision", "argument", "terminology", "open_question"]
+    },
+    "Claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "kind",
+        "subkind",
+        "date",
+        "actors",
+        "status",
+        "citations",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(dec|arg|trm|oq)-[0-9a-f]{6}$"
+        },
+        "statement": { "type": "string", "minLength": 1 },
+        "kind": { "$ref": "#/$defs/ClaimKind" },
+        "subkind": { "type": "string", "minLength": 1 },
+        "date": {
+          "anyOf": [
+            { "$ref": "#/$defs/isoDate" },
+            { "type": "null" }
+          ]
+        },
+        "actors": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["settled", "disputed", "superseded", "unknown"]
+        },
+        "citations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Citation" }
+        },
+        "provenance": { "$ref": "#/$defs/Provenance" }
+      }
+    },
+    "CoverageStatus": {
+      "type": "string",
+      "enum": ["empty", "linked", "drafted", "reviewed", "authored", "blocked"]
+    },
+    "ExternalReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "url"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "id": { "type": ["string", "null"] },
+        "title": { "type": ["string", "null"] },
+        "url": { "type": "string", "format": "uri" },
+        "cited_by": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

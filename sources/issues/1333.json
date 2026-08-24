@@ -1,0 +1,318 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "> 5.2.6 Verify that the application protects against SSRF attacks, by validating or sanitizing untrusted data or HTTP file metadata, such as filenames and URL input fields, and uses allow lists of protocols, domains, paths and ports.\r\n\r\nConsider an application where it is allowed to load arbitrary resources from the internet. It should not be allowed to load resources from localhost or the local network. This can't be performed by only checking user input, because the user could input a domain that resolves to localhost. The correct solution is to resolve the domain, check the IP, and then use that same IP to connect. In practice, this means the HTTP library needs to have functionality to protect against SSRF, to perform a check between DNS resolution and connection.\r\n\r\nIf the IP is validated beforehand, but then resolved again when connecting, SSRF may still be possible using a DNS rebinding attack, where the first resolution returns something else than the second resolution.\r\n\r\nAlso, redirects from an allowed domain to localhost should be blocked.\r\n\r\nSo using \"allow lists of protocols, domains, paths and ports\" is good advice, but it is insufficient to block all types of SSRF.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5IYPdO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The goal for 5.2.6 is clearly and only user input sanitize/validation.\r\n\r\nWhat you described here is more second layer of defense and we have related issue for that: https://github.com/OWASP/ASVS/issues/1324\r\n\r\nFor me it seems, that if you want to get those improvements into a requirement, those should go to configuration hardening category and to current 12.6.1.\r\n\r\nIf it already goes to messing with DNS, it feels out of ASVS scope for me.",
+      "createdAt": "2022-08-14T08:53:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1214314318",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IYS71",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The attack scenario is as follows:\r\n\r\nAn application has the functionality to load files from the internet. On its local network is also an API server or Redis server. The attacker inputs \"https://attacker.com/\" to load a resource from. This passes validation, because it seems like a host on the internet. The attacker either:\r\n\r\n1. Configures the DNS of attacker.com to resolve to 192.168.1.123, routing the request to the server on the local network as the application server.\r\n2. Redirects to \"https://192.168.1.123/\", also rerouting the request to the local network.\r\n\r\nAnd that results in SSRF.\r\n\r\nInput validation won't help, because the attacker supplied a valid URL. Firewall configuration won't help, because the application server needs to communicate with the API server or Redis server for normal functionality. The solution is to use something like [advocate](https://pypi.org/project/advocate/) or [safecurl](https://github.com/wkcaj/safecurl), which validate the host after resolution and upon redirect.\r\n\r\nI don't think we currnetly have a requirement to protect against this attack.",
+      "createdAt": "2022-08-14T10:18:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1214328565",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IYsKB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Like I said, if it is related to messing with DNS, it's out of ASVS scope.\r\n\r\nAnd proposals and descriptions are more related to 12.6.1 or material for new requirement. I think requirement 5.2.6 is valid and can stay like it is?",
+      "createdAt": "2022-08-14T19:02:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1214431873",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IZp78",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Like I said, if it is related to messing with DNS, it's out of ASVS scope.\r\n\r\nCan you elaborate on this? I don't understand why this would be the case.",
+      "createdAt": "2022-08-15T07:02:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1214684924",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IZvRV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Configures the DNS of attacker.com to resolve to 192.168.1.123, routing the request to the server on the local network as the application server.\r\n\r\nHow attacker can do that for the targeted server?",
+      "createdAt": "2022-08-15T07:31:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1214706773",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IZ0nf",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "In my scenario, the attacker owns attacker.com, so they can just configure the DNS in the normal way anyway they want.",
+      "createdAt": "2022-08-15T08:02:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1214728671",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IZ2Vc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And how the attacker.com got into the allow-listed domains?\r\n\r\n> In my scenario, the attacker owns attacker.com, so they can just configure the DNS in the normal way anyway they want.\r\n\r\nIf they configure their DNS, it does not mean that the target server is using their DNS to solve names.\r\n\r\nOnly thing what I can pick up from here as extra defense is that loading resources from external serveris should not follow redirects.\r\n",
+      "createdAt": "2022-08-15T08:10:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1214735708",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KcbGd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ping @Sjord ",
+      "createdAt": "2022-09-16T06:23:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1248965021",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Kc3rW",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Some applications allow loading any image by URL.\r\n\r\n[Example](https://www4.lunapic.com/editor/?action=flip):\r\n\r\n![image](https://user-images.githubusercontent.com/113030/190593493-f89461fb-98b0-4de6-b9c8-7cf87a38624a.png)\r\n\r\nIn this case, the server loads a user-input URL. But to avoid SSRF it should not load resources from the local network.\r\n\r\nThere is no meaningful allow list of domains in this case, since any host on the internet is permissable.\r\n\r\nAlternatively, even if there is a strict allow list, the domains on the allow list should not be able to perform SSRF by changing their DNS records.",
+      "createdAt": "2022-09-16T08:34:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1249082070",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Kd7xC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you provide for every user to access whatever address, then it must be accepted risk based on business logic rule. How to make potential impact lower for this kind of case it's a good question.\r\n\r\nI still don't get your DNS topic here - for me it is out of ASVS scope. If you can change someone's DNS, some tiny SSRF is not your main problem. Or I just don't get it - how you can change someones DNS records the that it is in the ASVS scope?",
+      "createdAt": "2022-09-16T13:23:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1249360962",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Keknj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> 1. onfigures the DNS of attacker.com to resolve to 192.168.1.123, routing the request to the server on the local network as the application server.\r\n\r\nURL validation is not enough for SSRF protection. You need to whitelist valid domains and patterns. URL validation and domain verification are the wins here. Attacker.com should not be on any SSRF allow-list.",
+      "createdAt": "2022-09-16T15:52:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1249528291",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Kekyb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> There is no meaningful allow list of domains in this case, since any host on the internet is permissable.\r\n\r\nI see your scenario. But if you allow a server to load any resource on the internet, you are already screwed. That is not reasonable for any enterprise app.",
+      "createdAt": "2022-09-16T15:53:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1249528987",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KhUBK",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The solution is to resolve the domain, validate that the resulting IP address is not an RFC1918 IP address, and then connect to that IP address. To avoid race conditions, only one domain resolution must be performed. This validation has to be done again when a redirect occurs.\r\n\r\n> But if you allow a server to load any resource on the internet, you are already screwed.\r\n\r\nI disagree with you here, but that doesn't really matter for this issue. Domains that are legitimately on the allow list should also not be able to redirect requests to the server's network.",
+      "createdAt": "2022-09-18T11:11:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1250246730",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Vi7ZY",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "SSRF defense is complex and likely merits its own section and should be removed from the validation section. Perhaps 5.2.6 goes away:\r\n\r\n5.2.6 | Verify that the application protects against SSRF attacks, by validating or sanitizing untrusted data or HTTP file metadata, such as filenames and URL input fields, and uses allow lists of protocols, domains, paths and ports. | ✓ | ✓ | ✓ | 918\r\n-- | -- | -- | -- | -- | --\r\n\r\nAnd is replaced by a new SSRF section that covers:\r\n\r\n1) Proper URL validation strategies (hat tip to @Sjord for his astute comments above) \r\n2) Proper URL creation strategies (such as \"https://server.com/\" + urlEncode(data))\r\n3) Network limitations for outbound service calls\r\n4) and perhaps more. SSRF is complex.\r\n\r\n",
+      "createdAt": "2023-02-17T20:16:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1435219544",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VjGd6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 3. Network limitations for outbound service calls\r\n\r\nIt is covered by current 12.6.1 and has opened issue https://github.com/OWASP/ASVS/issues/1324",
+      "createdAt": "2023-02-17T21:03:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1435264890",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VjIrq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Re-open for double-check, was it really intended close?",
+      "createdAt": "2023-02-17T21:13:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1435273962",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VjJL-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Its already being discussed so I closed it, I did not mean to do a duplicate.",
+      "createdAt": "2023-02-17T21:15:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1333#issuecomment-1435276030",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-08-13T09:55:37Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1333,
+  "state": "CLOSED",
+  "title": "5.2.6 insufficiently protects against SSRF",
+  "url": "https://github.com/OWASP/ASVS/issues/1333"
+}

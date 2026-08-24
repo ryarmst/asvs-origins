@@ -1,0 +1,284 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwNTgwMTE=",
+    "is_bot": false,
+    "login": "narfbg",
+    "name": "Andrey Andreev"
+  },
+  "body": "I was reading [this article from Wiz](https://www.wiz.io/blog/detecting-malicious-oauth-applications) the other day, and the use of homoglyphs for deception stuck with me because I've tackled the same problem many years ago.\n\nThat particular issue is easy to solve (for any authoritative names, have validations that don't allow mixing of alphabets), but surely we can research and distill other similar requirements. ASVS currently doesn't have any, and I can't think of a good reason why not. Perhaps just over-focusing on pure programming logic?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7rKkcV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is reasonable. homoglyphs are on the rise as an AI bypass. We are missing requirements around \"dont allow unprintable characters\" and \"dont allow alphabet mixing\" from https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Validation-and-Business-Logic.md\n\nBut take a look at https://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md - there are some requirements that are more low level there. Do any of those fit?\n\nI might be wrong so let me CC in the other leads.\n\ncc @elarlang cc @tghosth ",
+      "createdAt": "2026-02-23T15:24:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3945416469",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7rMUzD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for raising this @narfbg.\n\nI agree that homoglyph/confusable character attacks are a real concern, and I think the article you linked illustrates the problem well.\n\nHaving looked into this, I think ASVS v5.0 does already have building blocks that cover this area, though I acknowledge the connection isn't obvious:\n\n- [V1.1.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md#v11-encoding-and-sanitization-architecture) requires input to be decoded into a canonical form before further processing — this is a prerequisite for detecting confusable characters (you need to normalize first).\n- [V1.5.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md#v15-safe-deserialization) requires consistent character encoding across parsers, which is another precondition.\n- [V2.2.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Validation-and-Business-Logic.md#v22-input-validation) requires input validation against business or functional expectations — checking for mixed Unicode scripts or confusable characters in display names would fall under this.\n\nTogether these describe a canonicalize-then-validate pipeline that can cover homoglyph detection, but the specific application to visual deception isn't called out anywhere.\n\nInterestingly, the [v4.0.3 V5 chapter introduction](https://github.com/OWASP/ASVS/blob/v4.0.3_release/4.0/en/0x13-V5-Validation-Sanitization-Encoding.md) explicitly listed \"locale/Unicode attacks\" as a vulnerability class, but this mention was dropped when the chapter was restructured for v5.0.\n\nI think the right approach here is to restore and expand on that dropped text — adding language about homoglyphs, confusable characters, and mixed-script impersonation to the V1 or V2 chapter introductions to make explicit that the existing requirements apply to this attack class. This would guide implementers to consider these attacks without needing to add new requirements.\n\nWould be interested to hear if you think that goes far enough or if you feel a specific requirement is warranted.\n",
+      "createdAt": "2026-02-23T16:35:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3945876675",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7rPnWw",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "V2 looks like the right place to address this threat and 2.2.1 looks like the closest match, indeed. However, that seems more incidental by virtue of prescribing allow lists, not at all hinting of this type of deception.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **2.2.1** | Verify that input is validated to enforce business or functional expectations for that input. This should either use positive validation against an allow list of values, patterns, and ranges, or be based on comparing the input to an expected structure and logical limits according to predefined rules. For L1, this can focus on input which is used to make specific business or security decisions. For L2 and up, this should apply to all input. | 1 |\n\nIf the business logic accepts both latin-alphabet and (for example) cyrilic names, which is quite common if not the norm for anyone operating globally, then the path to least resistance for the implementer is to accept all letter characters and that's what will get coded.\n\nThe association with 1.1.1 and 1.5.3 is a wider stretch, since these requirements are about encoding and parsing, while Оutlook (cyrilic О) is a perfectly valid UTF-8 string. It's an attack on human cognition, not application logic.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **1.1.1** | Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization. | 2 |\n| **1.5.3** | Verify that different parsers used in the application for the same data type (e.g., JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks. | 3 |\n\nI'm ok with more free-form mention in a chapter introduction for fast-track purposes, but would strongly prefer an explicit requirement. There are many people out there who don't read the surrounding text at all, others who only read it for clarification on a case-by-case basis, and even more who just get distracted when something isn't in the \"meat\" of the standard.",
+      "createdAt": "2026-02-23T19:07:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3946739120",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7r4P-R",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Fair points, @narfbg.\n\nHowever, you yourself noted that globally operating businesses legitimately accept both Latin and Cyrillic names. Your original suggestion of \"don't allow mixing of alphabets\" works for OAuth display names impersonating \"Outlook,\" but breaks in other contexts: Japanese routinely mixes Kanji, Hiragana, Katakana, and Latin; a multilingual platform might have \"Александр (Alex) Smith.\" The correct validation is inherently application-specific, which is partly why V2.2.1 uses the \"business or functional expectations\" framing.\n\nI'm open to the idea of adding a requirement, but before we commit, could you sketch out what it would say? Specifically: what fields/contexts should it apply to, what detection approach would it prescribe, and how would it handle the multilingual case you raised? Even rough wording would give us something to iterate on.\n\nI'll plan to restore the \"locale/Unicode attacks\" language in the chapter introduction either way.",
+      "createdAt": "2026-02-25T07:36:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3957391249",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7s-YMd",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Fair points from you as well.\n\nI wouldn't say the validation for what I have in mind is inherently application-specific though, not when the threat is targeted with precision.\n\nThe \"Александр (Alex) Smith\" example shouldn't even be covered, since (among other reasons) a person's name isn't unique and therefore resorting to homoglyphs isn't necessary for impersonation.\nNot sure what to think of the Japanese thing though ... Being completely unfamiliar with Japanese, I'm inclined to wait for someone else's input on that. Maybe there's another term that describes a family of written script better than \"alphabet\"? A cursory search for Kanji, Hiragana, Katakana tells me that they are related.\n\nRough first draft:\n\n> Verify that unique, authoritative names used to visually identify entities (such as usernames, application names, brand names) during confirmation decisions are validated to only contain letters from a single alphabet. This is to prevent impersonation attempts that leverage homoglyph characters.\n\nI would like to also address confusion via digits (e.g. 0/O, 1/l, etc.) by suggesting a clearly-differentiating font, but let's cross that bridge later.",
+      "createdAt": "2026-02-27T23:58:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3975775005",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tbTVW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for the draft, @narfbg. The scoping to unique, authoritative names is a good narrowing of the problem and addresses the multilingual name concern I raised.\n\nI think there's potential here. A few refinements to iterate on:\n\n1. **\"Script\" rather than \"alphabet\"**: Unicode uses the term \"script\" (Latin, Cyrillic, Greek, etc.) which is more precise and avoids ambiguity around alphabets vs syllabaries vs logographic systems. [Unicode TR #39](https://www.unicode.org/reports/tr39/) (Unicode Security Mechanisms) defines formal mixed-script detection and \"commonly co-occurring scripts\" which could be referenced.\n\n2. **Suggested revised wording**:\n\n\"_Verify that unique, authoritative names which are displayed to users to support trust or security decisions (such as usernames, application names, or organization names) are validated to only contain characters from a single Unicode script or from a set of scripts which are known to legitimately co-occur (such as in Japanese writing). This is to prevent visual impersonation attempts using characters from different scripts which appear similar (homoglyphs)._\"\n\nThe \"known to legitimately co-occur\" clause handles cases like Japanese (which mixes Kanji, Hiragana, Katakana, and Latin routinely) without enumerating every permutation.\n\nI think V2.2 (Input Validation) is the right home for this. Agreed to defer the digit/letter confusion topic (0/O, 1/l) as that's a different mechanism.\n\nI'll restore the \"locale/Unicode attacks\" language in the chapter introductions regardless.",
+      "createdAt": "2026-03-02T10:01:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3983357270",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tbbNq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang any thoughts here?",
+      "createdAt": "2026-03-02T10:07:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3983389546",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tiZFY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Although using the word \"script\" may be technically correct, in ASVS the word \"script\" is not associated with the charset as the default idea. I think it is good to add the explained meaning in brackets after the first usage of the \"script\" in the requirement text.",
+      "createdAt": "2026-03-02T15:50:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3985215832",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tmMlN",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I had avoided the word \"script\" for similar reasons, but that's a minor nuisance if it's the most accurate term.\n\nIt's solid. My only concern is that it reads like one needs a PhD to understand the requirement. With that in mind, I'd rather clarify the context of \"script\" in free-form text following the requirements listing.",
+      "createdAt": "2026-03-02T18:48:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3986213197",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uKsbN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good points from both of you on the \"script\" ambiguity.\n\n@elarlang is right that \"script\" in ASVS context will default to \"executable code\" for most readers. @narfbg's readability concern is also valid; the requirement was getting dense.\n\nI think the cleanest fix is to drop \"script\" entirely and use \"writing system\" instead, which is self-explanatory and equally correct. I'd also like to move the explanatory context (what homoglyphs are, why this matters, the Japanese multi-writing-system case) into section-level guidance text rather than packing it all into the requirement itself.\n\nSomething like this for the section text before the requirement:\n\n> Authoritative names that users rely on when making trust or security decisions (such as usernames, application names, or organization names) can be targets for visual impersonation. Attackers may use characters from different Unicode writing systems that look similar (known as \"homoglyphs\") to create names that visually mimic legitimate ones. For example, using a Cyrillic \"О\" in place of a Latin \"O\". Some writing systems legitimately co-occur (for example, Japanese text routinely combines Kanji, Hiragana, Katakana, and Latin characters), and implementations should account for this.\n\nAnd then the requirement itself can be much leaner:\n\n\"_Verify that unique, authoritative names which are displayed to users to support trust or security decisions are validated to only contain characters from a single Unicode writing system, or from a set of writing systems which are known to legitimately co-occur._\"\n\nThis keeps the requirement itself short and testable while the section text provides the \"why\" and handles edge cases. The reference to [Unicode TR #39](https://www.unicode.org/reports/tr39/) (Unicode Security Mechanisms) for formal definitions of mixed-writing-system detection could also go in the section text or a footnote.\n\nThoughts?",
+      "createdAt": "2026-03-04T07:25:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3995780813",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7u8VD8",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Excellent!",
+      "createdAt": "2026-03-06T00:58:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-4008792316",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vhz47",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang any thoughts on this and potential locations?",
+      "createdAt": "2026-03-08T08:14:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-4018617915",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vh7oK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [@elarlang](https://github.com/elarlang) any thoughts on this and potential locations?\n\nIt asks to have a logical condition (which characters to allow) and to validate it. So the first choice seems to be V2.2 Input Validation.",
+      "createdAt": "2026-03-08T08:36:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-4018649610",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vkSUJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@narfbg is the implication that in the data items used for this, it will never ever be acceptable to mix writing systems and therefore this can be enforced when they are received into the system? Is there a situation where that validation would have to be afterwards because there are legitimate business reasons to allow this?",
+      "createdAt": "2026-03-08T15:29:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-4019266825",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vsxKu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Based on the current proposal, it asks the phrase also to be / target phrases that are unique - this must be validated upon accepting the data. Later changes can cause conflicts (different inputs with \"cleanup\" give the same output, and uniqueness is not satisfied).",
+      "createdAt": "2026-03-09T06:38:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-4021490350",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wFTqA",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "It should be completely enforceable on entry.\n\nI can imagine some silly scenarios as a result of merging databases from what used to be separate apps into one, but I don't think that's worth detailing. Not for individual requirement like this anyway, might be an idea to have something separately for mergers.",
+      "createdAt": "2026-03-10T01:07:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-4027923072",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2026-02-22T13:12:38Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3338,
+  "state": "OPEN",
+  "title": "Phishing and/or visual deception protections",
+  "url": "https://github.com/OWASP/ASVS/issues/3338"
+}

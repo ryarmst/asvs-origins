@@ -1,0 +1,242 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "✔ Point 1\n\n> 13.2.2 Verify that if a credential has to be used for service authentication, the credential being used by the consumer is not a default credential (e.g., root/root or admin/admin are default in some services during installation).\n\nProposal:\n> 13.2.2 Verify that if a credential has to be used for service authentication, the credential being used by the consumer is not a default credential (e.g., root/root or admin/admin).\n\n---\n\n✔ Point 2\n\n> 13.2.3 Verify that, if the application allows changing configurations around passwords or connection parameters for integrations with external databases and services, they are protected by extra controls such as authenticating again with at least one factor or multi-user approval.\n\nProposal:\n\n* passwords > credentials\n* remove \"external\"\n\n> 13.2.3 Verify that, if the application allows changing configurations around credentials or connection parameters for integrations with databases and services, they are protected by extra controls such as authenticating again with at least one factor or multi-user approval.\n\n---\n\nPoint 3\n\n> 13.2.4 Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from.\n\nI think we need to re-word it. Most likely this requirement is satisified by some WAF rules. We should not require it to be done by configuration in web or application server.\n\n---\n\n✔ Point 4\n\nMove 13.2.1 and 13.2.5 next to each other\n\n* 13.2.1 Verify that communications between backend application components that don't support the application's standard user session mechanism, including APIs, middleware, and data layers, are authenticated. Authentication must use individual service accounts, short-term tokens, or certificate-based authentication and not unchanging credentials such as passwords, API keys, or shared accounts with privileged access.\n* 13.2.5 Verify that communications between backend application components, including local or operating system services, APIs, middleware, and data layers, are performed with accounts assigned the least necessary privileges.\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6m1DHl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "For 13.2.4 This is sometimes just a WAF, sometimes it's firewall policy, sometimes is code level allow lists. Can we consider all of these? \n\nOtherwise +1 to these changes",
+      "createdAt": "2025-04-12T17:47:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2798924261",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6m4mim",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > 13.2.4 Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from.\n> \n> I think we need to re-word it. Most likely this requirement is satisified by some WAF rules.\n\nDon't WAFs typically only handle the incoming flows (where the application is acting as a server)? I understood this requirement to be about outgoing flows (where the application is acting as a client). \n\n> We should not require it to be done by configuration in web or application server.\n\nI agree that this is typically done by some firewall rules but I would interpret a firewall to be an implementation option for \"application server is configured with an allowlist\", though.",
+      "createdAt": "2025-04-13T08:20:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2799855782",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6m4m-A",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The point is, we should not limit and dictate the technical solution how to achieve this, we just need to require what must be achieved. At the moment I feel that this requirement may be interpreted literally and then rules in WAF are not accepted by some tester or implementer.",
+      "createdAt": "2025-04-13T08:26:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2799857536",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6m5mvl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> The point is, we should not limit and dictate the technical solution how to achieve this, we just need to require what must be achieved. At the moment I feel that this requirement may be interpreted literally and then rules in WAF are not accepted by some tester or implementer.\n\nI think this is definitely the way to go. There are so many different ways to solve this. Once again I think this is an astute observation, @elarlang _and I'm extremely impressed with the level of detail in which you are reviewing the entire standard the past few days_.",
+      "createdAt": "2025-04-13T20:51:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2800118757",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nAGRJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Update - points 1, 2 and 4 are addressed.\n\n13.2.4 now (after PR merge) has number 13.2.5 \n\n> 13.2.5 Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from.\n\nGoal to achieve: an allowlist of resources or systems to which the **application** can send requests or load data or files from\n\nProposal:\n> Verify that for the application is applyed an allowlist of resources and systems to which it can send requests, or load data or files from. It may be achieved by the application code, web server, or firewall, or by any combination of them.",
+      "createdAt": "2025-04-14T14:02:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2801820745",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nAJXO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Offtopic:\n>  @elarlang and I'm extremely impressed with the level of detail in which you are reviewing the entire standard the past few days.\n\nIt is actually close to 2 weeks of intense review now, as you can see, here I have already reached V13 and now all V17 have received the first feedback.\n\nThe level of detail has always been involved and taken into account, keeping in mind the big picture and alignment that everything fits together. This is something to keep in mind when you jump into opposition mode - first figure out why something is done as it is done.",
+      "createdAt": "2025-04-14T14:06:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "CONFUSED",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2801833422",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVTW4",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Offtopic:\n> \n> > [@elarlang](https://github.com/elarlang) and I'm extremely impressed with the level of detail in which you are reviewing the entire standard the past few days.\n> \n> It is actually close to 2 weeks of intense review now, as you can see, here I have already reached V13 and now all V17 have received the first feedback.\n> \n> The level of detail has always been involved and taken into account, keeping in mind the big picture and alignment that everything fits together. This is something to keep in mind when you jump into opposition mode - first figure out why something is done as it is done.\n\nAcknowledged — two weeks of deep review is even more impressive, and I genuinely meant the compliment.  It’s very disappointing to see a sincere acknowledgment turned into a veiled critique. I’d prefer we engage with mutual respect, even when we disagree. Assuming opposition instead of an positive intention to help undermines the collaborative spirit of OWASP that we both value.",
+      "createdAt": "2025-04-15T20:12:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2807379384",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVXYc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Update - points 1, 2 and 4 are addressed.\n> \n> 13.2.4 now (after PR merge) has number 13.2.5\n> \n> > 13.2.5 Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from.\n> \n> Goal to achieve: an allowlist of resources or systems to which the **application** can send requests or load data or files from\n> \n> Proposal:\n> \n> > Verify that for the application is applyed an allowlist of resources and systems to which it can send requests, or load data or files from. It may be achieved by the application code, web server, or firewall, or by any combination of them.\n\nThis has a grammatical error, and I want to make the options clear here. I suggest:\n\n_13.2.5 Verify that an allowlist is enforced for all external resources or systems the application is permitted to communicate with (e.g., for outbound requests, data loads, or file access). This allowlist can be implemented at the application layer, web server, firewall, or a combination of different layers._",
+      "createdAt": "2025-04-15T20:18:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2807395868",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nqeqM",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Minor tweak:\n\n\"_Verify that an allowlist is used to define the external resources or systems which the application is permitted to communicate with (e.g., for outbound requests, data loads, or file access). This allowlist can be implemented at the application layer, web server, firewall, or a combination of different layers._\"\n\n@jmanico @elarlang are you ok with this?",
+      "createdAt": "2025-04-17T13:30:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2812930700",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nqnDG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok for me",
+      "createdAt": "2025-04-17T13:37:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2812965062",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ntUmZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Ok for me too. Thank you for being receptive to my suggestions. And kudos to Elar for pointing this out in the first place.",
+      "createdAt": "2025-04-17T17:57:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2813675929",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ntnRq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Grammarly wanted that way:\n> Verify that an allowlist is used to define the external resources or systems with which the application is permitted to communicate (e.g., for outbound requests, data loads, or file access). This allowlist can be implemented at the application layer, web server, firewall, or a combination of different layers.",
+      "createdAt": "2025-04-17T18:39:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2951#issuecomment-2813752426",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-12T11:18:16Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2951,
+  "state": "CLOSED",
+  "title": "V13.2 requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/2951"
+}

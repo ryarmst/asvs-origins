@@ -1,0 +1,34 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3945416469",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I think this is reasonable. homoglyphs are on the rise as an AI bypass. We are missing requirements around \"dont allow unprintable characters\" and \"dont allow alphabet mixing\" from https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Validation-and-Business-Logic.md\n\nI might be wrong so let me CC in the other leads.\n\ncc @elarlang cc @tghosth ",
+          "recorded_at": "2026-02-23T15:24:31Z"
+        },
+        {
+          "body": "I think this is reasonable. homoglyphs are on the rise as an AI bypass. We are missing requirements around \"dont allow unprintable characters\" and \"dont allow alphabet mixing\" from https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Validation-and-Business-Logic.md\n\nBut take a look at https://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md - there are some requirements that are more low level there. Do any of those fit?\n\nI might be wrong so let me CC in the other leads.\n\ncc @elarlang cc @tghosth ",
+          "recorded_at": "2026-02-23T15:25:22Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/3338#issuecomment-3946739120",
+      "author": "narfbg",
+      "previous_versions": [
+        {
+          "body": "V2 looks like the right place to address this threat and 2.2.1 looks like the closest match, indeed. However, that seems more incidental by virtue of prescribing allow lists, not at all hinting of this type of deception.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **2.2.1** | Verify that input is validated to enforce business or functional expectations for that input. This should either use positive validation against an allow list of values, patterns, and ranges, or be based on comparing the input to an expected structure and logical limits according to predefined rules. For L1, this can focus on input which is used to make specific business or security decisions. For L2 and up, this should apply to all input. | 1 |\n\nIf the business logic accepts both latin-alphabet and (for example) cyrilic names, which is quite common if not the norm for anyone operating globally, then the path to least resistance for the implementer is to accept all letter characters and that's what will get coded.\n\nThe association with 1.1.1 and 1.5.3 is an wider stretch, since these requirements are about encoding and parsing, while Оutlook (cyrilic О) is a perfectly valid UTF-8 string. It's an attack on human cognition, not application logic.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **1.1.1** | Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization. | 2 |\n| **1.5.3** | Verify that different parsers used in the application for the same data type (e.g., JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks. | 3 |\n\nI'm ok with more free-form mention in a chapter introduction for fast-track purposes, but would strongly prefer an explicit requirement. There are many people out there who don't read the surrounding text at all, others who only read it for clarification on a case-by-case basis, and even more who just get distracted when something isn't in the \"meat\" of the standard.",
+          "recorded_at": "2026-02-23T19:07:11Z"
+        },
+        {
+          "body": "V2 looks like the right place to address this threat and 2.2.1 looks like the closest match, indeed. However, that seems more incidental by virtue of prescribing allow lists, not at all hinting of this type of deception.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **2.2.1** | Verify that input is validated to enforce business or functional expectations for that input. This should either use positive validation against an allow list of values, patterns, and ranges, or be based on comparing the input to an expected structure and logical limits according to predefined rules. For L1, this can focus on input which is used to make specific business or security decisions. For L2 and up, this should apply to all input. | 1 |\n\nIf the business logic accepts both latin-alphabet and (for example) cyrilic names, which is quite common if not the norm for anyone operating globally, then the path to least resistance for the implementer is to accept all letter characters and that's what will get coded.\n\nThe association with 1.1.1 and 1.5.3 is a wider stretch, since these requirements are about encoding and parsing, while Оutlook (cyrilic О) is a perfectly valid UTF-8 string. It's an attack on human cognition, not application logic.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **1.1.1** | Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization. | 2 |\n| **1.5.3** | Verify that different parsers used in the application for the same data type (e.g., JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks. | 3 |\n\nI'm ok with more free-form mention in a chapter introduction for fast-track purposes, but would strongly prefer an explicit requirement. There are many people out there who don't read the surrounding text at all, others who only read it for clarification on a case-by-case basis, and even more who just get distracted when something isn't in the \"meat\" of the standard.",
+          "recorded_at": "2026-02-23T19:07:47Z"
+        }
+      ]
+    }
+  ]
+}

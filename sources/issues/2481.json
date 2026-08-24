@@ -1,0 +1,631 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Current text:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.1** | [MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that the application defends against Cross-Site Request Forgery (CSRF) attacks to protect authenticated or sensitive public functionality, using the development framework's built-in anti-CSRF functionality or CSRF tokens, along with additional defense-in-depth measures. | ✓ | ✓ | ✓ | 352 |\r\n\r\nWe also have:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.3** | [ADDED, SPLIT FROM 14.5.3] Verify that the Origin header field is validated against a defined list of allowed origins to match the desired Cross-Origin Resource Sharing (CORS) policy. | ✓ | ✓ | ✓ | 346 |\r\n\r\n\r\nPoints to change:\r\n\r\n* Merge origin validation from 50.4.3 into 50.4.1, as discussed here: https://github.com/OWASP/ASVS/issues/876#issuecomment-2550873677\r\n* Mention triggering a CORS preflight\r\n\r\nPotential wording:\r\n\r\n_[MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that the application defends against Cross-Site Request Forgery (CSRF) attacks to protect authenticated or sensitive public functionality. This should use the development framework's built-in anti-CSRF functionality or CSRF tokens, along with additional defense-in-depth measures such as validating the origin header. Where cross-origin requests are used, this should always trigger a CORS preflight request first._",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6YWEam",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> [MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that the application defends against Cross-Site Request Forgery (CSRF) attacks to protect authenticated or sensitive public functionality. This should use the development framework's built-in anti-CSRF functionality or CSRF tokens, along with additional defense-in-depth measures such as validating the origin header. Where cross-origin requests are used, this should always trigger a CORS preflight request first.\r\n\r\nNotes:\r\n\r\n* Simple cross-origin javscript based requests (XHR, fetch) do not trigger pre-flight.\r\n* Cross origin requests from non-JavaScript sources (like HTML forms) do not trigger pre-flight or SOP.",
+      "createdAt": "2024-12-19T23:01:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2555922086",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ye87x",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, \"Where cross-origin requests are used, this should always trigger a CORS preflight request first.\" does not feel right as a consequence.",
+      "createdAt": "2024-12-21T21:57:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2558250737",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YfUp0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I would clarify to:\r\n\r\n\"_[MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that the application defends against Cross-Site Request Forgery (CSRF) attacks to protect authenticated or sensitive public functionality. This should use the development framework's built-in anti-CSRF functionality or CSRF tokens, along with additional defense-in-depth measures such as validating the origin header. Where cross-origin requests are used **for this functionality**, this should always trigger a CORS preflight request first._\"\r\n\r\nCan we think of a situation where a cross-origin request for \"authenticated or sensitive public functionality\" should not trigger a pre-flight?",
+      "createdAt": "2024-12-22T06:24:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2558347892",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YfadQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't like the requirement nor the proposal. It takes some time to list all the issues. That's why it is assigned to me with status \"awaiting proposal\".",
+      "createdAt": "2024-12-22T08:12:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2558371664",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Yfj-o",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, some ideas to take into account.\r\n\r\nProblems:\r\n* The terminology (CSRF) is outdated\r\n  * I think at the time Cross-Site Request Forgery was invented, the term Site was not defined\r\n    * The Site is effective top level domain + 1 (need to take into account the public suffix)\r\n  * Nowadays the term Cross-Site is most of the time used incorrectly\r\n    * Mostly the request forgery happens from the Same-Site scope due to he cookie SameSite attribute setup, but it is called Cross-Site Request Forgery\r\n    * If the request forgery happens due to CORS misconfiguration, the actual problem is Cross-Origin Request Forgery, because the boundary for CORS is Origin (not Site)\r\n* Safe HTTP methods vs state changes - request forgery, or also \"use HTTP safe methods\" are often limited to \"state changing\" functionality, but also in the scope should be\r\n  * Resource-demanding functionality, such as data export, serving a large file\r\n  * Authentication form\r\n  * Filling any form, such as commenting anything (hate speech into public site can cause some issues)\r\n* Addressed functionality: we need to take into account\r\n  * authenticated and not authenticated functionality\r\n  * state handling with cookies\r\n  * state handling with Authorization header (adding it with JavaScript)\r\n  * state handling with Authorization header (adding by the browser automatically - basic auth, NTLM, etc)\r\n\r\nProposals (to take into account):\r\n* Terminology - we call it abstractly \"request forgery\"\r\n  * or if to work hand-in-hand with Server-Side Request Forgery then it can also be called Client-Side Request Forgery (ironically, the acronym is CSRF)\r\n* Define the goal to achieve: for executing state-changing or resource demanding functionality (we may ask documentation requirement for that), application must be sure the request was initiated by the application itself or by a trusted party.\r\n* Special highlight for \"downgrading\" CORS-preflight request to CORS-safelisted request - need to check Origin and Content-Type request headers.\r\n\r\nv4.0.3 Requirements to cover:\r\n* V4.2.2 Verify that the application or framework enforces a strong anti-CSRF mechanism to protect authenticated functionality, and effective anti-automation or anti-CSRF protects unauthenticated functionality.\r\n* V13.2.3 Verify that RESTful web services that utilize cookies are protected from Cross-Site Request Forgery via the use of at least one or more of the following: double submit cookie pattern, CSRF nonces, or Origin request header checks.\r\n* V13.2.5 Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json.\r\n\r\nAdditionally, v5.0.0 requirements to cover:\r\n* V50.4.1 [MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that the application defends against Cross-Site Request Forgery (CSRF) attacks to protect authenticated or sensitive public functionality, using the development framework's built-in anti-CSRF functionality or CSRF tokens, along with additional defense-in-depth measures.\r\n* V50.4.3 [ADDED, SPLIT FROM 14.5.3] Verify that the Origin header field is validated against a defined list of allowed origins to match the desired Cross-Origin Resource Sharing (CORS) policy.\r\n* V13.2.5 Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json.",
+      "createdAt": "2024-12-22T10:40:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2558410664",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YgRyj",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The terminology (CSRF) is outdated \r\n\r\nI agree. I don't like this term very much (and I don't like \"XSS\" much either for the same kind of reasons). However, this is the accepted wording. It is difficult to depart from it and mint your own wording when the whole community is using this \"CSRF\".\r\n\r\nFWIW, I think a better wording would be \"cross origin request forgery\" but it is not used at all anywhere.\r\n\r\n> then it can also be called Client-Side Request Forgery \r\n\r\nI kind-of like that :smile:.\r\n\r\nI'm wondering if this is clear enough though. There might be other kind of client-side request forgery (for example, client-side cross-protocol confusion attacks, [ALPACA](https://alpaca-attack.com/ALPACA.pdf)).",
+      "createdAt": "2024-12-22T21:01:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2558598307",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YiY1n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Offtopic:\r\n> and I don't like \"XSS\" much either for the same kind of reasons\r\n\r\nProbably you can find also from here (ASVS repo) in issues discussions how much I don't like the XSS. The XSS even worse than CSRF. CSRF is \"half ok\", because the \"request forgery\" part still explains what it is. But XSS is also used in \"Same-Origin HTML injection\" situation, which means not a single word from cross-site scripting is actually true, and this is insane nonsense.\r\n\r\n---\r\n\r\nOntopic:\r\n> However, this is the accepted wording. It is difficult to depart from it and mint your own wording when the whole community is using this \"CSRF\".\r\n\r\nI think \"this is the used term\", not that much maybe \"the accepted term\" anymore. At the end, the term Cross-Site Request Forgery is incorrect and there is no reason to use it. The same with XSS - we have it mentioned only in one requirement in the context of impact. The \"Cross-Site\" is used also in \"XSSI\" name.\r\n\r\n> FWIW, I think a better wording would be \"cross origin request forgery\" but it is not used at all anywhere.\r\n\r\nI would not limit it to cross-origin either. It can be also same-origin - for example, an attacker can use only HTML injection (classical outcome from sanitized HTML, you can still use `<img src=\"/local/path\">`), but with that can trigger all functionality (if cookies are used for state handling) using GET method - for example calling resource demanding export, call logout etc.\r\n",
+      "createdAt": "2024-12-23T08:29:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2559151463",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YjCeV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I see your point but can you make a concrete wording suggestion please.",
+      "createdAt": "2024-12-23T09:47:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2559322005",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Yw5zt",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed XSS is not a good term. All three of the words can be wrong. \r\n\r\nMany folks use “web UI content injection”, “content injection” or similar as a more accurate term.\r\n",
+      "createdAt": "2024-12-26T17:04:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2562956525",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Y_fst",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Addressing proposals from @elarlang :\r\n\r\n> 1) Terminology - we call it abstractly \"request forgery\"\r\n\r\n**Cross Site Request Forgery**,  **Session Riding** CSRF and XSRF are the common terms and acronyms. If we stray beyond these, can we please cite them along side the new term? Maybe session riding is more accurate than cross site request forgery or request forgery? But overall I do not think this is a big problem. Most of the industry recognizes these legacy terms. The generic term \"request forgery\" is _**too generic IMO**_, it can incorrectly refer to SSRF or Clickjacking.\r\n\r\n> 2) Define the goal to achieve: for executing state-changing or resource demanding functionality (we may ask documentation requirement for that), application must be sure the request was initiated by the application itself or by a trusted party.\r\n\r\nI like the direction of this. But I think it's more than state changing functionality. I think it's any functionality that would cause damage if the request was forged, regardless of the verb or state changing effect. \r\n\r\n> 3) Special highlight for \"downgrading\" CORS-preflight request to CORS-safelisted request - need to check Origin and Content-Type request headers.\r\n\r\nI think this is a really good idea to add in. Thumbs up on this one.",
+      "createdAt": "2025-01-01T00:58:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2566781741",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZDTcv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Previously I proposed to use client-side request forgery to be \"paired\" with SSRF, but one of them is making the request and another is accepting the request:\r\n\r\n  * SSRF - The defense against SSRF is to not allow the application server-side component to _make_ the request to the location based on untrusted input\r\n  * CSRF - The defense against CSRF is to not allow the application server-side component to _accept_ a request from an untrusted party\r\n\r\nThe \"Client\" is also vague, and in the situation of SSRF to happen, the vulnerable application itself is a client to make the request. So maybe browser-based request forgery is a more correct or self-explaining term to use.\r\n\r\n## Proposal\r\n\r\nProposal is provided with different parts to have more precise feedback.\r\n\r\n* the term \"sensitive functionality\" - there should be something better, as it may get mixed or confusion with data classification.\r\n* part 2 - what else must be listed to \"to be protected against \"csrf\" list?\r\n\r\n---\r\n\r\nPart 1 - the definition:\r\n\r\n> Verify that the application validates the request to call out state-changing or sensitive functionality originating from the functionality provided by the application itself or by a trusted party, to defend against browser-based request forgery attacks (previously known as cross-site request forgery (CSRF)).\r\n\r\n---\r\n\r\nPart 2 - the clarification the functionality to defend\r\n\r\n> Sensitive functionality includes accepting form posts for authenticated and non-authenticated users (such as authentication), calling out resource-demanding functionality (such as data export), and (todo: what else to list here?)\r\n\r\n---\r\n\r\nPart 3 - safe HTTP methods for data changes (merge 13.6.2)\r\n\r\n> Sensitive functionality must not be executed using safe HTTP methods such as HEAD, OPTIONS, or GET (e.g. using navigation request).\r\n\r\n---\r\n\r\nPart 4 - CORS spotlight (merge 13.2.5)\r\n\r\n> For requests that expect to trigger a CORS-preflight request, request header fields such as 'Origin' and 'Content-Type' must be validated to ensure that it is not possible to call the functionality with CORS-safelisted request.\r\n\r\n---\r\n\r\nPart 5 - terminology note\r\n\r\nToo long to add into the requirement, probably part of the chapter text:\r\n> Note that the attack vector is known as cross-site request forgery (CSRF), but the definition of site (effective Top Level Domain + 1) makes the term CSRF outdated and incorrect. The scope limitation to cross-site is not valid, as the attack may come from 'same-site but cross-origin' or from 'same-site and same-origin' scope.\r\n",
+      "createdAt": "2025-01-02T13:31:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2567780143",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZDdmd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We also have a requirement for safe-methods:\r\n> V13.6.2 [MODIFIED, MOVED FROM 13.2.1] Verify that HTTP requests using the HEAD, OPTIONS, TRACE or GET verb do not modify any backend data structure or perform any state-changing actions. These requests are safe methods and should therefore not have any side effects.\t\r\n\r\nThe main goal is the same, it is a kind of pre-condition to have a defense against browser-based request forgery attacks and it does not have its own separate risk.\r\n\r\nThe choice here is, to merge everything into one monster requirement, or to have some more specific separate requirements to address separate related and underlying problems, such as using safe methods for state changes or CORS-preflight downgrade to CORS-safelisted.",
+      "createdAt": "2025-01-02T14:02:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2567821725",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZDq4a",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So what is the rough wording suggestion please here @elarlang? ",
+      "createdAt": "2025-01-02T14:40:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2567876122",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZEJ8L",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So what is the rough wording suggestion please here @elarlang?\r\n\r\nRough wording is concat(part1, part2, part3, part4, part-x) - written as separate parts to have more precise feedback and finetuning for different parts.\r\n\r\nUpdated proposal in https://github.com/OWASP/ASVS/issues/2481#issuecomment-2567780143",
+      "createdAt": "2025-01-02T16:02:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2568003339",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZR-jg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Regarding,\r\n\r\n\r\n> the term \"sensitive functionality\" - there should be something better, as it may get mixed or confusion with data classification.\r\n\r\nMaybe we need to focus on state changing or resource intensive functionality. Not sure I know what sensitive functionality means in this that isn't included by one of those other definitions.\r\n\r\n> part 2 - what else must be listed to \"to be protected against \"csrf\" list?\r\n\r\nNot convinced there is anything else.\r\n\r\nI would propose the following text:\r\n\r\n\r\n\r\n\"_Verify that requests to state-changing or resource intensive functionality are checked to ensure they originate from the application itself, to defend against browser-based request forgery attacks (commonly known as cross-site request forgery (CSRF)). Additionally, this functionality must not be invoked using safe HTTP methods such as HEAD, OPTIONS, or GET. This precaution will ensure that cross-origin requests to this functionality will trigger a preflight request._\"\r\n\r\n\r\nComments on the proposal:\r\n\r\n* In this use case, the \"trusted party\" is considered part of the application.\r\n* _Part 2 - the clarification the functionality to defend_ - I think this part is now redundant with the updated wording.\r\n*  _(e.g. from a navigation request)_ - I think this is redundant or should be moved to the section text.\r\n* _Part 4 - CORS spotlight (merge 13.2.5)_ - Based on what it says [at this link](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests), we are enforcing preflights through our HTTP verb requirement.\r\n* _Part 5 - terminology note_ - I have included a proposal below to rework the section text.\r\nSection text:\r\n\r\n### V50.4 Browser Origin Separation\r\n\r\nWhen accepting a request on the server side, we need to be sure it is initiated by the application itself and not in some way spoofed by a malicious party. Key security mechanisms here include browser security policies like Same Origin Policy for JavaScript and also SameSite logic for cookies.\r\n\r\nThe most common and well known attack vector is known as cross-site request forgery (CSRF), but note that the definition of site (effective Top Level Domain + 1) makes the term CSRF outdated and incorrect. The scope limitation to cross-site is not valid, as the attack may come from 'same-site but cross-origin' or from 'same-site and same-origin' scope.\r\n\r\n",
+      "createdAt": "2025-01-05T13:26:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2571626720",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZSEDR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In this use case, the \"trusted party\" is considered part of the application.\r\n\r\nAs we included CORS, it may be some other trusted party that uses the API\r\n\r\n> Part 2 - the clarification the functionality to defend - I think this part is now redundant with the updated wording.\r\n\r\nThe proposal lost spotlight for the non-authenticated actions, such as authentication.\r\n\r\n> Part 4 - CORS spotlight (merge 13.2.5) - Based on what it says [at this link](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS#simple_requests), we are enforcing preflights through our HTTP verb requirement.\r\n\r\nIf you don't validate the previously/my proposed part 4, you can bypass this new/your proposed part 4.",
+      "createdAt": "2025-01-05T14:41:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2571649233",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZyEdG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the following requirement covers parts 1, 2 and 4 above:\n\n\"_Verify that requests to state-changing, security sensitive, or resource intensive functionality includes a mechanism to prevent browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF). Ideally the functionality should only accept content-types which would trigger a CORS preflight and enforce an allow list of 'Origin' headers. Alternatively, another CSRF prevention mechanism may be used._\"\n\nIt covers the \"write\" case here where the \"read\" case is covered by [50.3.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x50-V50-Web-Frontend-Security.md#v503-browser-security-mechanism-headers).\n\nI think the following requirement covers **part** ~~s~~ ~~1, 2 and 4~~ **3** above:\n\n\"_Verify that requests to state-changing, security sensitive, or resource intensive functionality use appropriate HTTP methods including POST, PATCH, DELETE or PUT._\"\n\nPart 5 will be covered in chapter text but we have a note that we wanted to mention authentication as a specific \"write\" case there.",
+      "createdAt": "2025-01-09T12:29:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2580039494",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Z1npb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The only thing that tweaks me here is that SOP in terms of CSRF protection only matters for API’s and similar, standard same-site websites do not benefit from SOP for CSRF protection.\r\n\r\nThe “alternative” defense suggested in the last sentence is not alternative, its fundamental for standard websites and this requirement lends me to believe that SOP and preflight is enough when it often is not for CSRF defense.",
+      "createdAt": "2025-01-09T18:16:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2580970075",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Z4P1b",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would like to add my opinion that I think it is a good opportunity to move away from Cross-Site Request Forgery as a term. That said, our field would not be unique in clinging to incorrect terminology. \"Heartburn\" for example, has nothing to do with the heart...\r\n\r\n> Maybe we need to focus on state changing or resource intensive functionality. Not sure I know what sensitive functionality means in this that isn't included by one of those other definitions.\r\n\r\nI would consider XS Leaks and (See #2409), Spectre-like attacks (also #2409), and attacks like BREACH (#2203) to be relevant to the discussion. Here is a relevant [comment](https://github.com/OWASP/ASVS/issues/2203#issuecomment-2464361620) from the closing of #2203:\r\n\r\n> We also think that other cross origin and anti-automation controls would hopefully help mitigate this.\r\n\r\nI think therefore it is worth consider these classes of issues when constructing requirements to restrict processing of cross-site or cross-origin requests because there is functionality beyond resource intensive or state changing that could be impacted. Unfortunately, that also complicates the considerations. Thoughts?\r\n\r\nOne more thing I would like to add to the discussion (sorry): [Fetch Metadata ](https://developer.mozilla.org/en-US/docs/Glossary/Fetch_metadata_request_header) is now widely supported and provides much more contextual information about the nature of requests (compared to just the Origin header).\r\n\r\n\r\n",
+      "createdAt": "2025-01-10T03:15:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2581658971",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Z5jAm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's focus for this issue only to handle the related requirements (50.4.1, 13.2.5, 13.6.2).\r\n\r\nIf there are related requirements, let's have the wording first and then we can see, where those fits.\r\n\r\nI'm aware of `Sec-Fetch-*` header fields, those are in use also in requirement 50.6.1. I feel it is more #2049 area to discuss.\r\n\r\n---\r\n\r\nOn topic: As \"the one monster csrf requirement\" does not work out, I think we should move away from this direction and keep current separate requirements with finetuned focuses. I'll come back to this with a separate comment/proposal..",
+      "createdAt": "2025-01-10T07:59:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2581999654",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6asVpH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang to prepare an updated proposal",
+      "createdAt": "2025-01-16T11:50:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2595314247",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bF-L7",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "TLDR:\n\n* If you use CORS(-preflight), accept only CORS(-preflight)\n* Do not execute state-changing or resource-demanding functionality for navigation or (incorrect) resource loading (e.g. request made as calling an image load) request (using HTTP safe-method)\n* CORS-safelisted requests with POST method - check tokens and/or extra headers\n\n---\n\nDisclaimer - in total I have spent (too) many hours to put this together. I expect any comments to be technically validated before proposing anything else, just so that I do not have further time to explain how HTTP or CORS works. It also means, that every detail I proposed, is there for a reason, and if an alternative proposal is going to lose some detail, it must be validated and explained reason to do so.\n\n---\n\n## Separate requirements\n\nI'm going to propose (to keep) separate requirements instead of merging everything to one monster-anti-csrf-requirement, just because the impact is a \"CSRF\".\n\nIf the CORS-preflight can be downgraded to CORS-safelisted request, the impact is a \"CSRF\" but it is a separate problem to solve compared to \"missing tokens\" or \"making changes with navigation request\".\n\nIn the same way, we have a separate requirement for each technical situation on how to reach HTML or JavaScript execution (so-called XSS). If we could use one requirement \"verify that user-controlled input is not executed as HTML or JavaScript\" we could lose too many details and it could not provide anything practical anymore. For example, we can not put together problems related to dynamic document building (HTML or JavaScript injection), using an incorrect method to display the data (HTML or JavaScript execution), using an incorrect `Content-Type` when serving the data (API response as `text/html` instead of `application/json`), or serving user-uploaded `.svg` or `.html` file from the same-origin scope. Those all reach \"malicious content execution\", but test-cases and expected defenses are different.\n\nUsing separate requirements also aligns with agreed principles such as \"One problem per requirement\", \"different test-cases into different requirements\", and \"a separate requirement to highlight really widespread problems\".\n\nListed requirements are not duplicates, they just have a common impact. From the impact point of view, those (theoretically) can be merged into one monster requirement but with the cost of actionable details.\n\n---\n\n## Part 2, 5 - Terminology, Functionality, scope, technical limitation\n\nLimitation for request forgery requirements - it affects only if there\n\n  * is no state kept for the browser\n  * OR if the browser includes state-keeping information automatically with the request (such as session cookie, HTTP basic auth, or NTLM authentication HTTP headers). It affects authenticated and non-authenticated users.\n\nPreviously proposed:\n\n> Sensitive functionality includes accepting form posts for authenticated and non-authenticated users (such as authentication), calling out resource-demanding functionality (such as data export), and (todo: what else to list here?)\n\nIt should be covered in the chapter text.\n\nThe chapter text must include also \"Part 5\" - the explanation, of why \"CSRF\" is not a technically correct term to use.\n\n---\n\n## Part 4\n\nI start from Part 4, to get the scope reduced for the others.\n\nThe scope and the point to cover - if using API and/or CORS - accept only API and/or CORS calls.\n\nApplies only to APIs that are used via browser using JavaScript (XHR or fetch)\n\nPreviously (https://github.com/OWASP/ASVS/issues/2481#issuecomment-2567780143) proposed as part 4:\n\n> For requests that expect to trigger a CORS-preflight request, request header fields such as 'Origin' and 'Content-Type' must be validated to ensure that it is not possible to call the functionality with CORS-safelisted request.\n\nTest-Cases:\n\n  * If the application does not use cross-origin requests, it must not accept them (covered by validating the `Origin` request header field)\n  * Is `Access-Control-Allow-Origin` (ACAO) response header field reflecting the `Origin` request header field value\n    * CORS pre-flight is also used as a defense to validate if the browser is allowed to make the request to the API\n    * In case a quote is needed, from [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS): _CORS also relies on a mechanism by which browsers make a \"preflight\" request to the server hosting the cross-origin resource, in order to check that the server will permit the actual request._\n  * Is it possible to \"downgrade\" the CORS pre-flight request to a CORS-safelisted request\n    * Is the `Origin` request header field validated?\n    * Is the `Content-Type` request header field validated - if safelisted `Content-Type` is used, it requires using an extra defense method (e.g. an extra header field)?\n    * Is there any not CORS-safelisted request header in use?\n\nExpected defense:\n\n  * Use correct request headers field validation and correct response header field values (configuration) to have pre-flight-based defense in place\n\nIn other words: in case it is possible to skip pre-flight request and downgrade it to CORS-safelisted request, the expected defense is not to ask \"CSRF tokens\", but to fix the set of headers.\n\nIt means it should be a separate requirement - it is a separate technical problem, it expects a different defense than \"ask tokens\".\n\nIt should cover current v5.0 requirements:\n\n* V50.4.3 [ADDED, SPLIT FROM 14.5.3] Verify that the Origin header field is validated against a defined list of allowed origins to match the desired Cross-Origin Resource Sharing (CORS) policy.\n* V13.2.5 Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json.\n\nThe meaning for the requirement:\n\n> Verify that if the application uses and relies on CORS-preflight mechanism, it is not possible to call the functionality with a CORS-safelisted request. It may require validating the 'Origin' and 'Content-Type' request headers or using an extra header field in the communication that is not a CORS-safelisted request header field.\n\n---\n\n## Part 3 - Accept only safe methods - current 13.6.2 (#2492).\n\nWhen simplified, it needs to achieve that:\n\n* The application is built a way that state-changing functionality is used via safe methods, for example, deleting something is not done via the GET method request\n* The application does not accept calling the functionality with other methods or other parameters - a widespread problem for old-school applications as they may merge URL parameters and request body parameters without distinguishing them and checking the anti request forgery token only when functionality is called via the POST method. So it gives a \"CSRF\"-check bypass sending the same parameters via URL and using the GET method\n\nTest-cases (simplified):\n\n  * Verify that by default all the \"state changing\" functionality is not called with safe HTTP methods\n  * Verify that calling a \"state changing\" functionality can not be called with a safe HTTP method\n\nExpected defense (simplified):\n\n  * For state-changing requests, use and accept only unsafe HTTP methods\n\nPrevious proposal (simplified):\n\n> Sensitive functionality must not be executed using safe HTTP methods such as HEAD, OPTIONS, or GET (e.g. using navigation request).\n\nWhen not simplified, we need to take into account:\n\n  * CORS - if some HTTP request header fields are added by JavaScript (it is not automatically included by the browser)\n  * Tokens, that can be used as part of the URL\n\nThat means, although state-changing or sensitive functionality is called using an HTTP safe method, it is not vulnerable to \"CSRF\" just because of that.\n\nInstead of \"use HTTP safe methods\" we need to ask \"the functionality must not be triggered with navigation request or resource loading request, e.g. loading an image\". Navigation request here is the most critical because cookies with `SameSite=Lax` are sent with the request. For example, if calling the resource from a cross-site application as an image, cookies with `SameSite=Lax` are not sent.\n\nIt should cover current v5.0 requirements:\n\n* V13.6.2 [MODIFIED, MOVED FROM 13.2.1] Verify that HTTP requests using the HEAD, OPTIONS, TRACE or GET verb do not modify any backend data structure or perform any state-changing actions. These requests are safe methods and should therefore not have any side effects.\n\nThe proposal has \"negative wording\", but let's start with that.\n\n> Verify that state-changing or resource-demanding functionality is not executed for a navigation request or is called an incorrect destination (e.g. export data functionality is called as an image from the browser). Not accepting safe HTTP methods such as HEAD, OPTIONS, or GET and Sec-Fetch-* request headers can be used for validation. It requires special attention if the application does not distinguish URL parameters and message body parameters.\n\nThis requirement is a pre-condition to have any defense against browser-based request forgery.\n\nThe expected defense is not to check and validate tokens, the expected defense is to have a correct architecture in place.\n\n---\n\n## Part 1\n\n\nPrevious proposal (with updated wording by Josh):\n\n> Verify that requests to state-changing or resource intensive functionality are checked to ensure they originate from the application itself, to defend against browser-based request forgery attacks (commonly known as cross-site request forgery (CSRF)).\n\nIt should cover current v5.0 requirements:\n\n> V50.4.1 Verify that the application defends against Cross-Site Request Forgery (CSRF) attacks to protect authenticated or sensitive public functionality, using the development framework's built-in anti-CSRF functionality or CSRF tokens, along with additional defense-in-depth measures.\n\nA pre-condition:\n\n  * CORS-preflight can not be downgraded to CORS-safelisted request (Part 4)\n  * Navigation request can not be used to trigger functionality (Part 3)\n\nTest-Cases:\n\n  * Does the request contain something unique that is not known for a third party (token)\n  * Does the request contain something that can not be added by a cross-origin party (using an extra request header triggers CORS-preflight and provides a defense even if CORS is not used)\n  * Does the request contain something that can not be added by a cross-site party (requires \"Part3\", cookies with the `SameSite=Lax` or `SameSite=Strict`)\n\nExpected defense:\n\n  * Require and validate something (unique) from the request, that is provided by the application to the party that initiates the request\n\nProposal with some limitations and direction compared to the previous one:\n\n> Verify that requests to state-changing or resource intensive functionality are checked to ensure they originate from the application itself. For example, by using and validating tokens or extra HTTP headers that are not CORS-safelisted request-headers. This is to defend against browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF).\n\nScope - this requirement basically handles the situation if an HTTP request using the POST method is made\n\n  * GET, OPTIONS, HEAD are ruled out by Part 3\n  * PUT, DELETE, PATCH are triggering CORS-preflight and are covered by Part 4\n\nSo the requirement may also start with:\n\n> Verify that CORS-safelisted requests to\n\n---\n\nBefore any comments - please validate your comment against this post before submitting it.\n\n. o O ( Where do I send the bill for writing this post? )\n",
+      "createdAt": "2025-01-20T10:31:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2602033915",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bad8p",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "#thiscommentshouldhavebeenablogpost\n\n🙃🤣",
+      "createdAt": "2025-01-22T14:32:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2607406889",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bafU2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please can you add your proposals to the tl;dr together with tags to help understand which current requirements they are modifying.",
+      "createdAt": "2025-01-22T14:34:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2607412534",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bbizo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In the current situation, the long post was (forced to be) written to explain and address all the situations, different test cases, and expected developments together and point out, how they don't overlap.\n\nI recommend taking the time and analyze it. Understanding it is a pre-condition to make any decision based on the provided information. So I don't think those 3 proposed requirements should be taken out of context and then start answering the questions out of context that are actually already written in the post.",
+      "createdAt": "2025-01-22T16:21:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2607688936",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bcxrw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so as I understand it, your proposed requirements are:\n\nPart 4:\n\nV50.4.3 - [MODIFIED, MOVED FROM 13.2.5, SPLIT FROM 14.5.3] Verify that if the application uses and relies on CORS-preflight mechanism, it is not possible to call the functionality with a CORS-safelisted request. It may require validating the 'Origin' and 'Content-Type' request headers or using an extra header field in the communication that is not a CORS-safelisted request header field.\n\nPart 3:\n\nV13.6.2 - [MODIFIED, MOVED FROM 13.2.1] Verify that state-changing or resource-demanding functionality is not executed for a navigation request or is called an incorrect destination (e.g. export data functionality is called as an image from the browser). Not accepting safe HTTP methods such as HEAD, OPTIONS, or GET and Sec-Fetch-* request headers can be used for validation. It requires special attention if the application does not distinguish URL parameters and message body parameters.\n\nPart 1:\n\n50.4.1 - [MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that requests to state-changing or resource intensive functionality are checked to ensure they originate from the application itself. For example, by using and validating tokens or extra HTTP headers that are not CORS-safelisted request-headers. This is to defend against browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF).\n\nCorrect? If so, I can then go and analyse your argumentation whilst clearly understanding your end goal from your argumentation.",
+      "createdAt": "2025-01-22T18:47:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2608012016",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bdADh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Relations to current requirements that will be covered with new proposal, were listed in my post into each part. So I think the question was answered already.\n\nHow correct tags are pre-condition to analyze the concept \"one monster requirement\" vs \"3 separate requirements\"  is not understandable for me. What is the correct tag also depends on the requirement. I listed at the moment current v5.0.be requirements, if we want to have correct tags, we need to analyze the content of a v4.0.3 requirement compared to new proposed requirement. At this stage, I don't see the reason to put time into it. Just for an example, 13.2.3 from v4.0.3 is basically covered by 2 separate requirements.\n\nOverall, requirements to cover was provided in https://github.com/OWASP/ASVS/issues/2481#issuecomment-2558410664 and 13.6.2 was linked later in https://github.com/OWASP/ASVS/issues/2481#issuecomment-2567821725",
+      "createdAt": "2025-01-22T19:16:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2608070881",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bjGg0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "**Summary of discussion** \n\n----------------------------------------------------\n\n**These are ok:**\n\nPart 4:\n\n\"_V50.4.3 - [MODIFIED, MOVED FROM 13.2.5, SPLIT FROM 14.5.3] Verify that, if the application relies on the CORS preflight mechanism to prevent disallowed cross-origin use of sensitive functionality, it is not possible to call the functionality with a CORS-safelisted request. This may require checking the values of the 'Origin' and 'Content-Type' request headers or using an extra header field that is not CORS-safelisted._\"\n\nAdd a note to chapter text that this applies to apps that are designed to be accessed cross origin but also those which are not but instead preflight is used as a security mechanism.\n\n\nPart 1:\n\n\"_50.4.1 - [MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that CORS-safelisted requests to sensitive functionality are checked to ensure that they originate from the application itself. This may be done by using and validating anti-forgery tokens or requiring extra HTTP headers that are not CORS-safelisted request-headers. This is to defend against browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF)._\"\n\nAdd anti-forgery tokens to glossary?\n\n-------------------------------\n\n**This needs more thought:**\n\n\nPart 3:\n\nV13.6.2 - [MODIFIED, MOVED FROM 13.2.1] Verify that sensitive functionality is not executed for a navigation request or is called an incorrect destination (e.g. export data functionality is called as an image from the browser). Not accepting safe HTTP methods such as HEAD, OPTIONS, or GET and Sec-Fetch-* request headers can be used for validation. It requires special attention if the application does not distinguish URL parameters and message body parameters.\n\n",
+      "createdAt": "2025-01-23T12:20:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2609670196",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0jsV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Looking again at Part 3:\n\nThis is the current state:\n\n\"_V13.6.2 - [MODIFIED, MOVED FROM 13.2.1] Verify that HTTP requests using the HEAD, OPTIONS, TRACE or GET verb do not modify any backend data structure or perform any state-changing actions. These requests are safe methods and should therefore not have any side effects._\"\n\nI previously said ([here](https://github.com/OWASP/ASVS/issues/2492#issuecomment-2567893752)) that I thought this should be merged into a separate CSRF requirement. I am prepared to accept that it needs to stay separate and also include the subtleties of the version [proposed above](https://github.com/OWASP/ASVS/issues/2481#issuecomment-2609670196).\n\nI therefore propose the following @elarlang :\n\n\"_V13.6.2 - [MODIFIED, MOVED FROM 13.2.1] Verify that calls to sensitive functionality use appropriate HTTP methods such as POST, PUT, PATCH or DELETE, and not methods defined by the HTTP specification as \"safe\" such as HEAD, OPTIONS, or GET. Alternatively, strict validation of the Sec-Fetch-\\* can be used to ensure that the request did not originate from an inappropriate cross-origin call, a navigation request, or a resource load (such as an image source). This is particularly important if the application does not distinguish between URL parameters and message body parameters_.\"\n\nWhat do you think?",
+      "createdAt": "2025-01-26T07:01:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614246165",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0tT8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposed middle-part:\n> Alternatively, strict validation of the Sec-Fetch-* can be used to ensure that the request did not originate from an inappropriate cross-origin call, a navigation request, or a resource load (such as an image source).\n\nAttempt to turn it into positive requirement:\n> Alternatively, strict validation of the Sec-Fetch-* can be used to verify that the request to sensitive functionality was initiated the way the application expects it (such as not accepting cross-origin request, navigation request, or executing functionality as called by image source).\n\nIf to keep the first option, \"_such as an image source_\" needs to be updated to say that \"_executing functionality being loaded as image resource is not accepted if not intended_\".",
+      "createdAt": "2025-01-26T09:06:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614285564",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0vGG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> or executing functionality as called by image source\n\nI don't understand why this level of detail is necessary? We have already said this is about calling sensitive functionality. When would we ever expect this from a resource load?",
+      "createdAt": "2025-01-26T09:24:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614292870",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0vYk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Images and dynamically creating images can be called as an image resource and it is expected functionality.",
+      "createdAt": "2025-01-26T09:27:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614294052",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0vjJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"_V13.6.2 - [MODIFIED, MOVED FROM 13.2.1] Verify that calls to sensitive functionality use appropriate HTTP methods such as POST, PUT, PATCH or DELETE, and not methods defined by the HTTP specification as \"safe\" such as HEAD, OPTIONS, or GET. Alternatively, strict validation of the Sec-Fetch-* can be used to ensure that the request did not originate from an inappropriate cross-origin call, a navigation request, or a resource load (such as an image source) **where this is not expected**. This is particularly important if the application does not distinguish between URL parameters and message body parameters._\"\n\nGood enough? 👆",
+      "createdAt": "2025-01-26T09:29:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614294729",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0wIW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One more finetuning:\n> Verify that calls to sensitive functionality use appropriate HTTP methods such as POST, PUT, PATCH or DELETE, and not methods defined by the HTTP specification as \"safe\" such as HEAD, OPTIONS, or GET. Alternatively, strict validation of the Sec-Fetch-* **request header fields** can be used to ensure that the request did not originate from an inappropriate cross-origin call, a navigation request, or a resource load (such as an image source) where this is not expected. This is particularly important if the application does not distinguish between URL parameters and message body parameters",
+      "createdAt": "2025-01-26T09:35:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614297110",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0zET",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so I think we are there, I think all these requirements now belong in V50.4 so I would propose as follows:\n\n\n## V50.4 Browser Origin Separation\n\nWhen accepting a request on the server side, we need to be sure it is initiated by the application itself or by a trusted party and has not been forged by an attacker. The keywords here are browser security policies like Same Origin Policy for JavaScript and also SameSite logic for cookies. Another common protection is the CORS preflight mechanism. This mechanism will be critical for endpoints designed to be called from a different origin, but it can also be a useful request forgery prevention mechanism for endpoints which are not designed to be called from a different origin.\n\nThe category should contain requirements with ideas:\n\n* Verify that the request was initiated by a trusted party (CSRF, CORS misconfiguration)\n* Verify that the response is readable only for trusted parties (CORS misconfiguration)\n\n| # | Description | L1 | L2 | L3 | CWE |\n| :---: | :--- | :---: | :---: | :---: | :---: |\n| **50.4.1** | [MODIFIED, MOVED FROM 4.2.2, MERGED FROM 13.2.3] Verify that CORS-safelisted requests to sensitive functionality are checked to ensure that they originate from the application itself. This may be done by using and validating anti-forgery tokens or requiring extra HTTP headers that are not CORS-safelisted request-headers. This is to defend against browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF). | ✓ | ✓ | ✓ | 352 |\n| **50.4.3** | [MODIFIED, MOVED FROM 13.2.5, SPLIT FROM 14.5.3] Verify that, if the application relies on the CORS preflight mechanism to prevent disallowed cross-origin use of sensitive functionality, it is not possible to call the functionality with a CORS-safelisted request. This may require checking the values of the 'Origin' and 'Content-Type' request headers or using an extra header field that is not CORS-safelisted. | ✓ | ✓ | ✓ | 346 |\n| **50.4.4** | [MODIFIED, MOVED FROM 13.2.1] Verify that calls to sensitive functionality use appropriate HTTP methods such as POST, PUT, PATCH or DELETE, and not methods defined by the HTTP specification as \"safe\" such as HEAD, OPTIONS, or GET. Alternatively, strict validation of the Sec-Fetch-* request header fields can be used to ensure that the request did not originate from an inappropriate cross-origin call, a navigation request, or a resource load (such as an image source) where this is not expected. This is particularly important if the application does not distinguish between URL parameters and message body parameters. | ✓ | ✓ | ✓ | 650 |\n\n\n---\n\n# V13\n\n## V13.2 Web Services\n\n| # | Description | L1 | L2 | L3 | CWE |\n| :---: | :--- | :---: | :---: | :---: | :---: |\n| **13.2.1** | [MOVED TO 50.4.4] | | | | |\n| **13.2.3** | [DELETED, MERGED TO 50.4.1] | | | | |\n| **13.2.5** | [MOVED TO 50.4.3] | | | | |\n\n## V13.6 HTTP Request Header Validation\n\nDelete 13.6.2 and move the two reqs after it up by one number\n\n---\n\n# Appendix A: Glossary\n\n* **Anti-forgery token** - A mechanism by which one or more tokens are passed in a request and validated by the application server to ensure that the request has come from an expected endpoint.",
+      "createdAt": "2025-01-26T10:08:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614309139",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0zH3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let me know if you are good with this @elarlang and I will open a PR and make notes on the other relevant issues",
+      "createdAt": "2025-01-26T10:09:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614309367",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b1LR8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The chapter text should contain the explanation what kind of functionality must be protected and it is valid for authenticated and non-authenticated users.\n\nI need to rethink the modification tags, but you can start with the PR.",
+      "createdAt": "2025-01-26T12:57:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2481#issuecomment-2614408316",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-12-18T09:52:35Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 2481,
+  "state": "CLOSED",
+  "title": "Clarify CSRF requirement 50.4.1",
+  "url": "https://github.com/OWASP/ASVS/issues/2481"
+}

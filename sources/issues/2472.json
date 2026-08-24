@@ -1,0 +1,253 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "> _This this is the problem to fix not to say 13.2.5 is not valid defense against pre-preflight. 13.2.5 is important requirement for CORS, if there is another meaning in another context, I prefer to make a separate requirement for the other context with a clear definition, what other risk it mitigates._\r\n\r\nhttps://github.com/OWASP/ASVS/issues/876#issuecomment-2545170670\r\n\r\n> _Well I would actually argue that 13.2.5 is defence in depth for CSRF because the correct fix is what is in 50.4.1. It is irrelevant for CORS because again even if you manage to send the request, you cannot read the response._\r\n\r\nhttps://github.com/OWASP/ASVS/issues/876#issuecomment-2545197336\r\n\r\n\r\nWe should clarify the reason for 13.2.5\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **13.2.5** | Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json. | | ✓ | ✓ | 436 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6XtVmZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please also provide an explanation, what security risk the requirement solves outside of CORS context.",
+      "createdAt": "2024-12-16T10:50:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2545244569",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XuZU4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, the CWE is [436](https://cwe.mitre.org/data/definitions/436.html) \"Interpretation Conflict\". Based on the CWE it seems like the original intention of the requirement was to ensure that content which is received is processed by the correct interpreter and potentially also an expected interpreter.\r\n\r\nTracing back, it comes from ASVS 3.0, see this training slide:\r\n![image](https://github.com/user-attachments/assets/face74f0-103e-4beb-86db-57fffbf02ff0)\r\n\r\n\r\nThere are various frameworks which will seamlessly handle a variety of incoming content types. If assumptions have been made that incoming content will be of a certain type, sending content of a different type may bypass controls which rely on those assumptions.\r\n\r\nI think if nothing else the age of the requirement probably indicates that it was not intended to be related to CORS :)",
+      "createdAt": "2024-12-16T12:38:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2545521976",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XvRxP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it is such a generous problem, why is the requirement limited to REST services and precisely mentioning 2 certain content-types?",
+      "createdAt": "2024-12-16T14:19:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2545753167",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XvcOg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If assumptions have been made that incoming content will be of a certain type, sending content of a different type may bypass controls which rely on those assumptions.\r\n\r\nHow does it make sense or how is the assumption a security requirement?\r\n\r\nIf you make a request and change the content-type to mismatch with the content, it will reach the functionality anyway.\r\n\r\nBasically, you are saying, that for file upload we need to validate the file mime-type/content-type, and then it's ok to process it further? Take a look at requirement 12.2.1 to validate your idea for this interpretation.",
+      "createdAt": "2024-12-16T14:36:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2545796000",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xvf2y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> why is the requirement limited to REST services\r\n\r\nFair question and should potentially be wider\r\n\r\n>  precisely mentioning 2 certain content-types\r\n\r\nThese are examples, not a closed list\r\n\r\n> If you make a request and change the content-type to mismatch with the content, it will reach the functionality anyway\r\n\r\nNo, the point is that if it expects to receive json and it receives xml or formurlencoded then it will reject the request. If it expects to receive multiple types then it needs to be capable of validating the content.\r\n\r\n> Basically, you are saying, that for file upload we need to validate the file mime-type/content-type, and then it's ok to process it further?\r\n\r\nThis is not about file upload, this is about a regular web request where the web server is processing the content \r\n",
+      "createdAt": "2024-12-16T14:42:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2545810866",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xv5bs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> No, the point is that if it expects to receive json and it receives xml or formurlencoded then it will reject the request. If it expects to receive multiple types then it needs to be capable of validating the content.\r\n\r\nIt's called input validation. Checking the content-type header does not serve the goal. I think you did not take parallel with file-upload seriously.\r\n\r\nI reached my facepalm limit for this year.",
+      "createdAt": "2024-12-16T15:21:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2545915628",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YC4bO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I was thinking about this a little more @elarlang.\r\n\r\nMaybe if we refine it to:\r\n\r\n\"_Verify that REST services explicitly process received data based on the incoming Content-Type and will only accept expected content types. For example, a JSON API should not accept a request with an application/xml content type nor should it process a request with a text/plain content type as JSON._\"",
+      "createdAt": "2024-12-18T10:01:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2550892238",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YDHiG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What problem it solves outside of CORS?\r\n\r\nIf the service expects JSON content and gets a valid JSON content but with the  `Content-Type: text/plain` - what security risk it solves to not accept that?\r\n\r\nIf the service is accepting different contents and `Content-Types`, it just need to validate, that the sent \"message body\" is matching with defined `Content-Type`. As previously pointed parallel with file upload - the content must match with defined type. For me this is just basic input validation question.",
+      "createdAt": "2024-12-18T10:30:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2550954118",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YDWTT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so you think this should be merged into input validation or just removed as redundant?",
+      "createdAt": "2024-12-18T10:58:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2551014611",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YDgXF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From CORS point of view it gets merged into \"CSRF\" requirement.\r\n\r\nFor standard input validation I don't see specific problem or vector to solve that is not covered by general input validation requirements.",
+      "createdAt": "2024-12-18T11:19:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2551055813",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YD0W4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2483",
+      "createdAt": "2024-12-18T11:58:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2551137720",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YD4zj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It gets merged into V50.4.1, will be solved with #2481",
+      "createdAt": "2024-12-18T12:08:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2551155939",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YIU4f",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Please note that CORS is not always a CSRF protection mechanism. There are no preflight’s with a simple cross origin request. So GET based endpoints, which might be state changing and more, do not necessarily get CSRF protection. My opinion is that all sensitive API endpoints should not depend on CORS for CSRf protection.\r\n\r\n\r\nPlease disregard this or delete this comment if it’s redundant, I’m admittedly on my cell phone.",
+      "createdAt": "2024-12-18T21:42:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2552319519",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b1WnX",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This should get merged into 50.4.3 and will be resolved as part of #2481.",
+      "createdAt": "2025-01-26T14:47:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2472#issuecomment-2614454743",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-12-16T10:28:53Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjtAg",
+      "name": "4a) Waiting for another",
+      "description": "This issue is waiting for another issue to be resolved",
+      "color": "7EDA08"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    }
+  ],
+  "number": 2472,
+  "state": "CLOSED",
+  "title": "Clarify reasoning behind 13.2.5",
+  "url": "https://github.com/OWASP/ASVS/issues/2472"
+}

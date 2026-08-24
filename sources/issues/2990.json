@@ -1,0 +1,160 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "We have:\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **1.5.2** | Verify that **deserialization of data from untrusted clients** enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input. | 2 | v5.0.be-5.5.3 |\n\nShould we say \"deserialization of untrusted data\" instead?\n\nRationale: Untrusted data could come from other sources (emails, REST API consumption, etc.).\n\nOr \"deserialization of untrusted data, such as data coming from untrusted clients,\"?\n\nOr is it OK as it is?\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6nx76-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"deserialization of data\" is correct :)",
+      "createdAt": "2025-04-18T08:12:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2990#issuecomment-2814885566",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nx9Oe",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My question is whether \"from untrusted **client**\" is correct. 😄 ",
+      "createdAt": "2025-04-18T08:15:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2990#issuecomment-2814890910",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nx-sU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Understood, maybe better representation of my last comment:\n\n> Verify that deserialization of data ~~from untrusted clients~~ enforces safe input handling ...\n\nYes, untrusted client is confusing and we need to change that. Now the question is, is the requirement valid only for \"untrusted data\" or it is required to any data that is deserialized?",
+      "createdAt": "2025-04-18T08:18:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2990#issuecomment-2814896916",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nyG7_",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> is the requirement valid only for \"untrusted data\" or it is required to any data that is deserialized?\n\nI think we cannot require it for any data that is deserialized.\n\nUnrestricted RCE-capable deserialization is widely used in many applications. This is OK as long as the serialized data is emitted by a trusted source. For example, the applications generates serialized data, stores in its own trusted database and then read it back later one.\n\nSome examples:\n\n* Java RMI between trusted peers;\n* Apache Spark uses Java serialization by default for data exchange;\n* Python [`multiprocessing`](https://docs.python.org/3/library/multiprocessing.html) uses pickle under the hood for data exchange between processes.",
+      "createdAt": "2025-04-18T08:37:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2990#issuecomment-2814930687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nyMVx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Unrestricted RCE-capable deserialization is widely used in many applications.\n\nIn requirement\n> such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks.\n\nMaybe too much to the philosophy area, but whatever data you serialize, you always have a list of types you expect to be used from that process.\n\nBut to just fix the problem you pointed out in the issue, then get rid of clients and keep the untrusted data and PR it in.",
+      "createdAt": "2025-04-18T08:53:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2990#issuecomment-2814952817",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oM6HF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I prepared the PR #3024, but the wording feels weird, so please recheck @randomstuff @tghosth ",
+      "createdAt": "2025-04-22T17:05:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2990#issuecomment-2821956037",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-18T07:59:49Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2990,
+  "state": "CLOSED",
+  "title": "1.5.2 / v5.0.be-5.5.3 - Is \"deserialization of data from untrusted clients\" the correct wording?",
+  "url": "https://github.com/OWASP/ASVS/issues/2990"
+}

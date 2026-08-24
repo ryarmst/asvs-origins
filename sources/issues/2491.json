@@ -1,0 +1,176 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "I think we don't have addressed the problem, if server-side client makes request to external party and the external party redirects the request to \"malicious URL\".\r\n\r\nRelated requirement:\r\n> 14.6.1 Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from.\r\n\r\nMy proposal is to have requirement with the idea: server-side components that making requests must not follow redirects till is not intended for that use-case.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6ZDp0b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I think 14.6.1 is more general and may not be logically aware of whether to follow redirects or not.\r\n\r\nI think maybe we we want to work on the other requirement for SSRF:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **[5.2.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v52-sanitization-and-sandboxing)** | [MODIFIED] Verify that the application protects against Server-side Request Forgery (SSRF) attacks, by validating untrusted data against an allowlist of protocols, domains, paths and ports and sanitizing potentially dangerous characters before using the data to call another service. | ✓ | ✓ | ✓ | 918 |\r\n\r\nI would suggest a modification:\r\n\r\n\"_Verify that the application protects against Server-side Request Forgery (SSRF) attacks, by validating untrusted data against an allowlist of protocols, domains, paths and ports and sanitizing potentially dangerous characters before using the data to call another service. **The application should also be configured to not follow redirects when calling the other service unless this is specifically intended functionality.**_\"",
+      "createdAt": "2025-01-02T14:37:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2567871771",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZEa7h",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Although the note is valid here, requirement 5.2.6 is addressing user-input driven request forgery in the application but \"do not follow redirects\" is wider than user-input controlled calls.\r\n\r\nAlso, the defense against \"do not follow redirect\" is about configuration or defensive coding, but not input validation or sanitization. It is not a V5 topic.",
+      "createdAt": "2025-01-02T16:51:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2568072929",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6asTH_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that where the application back-end makes calls to external URLs, it is configured to not follow redirects unless this is specifically intended functionality. This is relevant for any external URL and is not limited to a situation where the URL has been provided by an untrusted user.\n\nThis is the proposed wording, to be added to [14.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x22-V14-Config.md#v146-web-or-application-server-configuration)\n\nAlternative option to edit existing [14.6.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x22-V14-Config.md#v146-web-or-application-server-configuration):\n> [MODIFIED, MOVED FROM 12.6.1] Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from, and that it is configured to not follow redirects unless this is specifically intended functionality.",
+      "createdAt": "2025-01-16T11:45:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2595303935",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6awfFy",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think @elarlang is spot on here. An allow list is validation, but if one of the items on your allow list redirects, that's only a problem if your server-side HTTP \"fetch\" class takes redirects, and to avoid this is about configuring something - and not validation.\n\nSo perhaps split the allow-list from the redirect? Especially when it comes to coding these are solved at different layers.",
+      "createdAt": "2025-01-16T18:17:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2596401522",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6axtXz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thinking more about it, I think we should go with a separate requirement and probably the best option is to use section \"V10.4 Defensive Coding\" for that as proposed by Josh during discussion.\n\n14.6.1 can be done in some waf, proxy, os, application or whatever level, but the \"no not follow redirects\" is the question of the library that makes the request - those are different enough to test and to implement - so let's keep them separately.",
+      "createdAt": "2025-01-16T19:40:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2596722163",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bBfVa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that where the application back-end makes calls to external URLs, it is configured to not follow redirects unless this is specifically intended functionality. This is relevant for any external URL and is not limited to a situation where the URL has been provided by an untrusted user.\n\nSo @elarlang, you are proposing this wording and to add on to 10.4?",
+      "createdAt": "2025-01-19T13:20:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2600858970",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bBr1c",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, although I'm not sure we need this explanation part. But if someone thinks that it is good then it can stay like it is.",
+      "createdAt": "2025-01-19T15:28:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2600910172",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bBxTc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest we drop the explanation and stick with:\n\nVerify that where the application back-end makes calls to external URLs, it is configured to not follow redirects unless it is intended functionality.\n",
+      "createdAt": "2025-01-19T16:30:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2491#issuecomment-2600932572",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-01-02T10:46:11Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    }
+  ],
+  "number": 2491,
+  "state": "CLOSED",
+  "title": "new requirement - do not follow redirects by default for requests made by server-side components",
+  "url": "https://github.com/OWASP/ASVS/issues/2491"
+}

@@ -1,0 +1,249 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "The parent issue with description is #2690 \n\nProposed level changes for requirement in chapter \"V5 Encoding and Sanitization\"\n\nFull list of requirements for the chapter is listed here: https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Encoding-Sanitization.md\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **5.2.2** | [MODIFIED] Verify that data being passed to a potentially dangerous context is sanitized beforehand to enforce safety measures, such as only allowing characters which are safe for this context and trimming input which is too long. | 1 > 2 |\n| **5.2.3** | Verify that the application sanitizes user input before passing to mail systems to protect against SMTP or IMAP injection. | ~~1 > 3~~<br>1 > 2 |\n| **5.2.5** | [MODIFIED] Verify that the application protects against template injection attacks by not allowing templates to be built based on untrusted input. Where there is no alternative, any untrusted input being included dynamically during template creation must be sanitized or strictly validated. | 1 > 2 |\n| **5.2.6** | [MODIFIED] Verify that the application protects against Server-side Request Forgery (SSRF) attacks, by validating untrusted data against an allowlist of protocols, domains, paths and ports and sanitizing potentially dangerous characters before using the data to call another service. | 1 > 2 |\n| **5.2.7** | [MODIFIED] Verify that user-supplied Scalable Vector Graphics (SVG) scriptable content is validated or sanitized to contain only tags and attributes (such as draw graphics) that are safe for the application, e.g., do not contain scripts and foreignObject. | 1 > 2 |\n| **5.2.8** | Verify that the application sanitizes, disables, or sandboxes user-supplied scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode, or similar. | 1 > 2 |\n| **5.2.9** | [ADDED] Verify that the application uses slashes to correctly escape special characters being used in regular expressions to ensure they are not misinterpreted as control characters. | 1 > 2 |\n| **5.2.10** | [ADDED] Verify that regular expressions are free from elements causing exponential backtracking, and ensure untrusted input is sanitized to mitigate ReDoS or Runaway Regex attacks. | 1 > 3 |\n| **5.2.11** | [ADDED] Verify that the application appropriately sanitizes untrusted input before use in Java Naming and Directory Interface (JNDI) queries and that JNDI is configured as securely as possible to prevent JNDI injection attacks. | ~~1 > 3~~<br>1 > 2 |\n| **5.3.7** | Verify that the application protects against LDAP injection vulnerabilities, or that specific security controls to prevent LDAP injection have been implemented. | ~~1 > 3~~<br>1 > 2 |\n| **5.3.10** | [MODIFIED] Verify that the application is protected against XPath injection attacks by using query parameterization or precompiled queries. | ~~1 > 3~~<br>1 > 2 |\n| **5.3.11** | [ADDED] Verify that the application is protected against CSV and Formula Injection. The application should follow the escaping rules defined in RFC4180 2.6 and 2.7 when exporting CSV files. The application should escape special characters including '=', '+', '-', '@' '\\t' (tab) and '\\00' (null character) using a single quote, if they are the first character in a field, when exporting CSV files and other spreadsheet formats such as xls, xlsx, odf. | 1 > 3 |\n| **5.5.3** | [MODIFIED, MERGED FROM 1.5.2] Verify that deserialization with untrusted clients enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure (such as BinaryFormatter) must not be used with untrusted input. | 1 > 2 |\n| **5.5.5** | [MODIFIED, MOVED FROM 13.1.1, LEVEL L1 > L2] Verify that different parsers used in the application for the same data type (e.g., JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks. | 2 > 3 |\n| **5.6.1** | [ADDED] Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization. | 1 > 2 |\n\nInitially proposed changes, but decided to not apply them:\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **5.2.12** | [ADDED] Verify that the application sanitizes content before it is sent to memcache to prevent injection attacks. | ~~2 > 3~~ |\n| **5.3.12** | [ADDED] Verify that LaTeX processors are configured securely (such as not using the \"--shell-escape\" flag) and an allowlist of commands is used to prevent LaTeX injection attacks. | ~~2 > 3~~ |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6ieMbL",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I disagree with making all the injections requirements (5.2.11, 5.2.12, 5.3.7, 5.3.10, 5.3.12) L3.\n\nFor example, in 5.3.12 Latex injection attacks might mean remote shell command execution (if for some reason this is feature is enabled in your latex processor).\n\nSame for 5.5.3, if we accept arbitrary deserialization from untrusted clients, this often/usually mean we give arbitrary code execution power to this client. We can hardly do worse than that. This is really first-layer of defense.",
+      "createdAt": "2025-03-14T21:35:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2725824203",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ieU5M",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree @randomstuff - I think all injection should be level 1. I'm very surprised they are being moved to level 3. These are usually fairly easy attacks that do massive damage.",
+      "createdAt": "2025-03-14T22:03:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2725858892",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igNBT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The current logic for L3 is because those are niche and not that widespread problems. Is it a good qualification, I'm not sure and marked (#2690) it as a topic to rediscuss with Josh.\n\n",
+      "createdAt": "2025-03-15T08:28:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2726350931",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igurC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree many of these are niche, that's totally fair. I just worry that these are relatively easy to exploit and high impact when they exist. ",
+      "createdAt": "2025-03-15T12:28:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2726488770",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ilK_H",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would have thought that remote code execution through unsafe deserialization was a quite common problem. It was even in the [OWASP Top 10 2017](https://owasp.org/www-project-top-ten/2017/A8_2017-Insecure_Deserialization) 😄 \n\nFor the injections requirements (5.2.11, 5.2.12, 5.3.7, 5.3.10, 5.3.12), the fact that the may be niche is currently not part of the reference criterions in #2690 😄. Some of them are not really really niche I think (LDAP injection for example). CSV injection is arguably more esoteric (?) (and proper injection protection in CSV seems undecidable anyway…).",
+      "createdAt": "2025-03-16T21:22:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2727653319",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i25T2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(Collecting my ideas for further discussion)\n\nWhat I would like to revisit:\n* 5.3.7 - ldap 1 > 3\n  * I would like to recommend that LDAP is not used by web application directly. When it is used for authentication, then usually the impact is locking accounts in AD. But, I can not require to not use it.\n  * If there is an LDAP injection for whatever reason, the impact is worth L1\n  * I would like to come back to L1 or L2 with this\n* 5.2.3 imap/smtp\n  * not listed by others, but although it is not that widespread solution, the impact of using trusted solution for sending out emails gives high-impact impersionation and phising vectors\n  * I would like to move it to L2\n\nWhat I would like to keep as they are:\n* 5.2.12 - memcache 2 > 3\n  * the problem is there, but it is not trivial to exploit\n  * I prefer L3 over L2\n* 5.3.10 - xpath 1 > 3\n  * quering from xml - the attack surface is the xml content from where you query, additionally probably can cause denial of service for the parser\n  * for sure not L1, I prefer L3 over L2\n* 5.5.3 deserialization 1 > 2\n  * impact _can_ be big, bit it is not easy to exploit\n  * not in the \"first priority list\", that is why L2\n\nNot so clear cases:\n* 5.2.11 - jndi 1 > 3\n  * yes, we had log4j, and if we take is away - how often you can year about that?\n  * is it L3 because of that? not sure.\n* 5.3.12 - latex 2 > 3\n  * I assume, that most of those who read this requirement first time have a question \"what is latex?\" This has been probably one of those requirements that raised the need for \"niche\" solution\n  * I test daily web application security, and I have not seen latex used by web application yet\n  * if we only watch impact, then it can be L1\n  * if we don't watch the niche argument, then L3 is too much\n\nTo conclude that - in certain circumstances many injection type of vulnerabilities may satisfy the condition \"if this is the only problem in your application, you have a vulnerability\".\n\nKeeping in mind the goal for L1 is \"easier entry\" and as few requirements we can justify, we can make a difference, what should be in the \"first priority\" list and what we can leave out.\n\nIn big picture, I think we should be quite strict with \"syntax layer\", e.g. revisit some requirements proposed to be on L3 for potential downgrade.",
+      "createdAt": "2025-03-18T09:32:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2732299510",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i4TWY",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> [I would like to recommend that LDAP is not used by web application directly. When it is used for authentication, then usually the impact is locking accounts in AD. But, I can not require to not use it.\n\nI like this direction. And in general I think of LDAP as fairly legacy. But I do see LDAP injection in older apps that have decided to use it directly. I support L1 or L2.\n\n> 5.2.12 - memcache 2 > 3 the problem is there, but it is not trivial to exploit.\nI prefer L3 over L2\n\nAgreed, I support either level.\n\n> 5.3.10 - xpath 1 > 3\n\nI rarely see this anymore. L2 or L3 works for me; I think it’s too niche for L1.\n\n> 5.5.3 deserialization 1 > 2 : impact can be big, bit it is not easy to exploit\n\nI agree when it comes to manual testing, but tools like ysoserial, marshalsec, serializekiller and similar have make exploiting these vulnerabilities fairly easy, even for a non-tester like me. And after all these years, I still get a lot of requests to teach this topic which shows developers still struggle with the category. And it’s common in python and important in the world of AI. **I strongly vote for L1 because it’s rising in importance in the upcoming generation of AI systems.**\n\n> 5.2.11 - jndi 1 > 3 \n\nThis is still a big problem in the Java world, but I do support L2 or L3 because it’s not common to all languages.\n\nMy initial reaction was that all injection is L1 but have softened my opinion as I read these reasonable arguments. The only item on this list I absolutely think should be L1 is deserialization, I am flexible on the rest.",
+      "createdAt": "2025-03-18T10:50:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2732668312",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jEXz-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff @jmanico - do we have an agreement on other changes that are not listed in my comment https://github.com/OWASP/ASVS/issues/2694#issuecomment-2732299510 so I can make the \"under discussion list\" a bit shorter - from 17 to 7 - or even less, if we have further agreements after explanations and reasoning behind change proposals.",
+      "createdAt": "2025-03-19T09:11:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2735832318",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jG0uC",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 5.3.10 - xpath 1 > 3\n> \n> quering from xml - the attack surface is the xml content from where you query, additionally probably can cause denial of service for the parser\n\nSome XPath/XSLT processors may allow the usage of additional modules such as:\n\n* `fn:doc ` (https://www.w3.org/TR/xpath-functions/#func-doc)\n  * SSRF\n  * access to filesystem files (with `file://`)\n* some ExPath extensions\n  * http://expath.org/spec/file (`file:write-binary`)\n  * http://expath.org/spec/http-client (`http://expath.org/spec/http-client`)\n",
+      "createdAt": "2025-03-19T12:33:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2736475010",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jI9ol",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussed with Josh and we can re-justify the \"niche\" part.\n\nWe can play a bit with the likelihood/impact aspect when prioritizing between L1 and L2, but we are not able to clarify why LDAP should be L3. If someone doesn't use LDAP, then they'll just ignore the requirement, but if it is in use, it should be in the selection. From L3 those requirements will be lost when they are actually needed.\n\nIf we take niche aspect away, most of the injection attacks must be covered latest with \"basic security\" level (L2), not some \"extra step further\" (L3). This way it is clear and logical for everyone to understand and follow.\n\n> Keeping in mind the goal for L1 is \"easier entry\" and as few requirements we can justify, we can make a difference, what should be in the \"first priority\" list and what we can leave out.\n\nTo conclude that, I apply all discussed requirements in https://github.com/OWASP/ASVS/issues/2694#issuecomment-2732299510 as L2.\n\nSo, thank you for that brainstorm and feedback, @randomstuff  and @jmanico ",
+      "createdAt": "2025-03-19T15:17:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2737035813",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jMhAK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My only concern over these is around deserialization being L1. I am very flexible on the rest.\n\nAnd even so, I really encourage you to charge forward as you see fit Elar so you are not bogged down by this discussion. I trust your instincts here and your arguments for the various levels are sound.",
+      "createdAt": "2025-03-19T20:03:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2694#issuecomment-2737967114",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-03-14T16:20:58Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB1p1gwg",
+      "name": "levels",
+      "description": "",
+      "color": "44DF16"
+    }
+  ],
+  "number": 2694,
+  "state": "CLOSED",
+  "title": "Level changes for V5",
+  "url": "https://github.com/OWASP/ASVS/issues/2694"
+}

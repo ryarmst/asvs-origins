@@ -1,0 +1,333 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nThe topic was raised by Fabio Cerullo in Slack chat.\r\n\r\nCurrent section [V5.5 Deserialization Prevention](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v55-deserialization-prevention) contains requirements which should be moved to \"code review\" category or section, we have V10 and V10.4 for those now.\r\n\r\nThe same applies to V5.4.\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM53XOV_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't agree, I stand by my previous comments [in the thread](https://owasp.slack.com/archives/C06MNF14M/p1709595823045979):\r\n\r\n> _deserialisation vulnerabilities are a result of not handling dangerous input correctly which is why they're there (**in 5.x**)_ \r\n>\r\n> _ultimately this is a problem of bad input which is why I think v5 is the closest compared to other chapters_\r\n>\r\n>  _I would add that I think we would rather have related requirements together rather than being too strict about which chapter they belong to_\r\n\r\n",
+      "createdAt": "2024-03-17T18:50:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2002576767",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM53ZL-d",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree, Josh. But that is, of course, 1/2 that story.\r\n\r\nDeserialization vulnerabilities occur when an application deserializes untrusted data without adequate validation or sanitization. An attacker can manipulate the serialized data to achieve arbitrary code execution, privilege escalation, or denial of service attacks.\r\n\r\nWhile it is true that these vulnerabilities come from improperly handling input (which is often external), it's not just about \"bad input\" but also about how the application processes and uses this input. :D ",
+      "createdAt": "2024-03-18T07:25:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2003091357",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53aUPP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just for brainstorm.\r\n\r\nI think we can take a parallel here with the so-called XSS - input validation MAY give you a defensive effect, but the application needs to guarantee that it can process the data securely.\r\n\r\n**Example 1**:\r\n\r\n  * _V5.5.2 Verify that the application correctly restricts XML parsers to only use the most restrictive configuration possible and to ensure that unsafe features such as resolving external entities are disabled to prevent XML eXternal Entity (XXE) attacks._\r\n\r\nYou may validate the incoming input, but the application is still vulnerable when meeting malicious input. The requirement does not say anything about input validation, but strict configuration to avoid XXE to happen even when not validated input reach to the functionality. The requirement is correct, but the choice of section is questionable.\r\n\r\nThe input validation part for processing XML is covered by other requirement:\r\n\r\n  * _V13.3.1 Verify that XSD schema validation takes place to ensure a properly formed XML document, followed by validation of each input field before any processing of that data takes place._\r\n\r\n\r\n**Example 2**:\r\n\r\n  * _V5.5.4 Verify that when parsing JSON in browsers or JavaScript-based backends, JSON.parse is used to parse the JSON document. Do not use eval() to parse JSON._\r\n\r\nJSON.parse vs eval - you can not fix it with validation. Validation is business logic rule, if you have free text field, you can not disallow anything, you just can not use eval. It's about program code, not input validation.\r\n",
+      "createdAt": "2024-03-18T09:54:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2003387343",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53fNCW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar: many forms of XSS defense MANDATES input validation.\n\n1) User generated HTML is best defended against XSS via HTML validation \non the client. See DomPurify.\n\n2) User constructed URL's that land in active anchor tags are best \ndefended against via URL validation in the client itself, like Angular \nhas built in.\n\nThe whole notion that input validation is not crucial to XSS defense is \nsimply not true, at all.\n\n",
+      "createdAt": "2024-03-18T18:40:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2004668566",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53fenP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, discussion over XSS is a bit offtopic here, but your example 1) is sanitization and 2) URL attribute value really needs validation.\r\n\r\nWe can spin this URL input validation with also - although you expect validated input, we still have Content-Security-Policy to mitigate loading external resources and requirement for accepting only allow-listed URL's to be loaded on the server side:\r\n_V14.7.1 [GRAMMAR, MOVED FROM 12.6.1] Verify that the web or application server is configured with an allow list of resources or systems to which the server can send requests or load data or files from._",
+      "createdAt": "2024-03-18T19:20:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2004740559",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53oQTl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am open to a proposal, I would rather be fast rather than right in this case :)",
+      "createdAt": "2024-03-19T12:23:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2007041253",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM54J5d4",
+      "author": {
+        "login": "kwwall"
+      },
+      "authorAssociation": "NONE",
+      "body": "FWIW, here's my $.02. I agree with @tghosth here. I really don't think these deserialization-related requirements should be moved anymore than any of the other ASVS requirements in Chapter 5 should be moved. If you look at section v10.4, those are on \"_general_ principles\" supporting defensive coding, not specific techniques. If we move  V5.5 to v10.4, then we might as well move then entire Chapter 5 there because certainly input validation is a general defense and I think if anything fits under \"defensive coding\", that does. However, the techniques for deserialization defense are specific in nature. I know, as I've written a few in my day.\r\n\r\nThere are (at least) 2 distinct basic use cases that come into play here:\r\n1. Verifying that serialized input came from a _trusted_ (based on the outcome of your threat model) source, implying that if you can confirm that the serialized input has a) not been tampered with and b) it actually originated from a trusted source (both of which you can do via cryptographic means like digital signatures, HMACs, or AEAD encryption) that you can use the serialized data \"as-is\" with otherwise validating the serialized data (although, I would contend it still is generally a good idea to do so, but that's something to decide in your threat model).\r\n2. Verifying that serialized data that comes from a non-trusted source requires verifying that the data is \"safe to use\". What makes this tricky is that it may have to be verified in special ways because you can't deserialize it and check afterwards (does Chris Frohoff's [ysoserialize](https://github.com/frohoff/ysoserial) ring a bell?). In Java, you can white-list classes know to be \"safe\" (which is much trickier than it looks; I would not attempt it without some threat modeling) using something like [JEP 290](https://openjdk.org/jeps/290).\r\n\r\nSo, I don't think that these defensive techniques used to defend against deserialization vulnerabilities are general enough to move them to any code review section on defensive coding.\r\n\r\nTherefore, I vote to close this issue. Or, if you really wish to continue to discuss it, I'd propose promoting it to a Discussion.",
+      "createdAt": "2024-03-22T20:29:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2015860600",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM54MAmH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is a wise perspective, Daniel.\r\n\r\nAnd I also want to state again that in general input validation is absolutely a critical defense later in many situations and we cannot have secure software without it. 😁 ",
+      "createdAt": "2024-03-23T08:41:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2016414087",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM54MIS2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I gave examples with requirements 5.5.2 and 5.5.4, but I _assume_ I got arguments against those with requirements 5.5.3. If this is the case we don't talk about the same thing and there is no chance to find agreement.\r\n\r\nSo, instead of describing abstract deserialization, I go requirement by requirement. Otherwise, there is a risk of taking one detail or requirement out of context and applying it to all requirements.\r\n\r\n\r\n**5.5.2**\r\n\r\n> Verify that the application correctly restricts XML parsers to only use the most restrictive configuration possible and to ensure that unsafe features such as resolving external entities are disabled to prevent XML eXternal Entity (XXE) attacks.\r\n\r\nIt's about configuration or setup for library. Nothing about processing user input. Fits to V10 or to some configuration hardening. Also fits to \"general principle\" category.\r\n\r\nThe requirement may need an exception \"if not intended by the application for controlled input\" or something.\r\n\r\nLike pointed out previously - the input validation part for processing XML is covered by other requirement:\r\n\r\n> V13.3.1 Verify that XSD schema validation takes place to ensure a properly formed XML document, followed by validation of each input field before any processing of that data takes place.\r\n\r\n\r\n**5.5.3**\r\n\r\n> Verify that deserialization is not used when communicating with untrusted clients. If this is not possible, ensure that deserialization is performed safely, for example, by only allowing a allow-list of object types or not allowing the client to define the object type to deserialize to, in order to prevent deserialization attacks.\r\n\r\nThis requirement needs some work, the construction \"Don't use it! But if you do, do it that way.\" does not make sense as a requirement.\r\n\r\nThis requirement describes handling safely untrusted input when (un)serializing, and fits to V5. I _assume_ this is also the requirement Kevin talked about and focused on.\r\n\r\n\r\n**5.5.4**\r\n\r\n> Verify that when parsing JSON in browsers or JavaScript-based backends, JSON.parse is used to parse the JSON document. Do not use eval() to parse JSON.\r\n\r\nWith or without untrusted input, eval() should never be used instead of JSON.parse(). It fits to V10.4. Also fits to \"general principle\" category.\r\n\r\n\r\n**5.5.5**\r\n\r\n> Verify that different parsers used in the application for the same data type (e.g. JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks.\r\n\r\nIt is about architecture or choice of components to be used in the application. I don't think it belongs to V5. Not sure it belongs to V10.4 either. But fits to \"general principle\" category.\r\n\r\n\r\nComments to @kwwall  https://github.com/OWASP/ASVS/issues/1903#issuecomment-2015860600\r\n\r\n\r\n> So, I don't think that these defensive techniques used to defend against deserialization vulnerabilities are general enough to move them to any code review section on defensive coding.\r\n\r\nThe conclusion from my text above is that there is a disagreement in 3 of 4 related requirements.\r\n\r\n\r\n> Therefore, I vote to close this issue. Or, if you really wish to continue to discuss it, I'd propose promoting it to a Discussion.\r\n\r\nFYI: for ASVS, we use issues to discuss certain categories or requirement-related problems or proposals, Discussions are used for more generic concepts. I'll close it when there is a decision and solution.\r\n\r\nWas my assumption, that your feedback is mainly focused on requirement 5.5.3 correct?\r\n\r\n\r\nComments to @jmanico  https://github.com/OWASP/ASVS/issues/1903#issuecomment-2016414087\r\n\r\n1) It was Kevin.\r\n\r\n2) Stay on topic :)\r\n\r\n",
+      "createdAt": "2024-03-23T10:43:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2016445622",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM540_qt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @kwwall - can we get your other $0.02? :)",
+      "createdAt": "2024-03-29T12:02:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2027158189",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM54_lqA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "A proposal as a conclusion for my comment (https://github.com/OWASP/ASVS/issues/1903#issuecomment-2016445622):\r\n\r\n  * move V5.5.2, V5.5.4 and V5.5.5 to section V10.4 Defensive Coding\r\n  * improve the wording for V5.5.3\r\n    * and need to think about the section/category, as it will be only one requirement for this section.",
+      "createdAt": "2024-04-01T15:19:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2029935232",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55A3Ll",
+      "author": {
+        "login": "kwwall"
+      },
+      "authorAssociation": "NONE",
+      "body": "Just now saw this email assigning me to the ticket. I don't recall seeing a\r\nseparate assignment email from GitHub though. (Or I saw it and forgot\r\nit.)Shouldn't that have happened as well. (Lately have been focusing on\r\nother things like moving my office to a bigger bedroom, doing taxes, and\r\npreparing for a talk at our local OWASP chapter chapter meeting.) All those\r\nthings are behind me so I can take a deeper look. Or @elar can take it\r\ninstead.  Up to you.\r\n\r\n-kevin\r\n\r\nOn Fri, Mar 29, 2024, 8:03 AM Elar Lang ***@***.***> wrote:\r\n\r\n> Assigned #1903 <https://github.com/OWASP/ASVS/issues/1903> to @kwwall\r\n> <https://github.com/kwwall>.\r\n>\r\n> —\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/OWASP/ASVS/issues/1903#event-12294449219>, or\r\n> unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/AAO6PGYHUC55AFJITJCFK53Y2VC7NAVCNFSM6AAAAABE2ESR7KVHI2DSMVQWIX3LMV45UABCJFZXG5LFIV3GK3TUJZXXI2LGNFRWC5DJN5XDWMJSGI4TINBUHEZDCOI>\r\n> .\r\n> You are receiving this because you were assigned.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2024-04-01T18:07:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2030269157",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55YOIn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> A proposal as a conclusion for my comment ([#1903 (comment)](https://github.com/OWASP/ASVS/issues/1903#issuecomment-2016445622)):\r\n> \r\n> * move V5.5.2, V5.5.4 and V5.5.5 to section V10.4 Defensive Coding\r\n> * improve the wording for V5.5.3    \r\n>   * and need to think about the section/category, as it will be only one requirement for this section.\r\n\r\nI am not 100% on board with this but have no strong objection",
+      "createdAt": "2024-04-04T07:27:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2036392487",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM55b9B7",
+      "author": {
+        "login": "kwwall"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have some objections. I will provide details this evening (US/Eastern timezone).",
+      "createdAt": "2024-04-04T14:29:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2037371003",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55gxKv",
+      "author": {
+        "login": "kwwall"
+      },
+      "authorAssociation": "NONE",
+      "body": "**TL;DR Warning**: The **BLUF** for this is -\r\n1. I think there needs to be a _really_ high bar for making changes like these to ASVS 5.0. Minor improvements need not apply for section moving.\r\n2. I think that section V10.4 Defensive Coding is a poor fit to move requirements 5.5.2, 5.5.4, and 5.5.5 and I will explain why. (And BTW, what is it with the ASVS' team's apparent obsession to prefix everything with a bloody 'V'? I think it's understood what we are referring to and it should only be used in cases where it's otherwise ambiguous. It especially annoys me when I see something like \"Chapter V8 Data Protection\". \"Chapter V8\"? Really? Great vegie drink (especially the Spicy V8), but a chapter name? WTF? But I digress.)\r\n\r\nThe rest of this treatise is a detailed explanation of those 2 points.\r\n\r\n\r\nFirst off, I don't think that the OWASP ASVS team has--in the general sense--completely thought through the impact of moving / deleting / changing specific requirements. I look at ASVS as a \"contract\" of sorts (as in an implied programming contract that an SDK will remain stable and as much as possible stay backward compatible.\r\n\r\nNow, one can argue based on semantic versioning, if you are going to change things around, you should do it now in 5.0 as going from 4.0.3 to 5.0 is a change in a \"major\" version allows you to do this. But just because you can, doesn't mean you should.\r\n\r\nWhen ASVS encourages companies to customize ASVS to their own needs, that implies some stability. Consider a company using the current stable release, 4.0.3, uses the identify for (say) v4.0.3-5.5.2 and has that mentioned in several of their wiki pages and maybe in a several dozen Jira tickets that all are referencing (say) a vulnerability template for XXE.\r\n\r\nFast forward to a day after which v5.0 is released and that company starts to update it. Now ideally, the (relatively) easy thing is for them to search for all the \"v.4.0.3-\" and change them to \"v5.0-\" in their wiki pages, they'd be finished. But those using ASVS know it isn't going to be _that_ easy. We realize that some (okay, several) of the 4.0.3 requirements have moved / deleted / or rewritten so that then need to be (re)customized to fit that companies policies and standards. Fair enough. But let's try to minimize the churn here. Because if you don't, the truth is that companies will simply not migrate to 5.0. If will be just like when Apache Struts 2 came out and rather than moving from Apache Struts 1.x to 2.0, the looked for alternatives and most that I've seen end up abandoning Struts 2 in favor of Spring Framework. So hopefully, that can be a lesson-learned for all of us. If you make migration too difficult, people will either forgo updating or look for an alternative. And if that happens, that's a loss for everyone. So OWASP has to have a high bar before making changes to 5.0, and I for one don't think this qualifies. The following paragraphs explains why.\r\n\r\n\r\nSo @elarlang's proposal is:\r\n> * move V5.5.2, V5.5.4 and V5.5.5 to section V10.4 Defensive Coding\r\n> \r\n> * improve the wording for V5.5.3\r\n>   \r\n>   * and need to think about the section/category, as it will be only one requirement for this section.\r\n\r\nI have no objection improving wording for 5.5.3. I do strongly object to moving 5.5.2, 5.5.3, and 5.5.5 to section V10.4 Defensive Coding.\r\n\r\nHere are my reasons. There are several:\r\n1. I'm not sure what section V10.4 is intended to be. It doesn't have a lead-in paragraph explaing it like almost all of our other sections do. So that means it means different things to different people. And perhaps that is part of the reason for the confusion here.\r\n2. Given there is not descriptive paragraph for what section V10.4 intended to be, I take take my personal contextual clues for the chapter that it belongs to, which is Chapter V10 Malicious Code and Insecure Code. Hmmm. I have a problem with that as well.\r\n3. IMO, \"Malicious Code\" should not confuse with the exploit to breach a vulnerability. I think the Control Objects for this chapter rule this out. So that leaves either a payload that is left behind by a successful breach or _intentionally_ malicious code that is planted by an insider or is the result of some upstream supply chain attack like those that have happened on pypi and Node repos. So I think that is a pretty narrow focus. (And I think that what's currently in section V10.2 reinforces that characterization. Context is king here.)\r\n4. Do 5.5.2, 5.5.3, and 5.5.5 fit the \"Insecure Code\" part? It seemingly does. But so do about 90% of the other ASVS requirements, so in reality is doesn't because that category is too broad and allows Chapter V10 to become a dumping ground. And IMO, THAT'S. JUST. WRONG.\r\n5. In https://github.com/OWASP/ASVS/issues/1903#issuecomment-2004740559 @elarlang commented that:\r\n> Well, discussion over XSS is a bit offtopic here, but your example 1) is sanitization and 2) URL attribute value really needs validation.\r\nI might remind you that @jmanico only brought this up because you first brought it up in https://github.com/OWASP/ASVS/issues/1903#issuecomment-2003387343. So I will defend Jim even if it can't remember my name and called me Daniel. :) But my point is, input validation _IS_ \"defensive coding\", so by your argument we should move all input validation related requirements to section V10.4. But we won't because it generally doesn't have much to do with intentionally malicious code (i.e., malware) and generally is ineffective against that.\r\n6. In https://github.com/OWASP/ASVS/issues/1903#issuecomment-2016445622, @elarlang regarding 5.5.2, wrote:\r\n> It's about configuration or setup for library. Nothing about processing user input. Fits to V10 or to some configuration hardening. Also fits to \"general principle\" category.\r\nI completely and absolutely object to this proposition. First off, it is almost all making the right SDK calls to set options in XML related libraries and not just some configuration option that you set. (See the [OWASP XML External Entity Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/XML_External_Entity_Prevention_Cheat_Sheet.html) for examples of what I am referring to.) Secondly, you state that there is \"nothing about processing user input\". That's just not true. If the user attempts to attack your application via XXE is is the attacker's input that is in fact being examined and filtered by these XML libraries.\r\n\r\nAnyhow, by now it is getting late and you're probably all bleary-eyed from reading this.\r\n\r\nJust remember the next time you ask for \"my other $.02\", that my middle name is \"TL;DR\".\r\n\r\nRegards.",
+      "createdAt": "2024-04-05T02:10:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2038633135",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55gxzl",
+      "author": {
+        "login": "kwwall"
+      },
+      "authorAssociation": "NONE",
+      "body": "And just for the official record, for this particular issue, I vote that we **_close_** it with a \"Won't fix\" label (if you have such for ASVS issues). And if you want to reword V5.5.3 for clarification, create that as a separate issue if you need to track it.",
+      "createdAt": "2024-04-05T02:14:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2038635749",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55h9zu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I'm not sure what section V10.4 is intended to be.\r\n\r\n\"I'm not sure what it is but it is for sure not correct\"?\r\n\r\nOeh. I expected some good argument-based feedback, but this is mostly just so off-topic. Basically not too much about the content of the issues or about the reasons to move them, just ranting about the \"V\" prefix and \"don't move them, because I don't like moving things around\".\r\n\r\nPlease, if you going to object something, first try to understand, what is going on in big picture and I'm happy to explain, what and why we have done with the structure.\r\n\r\nV10 (<- yes, with the V prefix), is not fully re-organized yet and I agree it needs more work. We know it.\r\n\r\nWe don't move things around because we can, but because I / we are sure that those belong to better place.\r\n\r\nTo address the problem \"I can not find the v4.0.3 requirement from the same place in the v5.0\" I personally have spent a lot of time to provide mapping and list of changes.\r\n\r\n> And just for the official record, for this particular issue, I vote that we close it with a \"Won't fix\" label (if you have such for ASVS issues). And if you want to reword V5.5.3 for clarification, create that as a separate issue if you need to track it.\r\n\r\nWe got your input, and in general, I already commented on that:\r\n> FYI: for ASVS, we use issues to discuss certain categories or requirement-related problems or proposals, Discussions are used for more generic concepts. **I'll close it when there is a decision and solution.**\r\n\r\nAnd the last one, a bit irony IMO:\r\n\r\n> And if you want to reword V5.5.3 for clarification, **create that as a separate issue if you need to track it**.\r\n\r\nSeparate issue is something to consider, when you want to address other topics than asked in the issue.",
+      "createdAt": "2024-04-05T05:05:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2038947054",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56J5V8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "5.5.3 - Suggestion from Josh and Elar.\r\n\r\n> [MODIFIED, MERGED FROM 1.5.2] Verify that if deserialization is used when communicating with untrusted clients, the input is handled safely. For example, by only allowing a allow-list of object types or not allowing the client to define the object type to deserialize to, in order to prevent deserialization attacks.\r\n\r\nI think that 5.4 should stay here.\r\n\r\nElar, to make decision about moving 5.5.",
+      "createdAt": "2024-04-11T10:45:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2049414524",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM598jrL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Arguments about why to move them and why to not move them are written down. As it's not something urgent to do and nothing dramatic happens when it's not done, I close the issue for now. I'll revisit the topic after the V10 rewrite.",
+      "createdAt": "2024-05-15T16:53:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1903#issuecomment-2113026763",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-03-17T11:51:25Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    }
+  ],
+  "number": 1903,
+  "state": "CLOSED",
+  "title": "move section V5.5 (and V5.4) to V10",
+  "url": "https://github.com/OWASP/ASVS/issues/1903"
+}

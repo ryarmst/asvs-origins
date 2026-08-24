@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asvs-origins.local/schema/issue.schema.json",
+  "title": "ASVS Origins issue record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "number",
+    "url",
+    "title",
+    "state",
+    "created_at",
+    "closed_at",
+    "author",
+    "participants",
+    "labels",
+    "source",
+    "triage",
+    "summaries",
+    "outcome",
+    "requirement_summaries",
+    "unmapped_topics",
+    "external_references",
+    "status"
+  ],
+  "properties": {
+    "kind": { "const": "issue" },
+    "number": { "type": "integer", "minimum": 1 },
+    "url": { "type": "string", "format": "uri" },
+    "title": { "type": "string", "minLength": 1 },
+    "state": { "type": "string", "enum": ["open", "closed"] },
+    "created_at": { "$ref": "common.schema.json#/$defs/isoDateTime" },
+    "closed_at": {
+      "anyOf": [
+        { "$ref": "common.schema.json#/$defs/isoDateTime" },
+        { "type": "null" }
+      ]
+    },
+    "author": { "type": "string", "minLength": 1 },
+    "participants": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot",
+        "snapshot_digest",
+        "history_snapshot",
+        "fetched_at",
+        "comment_count",
+        "has_edits",
+        "previous_digest"
+      ],
+      "properties": {
+        "snapshot": { "type": "string", "minLength": 1 },
+        "snapshot_digest": { "$ref": "common.schema.json#/$defs/sha256Digest" },
+        "history_snapshot": { "type": ["string", "null"] },
+        "fetched_at": { "$ref": "common.schema.json#/$defs/isoDateTime" },
+        "comment_count": { "type": "integer", "minimum": 0 },
+        "has_edits": { "type": "boolean" },
+        "previous_digest": { "type": ["string", "null"] }
+      }
+    },
+    "triage": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["class", "relevance", "estimated_requirement_count", "reason", "provenance"],
+          "properties": {
+            "class": {
+              "type": "string",
+              "enum": [
+                "proposal",
+                "clarification",
+                "defect",
+                "wording",
+                "process",
+                "translation",
+                "meta",
+                "spam"
+              ]
+            },
+            "relevance": {
+              "type": "string",
+              "enum": ["requirement_bearing", "chapter_bearing", "no_requirement"]
+            },
+            "estimated_requirement_count": { "type": "integer", "minimum": 0 },
+            "reason": { "type": "string", "minLength": 1 },
+            "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "summaries": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/Summary" }
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "resulting_changes", "closed_reason", "provenance"],
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": [
+                "unresolved",
+                "accepted",
+                "rejected",
+                "deferred",
+                "merged",
+                "no_action"
+              ]
+            },
+            "resulting_changes": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "closed_reason": { "type": ["string", "null"] },
+            "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+          }
+        },
+        { "type": "null" }
+      ]
+    },
+    "requirement_summaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "requirement_uid",
+          "requirement_id_at_time",
+          "relevance",
+          "body",
+          "decisions",
+          "arguments",
+          "terminology",
+          "open_questions",
+          "outcome",
+          "citations",
+          "provenance"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^rs-[0-9a-f]{6}$" },
+          "requirement_uid": { "type": "string", "pattern": "^req-[0-9a-f]{8}$" },
+          "requirement_id_at_time": { "type": ["string", "null"] },
+          "relevance": {
+            "type": "string",
+            "enum": ["primary", "secondary", "mentioned"]
+          },
+          "body": { "type": "string", "minLength": 1 },
+          "decisions": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/Claim" }
+          },
+          "arguments": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/Claim" }
+          },
+          "terminology": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/Claim" }
+          },
+          "open_questions": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/Claim" }
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "changed",
+              "no_change_yet",
+              "rejected",
+              "deferred",
+              "unresolved"
+            ]
+          },
+          "citations": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/Citation" }
+          },
+          "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+        }
+      }
+    },
+    "unmapped_topics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["topic", "reason", "provenance"],
+        "properties": {
+          "topic": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 },
+          "provenance": { "$ref": "common.schema.json#/$defs/Provenance" }
+        }
+      }
+    },
+    "external_references": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/ExternalReference" }
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage", "last_pipeline_run", "last_human_review", "stale"],
+      "properties": {
+        "coverage": { "$ref": "common.schema.json#/$defs/CoverageStatus" },
+        "last_pipeline_run": {
+          "anyOf": [
+            { "$ref": "common.schema.json#/$defs/isoDateTime" },
+            { "type": "null" }
+          ]
+        },
+        "last_human_review": {
+          "anyOf": [
+            { "$ref": "common.schema.json#/$defs/isoDateTime" },
+            { "type": "null" }
+          ]
+        },
+        "stale": { "type": "boolean" }
+      }
+    }
+  }
+}

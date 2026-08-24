@@ -1,0 +1,463 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirement:\n* V1.5.2 Verify that deserialization with untrusted clients enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure (such as BinaryFormatter) must not be used with untrusted input.\n\n\"deserialization with untrusted clients\" is confusing.\n\nIt [got merged](https://asvs.dev/mapping_v5.0.0_to_v4.0.3.html#v5.0.0-1.5.2)\n* v4.0.3-5.5.3 Verify that deserialization of untrusted data is avoided or is protected in both custom code and third-party libraries (such as JSON, XML and YAML parsers).\n* v4.0.3-1.5.2 Verify that serialization is not used when communicating with untrusted clients. If this is not possible, ensure that adequate integrity controls (and possibly encryption if sensitive data is sent) are enforced to prevent deserialization attacks including object injection.\n\nSo is the actual meaning \n> Verify that before deserialization of data from untrusted clients, the application enforces ..?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6lJelE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think \"deserialization of untrusted data\" makes a lot more sense than \"deserialization of untrusted clients\". I think the current versions are much better than the \"deserialization with untrusted clients\" text which seems confusing.",
+      "createdAt": "2025-04-01T21:26:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2770725188",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lJ535",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposition:\n\n> V1.5.2 Verify that, when deserializing untrusted data, the application enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure (such as BinaryFormatter) must not be used with untrusted input.\n\nAlso maybe it would be worth mentioning that we are alking about a .NET class?\n\n> (such as .NET's BinaryFormatter)",
+      "createdAt": "2025-04-01T22:37:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2770836985",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lLprF",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is also a problem in Java and Python. Python is especially relevant since AI models do a lot of deserialization. I don’t think this requirement should be .NET specific.",
+      "createdAt": "2025-04-02T04:13:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2771294917",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lLqyS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "… so I suggest we rip out the .NET reference or expand it to include some of these:\r\n\r\nJava: ObjectOutputStream, InitialContext\r\nPython: Pickle or Yaml.load (with unsafe loaders)\r\nPHP: unserialize() function\r\n.NET/C#: BinaryFormatter, NetDataContractSerializer, or LosFormatter\r\n\r\n\r\n",
+      "createdAt": "2025-04-02T04:17:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2771299474",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lT2RZ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don’t think this requirement should be .NET specific.\n\nI did not intend to make it .NET specific. I just wanted to clarify that `BinaryFormatter` was from .NET :)\n\nListing dangerous serializations endpoints could be useful but would make the requirement more lengthy:\n\n* Would it be possible to list them in a footnote or something?\n* It we do that, we might end up doing the same thing for a lof of other requirements.",
+      "createdAt": "2025-04-02T18:59:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2773443673",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lYLxs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Deserialization mechanisms that are explicitly defined as insecure (such as BinaryFormatter) must not be used with untrusted input.\n\nDo we actually need this part at all? Seems to be added/updated  https://github.com/OWASP/ASVS/commit/c53b2bc4cb9ce66cf062b3629f25344246e608b3 during the Summit as a result from #2297.",
+      "createdAt": "2025-04-03T06:03:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2774580332",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6laWxi",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "1) Wording\n\nFixed the weird wording.\n\n2) BinaryFormatter\n\nI would like to emphasise the point in the last sentence. We picked BinaryFormatter because of the very stark warnings in Microsoft's documentation. I don't think it is necessary to mention every different deserialization method for every language and I am happy to add text to the section text to explain this.\n\n![Image](https://github.com/user-attachments/assets/4ee9ab44-366a-4a19-8ba1-0eacc2495416)\n\nI would therefore propose the following for the requirement:\n\n\"_Verify that **deserialization of data from** untrusted clients enforces safe input handling, such as using an allowlist of object types or restricting client-defined object types, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure (for example, **.NET** BinaryFormatter) must not be used with untrusted input._\"\n\nAnd maybe add to the section text:\n\n\"_In particular, there are certain methods of deserialization where it has been made clear by the developers that they are insecure and cannot be made safe with untrusted data. One example of this is .NET's BinaryFormatter which has significant warnings attached to it:_\n\n* _https://learn.microsoft.com/en-gb/dotnet/standard/serialization/binaryformatter-security-guide_\n\n_This is just one example and for each mechanism in each language in use, careful due diligence of the mechanism should be performed._\"",
+      "createdAt": "2025-04-03T09:56:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2775149666",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lbLLQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I propose change in:\n> In particular, there are certain methods of deserialization where it has been made clear by the ~~developers~~ **programming language or framework documentation** that they are insecure and cannot be made safe with untrusted data. One example of this is .NET's BinaryFormatter which has significant warnings attached to it:\n\notherwise PR.",
+      "createdAt": "2025-04-03T10:54:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2775364304",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6leu-e",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I feel a little weird and putting in one .NET example and would suggest dropping it or moving to recommendations",
+      "createdAt": "2025-04-03T16:09:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2776297374",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lfIMk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Re-open.\n\nMaybe we can shorten the section text to:\n\n> In particular, there are certain methods of deserialization where it has been made clear by the programming language or framework documentation (such as .NET's BinaryFormatter, and PHP unserialize) that they are insecure and cannot be made safe with untrusted data.\n\nAnd remove the example from the requirement?",
+      "createdAt": "2025-04-03T16:50:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2776400676",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lu0Wb",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, it feels weird to have this one example in the requirement: many other dangerous serialization technologies have been used in many other systems so we might wonder why this one has been picked as an example.\n\nHaving a list of example of dangerous serialization technologies would be nice but feels weird in the requirement. It would be better be found in some \"ASVS companion\" document :)",
+      "createdAt": "2025-04-05T07:50:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2780513691",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lx6Sf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you provide other examples of a serialization technology that is so bad that the documentation looks like this????\n\n![Image](https://github.com/user-attachments/assets/50af7235-440b-4c11-87fc-fe42bf6c9e5f)",
+      "createdAt": "2025-04-06T09:17:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2781324447",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lyCBZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Can you provide other examples of a serialization technology that is so bad that the documentation looks like this????\n\nEasy task: https://www.php.net/manual/en/function.unserialize.php",
+      "createdAt": "2025-04-06T10:39:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2781356121",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lyIbC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Can you provide other examples of a serialization technology that is so bad that the documentation looks like this????\n> \n> Easy task: https://www.php.net/manual/en/function.unserialize.php\n\nDisagree. that just says use it with trusted data, the warning above says don't use it under any circumstances AND they made a breaking change to remove it from the library.",
+      "createdAt": "2025-04-06T11:48:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2781382338",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lyROw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Can you provide other examples of a serialization technology that is so bad that the documentation looks like this????\n\nI don't know .NET BinaryFomatter. However, AFAIU all (or most) the dangerous serialization technologies we have been discussing for this requirement are equivalently dangerous as they can be used for arbitrary code execution. I don't think that the fact that the .NET documentation has a very big warning means that this technology is particularly more dangerous than all the other serialization technologies we have been discussing.\n\n> Disagree. that just says use it with trusted data, the warning above says don't use it under any circumstances AND they made a breaking change to remove it from the library.\n\nWas/is .NET BinaryFomatter really unsafe when used with trusted data?",
+      "createdAt": "2025-04-06T13:14:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2781418416",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lymbf",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think the MS approach is because BinaryFormatter cannot be used safely, but because in practice it was widely used in an unsafe way, leading to numerous major vulns. The Java ecosystem similarly has suffered from essentially endemic deserialization issues. Oracle [has documentation](https://docs.oracle.com/en/java/javase/23/core/addressing-serialization-vulnerabilities.html) where they call out the \"Inherent Dangers of Deserialization\".",
+      "createdAt": "2025-04-06T16:40:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2781505247",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lynT-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think everyone in this thread has good points to make. Are you all ok with removing the .NET reference and move that and other language specific examples to a recommendations section or similar?",
+      "createdAt": "2025-04-06T16:50:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2781508862",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6l1b8y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As per consensus I removed the tech specific examples. I think the [Deserialization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html#deserialization-cheat-sheet) has sufficient tech examples.",
+      "createdAt": "2025-04-07T07:11:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2782248754",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6l1cuy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "and I take partial credit for that 🤣🤣\nhttps://github.com/OWASP/CheatSheetSeries/pull/794/files",
+      "createdAt": "2025-04-07T07:13:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2782251954",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nvq3s",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Yes, it feels weird to have this one example in the requirement: many other dangerous serialization technologies have been used in many other systems so we might wonder why this one has been picked as an example.\n> \n> Having a list of example of dangerous serialization technologies would be nice but feels weird in the requirement. It would be better be found in some \"ASVS companion\" document :)\n\nI think having an ASVS developer companion guide or even another dev standard would be a great idea and I'm sorry I didn't say so sooner.",
+      "createdAt": "2025-04-18T01:17:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2814291436",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nxkYm",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> ASVS developer companion guide\n\nFor reference, this would be a completely separate project with a separate roadmap. It would certainly have to be done after any ASVS release in order to avoid following a moving target. (And this would raise the question of the overlap between this document and other existing projects). ",
+      "createdAt": "2025-04-18T07:27:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2814789158",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n0mRw",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > ASVS developer companion guide\n> \n> For reference, this would be a completely separate project with a separate roadmap. It would certainly have to be done after any ASVS release in order to avoid following a moving target. (And this would raise the question of the overlap between this document and other existing projects). \n\nI think it's overall a great idea and I've taken it to a different thread. Thank you for this suggestion.",
+      "createdAt": "2025-04-18T14:47:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2846#issuecomment-2815583344",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-01T19:00:10Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2846,
+  "state": "CLOSED",
+  "title": "clarification for 1.5.2 / v5.0.be-5.5.3",
+  "url": "https://github.com/OWASP/ASVS/issues/2846"
+}

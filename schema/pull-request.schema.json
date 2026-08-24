@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://asvs-origins.local/schema/pull-request.schema.json",
+  "title": "ASVS Origins pull request record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "number",
+    "url",
+    "title",
+    "state",
+    "created_at",
+    "closed_at",
+    "merged_at",
+    "merge_commit",
+    "author",
+    "participants",
+    "labels",
+    "linked_issues",
+    "source",
+    "triage",
+    "summaries",
+    "outcome",
+    "requirement_summaries",
+    "requirement_changes",
+    "review_arguments",
+    "unmapped_topics",
+    "external_references",
+    "status"
+  ],
+  "properties": {
+    "kind": { "const": "pull_request" },
+    "number": { "type": "integer", "minimum": 1 },
+    "url": { "type": "string", "format": "uri" },
+    "title": { "type": "string", "minLength": 1 },
+    "state": { "type": "string", "enum": ["open", "closed", "merged"] },
+    "created_at": { "$ref": "common.schema.json#/$defs/isoDateTime" },
+    "closed_at": {
+      "anyOf": [
+        { "$ref": "common.schema.json#/$defs/isoDateTime" },
+        { "type": "null" }
+      ]
+    },
+    "merged_at": {
+      "anyOf": [
+        { "$ref": "common.schema.json#/$defs/isoDateTime" },
+        { "type": "null" }
+      ]
+    },
+    "merge_commit": { "type": ["string", "null"] },
+    "author": { "type": "string", "minLength": 1 },
+    "participants": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "linked_issues": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot",
+        "snapshot_digest",
+        "history_snapshot",
+        "fetched_at",
+        "comment_count",
+        "has_edits",
+        "previous_digest"
+      ],
+      "properties": {
+        "snapshot": { "type": ["string", "null"] },
+        "snapshot_digest": {
+          "anyOf": [
+            { "$ref": "common.schema.json#/$defs/sha256Digest" },
+            { "type": "null" }
+          ]
+        },
+        "history_snapshot": { "type": ["string", "null"] },
+        "fetched_at": {
+          "anyOf": [
+            { "$ref": "common.schema.json#/$defs/isoDateTime" },
+            { "type": "null" }
+          ]
+        },
+        "comment_count": { "type": ["integer", "null"], "minimum": 0 },
+        "has_edits": { "type": ["boolean", "null"] },
+        "previous_digest": { "type": ["string", "null"] }
+      }
+    },
+    "triage": { "type": "null" },
+    "summaries": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/Summary" }
+    },
+    "outcome": { "type": "null" },
+    "requirement_summaries": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "requirement_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requirement_uid", "id_at_time", "change", "before", "after"],
+        "properties": {
+          "requirement_uid": { "type": "string", "pattern": "^req-[0-9a-f]{8}$" },
+          "id_at_time": { "type": ["string", "null"] },
+          "change": {
+            "type": "string",
+            "enum": [
+              "added",
+              "removed",
+              "reworded",
+              "moved",
+              "split",
+              "merged",
+              "level_changed",
+              "renumbered"
+            ]
+          },
+          "before": { "type": ["string", "null"] },
+          "after": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "review_arguments": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/Claim" }
+    },
+    "unmapped_topics": {
+      "type": "array"
+    },
+    "external_references": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/ExternalReference" }
+    },
+    "status": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coverage", "last_pipeline_run", "last_human_review", "stale"],
+      "properties": {
+        "coverage": { "$ref": "common.schema.json#/$defs/CoverageStatus" },
+        "last_pipeline_run": {
+          "anyOf": [
+            { "$ref": "common.schema.json#/$defs/isoDateTime" },
+            { "type": "null" }
+          ]
+        },
+        "last_human_review": {
+          "anyOf": [
+            { "$ref": "common.schema.json#/$defs/isoDateTime" },
+            { "type": "null" }
+          ]
+        },
+        "stale": { "type": "boolean" }
+      }
+    }
+  }
+}
