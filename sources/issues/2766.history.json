@@ -1,0 +1,97 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2025-03-23T21:45:20Z",
+      "diff": "Originating from #2409 \n\nI propose the addition of the following requirement:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **50.1.2** | [ADDED] Verify that every HTTP response includes a Cross-Origin-Opener-Policy header to prevent the application from sharing a browsing context group with cross-origin documents, mitigating tabnabbing attacks and potential information leakages. The same-origin directive should be used unless a less secure directive is required to support cross-origin flows. | 2 | |\n\nThis protection mitigates tabnabbing type attacks that can still occur within browsers and it also prevents some forms of XS-Leak type attacks. I think it's most appropriate to include in V50.1 (the section will require an update, but I assume this is on the agenda). It could arguably be included under V50.3."
+    },
+    {
+      "editedAt": "2025-03-24T08:26:30Z",
+      "diff": "Originating from #2409 \n\nI propose the addition of the following requirement:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **50.1.x** | [ADDED] Verify that every HTTP response includes a Cross-Origin-Opener-Policy header to prevent the application from sharing a browsing context group with cross-origin documents, mitigating tabnabbing attacks and potential information leakages. The same-origin directive should be used unless a less secure directive is required to support cross-origin flows. | 2 | |\n\nThis protection mitigates tabnabbing type attacks that can still occur within browsers and it also prevents some forms of XS-Leak type attacks. I think it's most appropriate to include in V50.1 (the section will require an update, but I assume this is on the agenda). It could arguably be included under V50.3."
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2753699644",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> My general thinking is this:\n> \n> * Most apps can likely set a strict policy app-wide without issue\n> * Setting a single header for all responses is likely easiest and least likely to introduce gaps even if it's returned for resources where it has no impact\n\nThis is something they _can_ do, but this is something we _can not_ have a as requirement with justification that this is in our opinion easiest way to implement.\n\nIf there is an HTTP response with `Content-Type: text/plain` and someone reports based on the ASVS requirement that it has now vulnerability due to missing `Cross-Origin-Opener-Policy` headed field, it is a incorrect finding or report.\n\nI think our direction here should be that if the HTTP response contains functionality to provide top-level navigation to cross-origin (or to untrusted?) hosts, including window.open, then to prevent the application from sharing a browsing context group with cross-origin documents, the `Cross-Origin-Opener-Policy` header field must be defined.\n\nFrom the structure point of view, I think it belongs to v5.0.be V50.3 as proposed as one option in the initial issue description. Level for the requirement: 3.",
+          "recorded_at": "2025-03-26T10:27:10Z"
+        },
+        {
+          "body": "> My general thinking is this:\n> \n> * Most apps can likely set a strict policy app-wide without issue\n> * Setting a single header for all responses is likely easiest and least likely to introduce gaps even if it's returned for resources where it has no impact\n\nThis is something they _can_ do, but this is something we _can not_ have a as requirement with justification that this is in our opinion easiest way to implement.\n\nIf there is an HTTP response with `Content-Type: text/plain` and someone reports based on the ASVS requirement that it has now vulnerability due to missing `Cross-Origin-Opener-Policy` headed field, it is a incorrect finding or report.\n\nI think our direction here should be that if the HTTP response contains functionality to provide top-level navigation to cross-origin (or to untrusted?) hosts, including window.open, then to prevent the application from sharing a browsing context group with cross-origin documents, the `Cross-Origin-Opener-Policy` header field must be defined.",
+          "recorded_at": "2025-03-26T09:16:40Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2756638733",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I like @elarlang suggesting noopener attributes.\n\nIt's a bit over-kill, but I tend to suggest rendering user-driven links with `<a target=\"_blank\" rel=\"noopener noreferrer\" href={(userLink)}>…</a>`.\n\nBut I get it per @ryarmst that a good COOP policy provides other forms of XS-Leak defense. Cool. 😎 ",
+          "recorded_at": "2025-03-27T06:33:36Z"
+        },
+        {
+          "body": "I like @elarlang suggestion around noopener attributes.\n\nIt's a bit over-kill, but I tend to suggest rendering user-driven links with `<a target=\"_blank\" rel=\"noopener noreferrer\" href={(userLink)}>…</a>`.\n\nBut I get it per @ryarmst that a good COOP policy provides other forms of XS-Leak defense. Cool. 😎 ",
+          "recorded_at": "2025-03-27T04:30:08Z"
+        },
+        {
+          "body": "I like @elarlang suggestion around noopener attributes.\n\nIt's a bit over-kill, but I tend to suggest rendering user-driven links with `<a target=\"_blank\" rel=\"noopener noreferrer\" href={(userLink)}>…</a>`.\n\nBut I get it per @ryarmst that a good COOP policy provides other forms of XSS defense. Cool. 😎 ",
+          "recorded_at": "2025-03-27T04:29:32Z"
+        },
+        {
+          "body": "I like @elarlang suggestion around noopener attributes.\n\nIt's a bit over-kill, but I tend to suggest rendering user-driven links with `<a target=\"_blank\" rel=\"noopener noreferrer\" href={(userLink)}>…</a>`.",
+          "recorded_at": "2025-03-27T04:27:53Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2756902313",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Even without COOP, process isolation + opaque cross-origin window references prevent access to many properties, including .length, in modern Chromium-based browsers.\n\nFirefox 100+ blocks access to most window properties on cross-origin windows by default.\n\nIn recent Safari versions, reading .length of a cross-origin window returns 0 or throws a security error. Safari also uses intelligent tracking prevention (ITP) and opaque origin windows as default protection. Safari in particular has been super aggressive in stopping this form of attack by default.\n\nSo yes @elarlang this attack no longer works in modern browsers by default.",
+          "recorded_at": "2025-03-27T06:50:59Z"
+        },
+        {
+          "body": "Even without COOP, process isolation + opaque cross-origin window references prevent access to many properties, including .length, in modern Chromium-based browsers.\n\nFirefox 100+ blocks access to most window properties on cross-origin windows by default.\n\nIn recent Safari versions, reading .length of a cross-origin window returns 0 or throws a security error. Safari also uses intelligent tracking prevention (ITP) and opaque origin windows as default protection.\n\nSo yes @elarlang this attack no longer works in modern browsers by default.",
+          "recorded_at": "2025-03-27T06:39:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2757918378",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "No, this attack does work in modern browsers (excluding Firefox and maybe Safari - I haven't tested Safari). \n\n> First, the pre-condition is that the victim needs to accept pop-ups from the malicious domain, which is not allowed by browsers by default.\n\nThis is not entirely true. Sorry, I realize this particular code snippet is out of date. Browsers permit popups resulting from user interaction. Here is an example:\n\n```html\n<button onclick=\"window.open('https://www.attacker.com:5001')\">\n            Open Attacker Site\n</button>\n```\n\n[Here](https://youtu.be/Wy3zjJjlLLM) is a video I just made to demonstrate the behavior in an up-to-date instance of Chrome (default configuration) cross-origin.\n\nFinally, keep in mind that this is just for the \"outgoing\" sharing of a Window object, but the \"incoming\" scenario can also be used for leaks using techniques like frame counting. I have tested also the scenario detailed in the XS Leak reference (not the exact code, but an `open` also triggered by user interaction) and this still works in Chrome as well.",
+          "recorded_at": "2025-03-27T12:54:33Z"
+        },
+        {
+          "body": "No, this attack does work in modern browsers (excluding Firefox and maybe Safari - I haven't tested Safari). \n\n> First, the pre-condition is that the victim needs to accept pop-ups from the malicious domain, which is not allowed by browsers by default.\n\nThis is not entirely true. Sorry, I realize this particular code snippet is out of date. Browsers permit popups resulting from user interaction. Here is an example:\n\n```html\n<button onclick=\"window.open('https://www.attacker.com:5001')\">\n            Open Attacker Site\n</button>\n```\n\n[Here](https://youtu.be/Wy3zjJjlLLM) is a video I just made to demonstrate the behavior in an up-to-date instance of Chrome cross-origin.\n\nFinally, keep in mind that this is just for the \"outgoing\" sharing of a Window object, but the \"incoming\" scenario can also be used for leaks using techniques like frame counting. I have tested also the scenario detailed in the XS Leak reference (not the exact code, but an `open` also triggered by user interaction) and this still works in Chrome as well.",
+          "recorded_at": "2025-03-27T12:53:27Z"
+        },
+        {
+          "body": "No, this attack does work in modern browsers (excluding Firefox and maybe Safari - I haven't tested Safari). \n\n> First, the pre-condition is that the victim needs to accept pop-ups from the malicious domain, which is not allowed by browsers by default.\n\nThis is not entirely true. Sorry, I realize this particular code snippet is out of date. Browsers permit popups resulting from user interaction. Here is an example:\n\n```html\n<button onclick=\"window.open('https://www.attacker.com:5001')\">\n            Open Attacker Site\n</button>\n```\n\n[Here](https://youtu.be/Wy3zjJjlLLM) is a video I just made to demonstrate the behavior in an up-to-date instance of Chrome cross-origin.\n\nFinally, keep in mind that this is just for the \"outgoing\" sharing of a Window object, but the \"incoming\" scenario can also be used for leaks using techniques like frame counting. I have tested also the scenario detailed in the XS Leak snippet and this still works in Chrome as well.",
+          "recorded_at": "2025-03-27T12:47:48Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2817429203",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Hey @ryarmst, how does this look?\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.1.2** | [ADDED] Verify that any HTTP response capable of creating a new browsing context (e.g., uses window.open(), target _blank, or serves top‑level HTML navigations) includes Cross‑Origin‑Opener‑Policy: same-origin or functionally equivalent controls (such as consistently applying rel=noopener to all such navigations). This prevents opener and Frame‑based XS‑Leak as well as tab‑nabbing attacks.. | 3 |\n\n",
+          "recorded_at": "2025-04-21T00:51:51Z"
+        },
+        {
+          "body": "Hey Ryan, how does this look?\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.1.2** | [ADDED] Verify that any HTTP response capable of creating a new browsing context (e.g., uses window.open(), target _blank, or serves top‑level HTML navigations) includes Cross‑Origin‑Opener‑Policy: same-origin or functionally equivalent controls (such as consistently applying rel=noopener to all such navigations). This prevents opener and Frame‑based XS‑Leak as well as tab‑nabbing attacks.. | 3 |\n\n",
+          "recorded_at": "2025-04-21T00:51:41Z"
+        }
+      ]
+    }
+  ]
+}

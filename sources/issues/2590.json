@@ -1,0 +1,473 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "**Chapter text for 2.9:**\n\nCryptographic authentication mechanism include smart cards or FIDO keys, where the user has to plug in or pair the cryptographic device to the computer to complete authentication. The authenticatoin server will send a challenge nonce to the cryptographic device or software, and the device or software calculates a response based upon a securely stored cryptographic key.\n\nThe requirements for single-factor cryptographic devices and software, and multi-factor cryptographic devices and software are the same, as verification of the cryptographic device proves possession of the authentication factor.\n\n**Relevant requirements for this issue:**\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.9.3** | [MODIFIED, LEVEL L2 > L3] Verify that approved cryptographic algorithms are used in the generation, seeding, and verification of the cryptographic keys. | 3 | 327 |\n| **6.5.2** | [ADDED, SPLIT FROM 6.2.5, COVERS 6.2.3, LEVEL L2 > L1] Verify that only secure, authenticated ciphers and modes such as AES with GCM are used. | 1 | 326 |\n\nShould 2.9.3 be merged into 6.5.2? Feels like it is covered there. Is this something that absolutely needs its own separate requirement.\n\n@elarlang @jmanico  @randomstuff ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6dvbzw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "6.5.2 is actually about *encryption* (cipher). Smart card and (I think) FIDO keys use digital signatures so they are not really covered by 6.5.2.\n\nI agree that 2.9.3 *should* be covered by some requirement in 6.x. We don't really have requirements about digital signatures in V6 however.",
+      "createdAt": "2025-02-09T18:19:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2646457584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dwDTD",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think these can absolutely be merged. There is likely a lot of other merging possible in the crypto section. \n\nPerhaps for this one we may want to go this route:\n\n\nVerify that only approved cryptographic algorithms and modes of operation are used for key generation, seeding, verification, and encryption.\n\n\n",
+      "createdAt": "2025-02-09T22:00:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2646619331",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d1nmZ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that only approved cryptographic algorithms and modes of operation are used for key generation, seeding, verification, and encryption.\n\nYes, I agree that such a change makes sense in order to have a more exhaustive coverage of cryptographic topics without delving too deep into the details and without having  huge number of similar requirements.\n\nI think we would have to add \"digital signature\" and \"MAC\" as well (there is \"verification\" in your proposition but not generation of these). It could make sense sense to include Key Exchange as well (which is currently in 6.7.1).",
+      "createdAt": "2025-02-10T14:01:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2648078745",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d1p8c",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So how about:\n\nVerify that only approved cryptographic algorithms and modes of operation are used for key generation, key exchange, seeding, digital signature generation and verification, message authentication code (MAC) generation and verification, and encryption.\n\n",
+      "createdAt": "2025-02-10T14:03:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2648088348",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d17GT",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "That looks OK for me but I think some additional opinion on this would be welcome.\n\nIt might make some existing requirements redundant though.\n\nFor example, if we go this route, would we have to remove 6.7.1? It's partially redundant but provides more context and extra requirements:\n\n> 6.7.1 \t[ADDED] Verify that industry-proven cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. This should prevent attacks on the key establishment process which could lead to adversary-in-the-middle attacks or cryptographic breaks.\n\n***\n\nOne thing, I forgot in my previous comment was that this requirement is currently is \"Encryption Algorithms\". This would have to be renamed info \"Cryptographic Algorithms\" or \"Encryption Mechanisms\".\n",
+      "createdAt": "2025-02-10T14:26:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2648158611",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d248a",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I prefer to reduce the crypto requirements and drop 6.7.1 and others. I think we are getting too deep in the weeds. But I agree that others should chime in first.",
+      "createdAt": "2025-02-10T15:32:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2648411930",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d33jU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK for me. The second part of 6.7.1 is, I think, already mostly covered by requirements in V9.",
+      "createdAt": "2025-02-10T16:56:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2648668372",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4APd",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Actually, we already have:\n\n> 6.2.2 Verify that industry proven or government approved cryptographic algorithms, modes, and libraries are used, instead of custom coded cryptography.\n\nwhich is quite similar to proposed:\n\n> Verify that only approved cryptographic algorithms and modes of operation are used for key generation, key exchange, seeding, digital signature generation and verification, message authentication code (MAC) generation and verification, and encryption.\n\nCan we merge all of this into 6.2.2?\n\n***\n\nActually I would want to split 6.2.2 into:\n\n* one requirement about \"approved algorithms and modes\";\n* move the \"libraries\" topic in a separate requirement.\n\n> 6.2.2 Verify that only approved cryptographic algorithms and modes of operation are used for key generation, key exchange, seeding, digital signature generation and verification, message authentication code (MAC) generation and verification, and encryption.\n>\n> 6.2.X Verify that  industry proven libraries for cryptographic operations.",
+      "createdAt": "2025-02-10T17:09:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2648703965",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4Zri",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Actually I would want to split 6.2.2 into:\n> one requirement about \"approved algorithms and modes\";\n> move the \"libraries\" topic in a separate requirement.\n\nI support this direction. I like it.",
+      "createdAt": "2025-02-10T17:51:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2648808162",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIbvB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Actually, we already have:\n> \n> > 6.2.2 Verify that industry proven or government approved cryptographic algorithms, modes, and libraries are used, instead of custom coded cryptography.\n> \n> which is quite similar to proposed:\n> \n> > Verify that only approved cryptographic algorithms and modes of operation are used for key generation, key exchange, seeding, digital signature generation and verification, message authentication code (MAC) generation and verification, and encryption.\n> \n> Can we merge all of this into 6.2.2?\n> \n> Actually I would want to split 6.2.2 into:\n> \n>     * one requirement about \"approved algorithms and modes\";\n> \n>     * move the \"libraries\" topic in a separate requirement.\n> \n> \n> > 6.2.2 Verify that only approved cryptographic algorithms and modes of operation are used for key generation, key exchange, seeding, digital signature generation and verification, message authentication code (MAC) generation and verification, and encryption.\n> > 6.2.X Verify that  industry proven libraries for cryptographic operations.\n\n@randomstuff does this solve the original problem with 2.9.3 and 6.5.2? I think your direction makes sense but do you have a comprehensive suggested solution here?",
+      "createdAt": "2025-02-12T08:43:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2653010881",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eJE8-",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposition below.\n\nChanges to 6.2:\n\n> 6.2.2 Verify that only approved cryptographic algorithms and modes of operation are used for key generation, key exchange, seeding, digital signature generation and verification, message authentication code (MAC) generation and verification, and encryption.\n>\n> 6.2.X Verify that industry proven implementations are used for cryptographic operations.\n\nThis wording is intended to cover libraries as well as hardware accelerated implementations.\n\nNitpick: \"proven\" sounds like we are talking about formal proof of the implementation, I would try to come up with an alternative wording.\n\n6.5.2 can be removed as it becomes redundant with 6.5.4:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **6.5.2** | [ADDED, SPLIT FROM 6.2.5, COVERS 6.2.3, LEVEL L2 > L1] Verify that only secure, authenticated ciphers and modes such as AES with GCM are used. | 1 | 326 |\n| **6.5.4** | [MODIFIED, MOVED FROM 6.2.7] Verify that encrypted data is protected against unauthorized modification preferably by using an approved authenticated encryption method or by combining an approved encryption method with an approved MAC algorithm. | 3 | 326 |\n\nIn V2.9, we would remove 2.9.3 (redundant with the new 6.2.2) and add a comment:\n\n> See V6.2 and appendix V for considerations about cryptographic algorithms selection, parameters and usage.\n\n\n",
+      "createdAt": "2025-02-12T09:50:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2653179710",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eJJHc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Perhaps add that details in for the implementation requirement?\n\n_6.2.X Verify that industry proven implementations (including libraries and hardware accelerated implementations) are used for cryptographic operations._\n\n",
+      "createdAt": "2025-02-12T09:56:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2653196764",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eQrZ8",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And @randomstuff if you don't like the word proven, how about:\n\n_6.2.X Verify that industry-validated implementations (including libraries and hardware-accelerated implementations) are used for cryptographic operations._",
+      "createdAt": "2025-02-13T00:41:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2655172220",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ex3PT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So having looked a little more at this I am not sure about the direction of putting everything in 6.2.2. I think maybe we want to do the opposite and get 6.2.2 to focus on just the libraries aspect (like Jim's wording above) and cover the algorithm and mode stuff in the requirements we already have for those (6.5.1, 6.5.2, 6.5.4, 6.6.1, 6.7.1). \n\nIf you are still concerned that we are not covering digital signatures then maybe we need to expand 6.7 to cover this as well, such as:\n\n----\n\n## V6.7 Public Key Cryptography\n\nPublic Key Cryptography will be used where it is not possible or not desirable to share a secret key between multiple parties. \n\nAs part of this, there exists a need for approved key exchange mechanisms, such as Diffie-Hellman and Elliptic Curve Diffie-Hellman (ECDH) to ensure that the cryptosystem remains secure against modern threats.\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **6.7.1** | [ADDED] Verify that only approved cryptographic algorithms and modes of operation are used for key generation and seeding, and digital signature generation and verification. | 2 | 327 |\n| **6.7.2** | [ADDED] Verify that industry-proven cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. This should prevent attacks on the key establishment process which could lead to adversary-in-the-middle attacks or cryptographic breaks. | 2 | |\n\n---\n\nThis would then cover 2.9.3 for us.\n\n\nWhat do you think @jmanico @randomstuff ?",
+      "createdAt": "2025-02-17T18:41:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2663871443",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eyzNw",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this general direction. \n\n* So 6.2.2 becomes a L2 requirement _\"Verify that industry-validated implementations (including libraries and hardware-accelerated implementations) are used for cryptographic operations.\"_\n\n* The proposed 6.7.1 looks like two very different things and I'd lean towards splitting it. Basically adding a new requirement to support modern digital sigs, and leaving 6.7.1 mostly as is. (I would suggest dropping the second sentence from 6.7.1 as it is now and move the explanation to the appendix)\n\n* I suggest dropping the section sentence from the proposed 6.7.2 and moving it to the appendix.\n\nI don't have a strong charge for any of this and am happy for others to make the final call.",
+      "createdAt": "2025-02-17T21:40:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2664117104",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ezREx",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes I think, that approach would work.\n\n> I suggest dropping the section sentence from the proposed 6.7.2 and moving it to the appendix.\n\nI would keep \"prevent man-in-the-middle\" in 6.7.2 (or another requirement) as this is important. Without this part, anonymous Diffie-Hellman might be considered 6.7.2-compliant.",
+      "createdAt": "2025-02-17T23:45:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2664239409",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fAN81",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The proposed 6.7.1 looks like two very different things and I'd lean towards splitting it. Basically adding a new requirement to support modern digital sigs, and leaving 6.7.1 mostly as is. (I would suggest dropping the second sentence from 6.7.1 as it is now and move the explanation to the appendix)\n\n@jmanico I don't think I understand, could you provide an example here?",
+      "createdAt": "2025-02-19T06:40:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2667634485",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fASc3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In the meantime, I opened #2624 to handle the 6.2.2 changes. We may want to make more changes to this PR based on Jim's feedback. (Note that I swapped 6.7.1 and 6.7.2 from what I wrote in this issue to try and avoid renumbering).\n\nOnce this PR is addressed and merged, we can then handle the 2.9.3 duplication.",
+      "createdAt": "2025-02-19T06:48:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2667652919",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fGytu",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The current PR is really really solid so I approved it. I also suggest: splitting 6.7.1 and simplifying 6.7.2, but these are not necessary.\n\n6.7.1 | [ADDED] Verify that only approved cryptographic algorithms and modes of operation are used for key generation and seeding. | 2 | 327\n\n6.7.x | [NE] Verify that only approved algorithms are used for digital signature generation and verification. | 2 | 327\n\n6.7.2 | [ADDED] Verify that industry-proven cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. | 2\n\n\n\n\n\n",
+      "createdAt": "2025-02-19T17:50:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2669357934",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fHH7f",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> splitting 6.7.1 and simplifying 6.7.2, but these are not necessary.\n\nyeah based on what @randomstuff said I don't want to change 6.7.2 I see what you are saying for 6.7.1 but I think they are close enough to be together and would rather not split too much.\n\n",
+      "createdAt": "2025-02-19T18:27:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2669444831",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fHJfx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So we now have:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.9.3** | [MODIFIED, LEVEL L2 > L3] Verify that approved cryptographic algorithms are used in the generation, seeding, and verification of the cryptographic keys. | 3 | 327 |\n| **6.7.2** | [ADDED, SPLIT FROM 6.2.2] Verify that only approved cryptographic algorithms and modes of operation are used for key generation and seeding, and digital signature generation and verification. | 2 | 327 |\n\nTo close this out I would propose merging as follows:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.9.3** | [DELETED, MERGED TO 6.7.2] | | |\n| **6.7.2** | [ADDED, SPLIT FROM 6.2.2, MERGED FROM 2.9.3] Verify that only approved cryptographic algorithms and modes of operation are used for key generation and seeding, and digital signature generation and verification. | 2 | 327 |\n\nAny further comments on that?",
+      "createdAt": "2025-02-19T18:30:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2669451249",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fH83e",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "No more comments, this looks like solid work from everyone involved!",
+      "createdAt": "2025-02-19T20:13:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2669661662",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6f6o-g",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2650 to resolve this",
+      "createdAt": "2025-02-25T18:36:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2682949536",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n9mVC",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I was checking 6.7.2 (now 11.6.1) in the context of #2985 and I have some questions:\n\n* Maybe we should clarify the wording to say that \"key generation\" is about \"private key generation\".\n* We currently don't have a list of approved \"cryptographic algorithms […] for key generation and seeding\". Is that a problem? Should we instead split this requirement into:\n  * Verify that only approved cryptographic algorithms are used for digital signature generation and verification.\n  * Verify that only industry-proven algorithms are used for (private) key generation and (private key) seeding. (or is it OK to say approved here?)\n* As for \"modes of operations\", are they really used in the context of \"key generation and seeding, and digital signature generation and verification\"?\n\nAny feedback, @unprovable and @danielcuthbert?",
+      "createdAt": "2025-04-21T08:35:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2817942850",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pMAEn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Moved this discussion to #3061 as it is a little separate to this issue.\n\n",
+      "createdAt": "2025-04-29T11:41:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2590#issuecomment-2838495527",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-02-09T12:32:25Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2590,
+  "state": "CLOSED",
+  "title": "Is 2.9.3 a duplicate of 6.5.2 (crypto algorithms)",
+  "url": "https://github.com/OWASP/ASVS/issues/2590"
+}

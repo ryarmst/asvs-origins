@@ -1,0 +1,43 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2020-10-25T18:31:28Z",
+      "diff": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nCurrent requirement [14.4.6](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x22-V14-Config.md#v144-http-security-headers-requirements)\r\n\r\n> 14.4.6 Verify that a suitable \"Referrer-Policy\" header is included, such as \"no-referrer\" or \"same-origin\".\r\n\r\nFrom this requirement one may interpret, that only `no-referrer` and `same-origin` are accepted values for `Referrer-Policy`, but this is not true. As there are quite many suitable values I think it's not smart to list all of them here.\r\n\r\nSo first recommendation is - to just strip them off:\r\n\r\n> 14.4.6 Verify that a suitable \"Referrer-Policy\" header is included.\r\n\r\nor to add something like \"to avoid sensitive information leakage with `Referer` header\" (and this is meaning, not actual woring for requirement)."
+    },
+    {
+      "editedAt": "2020-10-29T08:30:09Z",
+      "diff": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nCurrent requirement [14.4.6](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x22-V14-Config.md#v144-http-security-headers-requirements)\r\n\r\n> 14.4.6 Verify that a suitable \"Referrer-Policy\" header is included, such as \"no-referrer\" or \"same-origin\".\r\n\r\nFrom this requirement one may interpret, that only `no-referrer` and `same-origin` are accepted values for `Referrer-Policy`, but this is not true. As there are quite many suitable values I think it's not smart to list all of them here.\r\n\r\nSo first recommendation is - to just strip them off:\r\n\r\n> 14.4.6 Verify that a suitable \"Referrer-Policy\" header is included.\r\n\r\nor to add something like \"to avoid sensitive information leakage with `Referer` header\" (and this is meaning, not actual wording for requirement)."
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/861#issuecomment-741902758",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "If we want to have this longer description, then I would add \"untrusted parties\". Using @Sjord proposal as a base:\r\n\r\n> Verify that a suitable \"Referrer-Policy\" header is included, to avoid exposing sensitive information in the URL through the Referer header **to untrusted parties**.\r\n\r\nWhat is danger for me here - if we kind of propose to use `no-referrer`, it's bad for site own monitoring and analytics tools which needs `Referer` header information.\r\n\r\nIn case, when application domain name is \"public\", then I personally recommend to use `strict-origin-when-cross-origin`.\r\n\r\nBut I would like to avoid using any examples in requirement itself, otherwise we are back to the problem why I made this issue.",
+          "recorded_at": "2020-12-09T16:58:59Z"
+        },
+        {
+          "body": "If we want to have this longer description, then I would add \"untrusted parties\". Using @Sjord proposal as a base:\r\n\r\n> Verify that a suitable \"Referrer-Policy\" header is included, to avoid exposing sensitive information in the URL through the Referer header **to untrusted parties**.\r\n\r\nWhat is danger for me here - if we kind of propose to use `no-referrer`, it's bad for site own monitoring and analytics tools which needs `Referer` header information.\r\n\r\nIn case, when application domain name is \"public\", then I personally recommend to use `strict-origin-when-cross-origin`.",
+          "recorded_at": "2020-12-09T16:53:58Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/861#issuecomment-746102749",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> Perhaps a referrer policy only makes sense for pages that load (third-party) resources. An API may not need a referrer policy at all. What a \"suitable\" referrer policy is, depends on what the site serves and whether there is sensitive information in the URL.\r\n\r\nAdditionally to loading resources from another pages (let's say classical HTML page), `Referer` is sent at least:\r\n* on clicking links\r\n* loading \"resources by resources\" - font files from css, something loaded by SVG etc.\r\n\r\n\"Loading resources\" can be result of HTML injection as well - let's say attacker can put some hidden image samewhere and then can track, from what URL which user and when is loading it. Not sending `Referer` in this case does not fix the issue, but gives less information.\r\n\r\nIf you can wordsmith it, we can put it to the requirement, but at the same time I'm afraid it may miss some edge-cases with those restrictions.",
+          "recorded_at": "2021-01-06T20:24:19Z"
+        },
+        {
+          "body": "Additionally to loading resources from another pages (let's say classical HTML page), `Referer` is sent at least:\r\n* on clicking links\r\n* loading \"resources by resources\" - font files from css, something loaded by SVG etc.\r\n\r\nIf you can wordsmith it, we can put it to the requirement, but at the same time I'm afraid it may miss some edge-cases with those restrictions.",
+          "recorded_at": "2020-12-16T10:59:59Z"
+        }
+      ]
+    }
+  ]
+}

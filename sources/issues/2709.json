@@ -1,0 +1,436 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "These seems close enough where they can be merged.\n\n| # | Description | \n| :---: | :--- |\n| **7.4.1** | [MODIFIED] Verify that a generic message is shown when an unexpected or security sensitive error occurs, which does not expose sensitive internal system data such as stack traces, queries, secret keys, and tokens. | \n| **7.4.3** | Verify that a \"last resort\" error handler is defined which will catch all unhandled exceptions. | ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6idwos",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree. Moreover \"last resort\" error handler seems like an implementation detail. The same effect can sometimes be achieved by using a dedicated configuration option in the framework.",
+      "createdAt": "2025-03-14T20:44:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2725710380",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igD-b",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "7.4.1\n* we can watch as defense against unintended technical information leakage - do not show errors to output\n* it is an essential level\n* mostly can be tested via black box\n\n7.4.3\n* is addressing the program code, that all errors should be handled\n* is advanced level of security or not that direct impact from security point of view\n* to be sure, it must be tested via code-review\n\nSo, for me, those are clearly different topics, and I don't think we should merge them.",
+      "createdAt": "2025-03-15T07:45:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2726313883",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igsVT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In most frameworks, the configuration and code mechanisms that catches these unhandled exceptions (for 7.4.3) is the same mechanism that ensures only a generic message is displayed (for 7.4.1).\n\nThis is the case for ASP .NET Core (using Exception Handling Middleware), Java Spring (use of @ControllerAdvice and @ExceptionHandle), Java Struts (via config), Django (DEBUG flag) and others.\n\nThis is the main reason why I'd like to merge these. As a dev, I can do both of these in one shot, always.",
+      "createdAt": "2025-03-15T12:07:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2726479187",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ihw2o",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is the main reason why I'd like to merge these. As a dev, I can do both of these in one shot, always.\n\nNot always, but in your listed frameworks. If someone builds anything from scratch, it must be taken into account. One is mostly configuration questions, and the other is program code architecture questions (which, in your examples, are handled by listed frameworks).",
+      "createdAt": "2025-03-15T16:11:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2726759848",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ii0pr",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "All I need to do in custom code is have a high level try/catch block around request processing and catch unhandled exceptions. This is sincerely straight forward. It’s only messy if you have a custom and sloppy code base that is poorly structured.\r\n\r\nI don’t want to push you too hard Elar and I mean no disrespect. But a few of us think merging this is ok and even after reviewing your comments carefully, I still think merging is the best move.\r\n\r\n",
+      "createdAt": "2025-03-15T22:38:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2727037547",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ikpMp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We already deleted in 7.4.2 in #2627 / #2642 because it wasn't different enough from 7.4.3.\n\nThe way I see it, from an implementation perspective there are two different things going on here.\n\nIn 7.4.1, the developer always needs to have in mind what error message is going to be returned when handling an exception.\n\nFor example, a couple of weeks ago I found code returning a full Axios error object in the exception handler which contained a whole load of data including a secret key and a session token. Just providing the error message and not the full object would have been enough detail without being too detailed. Developers would want to handle their own exceptions and not defer to a last resort handler or even a single, central handler every time so I don't think a central mechanism would have been appropriate in this case. Instead, the aim is for the developer to have this sort of issue in mind when writing their exception handling code.\n\n7.4.3 is conceptually a different problem. What happens if the dev forgets error handling? What happens if something happens that the dev does not anticipate? In this case, we need a last resort mechanism that would handle uncaught exceptions gracefully. To @randomstuff's point, maybe the wording could be more broadly applicable but it feels like a slightly different problem.\n\nTo @jmanico's specific point, it feels like these two requirements *could* be handled together by developers, but if they are insisting on non-centralized exception handling, which seems like a design choice rather than a security issue, then we need both requirements in order to handle both issues.",
+      "createdAt": "2025-03-16T15:59:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2727514921",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iky6c",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Josh, I hear you, but I still think merging is the right move because it simplifies security. A unified error handling mechanism means fewer blind spots, less complexity, and a much more consistent security posture.\n\n**Less Dev Work, Fewer Mistakes** – One mechanism, one place to verify, one secure path. The more scattered the handling, the more likely devs miss something.\n\n**Catches Everything** – Everything funnels through the same controlled process. That’s much stronger security.\n\n**Easier to Test & Audit** – A single, structured approach makes it easier to test, automate, and prove security is solid.\n\nMost frameworks already do this in one shot, and even in custom code, a high-level try/catch around request processing achieves both goals cleanly. More separation just invites inconsistency. The only time I have seen this as a challenge is low quality PHP applications where each endpoint is a separate file, and that went out of style 15 years ago.\n\nAnd really, if you both think strongly about this, I can let it go. But I really feel the merge is better for a lot of reasons.",
+      "createdAt": "2025-03-16T17:30:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2727554716",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ik0QC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As I wrote in https://github.com/OWASP/ASVS/issues/2709#issuecomment-2726313883, displaying error messages and catch all are different test-caseses from verifying point of view and must be in a separate requirements only because of that.\n\n2nd blocker is different levels - (based on proposals) 7.4.1 is L2, and 7.4.3 is L3. I don't want to merge the content 7.4.3 into 7.4.1 to require it from L2.\n\nI don't argue how someone implements it or it is supported or not supported by frameworks, I just explain why those 2 need to be in a separate requirements in ASVS.\n\nIt is \"less damage\" to remove 7.4.3 compared to merge it 7.4.1.",
+      "createdAt": "2025-03-16T17:42:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2727560194",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ioVa9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the underlying problem here is that 7.4.3 does not describe why it exists and what precise security problem it solves, and then everyone can interpret it differently.\n\nIn v.4.0.3 we had requirements written as:\n* V7.4.2 Verify that exception handling (or a functional equivalent) is used across the codebase to account for expected and unexpected error conditions.\n* V7.4.3 Verify that a \"last resort\" error handler is defined which will catch all unhandled exceptions.\n\nWe deleted 7.4.2 as \"DELETED, INSUFFICIENT IMPACT\".\n\nI think the combined point for those 2 is: \"to not lose error details for logging and monitoring\" - this message should be added to 7.4.3.",
+      "createdAt": "2025-03-17T07:50:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2728482493",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1XKc",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Josh, I hear you, but I still think merging is the right move because it simplifies security. A unified error handling mechanism means fewer blind spots, less complexity, and a much more consistent security posture.\n\nI agree that having a centralised and unified error handling mechanism is a better way of approaching this but I don't think we can mandate it as the **only** way of having a secure app. \n\nWe therefore need to provide the two requirements separately to handle a situation where an application does not do this in a centralised way. This is important for both developers when implementing and also when verifying.\n\nWe should however mention this in the recommendations section.\n\n> I think the underlying problem here is that 7.4.3 does not describe why it exists and what precise security problem it solves, and then everyone can interpret it differently.\n\nMaybe we fix this with:\n\n\"_Verify that a \"last resort\" error handler is defined which will catch all unhandled exceptions to avoid unexpected crashes **which could lead to loss of availability or disclosure of sensitive crash data**._\"\n\n",
+      "createdAt": "2025-03-18T07:05:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2731897500",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1kE_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that a \"last resort\" error handler is defined which will catch all unhandled exceptions to avoid unexpected crashes which could lead to loss of availability or disclosure of sensitive crash data.\n\n\"loss of availability\" or \"disclosure of sensitive crash data\" - I don't think any of them are correct for this requirement. Disclosure of sensitive data is already covered by 7.4.1 and the point was to make them clearly different. \"Loss of availability\" already happened if the error in the program code happened. With catch all we don't fix that. The only thing we can achieve with that is to handle errors in a systematic and expected way to be able to collect information and evidence from the error itself.",
+      "createdAt": "2025-03-18T07:30:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2731950399",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1plL",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Disclosure of sensitive data is already covered by 7.4.1\n\n7.4.1 in principle covers situations that were expected, 7.4.3 refers to a situation which was not expected.\n\n> \"Loss of availability\" already happened if the error in the program code happened.\n\n\"Loss of availability\" here refers to the difference between an exception being caught and an exception not being caught which crashes out the whole application process",
+      "createdAt": "2025-03-18T07:41:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2731972939",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1sGp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Disclosure of sensitive data is already covered by 7.4.1\n> \n> 7.4.1 in principle covers situations that were expected, 7.4.3 refers to a situation which was not expected.\n\nIf I got confused, there is quite high change it happens with others as well.\n\n> > \"Loss of availability\" already happened if the error in the program code happened.\n> \n> \"Loss of availability\" here refers to the difference between an exception being caught and an exception not being caught which crashes out the whole application process\n\nWe also have a requirement:\n> V7.4.5 Verify that the application fails gracefully and securely, including when an exception occurs, preventing fail open conditions such as processing a transaction despite errors resulting from validation logic.\n\nIt just proves, that we have at least 3 different interpretations for 7.4.3 :)",
+      "createdAt": "2025-03-18T07:46:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2731983273",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i2kQo",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So what if we merge 7.4.5 into 7.4.3?\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **7.4.3** | [MODIFIED, MERGED FROM 4.1.5, LEVEL L1 > L2] Verify that the application fails gracefully and securely, including when an exception occurs, preventing fail open conditions such as processing a transaction despite errors resulting from validation logic. This should include having some sort of \"last resort\" error handling logic to catch unhandled exceptions. | 2 | 431 |",
+      "createdAt": "2025-03-18T09:06:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2732213288",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i30bw",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> 7.4.1 in principle covers situations that were expected, 7.4.3 refers to a situation which was not expected.\n\nI think this is a very important distinction. I like the merge suggestion from Josh as well.\n\nLeaked stack traces and similar have accidentally leaked keys, passwords and other system internals that can only be stopped from specialized catch all exception handling.",
+      "createdAt": "2025-03-18T10:14:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2732541680",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i4NXu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I feel like we are replacing one problem with another one here. I'll think about it and come back into this (e.g. it is not PR ready)",
+      "createdAt": "2025-03-18T10:45:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2732643822",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i4uvd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And one more thing. I know I've pushed this argument, but I do not think it's so important where it really needs to continue being debated. If you really want to keep these separate, I fully support it. I don't want to waste your time by pushing something that is really ok either way. \n\nSo if you prefer to close this out so you can focus on more important things, I fully support that Elar.",
+      "createdAt": "2025-03-18T11:12:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2732780509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i44Rl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can something be merged or not is secondary question at the moment - first we need to map, why those requirements exists and what precise security problem those addresses. At the moment basically everyone of us found separate interpretation for requirement 7.4.3. If no one can understand why this requirement exists, then should it exist at all :) But as I said, I'll come back to that.",
+      "createdAt": "2025-03-18T11:20:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2732819557",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i47z1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Fair point. :) I just want to make sure that I am not forcing your hand to debate something that is not terribly important while you can be working on other more important things. If you wish to close this out after thinking it over, I fully support that.\n",
+      "createdAt": "2025-03-18T11:23:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2732834037",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i-9a2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Disclosure of sensitive data is already covered by 7.4.1\n> \n> 7.4.1 in principle covers situations **that were expected**, 7.4.3 refers to a situation which was not expected.\n\nCurrent 7.4.1 stands for\n\n> 7.4.1 Verify that a generic message is shown when **an unexpected** or security sensitive error occurs, which does not expose sensitive internal system data such as stack traces, queries, secret keys, and tokens.\n\nAnyhow, we don't need more than 1 requirement to say \"do not leak technical information via error messages\". In a way this requirement can be watched as debug or development mode on and can also fit to \"V14.3 Unintended Information Leakage\".\n\nSo, the goal for 7.4.1: do not expose sensitive internal system data on error situation.\n\n---\n\n7.4.5\n\nAs it stands\n> V7.4.5 Verify that the application fails gracefully and securely, including when an exception occurs, preventing fail open conditions such as processing a transaction despite errors resulting from validation logic.\n\nIn v4.0.3 it was:\n> v4.0.3-4.1.5 Verify that access controls fail securely including when an exception occurs.\n\nIt basically says, that if there security control returns \"false\" such as authorization control OR un expected error happens, application must stop processing anything further.\n\nThe situation \"security control returns false\" does not feel like error handling as such, but maybe someone defines it differently than me.\n\n---\n\n7.4.3\n\nAs it stands\n> V7.4.3 Verify that a \"last resort\" error handler is defined which will catch all unhandled exceptions.\n\nI think this requirement may be originated from \"import CWE-s as requirements\" era.\n\n[CWE-431](https://cwe.mitre.org/data/definitions/431.html): Missing Handler\n\nDescription: _When an exception is thrown and not caught, the process has given up an opportunity to decide if a given failure or event is worth a change in execution._\n\nSo it kind of matches with my interpretation in https://github.com/OWASP/ASVS/issues/2709#issuecomment-2728482493: \n\n> I think the combined point for those 2 is: \"to not lose error details for logging and monitoring\" - this message should be added to 7.4.3.\n\nThis is also my proposal: we need to define the goal for 7.4.3 - catch all to not lose error messages and details. In other words, if an error happens, the application must produce meaningful information into logs for further investigation.\n\nAnd it is L3 area.\n",
+      "createdAt": "2025-03-18T18:56:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2734413494",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jIUZz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "---\n\n> 7.4.5\n> \n> As it stands\n> > V7.4.5 Verify that the application fails gracefully and securely, including when an exception occurs, preventing fail open conditions such as processing a transaction despite errors resulting from validation logic.\n> \n> In v4.0.3 it was:\n> > v4.0.3-4.1.5 Verify that access controls fail securely including when an exception occurs.\n> \n> It basically says, that if there security control returns \"false\" such as authorization control OR un expected error happens, application must stop processing anything further.\n> \n> The situation \"security control returns false\" does not feel like error handling as such, but maybe someone defines it differently than me.\n\nSo the idea of denying by default or failing secure, especially in access control is sort of an error handling thing but it is also about having safe programme flow. It is an important principle but I think it is hard to see it as a testable requirement. \n\nThat is one of the reasons I feel like merging it with 7.4.3 would help.\n\n---\n\n> This is also my proposal: we need to define the goal for 7.4.3 - catch all to not lose error messages and details. In other words, if an error happens, the application must produce meaningful information into logs for further investigation.\n\nI think this is one goal but I think the other goal is that the point of error handling is that an error does not take down the entire app process, i.e. an unhandled error could bring down the process leading to denial of service.",
+      "createdAt": "2025-03-19T14:32:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2736866931",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jJPID",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > This is also my proposal: we need to define the goal for 7.4.3 - catch all to not lose error messages and details. In other words, if an error happens, the application must produce meaningful information into logs for further investigation.\n\n> I think this is one goal but I think the other goal is that the point of error handling is that an error does not take down the entire app process, i.e. an unhandled error could bring down the process leading to denial of service.\n\nThis should be applied into V7.4.4 if to widen the scope from connection failure to general failure?",
+      "createdAt": "2025-03-19T15:38:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2737107459",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jJXLa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe but I feel like 7.4.4 is talking about a specific case.",
+      "createdAt": "2025-03-19T15:46:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2737140442",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jVGF4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussed with Elar, we think the best option for now is to add some clarification to 7.4.3 and move on for now.",
+      "createdAt": "2025-03-20T12:02:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2709#issuecomment-2740216184",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-03-14T19:30:11Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABJFMusA",
+      "name": "V16 (prev V7)",
+      "description": "Temporary label for grouping logging related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    }
+  ],
+  "number": 2709,
+  "state": "CLOSED",
+  "title": "Clarification for 7.4.3 and/or potential merge to other 7.4 requirement",
+  "url": "https://github.com/OWASP/ASVS/issues/2709"
+}

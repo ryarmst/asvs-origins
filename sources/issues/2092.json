@@ -1,0 +1,569 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nUpdate: skip the long issue and jump to https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420404327\r\n\r\n---\r\n\r\nUpdate: the requirement is moved to 51.2.15\r\n\r\nCurrent requirement ~~51.2.2~~ 51.2.15:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.15** | [ADDED] Verify that the replay of authorization codes into the authorization response is prevented either by using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. The PKCE challenge or OpenID Connect \"nonce\" must be transaction-specific and securely bound to the client and the user agent in which the transaction was started. | ✓ | ✓ | ✓ |\r\n\r\n\r\nI'm quite confused, what is to goal for the requirement.\r\n\r\nIt starts with a claim to prevent authorization code replay into the authorization response - authorization code in authorization response is handled by the client and this is basically CSRF vector to prevent, it is covered now in 51.3.5:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.3.5** | [ADDED] Verify that, if the code flow is used, the OAuth Client has protection against CSRF attacks which trigger token requests, either by using PKCE functionality or checking the state parameter that was sent in the authorization request. | ✓ | ✓ | ✓ |\r\n\r\n\r\nFurther, it requires validating the nonce in ID token, but this is to mitigate ID token replay attack to (OIDC) the client, but for that we have also a separate requirement (at the moment it is in wrong section, but this is another topic to discuss):\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.3.2** | [ADDED] Verify that the Client is using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. | ✓ | ✓ | ✓ |\r\n\r\nFor me the requirement 51.2.15 seems to mix different things. Or did I miss the actual point for the requirement?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Mv7lX",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In the way I understood it, `51.2.2` is for ensuring that when you use PKCE challenge or OIDC nonce they should be transaction-specific to prevent replay of these codes as well. \r\n\r\nNo, `51.3.5` does not re-use those authorization codes as a CSRF protection. I haven't seen those authorization codes being used to prevent the CSRF vector. Maybe someone else has more knowledge about it from the community who can help us about this, but as far as I know that is not what those authorization codes help prevent.  \r\n\r\nAlthough, I believe you are correct that the way `51.3.2` is written it is already handled in 51.2.2. We can remove `51.3.2` then since `51.2.2` handles it. ",
+      "createdAt": "2024-09-19T15:41:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2361375063",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M3s31",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ack, the focus is \"transaction-specific\".\r\n\r\nAdditionally, @randomstuff asked a question in https://github.com/OWASP/ASVS/issues/2041#issuecomment-2354018055\r\n\r\n> Is there any need to say the the nonce must be a unpredictable?\r\n\r\nI think we need to reword it what problem the requirement solves and avoid duplication with other requirements.",
+      "createdAt": "2024-09-20T10:37:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2363411957",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NR0b0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff @TobiasAhnoff - any ideas how to solve this?",
+      "createdAt": "2024-09-24T05:58:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2370258676",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NUzmw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Although, I believe you are correct that the way 51.3.2 is written it is already handled in 51.2.2. We can remove 51.3.2 then since 51.2.2 handles it.\r\n\r\nYes, I agree. They are redundant.",
+      "createdAt": "2024-09-24T11:49:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2371041712",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NU4eQ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Is there any need to say the the nonce must be a unpredictable?\r\n\r\nI think, this should probably be somewhere and I don't believe it's currently really states **but** it is really more general than OAuth and should probably be somewhere else as well.\r\n\r\nThis is related to:\r\n\r\n> 6.3.1, Verify that all random numbers, random file names, and random strings are generated using a cryptographically-secure pseudo-random number generator (CSPRNG) when these random values are intended to be not guessable by an attacker.\r\n>\r\n> 6.3.3, Verify that random numbers are created with proper entropy even when the application is under heavy load, or that the application degrades gracefully in such circumstances.\r\n\r\n\"sufficient entropy\" is somewhat left to interpretation. OAuth requires at least 128 bits and recommends 160 bits of entropy for tokens:\r\n\r\n> The probability of an attacker guessing generated tokens (and other credentials not intended for handling by end users) MUST be less than or equal to 2^(-128) and SHOULD be less than or equal to 2^(-160).\r\n\r\nNote that the the wording in the the OAuth 2.1 draft is more general than the requirement in 6.3.3 as it applies to random/opaque tokens **and** for signature/MAC tokens.\r\n\r\nSo the questions are:\r\n\r\n* Is there any need for an explicit mention of this in the OAuth chapter?\r\n* Or it it enough to have it stated in the Crytpography chapter?\r\n* Is the current requirements in the cryptography chapter enough?\r\n",
+      "createdAt": "2024-09-24T11:59:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2371061648",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NVJiH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the randomness is well covered in V6 (and if it is not, for general requirements it should be covered there)\r\n\r\n> Ack, the focus is \"transaction-specific\".\r\n\r\nI think the main focus should be \"transaction-specific\" to mitigate replay attacks.",
+      "createdAt": "2024-09-24T12:27:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2371131527",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N7vrT",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A thing to note is that this is part of the \"OAuth Authorization Server\", not the \"OIDC OpenID Provider\" section, so OIDC details should be avoided in the requirement, split, moved to OIDC or should we mix OAuth and OIDC in this case?\r\n\r\nFor OAuth we could have\r\n\r\n> Verify that the replay of authorization codes into the authorization response is prevented by using PKCE with a transaction-specific challenge which is securely bound to the client and the user agent in which the transaction was started.\r\n\r\nFor OIDC,, given that it is clear that all OAuth requirements also applies to OIDC  it could be:\r\n\r\n> Verify that the replay of authorization codes into the authorization response is prevented either by using OAuth PKCE or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. The OpenID Connect \"nonce\" must be transaction-specific in the same way as the PKCE challenge.\r\n\r\nor if we mix, like suggested above\r\n\r\n> Verify that the replay of authorization codes into the authorization response is prevented either by using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. The PKCE challenge or OpenID Connect \"nonce\" must be transaction-specific and securely bound to the client and the user agent in which the transaction was started. \r\n\r\nI think none of them is perfect, but I think it is good to keep OIDC details separate to make it clear that OAuth can be used without OIDC and ID Tokens.\r\n",
+      "createdAt": "2024-09-29T07:56:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2381249235",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N_kLS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think my initial comment applies to the last proposal as well. I would not like to mix and duplicate ID token replay (51.3.2 (it is in incorrect section)) and OAuth client CSRF (51.3.5), additionally general PKCE requirement.\r\n\r\nProbably 2 directions from here:\r\n* mention transaction-specific in each related requirement separately\r\n* write one requirement to declare a \"transaction-specific\" problem.\r\n\r\nIn a way, if we have requirements like \"Verify that, if the code flow is used, the OAuth Client has protection against CSRF attacks\", then if the cause of not having the defense is the missing transaction-specific token, it is still the same requirement and the same problem, it is just finding the technical detail in it.",
+      "createdAt": "2024-09-30T06:49:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2382250706",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O0EJL",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "They way I see it (based on https://github.com/OWASP/ASVS/pull/2122/files) this is addressed by \r\n\r\n> 51.2.3\r\n> Verify that, if the code grant is used, the authorization server mitigates authorization code interception attacks by requiring PKCE. For authorization requests, the authorization server must require a valid code_challenge value and must not accept code_challenge_method 'plain'. For a token request, it must require validation of the \"code_verifier\" parameter.\r\n\r\nAnd for OIDC\r\n\r\n>51.5.1\r\n>Verify that the Client (as the Relying Party) mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider (in OAuth2 refereed to as the Authorization request sent to the Authorization Server)\r\n\r\nSo 51.2.2, 51.3.5 and 51.3.2 can be removed since they are addressed/replaced by 51.2.3 and 51.5.1 (and randomness is well covered in V6), maybe add CSRF for 51.2.3?\r\n> Verify that, if the code grant is used, the authorization server mitigates authorization code interception **and CSRF** attacks by requiring PKCE. For authorization requests, the authorization server must require a valid code_challenge value and must not accept code_challenge_method 'plain'. For a token request, it must require validation of the \"code_verifier\" parameter.\r\n\r\nOr have I confused latest numbering? ",
+      "createdAt": "2024-10-07T06:29:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2396013131",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O4-sC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We need to do de-duplication round later, I have not opened issues for those yet, as the first goal is to get all requirements in.\r\n\r\nFor this, the goal seems to be \"transaction-specific\", all other parts are too mixed here and are covered somewhere else.",
+      "createdAt": "2024-10-07T15:50:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2397301506",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_Vqs",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Ok, then I think this issue needs to suggest one requirement for OAuth and one for OIDC, perhaps this could work?\r\n\r\nOAuth\r\n\r\n> Verify that the replay of authorization codes into the authorization response is prevented by using PKCE with a transaction-specific challenge which is securely bound to the client and the user agent in which the transaction was started.\r\n\r\nOIDC (given that it is clear that all OAuth requirements also applies to OIDC)\r\n\r\n> Verify that, if OAuth PKCE is not used, the replay of authorization codes into the authorization response is prevented by verifying the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. The OpenID Connect \"nonce\" must be transaction-specific in the same way as the OAuth PKCE challenge.\r\n",
+      "createdAt": "2024-10-08T06:34:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2398968492",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRHBn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As we have some renumbering and modifications, then I'll recheck everything and make an update.\r\n\r\nThe requirement is now moved to 51.2.15:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.15** | [ADDED] Verify that the replay of authorization codes into the authorization response is prevented either by using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. The PKCE challenge or OpenID Connect \"nonce\" must be transaction-specific and securely bound to the client and the user agent in which the transaction was started. | ✓ | ✓ | ✓ |\r\n\r\n\r\n> Verify that the replay of authorization codes into the authorization response is prevented either by using the PKCE flow ...\r\n\r\nI tried to understand, from where the \"replay codes into the authorization response\" comes, because for me it does not make too much sense. Potential [resource](https://ldapwiki.com/wiki/Wiki.jsp?page=Authorization%20Code%20Flow).\r\n\r\nThe \"authorization code response\" comes from the AS, but in reality, it is a request from AS to the client.\r\n\r\nAuthorization code replay can happen:\r\n* resend authorization code to the OAuth client, that can send it to the AS with the token request\r\n* doing directly token request to the AS\r\n\r\nAgainst \"replay\" the actual defense is that the authorization code is \"one time use\", and it is covered by 51.2.1.\r\n\r\nFrom the defined attack vector to mitigate \"authroization code replay\" point of view, the PKCE seems offtopic here. The PKCE is against authorization code interception/injection.\r\n\r\n > ... or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token.\r\n\r\nThis part is talking about ID token and the 'nonce' claim, that is defense against ID token replay attack and it is covered by 51.4.1.\r\n\r\nFrom the authorization code replay attack point of view, it seems also offtopic.\r\n\r\n\r\n> The PKCE challenge or OpenID Connect \"nonce\" must be transaction-specific and securely bound to the client and the user agent in which the transaction was started.\r\n\r\nThis is most likely from [here](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#section-2.1.1-3) and is also meant against authorization code interception/injection attacks.\r\n\r\nFrom the authorization code replay attack point of view, being transaction-specific provides defense against replay, but it then requires, that AS keeps the list of already used PKCE and nonce values (that is actually recommended to do for AS: _Authorization servers are encouraged to make a reasonable effort at detecting and preventing the use of constant PKCE challenge or OpenID Connect nonce values._).\r\n\r\n\"transaction-specific\" part is not covered as a separate requirement.\r\n\r\nSo, TLDR - the requirement was actually against authorization code interception/injection attacks.\r\n\r\n---\r\n\r\n## The proposal\r\n\r\n> Verify that the client validates the values (such as authorization code, ID token) sent to the client or received by the client to be the result of the authorization flow that was initiated by the same client. It requires, that client-generated secrets, such as PKCE 'code_challenge', 'state', or OIDC 'nonce', are not guessable, are transaction-specific, and securely bound to the client and the user agent in which the transaction was started.\r\n\r\n",
+      "createdAt": "2024-10-17T19:53:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420404327",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRMES",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Potential [resource](https://ldapwiki.com/wiki/Wiki.jsp?page=Authorization%20Code%20Flow).\r\n\r\n<del>In complete objectivity, I have to recommend [this resource](https://www.gabriel.urdhr.fr/2023/02/06/oauth2-diagr<ams/#authorization-code-grant). :wink: </del> → I misinterpreted the meaning of the previous comment :)",
+      "createdAt": "2024-10-17T20:02:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420424978",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRU0F",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Potential [resource](https://ldapwiki.com/wiki/Wiki.jsp?page=Authorization%20Code%20Flow).\r\n\r\nNote that it was meant to be the source, from where the confusing wording is coming from.\r\n\r\n",
+      "createdAt": "2024-10-17T20:09:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420460805",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QReWR",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The fact that the authorization code is single use indeed prevent against authorization code replay (implemented AS-side).\r\n\r\n> From the authorization code replay attack point of view, being transaction-specific provides defense against replay, but it then requires, that AS keeps the list of already used PKCE and nonce values (that is actually recommended to do for AS: \r\n\r\nI *think* `nonce` provides a more limited form of client-side authorization code replay protection: it does not prevent the authorization code to be exchanged more than once but the client will not accept the resulting ID token twice.\r\n\r\nIn other words,\r\n\r\n* it prevents *a malicious user* from trying to replay the authorization code and *successfully getting a session*;\r\n* but it does not prevent *a malicious client* from exchanging the authorization code and *obtaining a OIDC access token* (granting access to PII which he would have had access to anyway).\r\n\r\nI think a similar argument can be made about PKCE.",
+      "createdAt": "2024-10-17T20:33:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420499857",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRhEu",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "See for reference on this topic [4.5.3](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#name-countermeasures-4) from the Oauth Security topics draft.\r\n\r\nAnd:\r\n\r\n> **4.3.1 [Authorization Code in Browser History](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#name-authorization-code-in-brows)**\r\n> \r\n> Countermeasures:\r\n>\r\n> * Authorization code replay prevention as described in [[RFC6819](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#RFC6819)], Section 4.4.1.1, and [Section 4.5](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#code_injection).",
+      "createdAt": "2024-10-17T20:37:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420511022",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRooh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that I applied PKCE `code_challenge` + `code_verifier`one-time-use to nonce, that is not valid move. But this was all comments for the current requirement that I propose to delete and replace with a new requirement. So let's focus on this one:\r\n\r\n> Verify that the client validates the values (such as authorization code, ID token) sent to the client or received by the client to be the result of the authorization flow that was initiated by the same client. It requires, that client-generated secrets, such as PKCE 'code_challenge', 'state', or OIDC 'nonce', are not guessable, are transaction-specific, and securely bound to the client and the user agent in which the transaction was started.",
+      "createdAt": "2024-10-17T20:46:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420541985",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRxTl",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The first sentence says:\r\n\r\n> that was initiated by the same client.\r\n\r\nbut then:\r\n\r\n>  and securely bound to the client **and the user agent** in which the transaction was started\r\n\r\nShouldn't the first sentence be instead something like:\r\n\r\n> Verify that the client validates the values (such as authorization code, ID token) sent to the client or received by the client to be the result of the authorization flow that was initiated from the same **user session**.\r\n\r\n***\r\n\r\n> It requires, that client-generated secrets, such as PKCE 'code_challenge', 'state', or OIDC 'nonce', are not guessable, [...]\r\n\r\nI would use `code_verifier` instead of `code_challenge` here (?). I think the requirement is equally valid with either but I think it makes more sense this way (as code_challenge is just a deterministic function of code_verifier).\r\n\r\n***\r\n\r\n> are transaction-specific\r\n> and securely bound to the client and the user agent in which the transaction was started.\r\n\r\nI feel we miss the notion that they are bound to some sort of user session as well (i.e. that a transaction is bound to a given user **session**).\r\n\r\nSee for example [OAuth 2.1 draft section 7.9](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-7.9):\r\n\r\n> The traditional countermeasure is that clients pass a random value, also known as a CSRF Token, in the state parameter that links the request to the redirect URI to the **user agent session** as described. \r\n>\r\n> [...]\r\n>\r\n> If state is used for carrying application state, and integrity of its contents is a concern, clients MUST protect state against tampering and swapping. This can be achieved by binding the contents of state to the **browser session** and/or signed/encrypted state values [[I-D.bradley-oauth-jwt-encoded-state](https://datatracker.ietf.org/doc/html/draft-bradley-oauth-jwt-encoded-state-09)].\r\n\r\nOr [OAuth Security topics draft 4.5.3.2](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#name-nonce):\r\n\r\n> OpenID Connect's existing nonce parameter can protect against authorization code injection attacks. The nonce value is one-time use and created by the client. The client is supposed to **bind it to the user agent session** and sends it with the initial request to the OpenID Provider (OP).\r\n",
+      "createdAt": "2024-10-17T21:08:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2420577509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QU40O",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "All valid points, do you want to propose full requirement as well?",
+      "createdAt": "2024-10-18T05:13:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2421394702",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QVFn_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just for one more direction how to set up the first part.\r\n> Verify that the client accepts the values (such as authorization code, access token, ID token) from the authorization server only if those are created as a result of the authorization flow that was initiated by the same user session.\r\n\r\nThe \"user session\" or \"user agent session\" need to be written the way that is valid for public clients and confidential clients.\r\n\r\nEven here, only session is enough, it must be transaction specific - it means you can not use the same value many times for the same session.\r\n\r\nMy intent is to cover the transaction-specific part with the requirement, but the first part, which is used to explain the need for transaction-specific behavior, is a bit too wide and overlaps already with OAuth client CSRF protection (51.3.2) and OIDC client ID token replay protection (51.5.1).",
+      "createdAt": "2024-10-18T05:40:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2421447167",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qb1YE",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With these modifications, that would be:\r\n\r\n> Verify that the client validates the values (such as authorization code, ID token) sent to the client or received by the client to be the result of the authorization flow that was initiated by the same user agent session and transaction. Client-generated secrets, such as PKCE 'code_verifier', 'state', or OIDC 'nonce', must not be guessable, must be transaction-specific, and must be securely bound to the client and the user agent session in which the transaction was started.",
+      "createdAt": "2024-10-18T20:51:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2423215620",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QcBrJ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Small suggestion here:\r\n\r\n_Verify that the client validates the values (such as the authorization code or ID token) sent to or received by the client to ensure they result from the authorization flow was initiated by the same user agent session and transaction. This requires that client-generated secrets, such as the PKCE 'code_verifier,' 'state,' or OIDC 'nonce,' are not guessable, are specific to the transaction, and are securely bound to both the client and the user agent session in which the transaction was started._",
+      "createdAt": "2024-10-18T21:36:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2423265993",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QcWcM",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, yes this is much better! Two minor grammar fixes (I think):\r\n\r\n> Verify that the client validates the values (such as the authorization code or ID token) sent to or received by the client to ensure they result from *an* authorization flow *which* was initiated by the same user agent session and transaction. This requires that client-generated secrets, such as the PKCE 'code_verifier,' 'state,' or OIDC 'nonce,' are not guessable, are specific to the transaction, and are securely bound to both the client and the user agent session in which the transaction was started.",
+      "createdAt": "2024-10-18T23:05:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2423351052",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qen3M",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I explain changes proposed here https://github.com/OWASP/ASVS/issues/2092#issuecomment-2421447167\r\n\r\n* \"client validates\" > \"client accepts\" - I think the initially proposed \"validate\" is not correct, because the point here is that the client can accept those values only, if it can be sure that those are coming from user's own initiated session and transaction\r\n* \"sent to or received by the client\" > \"from the authorization server\"\r\n\r\nFirst change is important, other is more question of a point of view.",
+      "createdAt": "2024-10-19T15:16:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2423946700",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QnbrW",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK that would give us:\r\n\r\n> Verify that the client accepts the values (such as the authorization code or ID token) from the authorization server to ensure they result from an authorization flow which was initiated by the same user agent session and transaction. This requires that client-generated secrets, such as the PKCE 'code_verifier' 'state' or OIDC 'nonce' are not guessable, are specific to the transaction, and are securely bound to both the client and the user agent session in which the transaction was started.\r\n\r\n***\r\n\r\nSmall questions about the wording:\r\n\r\n> Verify that the client accepts the values (such as the authorization code or ID token) from the authorization server to ensure they result from an **authorization flow** which was initiated by the same user agent session and **transaction**.\r\n\r\nIsn't \"authorization flow\" and \"transaction\" redundant here?\r\n\r\nIn which cases should we talk about \"authorization flow\" or about \"transaction\"?\r\n\r\n***\r\n\r\nAnother thing which is not very clean is that the main requirement says:\r\n\r\n> result from an authorization flow which was initiated by the same user agent session and transaction\r\n\r\nbut in the next sentence, the scope of the requirement is expanded into what I think is another consideration:\r\n\r\n> are not guessable\r\n\r\n***\r\n\r\nAnother thing which is somewhat weird is:\r\n\r\n> Verify that the client accepts the values (such as the **authorization code** or ID token) […]\r\n\r\nThe client cannot really verify the authorization code directly. It can check the `state`, use PKCE to help the server mitigate authorization code injection, check the `scope` (or `authorization_details`) after the authorization code exchange, check the ID token after the authorization code exchange, etc.\r\n\r\n***\r\n\r\nI'm wondering the current propositions are still somewhat weird or at least not very very precise even if they convey the general idea.",
+      "createdAt": "2024-10-21T10:22:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2426256086",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QoL8U",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Isn't \"authorization flow\" and \"transaction\" redundant here?\r\n\r\nPlease propose correction.\r\n\r\n> but in the next sentence, the scope of the requirement is expanded into what I think is another consideration:\r\n\r\nVerify that the client accepts values only if (what must be done) > it can be achieved by using not guessable value (how it must be done). Personally I can not see a problem here.\r\n\r\n> The client cannot really verify the authorization code directly. It can check the state, use PKCE to help the server mitigate authorization code injection, check the scope (or authorization_details) after the authorization code exchange, check the ID token after the authorization code exchange, etc.\r\n\r\nThis was my reason to change \"validate\" to \"accept\" in https://github.com/OWASP/ASVS/issues/2092#issuecomment-2423946700",
+      "createdAt": "2024-10-21T11:51:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2426453780",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QoWFo",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What about something such as:\r\n\r\n> Verify that the client securely scopes a given interactive OAuth authorization flow to a user agent session and transaction. This requires that client generated such as 'state', PKCE 'code_verifier' and OIDC 'nonce' are not guessable, are specific to the transaction, and are securely bound to both the client and the user agent session in which the transaction was started. This requires as well that cross-session or cross-transaction injection of values generated by the authorization server (such as ID token, authorization code) is mitigated by the client.\r\n",
+      "createdAt": "2024-10-21T12:11:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2426495336",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QoXs7",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I prefer to develop our previous version.",
+      "createdAt": "2024-10-21T12:14:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2426501947",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qq6yJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me it seems that one important part (\"accept\" + \"only if\" got lost from https://github.com/OWASP/ASVS/issues/2092#issuecomment-2421447167). So updated proposal:\r\n> **Verify that the client accepts the values** (such as the authorization code or ID token) **from the authorization server only if** these result from an authorization flow that was initiated by the same user agent session and transaction. This requires that client-generated secrets, such as the PKCE 'code_verifier', 'state' or OIDC 'nonce' are not guessable, are specific to the transaction, and are securely bound to both the client and the user agent session in which the transaction was started.\r\n\r\nAs the 2nd part feels a bit duplication, there is potential for improvements, but if there are no mistakes or errors to point out, I'm ok to go in with that.",
+      "createdAt": "2024-10-21T16:34:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2427169929",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qz6sO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The proposed requirement is valid for OAuth Client and OIDC Client... So the only valid move seems to be to add it into to V51.1 Generic OAuth and OIDC security.",
+      "createdAt": "2024-10-22T15:00:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2092#issuecomment-2429528846",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-18T06:19:01Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2092,
+  "state": "CLOSED",
+  "title": "51.2.15 - OAuth - ask to be transaction-specific",
+  "url": "https://github.com/OWASP/ASVS/issues/2092"
+}

@@ -1,0 +1,238 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjI2NzA2MDY3",
+    "is_bot": false,
+    "login": "meetinthemiddle-be",
+    "name": ""
+  },
+  "body": "Weakness: An attacker who has control over a user's session can permanently lock the user out without their knowledge due to the e-mail / phone number change process not notifying the victim who can then also not flag the apparent breach to the system owner.\n\n\nProposed requirement variations:\n- Verify that modifications to account recovery mechanisms trigger out-of-band notifications to existing verified contact methods, enabling users to detect and report unauthorized changes before losing account access\n- Verify that email address changes require notification to the previous email address (perhaps for a L3 expansion : include a time-limited mechanism to reverse the change, preventing permanent account lockout scenarios.)\n- Verify that when critical account information is modified (including but not limited to email address, password recovery methods, or multi-factor authentication settings), the application sends immediate notification to all previously verified contact methods and provides a mechanism for the legitimate user to report unauthorized changes.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM64hUYJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What aspects are not covered by current 7.5 requirements?\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **7.5.1** | Verify that the application requires full re-authentication before allowing modifications to sensitive account attributes which may affect authentication such as email address, phone number, MFA configuration, or other information used in account recovery. | 2 |\n| **7.5.3** | Verify that the application requires further authentication with at least one factor or secondary verification before performing highly sensitive transactions or operations. | 3 |",
+      "createdAt": "2025-07-21T08:38:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3095741961",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM64hbcr",
+      "author": {
+        "login": "meetinthemiddle-be"
+      },
+      "authorAssociation": "NONE",
+      "body": "7.5.1. comes close , but is missing is the part where the victim must also be notified of such a change on the old mail address (and/or phone number if that is used for authentication purposes). When changing other datapoints that _aren't_ means of contacting the account owner (MFA config, password), this change should also be communicated to them, of course, but what you don't want is an attacker making these changes **_unnoticed_** after performing the full re-authentication.",
+      "createdAt": "2025-07-21T08:49:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3095770923",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM64lwH3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We also have:\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **6.3.7** | Verify that users are notified after updates to authentication details, such as credential resets or modification of the username or email address. | 3 |\n",
+      "createdAt": "2025-07-21T14:00:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3096904183",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65gK_T",
+      "author": {
+        "login": "meetinthemiddle-be"
+      },
+      "authorAssociation": "NONE",
+      "body": "This indeed looks like it covers _some_ of my initial concern. \n\nHowever, it was more aimed at identifiers that are *also used to _contact_ the user* including notifying them on the *previously known identifier*. Someone implementing 6.3.7. complies with the requirement of sending a notification to the _newly_ entered e-mail address or phone number (\"... users are notified *after* updates ...\" ), which leaves my initial concern intact. My point is that users should be notified on (at least) the old identifier adding the message that if they were unaware of this change, they can contact support immediately while logs are still available to investigate the breach incident.",
+      "createdAt": "2025-07-24T06:32:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3112218579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65gTwB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With the \"previously known identifier\" we can be more precise, but I'm afraid we are going to ask \"the one and only solution\" that may be unnecessarily limiting options.\n\n> My point is that users should be notified on (at least) the old identifier adding the message that **if they were unaware of this change**,\n\nAt the same time, I have a question: how can this situation happen if 7.5.1 is implemented?",
+      "createdAt": "2025-07-24T06:48:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3112254465",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65oxBz",
+      "author": {
+        "login": "meetinthemiddle-be"
+      },
+      "authorAssociation": "NONE",
+      "body": "> With the \"previously known identifier\" we can be more precise ...\n\nThat would indeed help business analysts writing the user story and acceptance criteria to understand that \"users are notified after updates\" does not mean \"fetch the e-mail address after it has been updated\". Tests to validate that the change notification was sent to the new mail address / phone number will pass and cause exactly the issue I was aiming to solve by adjusting the wording of 6.3.7.\n\n\n>  ... but I'm afraid we are going to ask \"the one and only solution\" that may be unnecessarily limiting options.\n\nMaybe it's caused by me not being a native English speaker but I'm afraid I don't understand what is meant with this. \n\n\n> how can this situation happen if 7.5.1 is implemented?\n\n7.5.1. is not helping if the account compromise happened due to the attacker knowing the password. They can easily perform a full re-authentication, assuming the authentication process is lacking MFA (which _would_ indeed be odd for a L3 system). At the same time I'm wondering the cause of 6.3.7. not being an L2 requirement while also respecting the amount of effort and thought that the ASVS core team has presumably put into making this decision.\n",
+      "createdAt": "2025-07-24T18:40:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3114471539",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65o3Ij",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 7.5.1. is not helping if the account compromise happened due to the attacker knowing the password. \n\nYes, re-authentication here means using MFA. So, in theory, it should never happen. But in practice...\n\nIn case we improve anything, we should do it for 6.3.7. \n\nAlso, it is worth analyzing - can notification to \"old identifier\" fire back anyhow?",
+      "createdAt": "2025-07-24T18:47:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3114496547",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM66EVSJ",
+      "author": {
+        "login": "meetinthemiddle-be"
+      },
+      "authorAssociation": "NONE",
+      "body": "> In case we improve anything, we should do it for 6.3.7.\n\nMakes all the sense.\n\n> Also, it is worth analyzing - can notification to \"old identifier\" fire back anyhow?\n\nThat's a great question. A few thoughts on this:\n\nThe number of sent notifications due to this would double, as there will presumably also (already) be one sent to the new address for verification. If the identifier is a phone number, where notifications are sent via SMS, this usually has a cost impact.\n\nThe mailbombing potential, I guess, wouldn't increase as opposed to what it already is now; the attacker can arbitrarily choose the _new_ identifier, but not the old one, and also this notification is just sent once.",
+      "createdAt": "2025-07-26T12:02:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3121697929",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6_DmRk",
+      "author": {
+        "login": "meetinthemiddle-be"
+      },
+      "authorAssociation": "NONE",
+      "body": "Is there any info regarding whether anything is still required from me and/or an update on status, please?",
+      "createdAt": "2025-08-20T10:17:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3205391460",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6_EJWv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi, there is some work to do with \"change management\" from our side before we apply any changes to the requirements. I think the situation or the goal for the change is clear here, but it just may take time to get into the repository. At the same time, there is no hurry with that, because we don't plan to make a new release in the near future.",
+      "createdAt": "2025-08-20T10:44:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3205535151",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6_Ebab",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In general the main leads here are rightfully needing some time off after this huge release. But we care deeply about your feedback. Even if we do not get to it for a few months, we will review your concerns carefully before we release 5.0.1.\n\nThank you! 🙏🏼 ",
+      "createdAt": "2025-08-20T10:57:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-3205609115",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABE6fngg",
+      "author": {
+        "login": "meetinthemiddle-be"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hey all, I was wondering if there was any update on this?",
+      "createdAt": "2026-06-04T17:48:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3219#issuecomment-4624738178",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-07-18T08:57:06Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    }
+  ],
+  "number": 3219,
+  "state": "OPEN",
+  "title": "Requirement to detect account theft lacking notification of e-mail address or phone number change.",
+  "url": "https://github.com/OWASP/ASVS/issues/3219"
+}

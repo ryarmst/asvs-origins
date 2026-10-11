@@ -1,0 +1,163 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "OAuth 2 related vulnerabilities are not uncommon because the OAuth specification is relatively vague and flexible by design. Also, OAuth bounties are usually highly paid (like [this one](https://ysamm.com/?p=763) with a $44000 bounty).\r\nI believe we are missing a few checks for OAuth in the ASVS. I start with \"Ensure that the application doesn't use any deprecated OAuth flows\". We have two deprecated flows: \r\n1- [Implicit Flow](https://oauth.net/2/grant-types/implicit/)\r\n2- [Resource Owner Password Credentials](https://oauth.net/2/grant-types/password/)\r\n\r\nFurthermore, for SPAs (Single Page Applications) and mobile apps, the application should use PKCE flow. Also, I have seen customers that don't properly understand refresh token, access token and ID token and don't use them correctly. We should also mention that the refresh token should be stored in the cookie. I have some more items in my mind that I will add after I have heard your comments.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5OtynP",
+      "author": {
+        "login": "tkisason"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Good idea, a common issue is the the need to add redirect_uri whitelist, since if an redirect_uri whitelist doesn't exist, it's possible to hijack accounts. ",
+      "createdAt": "2022-11-18T23:03:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1320626639",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Ovhrj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You can propose more precise requirements with answering (first for yourself), what kind of problem or risk it addresses. We can help with potential duplicates (if the point is already covered in ASVS somehow).\r\n\r\n> Good idea, a common issue is the the need to add redirect_uri whitelist, since if an redirect_uri whitelist doesn't exist, it's possible to hijack accounts.\r\n\r\nThere requirement for that:\r\n_V5.1.5 Verify that URL redirects and forwards only allow destinations which appear on an allow list, or show a warning when redirecting to potentially untrusted content._",
+      "createdAt": "2022-11-20T09:36:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1321081571",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5O8Pzf",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think about this one? \r\n\"Ensure that the application doesn't use any deprecated OAuth flows\". We have two deprecated flows:\r\n1- [Implicit Flow](https://oauth.net/2/grant-types/implicit/)\r\n2- [Resource Owner Password Credentials](https://oauth.net/2/grant-types/password/)",
+      "createdAt": "2022-11-23T00:53:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1324416223",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5PAhIG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With some exceptions, the style for requirement should be positive - what to achieve instead of what to not achieve.\r\n\r\nWhat is the challenge here - if to fix the list to the standard, be future proof and past proof.\r\n* fixed list - if we don't fix the list then it's \"flowing requirement\"\r\n* future proof - what to do, if some flow allowed in standard is declared as deprecated\r\n* past proof - we don't release ASVS too often, if some flow will be deprecated, then to cover it with up-to-date information, it requires some 5.0.* > 5.*.0 release\r\n",
+      "createdAt": "2022-11-23T19:04:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1325535750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X5mDB",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth @elarlang @jmanico What do you think about adding these new checks?\r\n- Verify that the application implements only secure and recommended OAuth 2.0 flows, such as the Authorization Code Flow and Authorization Code Flow with PKCE. Ensure that deprecated flows, such as the Implicit Flow and Resource Owner Password Credentials Flow, are not used.\r\n- Verify that the application securely validates redirect URIs during the OAuth 2.0 authorization process. Ensure that only registered and trusted redirect URIs are allowed, preventing potential open redirect vulnerabilities.\r\n- Verify that the application generates, validates, and securely manages the OAuth 2.0 state parameter during the authorization process. Ensure that the state parameter is used to mitigate CSRF attacks and is generated securely, validated upon receiving the authorization code, and not reused.\r\n- Verify that the application implements OAuth 2.0 Proof Key for Code Exchange (PKCE) for public clients, such as mobile or single-page applications. Ensure that PKCE enhances the security of the authorization code flow by mitigating the risk of authorization code interception.\r\n",
+      "createdAt": "2023-03-18T05:10:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1474715841",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X6gAj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "These look solid\n\n1) you need the state parameter to address CSRF OR PKCE but not both.\n\n2) resource owner client credentials is ok when the client and auth server are the same vendor; but your point is taken well, I get it\n\n3) PKCE is important even for confidential clients!\n\n--\nJim Manico\n@Manicode\n",
+      "createdAt": "2023-03-18T18:48:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1474953251",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X6j5B",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please take a look, maybe this topics are covered in https://github.com/OWASP/ASVS/issues/996",
+      "createdAt": "2023-03-18T19:42:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1474969153",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZFb19",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Agree with @elarlang that this is covered in #996. We even have a PR with some proposed changes in #1494. Please check if anything you have mentioned is not in that issue or PR and comment there. I am going to close this as a duplicate for now. I would particiularly be interested in input on how we can focus down the fewest important requirements as I believe the proposed section may currently be too large and complicated.",
+      "createdAt": "2023-04-03T16:05:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1431#issuecomment-1494596989",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-11-18T21:26:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1431,
+  "state": "CLOSED",
+  "title": "There are some missing items related to OAuth",
+  "url": "https://github.com/OWASP/ASVS/issues/1431"
+}

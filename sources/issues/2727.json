@@ -1,0 +1,147 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "Since we are moving idle timeout and absolute timeout to L2, we have a situation where L1 allows for long term persistent sessions by design that are never automatically shut down. This triggered me to re-evaluate the 3.7.1 and 3.7.3 requirements.\n\nI would like to suggest we move these (1) to the access control section and (2) move them to L1. Re-authentication which we describe below is formally called \"step-up authorization\" and is less about protecting the session, and more about protecting the sensitive features described below. \n\nFailure to complete step-up authorization does not typically shut down the session in any way, it just causes the feature to not be executed and the user can typically go \"back\", avoid this step, and continue using the session for other features.\n\nI would also consider merging these both if we consider them both to be L1.\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.7.1** | [MODIFIED, SPLIT TO 3.7.3, LEVEL L1 > L2] Verify that the application requires re-authentication before allowing modifications to sensitive account attributes which may affect authentication such as email address, phone number, MFA configuration, or other information used in account recovery. | 2 | 306 |\n| **3.7.3** | [ADDED, SPLIT FROM 3.7.1] Verify that the application requires re-authentication or secondary verification before performing highly sensitive transactions or operations. | 3 | 306 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6ikq4b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, so in my personal opinion, 3.7.3 is a bit subjective and hard to verify (and therefore decide how to implement). I think it was in recognition of that, that it got split up so that it would be L3.\n\nAlongside that was the recognition that the current content of 3.7.1 is an important security control, with a similar impact to being able to change a user's password without the old password.\n\nBUT, why did it not make the cut for L1? \n\nI think the simple answer is that in order for an attacker to exploit a lack of re-authentication, there is a pre-condition that they have somehow gained access to the user's logged in session. In general, we want L1 requirements to be things that without them the app is directly exposed to attack without pre-conditions.\n\nBUT...\n\nWe currently have 2.1.6 (not being able to change a user's password without the old password) as L1 so this choice of L2 seems inconsistent with that.\n\n@elarlang what do you think about this inconsistency?",
+      "createdAt": "2025-03-16T16:11:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2727#issuecomment-2727521819",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iksgO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would like to suggest we move these (1) to the access control section and (2) move them to L1\n\nFor both requirements: problem to solve is not an authorization or authentication, those are for mitigating the impact from session take over and belong to the section they are.\n\n> Re-authentication which we describe below is formally called \"step-up authorization\" and is less about protecting the session, and more about protecting the sensitive features described below.\n\nI don't interpret this (3.7.1) as step-up authorization requirement. If step-up authorization is not covered, we need to watch the V4 requirements, but not changing this one as this has it's own problem to solve.\n\nThe rest is pretty much said by Josh.\n\n> @elarlang what do you think about this inconsistency?\n\nAbout 2.1.6, I have proposed many times, that this requirement belong to 3.7 but you (I guess both) have been against it (to keep all password-related requirements in one place)...\n\nedit: in case you meant inconsistency about 2.1.6 vs 3.7.1 levels, then 3.7.1.. I don't have answer, every answer feels wrong :)",
+      "createdAt": "2025-03-16T16:26:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2727#issuecomment-2727528462",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ikuE-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From \"if this is the only problem in your application - do you have an vulnerability\" - both are L2\n* 2.1.6 - it is 2nd layer of defense, but for attacking scenario really straight forward\n* 3.7.1 - it is 2nd layer of defense and L2\n\nFrom \"pick x amount of requirements you solve in the first wave to get fast, easy and most effective wins\"\n* 2.1.6 is L1\n* 3.7.1 is L2\n\nTo conclude that - acknowledging the potential incosistency, I'm ok to keep them as they are.\n\n~~If we need to change it, then 3.7.1 to L1... but it does not feel right.~~",
+      "createdAt": "2025-03-16T16:41:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2727#issuecomment-2727534910",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ikyel",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think you are all making really good arguments here. I can see that per the pre-condition rules L2/L3 is acceptable.\n\nThe only reason I vote to bump 3.7.1 and 3.7.3 to L1 (and make an exception) is because we no longer have any session limitation requirements at L1. I feel this is critical to protecting software.\n\nSomeone could hijack a session at L1 and suddenly have a new IP address across the world, transfer money, change the email address and more and L1 controls would not stop this.\n\nSo I respect your leadership @elarlang and @tghosth as we near the end. But I (strongly) vote L1 here.",
+      "createdAt": "2025-03-16T17:26:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2727#issuecomment-2727552933",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ikzMY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The only reason I vote to bump 3.7.1 and 3.7.3 to L1 (and make an exception) is because we no longer have any session limitation requirements at L1. I feel this is critical to protecting software.\n\nAs I desribed in https://github.com/OWASP/ASVS/issues/2692#issuecomment-2726393590 and https://github.com/OWASP/ASVS/issues/2692#issuecomment-2726753390 I think the impact from 3.3.5 and 3.8.2 is not that big.\n\nWe all agree that it  (3.7.1) is an important requirement, but at the same time, it is hard to put at the same level as SQL injection or other immediate-impact vectors.\n\nJim, the most important point here for L1 vs L2 is that L1 is \"the first step in\" and not the end goal. The application should reach L2 anyway; L1 is the list of requirements from where everyone should start as the most prioritized requirements.\n\nWriting all this, I updated my previous statement to update 3.7.1 to L1 if needed - I think L2 is a good choice for it.",
+      "createdAt": "2025-03-16T17:33:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2727#issuecomment-2727555864",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ik1dg",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar, I totally understand where you are coming from and as we approach the final push, I am not offended if you make decisions different than my opinions. \n\nI have strong opinions over these matters and I'm reading your comments carefully. You're making a good argument, always, even when we disagree.\n\nSo from this point on, do not let any of my arguments get in the way of getting things done. Charge ahead, even when we disagree. It's hard for me to drop my view as a software architect and developer. I am not a tester.\n\nYou have the helm, captain, and I state that with sincerely and respect. 🫡 Whenever you are ready, go PR.",
+      "createdAt": "2025-03-16T17:53:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2727#issuecomment-2727565152",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1LWs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that session hijacking is a difficult topic. We have some basic protections in L1 such as logout and session termination, (which with self-contained tokens is actually quite hard anyway, but nevertheless important), as well as rotation to prevent session fixation. \n\nI think 3.7.1 is borderline L1/L2 but I think I prefer it at L2 for now.",
+      "createdAt": "2025-03-18T06:43:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2727#issuecomment-2731849132",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-03-16T15:43:14Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xM9PW",
+      "name": "_5.0 - draft",
+      "description": "This should be discussed once a 5.0 draft has been prepared.",
+      "color": "D14988"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    }
+  ],
+  "number": 2727,
+  "state": "CLOSED",
+  "title": "Step-up authorization / Re-authentication 3.7.1 and 3.7.3",
+  "url": "https://github.com/OWASP/ASVS/issues/2727"
+}

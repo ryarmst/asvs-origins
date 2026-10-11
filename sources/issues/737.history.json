@@ -1,0 +1,62 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799529631",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I don't know :) But I agree, this requirement may need some improvement - it describes what should NOT be done, but should describe what should be done.\r\n\r\nI interpret this \"state for authentication\" as \"session for authentication\". Example:\r\nClient starts authentication from application A via application SSO\r\nIf client is sent from A to SSO without having session/state fixed on application A then it's not possible to check, is this the same client who is requesting application A with \"authentication decision\" from SSO.\r\nUsually - application A should send `state` parameter (or something like that) to SSO and then validate this `state` parameter, when client is sent from SSO back to application A. If there is no state in use, then it opens race-condition.\r\n\r\nTo which category my scenario suits, it's also good question. Is \"keeping state\" business logic, I'm not sure.",
+          "recorded_at": "2021-03-15T16:02:53Z"
+        },
+        {
+          "body": "I don't know :) But I agree, that this requirements may need some improvement - it describes what should NOT be done, but should describe what should be done.\r\n\r\nI interpret this \"state for authentication\" as \"session for authentication\". Example:\r\nClient starts authentication from application A via application SSO\r\nIf client is sent from A to SSO without having session/state fixed on application A then it's not possible to check, is this the same client who is requesting application A with \"authentication decision\" from SSO.\r\nUsually - application A should send `state` parameter (or something like that) to SSO and then validate this `state` parameter, when client is sent from SSO back to application A. If there is no state in use, then it opens race-condition.\r\n\r\nTo which category my scenario suits, it's also good question. Is \"keeping state\" business logic, I'm not sure.",
+          "recorded_at": "2021-03-15T15:51:43Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799654461",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "It's implied in 11.1.1\r\n\r\n**Verify the application will only process business logic flows for the same user in sequential step order and without skipping steps.**\r\n\r\nIn order to track proper sequences you need to track state. Perhaps augment this requirement as opposed to a new one?",
+          "recorded_at": "2021-03-15T18:34:55Z"
+        },
+        {
+          "body": "It's implied in 11.1.1\r\n\r\nVerify the application will only process business logic flows for the same user in sequential step order and without skipping steps.\r\n\r\nIn order to track proper sequences you need to track state. Perhaps augment this requirement as opposed to a new one?",
+          "recorded_at": "2021-03-15T18:34:45Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-833290759",
+      "author": "avasiljeva",
+      "previous_versions": [
+        {
+          "body": "I'm following this discussion with a big interests, since in our group nobody can effectively interpret 1.11.2 as well.\r\nNow it is starting to get clearer to me.\r\n\r\nSlight adjustment on your @csfreak92 proposal:\r\n```Verify that all high-value business logic flows, including authentication, session management and access control, maintain a consistent application state and check it to prevent race conditions and business logic flaws```\r\n\r\nHow does it sound?",
+          "recorded_at": "2021-05-06T07:17:38Z"
+        },
+        {
+          "body": "I'm following this discussion with a big interests, since in our group nobody can effectively interpret 1.11.2 as well.\r\nNow it is starting to get clearer ot me.\r\n\r\nSlight adjustment on your @csfreak92 proposal:\r\n```Verify that all high-value business logic flows, including authentication, session management and access control, maintain a consistent application state and check it to prevent race conditions and business logic flaws```",
+          "recorded_at": "2021-05-06T07:17:10Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-849426240",
+      "author": "wet-certitude",
+      "previous_versions": [
+        {
+          "body": "I've tried to reconstruct the meaning of 1.11.2 based on this discussion. However, I'm not sure I quite get it. \r\n\r\nFrom what I've gathered \"state\" is supposed to be the state of a user on the application, as in whether the user is logged in, which roles they have or where in the authentication process they currently are (in regards to e.g. to OAuth). In plain English a state could be `Client X is in the process of authenticating against the IdP` or `User U is logged in on Client X and has the role 'admin'`. \r\n\r\nThe new stipulation is:\r\n> Verify that business logic flows, including authentication, session management and access control, maintain a consistent application state and check to prevent race conditions and business logic flaws.\r\n\r\nBased on that interpretation of \"state\" I tried to dissect this sentence:\r\n\r\n\"maintain a consistent application state\" is somewhat unclear as there is no definition of what \"consistent\" means in this context. When thinking about race conditions, etc. \"consistent\" to me means the \"state\" is atomic. For example, when the user logs out, all parts of the application must be aware that the state is `Client X is not authenticated` at the same time. Vulnerabilities could result from parts of the application maintaining a different state (e.g. that the user is still logged in) due to race conditions.  \"business logic flaws\" I think is very broad and can cover, I believe, a wide variety of flaws. \r\n\r\nBy my interpretation, this stipulation basically mandates that there should be no flaws (race condition or otherwise) when handling user state. A simplified requirement would be: \r\n`Verify that the application handles user state (e.g. login status) in a way that attackers cannot influence it in an undesired way.`\r\nHowever, this is a VERY broad statement and may therefore not be useful.\r\n\r\nI might be way off with my interpretation. If that is the case, please provide a hypothetical vulnerability that violates this requirement, so I can understand its intention.",
+          "recorded_at": "2021-05-27T08:38:03Z"
+        },
+        {
+          "body": "I've tried to reconstruct the meaning of 1.11.2 based on this discussion. However, I'm not sure I quite get it. \r\n\r\nFrom what I've gathered \"state\" is supposed to be the state of a user on the application, as in whether the user is logged in, which roles they have or where in the authentication process they currently are (in regards to e.g. to OAuth). In plain English a state could be `Client X is in the process of authenticating against the IdP` or `User U is logged in on Client X and has the role 'admin'`. \r\n\r\nThe new stipulation is:\r\n> Verify that business logic flows, including authentication, session management and access control, maintain a consistent application state and check to prevent race conditions and business logic flaws.\r\n\r\nBased on that interpretation of \"state\" I tried to dissect this sentence:\r\n\r\n\"maintain a consistent application state\" is somewhat unclear as there is no definition of what \"consistent\" means in this context. When thinking about race conditions, etc. \"consistent\" to me means the \"state\" is atomic. For example, when the user logs out, all parts of the application must be aware that the state is `Client X is not authenticated` at the same time. Vulnerabilities could result from parts of the application maintaining a different state (e.g. that the user is still logged in) due to race conditions.  \"business logic flaws\" I think is very broad and can cover, I believe, a wide variety of flaws. \r\n\r\nBy my interpretation, this stipulation basically mandates that there should be no flaws (race condition or otherwise) when handling user state. A simplified requirement would be: \r\n`Verify that the application handles user state (e.g. login status) in a way that attackers cannot influence it in an undesired way.`\r\nHowever, this is a VERY broad statement and may therefore not be useful.\r\n\r\nI might be way off with my interpretation. If that is the case, please provide a hypothetical vulnerability that violates this requirement, so I can understand it's intention.",
+          "recorded_at": "2021-05-27T08:02:50Z"
+        }
+      ]
+    }
+  ]
+}

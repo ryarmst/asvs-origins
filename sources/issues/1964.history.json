@@ -1,0 +1,105 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2024-05-19T19:30:12Z",
+      "diff": "spin-off from https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 2\"\r\n\r\nFor a situation, where OAuth is used as a \"first-party\" authorization solution and the application needs one and only way how it communicates with the authorization server, then for the OAuth client must be configured and the Authorization Server must validate, that: only the expected values are allowed, that is implemented by the client:\r\n\r\n  * response_type\r\n  * response_mode\r\n  * scope - here, support for the `offline_access` may be worth special mention\r\n\r\n--\r\nFeedback from @tghosth in https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876\r\n\r\n> If this is a simple requirement then it sounds sensible as long as it is not too detailed.\r\n\r\n--\r\nOverlap by recommendation from @TobiasAhnoff in https://github.com/OWASP/ASVS/issues/1925\r\n\r\n> 3 Verify that client configuration asserts least privilege (e g scopes and flows)\r\n\r\nAlthough response_type and response_mode are not directly privilege, those are all related with allowed flow.\r\n"
+    },
+    {
+      "editedAt": "2024-05-21T14:08:08Z",
+      "diff": "spin-off from https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 2\"\r\n\r\nFor a situation, where OAuth is used as a \"first-party\" authorization solution and the application needs one and only way how it communicates with the authorization server, then for the OAuth client must be configured and the Authorization Server must validate, that: only the expected values are allowed, that is implemented by the client:\r\n\r\n  * response_type\r\n  * response_mode\r\n  * scope - here, support for the `offline_access` may be worth special mention\r\n\r\nedit: scope in mind - authorization request from OAuth Client to OAuth Authorization Server\r\n\r\n--\r\nFeedback from @tghosth in https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876\r\n\r\n> If this is a simple requirement then it sounds sensible as long as it is not too detailed.\r\n\r\n--\r\nOverlap by recommendation from @TobiasAhnoff in https://github.com/OWASP/ASVS/issues/1925\r\n\r\n> 3 Verify that client configuration asserts least privilege (e g scopes and flows)\r\n\r\nAlthough response_type and response_mode are not directly privilege, those are all related with allowed flow.\r\n"
+    },
+    {
+      "editedAt": "2024-10-05T09:17:58Z",
+      "diff": "The focus for the issue is set to only handle the response_mode parameter validation, jump to https://github.com/OWASP/ASVS/issues/1964#issuecomment-2382319552\r\n\r\n---\r\n\r\nspin-off from https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 2\"\r\n\r\nFor a situation, where OAuth is used as a \"first-party\" authorization solution and the application needs one and only way how it communicates with the authorization server, then for the OAuth client must be configured and the Authorization Server must validate, that: only the expected values are allowed, that is implemented by the client:\r\n\r\n  * response_type\r\n  * response_mode\r\n  * scope - here, support for the `offline_access` may be worth special mention\r\n\r\nedit: scope in mind - authorization request from OAuth Client to OAuth Authorization Server\r\n\r\n--\r\nFeedback from @tghosth in https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876\r\n\r\n> If this is a simple requirement then it sounds sensible as long as it is not too detailed.\r\n\r\n--\r\nOverlap by recommendation from @TobiasAhnoff in https://github.com/OWASP/ASVS/issues/1925\r\n\r\n> 3 Verify that client configuration asserts least privilege (e g scopes and flows)\r\n\r\nAlthough response_type and response_mode are not directly privilege, those are all related with allowed flow.\r\n"
+    },
+    {
+      "editedAt": "2024-10-05T09:18:07Z",
+      "diff": "UPDATE: The focus for the issue is set to only handle the response_mode parameter validation, jump to https://github.com/OWASP/ASVS/issues/1964#issuecomment-2382319552\r\n\r\n---\r\n\r\nspin-off from https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 2\"\r\n\r\nFor a situation, where OAuth is used as a \"first-party\" authorization solution and the application needs one and only way how it communicates with the authorization server, then for the OAuth client must be configured and the Authorization Server must validate, that: only the expected values are allowed, that is implemented by the client:\r\n\r\n  * response_type\r\n  * response_mode\r\n  * scope - here, support for the `offline_access` may be worth special mention\r\n\r\nedit: scope in mind - authorization request from OAuth Client to OAuth Authorization Server\r\n\r\n--\r\nFeedback from @tghosth in https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876\r\n\r\n> If this is a simple requirement then it sounds sensible as long as it is not too detailed.\r\n\r\n--\r\nOverlap by recommendation from @TobiasAhnoff in https://github.com/OWASP/ASVS/issues/1925\r\n\r\n> 3 Verify that client configuration asserts least privilege (e g scopes and flows)\r\n\r\nAlthough response_type and response_mode are not directly privilege, those are all related with allowed flow.\r\n"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2122515254",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Based on the typical OAuth registration and \"user\" workflow, I would add one more level here.\r\n\r\n1) Server allows a series of scopes to start with.\r\n2) Client registers (once) with a limited list of these scopes (or all that the server offers).\r\n3) A \"user\" goes through the OAuth flow and may only use the scopes that the server approved of during registration time and NOT NECESSARILY the complete lists of scopes that server allows. Again, only the scope the server approved of _during client registration_ should be allowed during user flows, and I feel we need to clarify that level of strictness.\r\n\r\nSo I'd suggest two requirements around scopes since there are granted at very different parts of the OAuth lifecycle.\r\n\r\n1) Only let a client register for scopes that the server allows\r\n2) Only let a \"user\" use scopes the authorization server approved of during client-registration",
+          "recorded_at": "2024-05-21T12:26:37Z"
+        },
+        {
+          "body": "Based on the typical OAuth registration and \"user\" workflow, I would add one more level here.\r\n\r\n1) Server allows a series of scopes to start with.\r\n2) Client registers (once) with a limited list of these scopes (or all that the server offers).\r\n3) A \"user\" goes through the OAuth flow and may only use the scopes that the server approved of during registration time and NOT NECESSARILY the complete lists of scopes that server allows. Again, only the scope the server approved of _during client registration_ should be allowed during user flows, and I feel we need to clarify that level of strictness.\r\n",
+          "recorded_at": "2024-05-21T12:24:06Z"
+        },
+        {
+          "body": "Based on the typical OAuth registration and \"user\" workflow, I would add one more level here.\r\n\r\n1) Server allows a series of scopes to start with.\r\n2) Client registers (once) with a limited list of these scopes (or all that the server offers).\r\n3) A \"user\" goes through the OAuth flow and may only use the scopes that the server approved of during registration time and NOT NECESSARILY the complete lists of scopes that server allows. Again, only the scope the server approved of _during client registration_ should be allowed during user flows.\r\n",
+          "recorded_at": "2024-05-21T12:23:08Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2233151490",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "A suggestion is to add something like this:\r\n\r\nL1,L2,L3: Verify that allowed scopes for each client asserts least privilege (especially if RS authorization is based on just a valid token and scopes, not using any additional token claims like identity of the caller or group membership)\r\n\r\nL2,L3: Verify that all clients are configured to only allow the required flow. For system integrations only allow grant type 'client-credentials' and for user interaction applications only allow grant type 'code'  (Implicit and ROPC should not be supported, other additional flows like Device Authorization Grant might be supported if needed). Avoid reusing clients for different purposes (allowing e g both code and client-credentials).\r\n\r\nL1,L2,L3: Verify that grant type 'code' is always used together with PKCE\r\n\r\nL3: \"Verify that all clients are confidential\" (L1-L2 could allow for public clients)\r\n\r\nL3: \"Verify that all clients are configured to use strong client authentication, mTLS or private-key-jwt\" (L1-L2 could also use client-secret,  note that verification 9.3.3 mandates mTLS, but private-key-jwt is also regarded sufficient by e g FAPI)\r\n\r\nL3: Verify that PAR with client authentication is used (for L1-L2 PAR is optional and could be used without client authentication)\r\n\r\nL3: Verify that sender-constrained access-tokens are used either using mTLS or DPoP (note that for L1 and L2 this does not require client authentication if used by public clients)\r\n\r\nL3: Verify that refresh-tokens are sender-constrained (by requiring client authentication for all token requests, while L1-L2 could allow one-time mitigation strategy for public clients, this is especially important if offline_access is granted, allowing long lived tokens not attached to active user sessions)\r\n\r\n\r\n\r\n",
+          "recorded_at": "2024-07-18T08:01:49Z"
+        },
+        {
+          "body": "A suggestion is to add something like this:\r\n- Verify that all clients are confidential and only allows required authentication methods. Note that verification 9.3.3 mandates mTLS, but private-key-jwt is also regarded sufficient for OAuth in L3 applications. Support for client-secret authentication could be considered (if needed)  and L2 applications could also allow public clients (without client authentication) \r\n- Verify that clients are configured to only allow the required flow. For system integrations only allow grant type 'client-credentials' and for user interaction applications only allow grant type 'code'  (implicit and ROPC should not be supported, other additional flows like Device Authorization Grant might be supported if needed). Avoid reusing clients for different purposes (allowing e g both code and client-credentials).\r\n- Verify that allowed scopes for each client asserts least privilege (especially if RS authorization is based on just a valid token and scopes, not using any additional token claims like identity of the caller or group membership)\r\n- Verify that it if long-lived refresh-tokens (especially together with the offline_access scope) are granted to a client, then the client must be confidential (L3) or one-time usage (L2, if allowing public clients).\r\n",
+          "recorded_at": "2024-07-18T07:27:54Z"
+        },
+        {
+          "body": "A suggestion is to add something like this:\r\n- Verify that all clients are confidential and only allows required authentication methods. Note that verifications 2.2.5 and 9.3.3 mandates mTLS, but private-key-jwt is also regarded sufficient for OAuth in L3 applications. Support for client-secret authentication could be considered (if needed)  and L2 applications could also allow public clients (without client authentication) \r\n- Verify that clients are configured to only allow the required flow. For system integrations only allow grant type 'client-credentials' and for user interaction applications only allow grant type 'code'  (implicit and ROPC should not be supported, other additional flows like Device Authorization Grant might be supported if needed). Avoid reusing clients for different purposes (allowing e g both code and client-credentials).\r\n- Verify that allowed scopes for each client asserts least privilege (especially if RS authorization is based on just a valid token and scopes, not using any additional token claims like identity of the caller or group membership)\r\n- Verify that it if long-lived refresh-tokens (especially together with the offline_access scope) are granted to a client, then the client must be confidential (L3) or one-time usage (L2, if allowing public clients).\r\n",
+          "recorded_at": "2024-07-17T12:03:05Z"
+        },
+        {
+          "body": "A suggestion is to add something like this:\r\n- Verify that all clients are confidential and only allows required authentication methods. Note that verifications 2.2.5 and 9.3.3 mandates mTLS, but private-key-jwt is also regarded sufficient for OAuth in L3 applications. Support for client-secret authentication could be considered (if needed)  and L2 applications could also allow public clients (without client authentication) \r\n- Verify that clients are configured to only allow the required flow. For system integrations only allow grant type 'client-credentials' and for user interaction applications only allow grant type 'code'  (implicit and ROPC should not be supported, other additional flows like Device Authorization Grant might be supported if needed). Avoid reusing clients for different purposes (allowing e g both code and client-credentials).\r\n- Verify that allowed scopes for each client asserts least privilege (especially if back-end authorization is based on just a valid token and scopes, not using any additional token claims like identity of the caller or group membership)\r\n- Verify that it if long-lived refresh-tokens (especially together with the offline_access scope) are granted to a client, then the client must be confidential (L3) or one-time usage (L2, if allowing public clients).\r\n",
+          "recorded_at": "2024-07-17T12:00:47Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2397442207",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "Yes, I agree that PAR could be used to prevent tampering with this parameter (as well as other parameters) (as long as client authentication is required for the PAR endpoint i.e. for confidential clients).",
+          "recorded_at": "2024-10-07T16:57:40Z"
+        },
+        {
+          "body": "Yes, I agree that PAR could be used to make prevent tampering with this (as well as other) parameters (as long as client authentication is required for the PAR endpoint i.e. for confidential clients).",
+          "recorded_at": "2024-10-07T16:57:16Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2412365426",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "Two things kind-of bothers me here:\r\n\r\n* I'm afraid this often won't be easily implementable without begging `$framework` devs, which means this requirement might be ignored and if too many requirements are ignored other will be ignored as well.\r\n* It is currently not even possible to implement this using dynamic client registration because there is no `response_modes_supported` client registration metadata.\r\n\r\nWhat *is* possible with dynamic client registration is that the client can use `require_pushed_authorization_requests` so that the (confidential) client can make sure that the proper `response_mode` was used.\r\n\r\nSo could this be reworded as something such as (which focused on the goal):\r\n\r\n> [ADDED] Verify that for a given client, an attacker may not tamper with the 'response_mode' parameter.\r\n\r\nThis could be achieved:\r\n\r\n* by having the authentication server validate this value against the expected values;\r\n* or by using PAR;\r\n* or by using JAR.\r\n",
+          "recorded_at": "2024-10-14T21:22:55Z"
+        },
+        {
+          "body": "Two things kind-of bothers me here:\r\n\r\n* I'm afraid this often won't be easily implementable without begging `$framework` devs, which means this requirement might be ignored and if too many requirements are ignored other will be ignored.\r\n* It is currently not even possible to implement this using dynamic client registration because there is no `response_modes_supported` client registration metadata.\r\n\r\nWhat *is* possible with dynamic client registration is that the client can use `require_pushed_authorization_requests` so that the (confidential) client can make sure that the proper `response_mode` was used.\r\n\r\nSo could this be reworded as something such as (which focused on the goal):\r\n\r\n> [ADDED] Verify that for a given client, an attacker may not tamper with the 'response_mode' parameter.\r\n\r\nThis could be achieved:\r\n\r\n* by having the authentication server validate this value against the expected values;\r\n* or by using PAR;\r\n* or by using JAR.\r\n",
+          "recorded_at": "2024-10-14T21:22:37Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2416095746",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Via #2157 \r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.12** | [ADDED] Verify that for a given client, an attacker may not tamper with the 'response_mode' parameter, for example by having the authorization server validate this value against the expected values or by using pushed authorization request (PAR) or JWT-secured authorization request (JAR). | ✓ | ✓ | ✓ |",
+          "recorded_at": "2024-10-16T08:36:20Z"
+        },
+        {
+          "body": "| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.12** | [ADDED] Verify that for a given client, an attacker may not tamper with the 'response_mode' parameter, for example by having the authorization server validate this value against the expected values or by using pushed authorization request (PAR) or JWT-secured authorization request (JAR). | ✓ | ✓ | ✓ |",
+          "recorded_at": "2024-10-16T08:32:37Z"
+        }
+      ]
+    }
+  ]
+}

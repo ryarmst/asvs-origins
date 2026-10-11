@@ -1,0 +1,78 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1770#issuecomment-2454961617",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": " I totally agree that each file inside a zip needs to also go through a file validation/malware scanning/etc process like any other uploaded individual file.",
+          "recorded_at": "2024-11-05T10:27:35Z"
+        },
+        {
+          "body": "Another problem is that you cannot figure out the unpacked size of the zip without walking the file structure and counting. I typically unzip files for file upload in a quota limited directory and if it fails, drop it. I worry mostly about disk flooding attacks when it comes to zip. (already covered 12.1.2)\r\n\r\nAnd I totally agree that each file inside a zip needs to also go through a file validation/malware scanning/etc process like any other uploaded individual file.",
+          "recorded_at": "2024-11-04T15:08:23Z"
+        },
+        {
+          "body": "Another problem is that you cannot figure out the unpacked size of the zip without walking the file structure and counting. I typically unzip files for file upload in a quota limited directory and if it fails, drop it. I worry mostly about disk flooding attacks when it comes to zip.\r\n\r\nAnd I totally agree that each file inside a zip needs to also go through a file validation/malware scanning/etc process like any other uploaded individual file.",
+          "recorded_at": "2024-11-04T15:07:02Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1770#issuecomment-2454974595",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "So how about this addition\r\n\r\n12.1.5 | [ADDED] Verify that if an application allows users to upload archive files (e.g., zip files), the application must individually validate each file within the archive according to established file validation rules. | ✓ | ✓ | ✓ | 23\r\n-- | -- | -- | -- | -- | --",
+          "recorded_at": "2024-11-04T15:16:41Z"
+        },
+        {
+          "body": "So how about this addition\r\n\r\n12.1.5 | [ADDED] Verify that if an application allows users to upload archive files (e.g., zip files) and then unpacks files from these archives within the application, the application must individually validate each file within the archive according to established file validation rules. | ✓ | ✓ | ✓ | 23\r\n-- | -- | -- | -- | -- | --",
+          "recorded_at": "2024-11-04T15:16:21Z"
+        },
+        {
+          "body": "So how about this.\r\n\r\nLet's make a new section 12.8 that is exclusively for archive (zip, etc) file handling.  We can move these two into it:\r\n\r\n12.1.2 | Verify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum number of files before uncompressing the file. |   | ✓ | ✓ | 409\r\n-- | -- | -- | -- | -- | --\r\n\r\n12.3.7 | [ADDED] Verify that server-side file processing such as file decompression ignores user-provided path information to prevent vulnerabilities such as zip slip. | ✓ | ✓ | ✓ | 23\r\n-- | -- | -- | -- | -- | --\r\n\r\n... and add a third that Elar suggested above:\r\n\r\n_Verify that if an application allows users to upload archive files (e.g., zip files) and then unpacks files from these archives within the application, the application must individually validate each file within the archive according to established file validation rules._",
+          "recorded_at": "2024-11-04T15:12:18Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1770#issuecomment-2456804161",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Another option is to modify 12.2.1, suggested by @tghosth \r\n\r\n12.2.1 | [MODIFIED] Verify that when the application accepts a file, it checks if the file extension matches an expected file extension and validates that the contents correspond to the type represented by the extension. This includes, but is not limited to, checking the initial 'magic bytes', performing image re-writing, and using specialized libraries for file content validation. **_This validation should apply to uploaded files and also to uploaded contents of an archive file, such as a zip._** | | ✓ | ✓ | 434\r\n-- | -- | -- | -- | -- | --",
+          "recorded_at": "2024-11-05T10:31:52Z"
+        },
+        {
+          "body": "Another option is to modify 12.2.1, suggested by @tghosth \r\n\r\n12.2.1 | [MODIFIED] Verify that when the application accepts a file, it checks if the file extension matches an expected file extension and validates that the contents correspond to the type represented by the extension. This includes, but is not limited to, checking the initial 'magic bytes', performing image re-writing, and using specialized libraries for file content validation. **_This validation should apply to uploaded files and also to uploaded contents of an archive file, such as a zip._** | | ✓ | ✓ | 434",
+          "recorded_at": "2024-11-05T10:31:41Z"
+        },
+        {
+          "body": "Another option is to modify 12.2.1, suggested by @tghosth \r\n\r\n12.2.1 | [MODIFIED] Verify that when the application accepts a file, it checks if the file extension matches an expected file extension and validates that the contents correspond to the type represented by the extension. This includes, but is not limited to, checking the initial 'magic bytes', performing image re-writing, and using specialized libraries for file content validation. **_This validation should also apply to uploaded files or uploaded contents of an archive file, such as a zip._** | | ✓ | ✓ | 434\r\n-- | -- | -- | -- | -- | --",
+          "recorded_at": "2024-11-05T10:31:07Z"
+        },
+        {
+          "body": "Another option is to modify 12.2.1, suggested by @tghosth \r\n\r\n12.2.1 | [MODIFIED] Verify that when the application accepts a file, it checks if the file extension matches an expected file extension and validates that the contents correspond to the type represented by the extension. This includes, but is not limited to, checking the initial 'magic bytes', performing image re-writing, and using specialized libraries for file content validation. **_This validation should also apply to uploaded files or uploaded contents of an archive file, such as a zip._** | | ✓ | ✓ | 434",
+          "recorded_at": "2024-11-05T10:30:33Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1770#issuecomment-2456809729",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "12.2.1 | [MODIFIED] Verify that when the application accepts a file, either on its own or within an archive such as a zip file, it checks if the file extension matches an expected file extension and validates that the contents correspond to the type represented by the extension. This includes, but is not limited to, checking the initial 'magic bytes', performing image re-writing, and using specialized libraries for file content validation. | | ✓ | ✓ | 434\r\n-- | -- | -- | -- | -- | --",
+          "recorded_at": "2024-11-05T10:33:10Z"
+        },
+        {
+          "body": "12.2.1 | [MODIFIED] Verify that when the application accepts a file, either on its own or within an archive such as zip, it checks if the file extension matches an expected file extension and validates that the contents correspond to the type represented by the extension. This includes, but is not limited to, checking the initial 'magic bytes', performing image re-writing, and using specialized libraries for file content validation. | | ✓ | ✓ | 434\r\n-- | -- | -- | -- | -- | --",
+          "recorded_at": "2024-11-05T10:32:52Z"
+        }
+      ]
+    }
+  ]
+}

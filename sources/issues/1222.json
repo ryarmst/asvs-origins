@@ -1,0 +1,290 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "There was a situation that my target was not vulnerable against Directory Traversal Attack in a normal way, but it was allowing me to upload a compressed folder, I was able to upload a PHP shell file in a folder that had the permission to execute the file by doing this:\r\n1- Create a zip file with a Python code and for the name of the target file to be compressed use something like this ../../../../../../../../var/www/target/root/shell.php [we cannot do it using normal applications that can ZIP files]\r\nI believe we need to have an ASVS item to check that. \r\n\r\n[Reference](https://github.com/snyk/zip-slip-vulnerability)",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM49yAh-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Abstractly, for my taste it's covered by path traversal points. See:\r\n* _V12.3.1 Verify that user-submitted filename metadata is not used directly by system or framework filesystems and that a URL API is used to protect against path traversal._\r\n\r\nIf the file was written to given destination by zip library, then it's path traversal problem in zip library - should we get zip library specific requirement, I'm not sure. Taken in account, it was \"out of box\" in 2018, and now most widespread libraries should be fixed or \"known to be vulnerable\" == avoidable.\r\n\r\nPerspective is - that zip library is one of the components in the application, and it should not contain known vulnerabilities:\r\n* _V1.14.3 Verify that the build pipeline warns of out-of-date or insecure components and takes appropriate actions._\r\n* _V14.2.1 Verify that all components are up to date, preferably using a dependency checker during build or compile time._",
+      "createdAt": "2022-02-11T18:56:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1036519550",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM49yN1n",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I still believe that we need to mention Zip Slip attack as many pentesters might not be aware of this method, maybe we can change 12.1.2 and a note to check Zip Slip attack too.\r\n",
+      "createdAt": "2022-02-11T20:01:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1036574055",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM490P2N",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Extra awareness is never bad, but I think to cover all possible test-cases is more testing-guide context.\r\n\r\nAt the moment I would say - problem in the issue title is covered, there are ASVS requirements for reporting it.\r\n\r\nLet's wait feedback from others as well.",
+      "createdAt": "2022-02-12T10:13:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1037106573",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-D4f3",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico What do you think about this one?",
+      "createdAt": "2022-02-16T07:47:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1041205239",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-ft1z",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think there is a high likelihood that someone could write this into their own code and therefore just talking about vulnerable dependencies is not enough.\r\n\r\nI agree that this is a kind of path traversal vulnerability but (as discussed in #1136) I am not sure if the [12.3 requirements](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V12-Files-Resources.md#v123-file-execution) are clear enough to cover this situation as well.\r\n\r\n@ImanSharaf  please could you look at the requirements in that section and see whether you think they cover the root cause of this vulnerability?",
+      "createdAt": "2022-02-23T07:13:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1048501619",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-fyYD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think there is a high likelihood that someone could write this into their own code\r\n\r\nHigh likelihood, that people _implement_ zip libraries not _using_ zip libraries? If in general \"take file path from _some container_ and use it later\" then it's not zip specific and should be handled as path traversal.\r\n\r\nMentioned 12.3.1 needs some update anyway.",
+      "createdAt": "2022-02-23T07:49:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1048520195",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Er9Ao",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree 100% that zip slip should somehow be mentioned. Two things can go wrong. The library may be totally vulnerable and the developer may not be checking for this path traversal. For example, I typically unzip uploaded files into a staging directiony with OS-level limits....",
+      "createdAt": "2022-06-10T13:38:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1152372776",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E830P",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I agree 100% that zip slip should somehow be mentioned. Two things can go wrong.\r\n\r\nJim, I addressed those both cases in my comment https://github.com/OWASP/ASVS/issues/1222#issuecomment-1036519550\r\n\r\n> The library may be totally vulnerable ...\r\n\r\nIf the library is vulnerable, then it is covered by requirements:\r\n* V1.14.3 Verify that the build pipeline warns of out-of-date or insecure components and takes appropriate actions.\r\n* V14.2.1 Verify that all components are up to date, preferably using a dependency checker during build or compile time.\r\n\r\n>  and the developer may not be checking for this path traversal.\r\n\r\nThen it's clear path traversal, covered by requirement:\r\n\r\n* V12.3.1 Verify that user-submitted filename metadata is not used directly by system or framework filesystems and that a URL API is used to protect against path traversal.\r\n\r\nAt the moment I can not see, how this new requirement could be unique - without being duplicate one of mentioned requirements.",
+      "createdAt": "2022-06-15T18:44:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1156807951",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FU0xt",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So having looked at 12.3, I think we could consider a specific requirement for zipslip or at least a mention of zipslip within an existing item in this section as it already has multiple requirements related to relying on user provided file paths.\r\n\r\nTo be honest, I think 12.3.1, 12.3.2, 12.3.3 and 12.3.5 all need clarifications to make the differences between them clearer and zipslip could be a part of this.\r\n\r\n@elarlang what do you think?",
+      "createdAt": "2022-06-22T13:18:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1163086957",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FaVWC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Maybe an addition like so:\r\nV12.3.1 Verify that user-submitted filename metadata is not used directly by system or framework filesystems and that a URL API is used to protect against path traversal. **Path traversal can also be exploited by extracting files from a zip file or other archive.**\r\n",
+      "createdAt": "2022-06-23T15:07:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1164531074",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5F-R30",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I disagree with combining it because whilst this is conceptually the same issue, the first part is solved using some sort of URL API but the zip slip thing would need to be fixed in the code that processes the zip files.",
+      "createdAt": "2022-07-04T15:45:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1173954036",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5O3Xv9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So having looked at 12.3, I think we could consider a specific requirement for zipslip or at least a mention of zipslip within an existing item in this section as it already has multiple requirements related to relying on user provided file paths.\r\n\r\nok, let's go for separate requirement.\r\n\r\n> To be honest, I think 12.3.1, 12.3.2, 12.3.3 and 12.3.5 all need clarifications to make the differences between them clearer and zipslip could be a part of this.\r\n\r\nthere is separate issue (now) for those requirements: https://github.com/OWASP/ASVS/issues/1427",
+      "createdAt": "2022-11-22T06:07:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1323138045",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZFkFJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So how about:\r\n\r\n> Verify that server-side file processing such as file decompression ignores user provided path information.",
+      "createdAt": "2023-04-03T16:28:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1494630729",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZPNg4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If I could not know from this issue that proposed requirement is about zip slip, is it intuitive and understandable, that it is about zip slip? I think it makes sense to mention it somehow in the requirement.",
+      "createdAt": "2023-04-05T09:05:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1497159736",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmdV6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So how about:\r\n\r\n> Verify that server-side file processing such as file decompression ignores user provided path information to prevent vulnerabilities such as zip slip.\r\n\r\n@elarlang ",
+      "createdAt": "2023-05-31T14:36:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1570362746",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dnQqp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "* Level: 1\r\n* [CWE-23](https://cwe.mitre.org/data/definitions/23.html)\r\n\r\nNot sure about category, but let's get it into 12.3 and move later to better one if we('ll) have some better one.",
+      "createdAt": "2023-05-31T16:46:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1222#issuecomment-1570572969",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-02-11T17:40:34Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1222,
+  "state": "CLOSED",
+  "title": "There is no item to check Zip Slip related vulnerabilities",
+  "url": "https://github.com/OWASP/ASVS/issues/1222"
+}

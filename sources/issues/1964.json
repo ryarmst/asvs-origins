@@ -1,0 +1,555 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "UPDATE: The focus for the issue is set to only handle the response_mode parameter validation, jump to https://github.com/OWASP/ASVS/issues/1964#issuecomment-2382319552\r\n\r\n---\r\n\r\nspin-off from https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 2\"\r\n\r\nFor a situation, where OAuth is used as a \"first-party\" authorization solution and the application needs one and only way how it communicates with the authorization server, then for the OAuth client must be configured and the Authorization Server must validate, that: only the expected values are allowed, that is implemented by the client:\r\n\r\n  * response_type\r\n  * response_mode\r\n  * scope - here, support for the `offline_access` may be worth special mention\r\n\r\nedit: scope in mind - authorization request from OAuth Client to OAuth Authorization Server\r\n\r\n--\r\nFeedback from @tghosth in https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876\r\n\r\n> If this is a simple requirement then it sounds sensible as long as it is not too detailed.\r\n\r\n--\r\nOverlap by recommendation from @TobiasAhnoff in https://github.com/OWASP/ASVS/issues/1925\r\n\r\n> 3 Verify that client configuration asserts least privilege (e g scopes and flows)\r\n\r\nAlthough response_type and response_mode are not directly privilege, those are all related with allowed flow.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5-gLGW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 3 Verify that client configuration asserts least privilege (e g scopes and flows)\r\n\r\nI was thinking more about it - I think it is another topic compared which I opened, so probably we have 2 different vectors to cover.\r\n\r\n* original issue - (at least for 1st party solution) authorization server should accept only those parameters and values for communication, that are needed by the (one and only) OAuth Client - response_mode, response_type, scope\r\n* additional issue, by Tobias - scope definition on the _Authorization Server_ side for the _OAuth Client_ should not give more permissions than needed for given client and actions.\r\n\r\nping @TobiasAhnoff - please confirm my understanding",
+      "createdAt": "2024-05-21T10:56:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2122363286",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-gwM2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Based on the typical OAuth registration and \"user\" workflow, I would add one more level here.\r\n\r\n1) Server allows a series of scopes to start with.\r\n2) Client registers (once) with a limited list of these scopes (or all that the server offers).\r\n3) A \"user\" goes through the OAuth flow and may only use the scopes that the server approved of during registration time and NOT NECESSARILY the complete lists of scopes that server allows. Again, only the scope the server approved of _during client registration_ should be allowed during user flows, and I feel we need to clarify that level of strictness.\r\n\r\nSo I'd suggest two requirements around scopes since there are granted at very different parts of the OAuth lifecycle.\r\n\r\n1) Only let a client register for scopes that the server allows\r\n2) Only let a \"user\" use scopes the authorization server approved of during client-registration",
+      "createdAt": "2024-05-21T12:23:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2122515254",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-hn69",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm not sure we are talking about the same thing here (user registration vs configured client), I modified initial issue to be more clear and added:\r\n\r\n> edit: scope in mind - authorization request from OAuth Client to OAuth Authorization Server\r\n\r\nFor the **1st party solution** (if there is no \"discovery\" in place), when an application uses the SSO service from the same organization, there should be no client registration available for being a OAuth Client. It is actually worth a separate requirement.\r\n\r\n",
+      "createdAt": "2024-05-21T14:16:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2122743485",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6FGzAC",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A suggestion is to add something like this:\r\n\r\nL1,L2,L3: Verify that allowed scopes for each client asserts least privilege (especially if RS authorization is based on just a valid token and scopes, not using any additional token claims like identity of the caller or group membership)\r\n\r\nL2,L3: Verify that all clients are configured to only allow the required flow. For system integrations only allow grant type 'client-credentials' and for user interaction applications only allow grant type 'code'  (Implicit and ROPC should not be supported, other additional flows like Device Authorization Grant might be supported if needed). Avoid reusing clients for different purposes (allowing e g both code and client-credentials).\r\n\r\nL1,L2,L3: Verify that grant type 'code' is always used together with PKCE\r\n\r\nL3: \"Verify that all clients are confidential\" (L1-L2 could allow for public clients)\r\n\r\nL3: \"Verify that all clients are configured to use strong client authentication, mTLS or private-key-jwt\" (L1-L2 could also use client-secret,  note that verification 9.3.3 mandates mTLS, but private-key-jwt is also regarded sufficient by e g FAPI)\r\n\r\nL3: Verify that PAR with client authentication is used (for L1-L2 PAR is optional and could be used without client authentication)\r\n\r\nL3: Verify that sender-constrained access-tokens are used either using mTLS or DPoP (note that for L1 and L2 this does not require client authentication if used by public clients)\r\n\r\nL3: Verify that refresh-tokens are sender-constrained (by requiring client authentication for all token requests, while L1-L2 could allow one-time mitigation strategy for public clients, this is especially important if offline_access is granted, allowing long lived tokens not attached to active user sessions)\r\n\r\n\r\n\r\n",
+      "createdAt": "2024-07-17T12:00:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2233151490",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N_0_A",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Scope and response_type concerns are or will be covered by other requirements.\r\n\r\nHere there is need to build a requirement to say, that only allowed response_mode can be accepted by the authorization server (for the authorization request).",
+      "createdAt": "2024-09-30T07:27:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2382319552",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OEn3P",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Using the style from 51.2.5 it should sounds like:\r\n> Verify that for a given client, the authorization server only allows  'response_mode' value that this client needs to use.",
+      "createdAt": "2024-09-30T15:50:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2383576527",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Obh3w",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree that 'response_mode' could be restricted, but is it possible (per client)? In my experience this not supported by some common OAuth/OIDC services, but I might be wrong...can´t find good reference documentation on this? ",
+      "createdAt": "2024-10-02T20:06:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2389581296",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OfH9n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "When I was discussing the topic with \"OAuth 2.0 for Browser-Based Applications\" they thought it was a more general issue than browser-based apps and should belong to more general spec. Also, it should be solved when JAR/PAR is used for backend (confidential?) OAuth clients.\r\n\r\nIn case it is not suitable for 3rd party solutions and for discovery mode, then we should limit the requirement for 1st party usage. Although OAuth is not even meant to be used like that.\r\n\r\nping @randomstuff",
+      "createdAt": "2024-10-03T05:03:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2390523751",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ohnam",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I agree that 'response_mode' could be restricted, but is it possible (per client)?\r\n\r\nI'm not sure the security benefit is that great. I don't believe an attacker would gain a significant advantage in changing the `response_mode`. If that's true and as I don't see much support for checking this (i.e. there is no associated client registration metadata), I would say we should not include this.\r\n\r\n`response_modes=form_post` is somewhat safer because the response values won't be visible in the logs/history. It would probably be better for the client to use it when possible (i.e. when this is supported by the AS and, I guess, when the RP is browser-based) but  I'm not sure that a requirement about this should be included.",
+      "createdAt": "2024-10-03T11:25:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2391176870",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OpE9S",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If redirect_uri is not matched with string-match and is (as an example) validated on origin level, it is enough to have one open-redirect, xss, referrer-leakage (for example you can set HTML attribute to an image, to have the effect) etc on the site, to steal the authorization code.\r\n\r\nIf redirect_uri is validated correctly using string-match, but if you can change response_mode, then the client does not read the authorization code from the response and leaves it to be read to an attacker - there are still XSS or referrer-leakage vectors to read it, or it may leak from URL to logs and so on.\r\n\r\nI have proved stealing the authorization code many times during pentests and often I can say, that it could be not possible or it is more complicated if I (as an attacker) can not use other response_mode value than it is used by default.",
+      "createdAt": "2024-10-04T08:26:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2393132882",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OxzVh",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The suggested verification works, even if I think it is hard to do this with some AS services, but maybe it should be noted that there are other mitigations, perhaps?\r\n\r\n> Verify that for a given client, the authorization server only allows 'response_mode' value that this client needs to use. Or applies other mitigations like PAR or a confidential client.\r\n",
+      "createdAt": "2024-10-06T12:21:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2395420001",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ox0-U",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think a confidential client is not that helpful here, as the response_mode value must be limited for the authorization request, but the confidential client comes into play with the token request. I don't know enough about PAR to comment on that.",
+      "createdAt": "2024-10-06T12:42:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2395426708",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O5Awu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The suggested verification works, even if I think it is hard to do this with some AS services\r\n\r\nMaybe AS providers should implement some features, not we need to change requirement to be more flexible? :)\r\n\r\nAlthough I agree that the risk-level is different when confidential client or/or client authentication is used, but it's the same with basically everything (public client vs confidential client). I think serving the idea and principle is enough at the moment:\r\n> Verify that for a given client, the authorization server only allows 'response_mode' value that this client needs to use.\r\n",
+      "createdAt": "2024-10-07T15:54:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2397309998",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O5hCf",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I agree that PAR could be used to prevent tampering with this parameter (as well as other parameters) (as long as client authentication is required for the PAR endpoint i.e. for confidential clients).",
+      "createdAt": "2024-10-07T16:57:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2397442207",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O5kFB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The problem is likely used if the OAuth client is public, but PAR comes into the play from level 3. It is suitable as \"or\" condition.",
+      "createdAt": "2024-10-07T17:03:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2397454657",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_SnX",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I think a confidential client is not that helpful here\r\n\r\nFor code flow it is (implicit should not be used), since the code can only be used by the confidential client who has the client-secret (which is a mitigation for the risk of the code leaking in a query-string or post-body).\r\n\r\n> The problem is likely used if the OAuth client is public, but PAR comes into the play from level 3. It is suitable as \"or\" condition.\r\n\r\nI agree, is this good or should we remove/add anything?\r\n\r\n> Verify that for a given client, the authorization server only allows 'response_mode' value that this client needs to use. Or applies other mitigations like PAR or a confidential client.\r\n\r\n\r\n",
+      "createdAt": "2024-10-08T06:26:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2398955991",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_wCD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For code flow it is (implicit should not be used), since the code can only be used by the confidential client who has the client-secret (which is a mitigation for the risk of the code leaking in a query-string or post-body).\r\n\r\nAs I said, it comes into play with the token request, but we need to defend also the authorization request. If an attacker was able to get the authorization code, then in case there is CSRF on the client side (51.3.5) and PKCE is not used, you can force the client to make the request, without having direct access to the token endpoint.",
+      "createdAt": "2024-10-08T07:36:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2399076483",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PIqWQ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I am not sure I understand...are you suggesting that the requirement should be just (this applies to all kinds of clients and flows)\r\n\r\n> Verify that for a given client, the authorization server only allows 'response_mode' value that this client needs to use.\r\n\r\nor should we mention PAR (since it \"defends the authorization request\") and have\r\n\r\n> Verify that for a given client, the authorization server only allows 'response_mode' value that this client needs to use. Or applies other mitigations like PAR.\r\n\r\nAnd remove the confidential client part since this is not relevant? Or is this only an issue for public clients so it could be like this? \r\n\r\n> Verify that for a given **public** client, the authorization server only allows 'response_mode' value that this client needs to use. Or applies other mitigations like PAR.\r\n",
+      "createdAt": "2024-10-09T06:21:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2401412496",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PkFhn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Goes in via #2140\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.12** | [ADDED] Verify that for a given client, the authorization server only allows the 'response_mode' value that this client needs to use. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-10-12T15:28:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2408601703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PlEpu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I added the \"keep it simple\" version. If it requires some further improvement, please let me know. Otherwise we are done here.",
+      "createdAt": "2024-10-13T07:26:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2408860270",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ppo4Y",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I added the \"keep it simple\" version.\r\n\r\nI think it is a good thing to have. But, in my experience it is often not possible to do this (since authorization servers in general does not support configuration of allowed response_modes per client), so my concern is that we might add a requirement for all levels that not many implementations can do...is that ok or should requirements in ASVS for L1 and L2 be required to also have \"good\" implementation support? If this is ok, then I think 51.2.12 is good. \r\n",
+      "createdAt": "2024-10-14T06:03:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2410057240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ppxbv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I watched it from my pen-test experience and I can say, if the requirement is satisfied, it gives enough security benefits to be a worthy requirement.\r\n\r\nSo half of your concern can be fixed with a feature request to Keycloak? :)",
+      "createdAt": "2024-10-14T06:07:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2410092271",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PycZy",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Two things kind-of bothers me here:\r\n\r\n* I'm afraid this often won't be easily implementable without begging `$framework` devs, which means this requirement might be ignored and if too many requirements are ignored other will be ignored as well.\r\n* It is currently not even possible to implement this using dynamic client registration because there is no `response_modes_supported` client registration metadata.\r\n\r\nWhat *is* possible with dynamic client registration is that the client can use `require_pushed_authorization_requests` so that the (confidential) client can make sure that the proper `response_mode` was used.\r\n\r\nSo could this be reworded as something such as (which focused on the goal):\r\n\r\n> [ADDED] Verify that for a given client, an attacker may not tamper with the 'response_mode' parameter.\r\n\r\nThis could be achieved:\r\n\r\n* by having the authentication server validate this value against the expected values;\r\n* or by using PAR;\r\n* or by using JAR.\r\n",
+      "createdAt": "2024-10-14T21:22:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2412365426",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P0uKA",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang I agree that it is a worthy requirement and I like rewording with focus on the goal as @randomstuff suggested, perhaps add how this can be achieved to the requirement  \r\n\r\n> Verify that for a given client, an attacker may not tamper with the 'response_mode' parameter. In example by having the authorization server validate this value against the expected values or by using PAR or JAR.\r\n\r\n",
+      "createdAt": "2024-10-15T05:59:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2412962432",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P0zpr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Personally, I don't care how it is achieved. One may also put a WAF rule and block all other requests that are not with response_mode=expected.\r\n\r\nI'll update the requirement with next area51 PR.",
+      "createdAt": "2024-10-15T06:14:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2412984939",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QArIC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Via #2157 \r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.12** | [ADDED] Verify that for a given client, an attacker may not tamper with the 'response_mode' parameter, for example by having the authorization server validate this value against the expected values or by using pushed authorization request (PAR) or JWT-secured authorization request (JAR). | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-10-16T08:32:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2416095746",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QBSxU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Done with this update.",
+      "createdAt": "2024-10-16T09:33:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2416258132",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RZlF-",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, Should this be worded positively instead? (see #2151)\r\n\r\n",
+      "createdAt": "2024-10-26T06:55:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2439401854",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RZmfY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang, Should this be worded positively instead? (see #2151)\r\n\r\nYes, that is correct. My first proposal (https://github.com/OWASP/ASVS/issues/1964#issuecomment-2408601703) was a positive requirement but seems that I did not recheck the updated version. So, let's fix it.",
+      "createdAt": "2024-10-26T07:06:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2439407576",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SpdR8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It will be updated to:\r\n> Verify that for a given client, the authorization server only allows the 'response_mode' value that this client needs to use. For example by having the authorization server validate this value against the expected values or by using pushed authorization request (PAR) or JWT-secured authorization request (JAR).",
+      "createdAt": "2024-11-06T17:11:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1964#issuecomment-2460341372",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-05-19T19:30:12Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 1964,
+  "state": "CLOSED",
+  "title": "proposal/discussion: OAuth - (for 1st party usage) only used (by the client) communication options must be allowed by authorization server",
+  "url": "https://github.com/OWASP/ASVS/issues/1964"
+}

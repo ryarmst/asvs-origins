@@ -1,0 +1,88 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-797731915",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "JSONP is a major antipattern and should not be used, it allows for CSP bypass.\r\n\r\nCan you give us a PR with a new requirement to avoid this and we can work on getting it rolled into main?\r\n\r\nReference: https://blog.fullstacktraining.com/why-jsonp-shouldnt-be-used/",
+          "recorded_at": "2021-03-13T17:18:03Z"
+        },
+        {
+          "body": "JSONP is a major antipattern and should not be used, it allows for CSP bypass.\r\n\r\nCan you give us a PR with a new requirement to avoid this and we can work on getting it rolled into main?",
+          "recorded_at": "2021-03-12T20:18:54Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-896814258",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Some more ideas on that category-topic - it's not sensitive data leakage from the point of view - this user's browser has permission to access it and can see it anyway (no extra leakage)\r\n\r\nThe problem is - JavaScript code, which is readable with Cross-Origin requests, contain (sensitive) data.\r\n\r\nAnd there are 2 ways how to fix it:\r\n\r\n  * remove data from JavaScript code\r\n  * restrict access for Cross-Origin requests (similar to defense against CSRF)\r\n\r\nThe problem exists, when request is made with authenticated/authorised user and response contains information which is only meant for them. It is most likely the case for cookie-based sessions as well.\r\n\r\nFor non-authenticated users there is requirement like 2.10.4.\r\n\r\nI watch this issue as \"Cross-Origin Reading (Request)\", and CSRF as \"Cross-Origin Writing (Request)\". So, those should belong together to one category and we don't have suitable one at the moment.\r\n\r\nOr\r\n* Cross-Origin Confidentiality - attacker forces victim's browser to read data from targeted site (XSSI)\r\n* Cross-Origin Integrity - attacker forces victim's browser to make data change request in targeted site (CSRF)\r\n\r\nThose were thoughts at the moment, still need more investigation from my side.",
+          "recorded_at": "2021-08-11T16:23:48Z"
+        },
+        {
+          "body": "Some more ideas on that category-topic - it's not sensitive data leakage from the point of view - this user's browser has permission to access it and can see it anyway (no extra leakage)\r\n\r\nThe problem is - JavaScript code, which is readable with Cross-Origin requests, contain (sensitive) data.\r\n\r\nAnd there are 2 ways how to fix it:\r\n\r\n  * remove data from JavaScript code\r\n  * restrict access for Cross-Origin requests (similar to defense against CSRF)\r\n\r\nThe problem exists, when request is made with authenticated/authorised user and response contains information which is only meant for them. It is most likely the case for cookie-based sessions as well.\r\n\r\nFor non-authenticated users there is requirement like 2.10.4.\r\n\r\nI watch this issue as \"Cross-Origin Reading (Request)\", and CSRF as \"Cross-Origin Writing (Request)\". So, those should belong together to one category and we don't have suitable one at the moment.\r\n\r\nOr\r\n* Cross-Origin Confidentiality - attacker forces victim's browser to read data from targeted site\r\n* Cross-Origin Integrity - attacker forces victim's browser to make data change request in targeted site\r\n\r\nThose were thoughts at the moment, still need more investigation from my side.",
+          "recorded_at": "2021-08-11T16:22:37Z"
+        },
+        {
+          "body": "\r\nSome more ideas on that category-topic - it's not sensitive data leakage from the point of view - this user's browser has permission to access it and can see it anyway (no extra leakage)\r\n\r\nThe problem is - JavaScript code, which is readable with Cross-Origin requests, contain (sensitive) data.\r\n\r\nAnd there are 2 ways how to fix it:\r\n\r\n  * remove data from JavaScript code\r\n  * restrict access for Cross-Origin requests (similar to defense against CSRF)\r\n\r\nThe problem exists, when request is made with authenticated/authorised user and response contains information which is only meant for them. It is most likely the case for cookie-based sessions as well.\r\n\r\nFor non-authenticated users there is requirement like 2.10.4.\r\n\r\nI watch this issue as \"Cross-Origin Reading (Request)\", and CSRF as \"Cross-Origin Writing (Request)\". So, those should belong together to one category and we don't have suitable one at the moment.\r\n\r\nThose were thoughts at the moment, still need more investigation from my side.",
+          "recorded_at": "2021-08-11T13:11:08Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1836041938",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nI prepare for PR and re-analyzing those requirements:\r\n\r\n* \"sensitive data\" is a bit vague - maybe authenticated data?\r\n* \"JavaScript\" is a bit vague - technically JSON is also JavaScript\r\n* \"file\" is a bit too strict - usually, when sensitive data is part of JavaScript content, it's a dynamically built response, not a file.\r\n\r\nNeed some wording and grammar help here, but the direction is maybe something like:\r\nVerify that authenticated data is not present in the HTTP response when it can be included as a JavaScript source to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nTechnical note: it's only problematic when the session token is transferred automatically with the same request, which in practice means if the session token is delivered in the Cookie header and:\r\n* the session cookie has the `SameSite` attribute set to `None`\r\n* OR to value `Lax` when an attack comes from  Same-Site scope.",
+          "recorded_at": "2023-12-28T12:07:07Z"
+        },
+        {
+          "body": "\r\n> Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nI prepare for PR and re-analyzing those requirements:\r\n\r\n* \"sensitive data\" is a bit vague - maybe authenticated data?\r\n* \"JavaScript\" is a bit vague - technically JSON is also JavaScript\r\n* \"file\" is a bit too strict - usually, when sensitive data is part of JavaScript content, it's a dynamically built response, not a file.\r\n\r\nNeed some wording and grammar help here, but the direction is maybe something like:\r\nVerify that authenticated data is not present in the HTTP response when it can be included as a JavaScript source to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nTechnical note: it's only problematic when the session token is transferred automatically with the same request, which in practice means if the session token is delivered in the Cookie header and the session cookie has the `SameSite` attribute set to `None` or to value `Lax` when an attack comes from  Same-Site scope.",
+          "recorded_at": "2023-12-01T12:33:38Z"
+        },
+        {
+          "body": "\r\n\r\n> Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nI prepare for PR and re-analyzing those requirements:\r\n\r\n* \"sensitive data\" is a bit vague - maybe authenticated data?\r\n* \"JavaScript\" is a bit vague - technically JSON is also JavaScript\r\n* \"file\" is a bit too strict - usually, when sensitive data is part of JavaScript content, it's a dynamically built response, not a file.\r\n\r\nNeed some wording and grammar help here, but the direction is maybe something like:\r\nVerify that authenticated data is not present in the HTTP response when it can be included as a JavaScript source to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nTechnical note: it's only problematic when the session token is transferred automatically with the same request, which in practice means if the session token is delivered in the Cookie header and the session cookie has the `SameSite` attribute set to `None`.",
+          "recorded_at": "2023-12-01T12:30:51Z"
+        },
+        {
+          "body": "I prepare for PR and re-analyzing those requirements.\r\n\r\n> Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\n\"JavaScript file\"\r\n* sensitive data is a bit vague - maybe authenticated data?\r\n* JavaScript is a bit vague - technically JSON is also JavaScript\r\n* file is a bit too strict - usually, when sensitive data is part of JavaScript content, it's a dynamically built response, not a file.\r\n\r\nNeed some wording and grammar help here, but the direction is maybe something like:\r\nVerify that authenticated data is not present in the HTTP response when it can be included as a JavaScript source to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nTechnical note: it's only problematic when the session token is transferred automatically with the same request, which in practice means if the session token is delivered in the Cookie header and the session cookie has the `SameSite` attribute set to `None`.",
+          "recorded_at": "2023-12-01T12:30:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1866278685",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Requirements are now in the document based on the last proposed wording:\r\n\r\n## V50.4 Cross-Site Script Inclusion\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.1** | [ADDED] Verify that JSONP functionality is not enabled anywhere across the application to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |\r\n| **50.4.2** | [ADDED] Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |\r\n\r\nAs pointed out in previous comment (https://github.com/OWASP/ASVS/issues/903#issuecomment-1836041938), requirements can be improved.\r\n\r\nping @tghosth , @Sjord ",
+          "recorded_at": "2023-12-21T13:53:20Z"
+        },
+        {
+          "body": "Requirements are now in the document based on last proposed wording:\r\n\r\n## V50.4 Cross-Site Script Inclusion\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.1** | [ADDED] Verify that JSONP functionality is not enabled anywhere across the application to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |\r\n| **50.4.2** | [ADDED] Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |\r\n\r\nAs pointed out in previous comment (https://github.com/OWASP/ASVS/issues/903#issuecomment-1836041938), requirements can be improved.",
+          "recorded_at": "2023-12-21T13:47:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1871052942",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "How about:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.2** | [ADDED] Verify that **data which should require authorization** to access is not returned in **executable JavaScript** **format** to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |",
+          "recorded_at": "2023-12-28T10:53:15Z"
+        },
+        {
+          "body": "How about:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.1** | [ADDED] Verify that JSONP functionality is not enabled anywhere across the application to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |\r\n| **50.4.2** | [ADDED] Verify that **data which should require authorization** to access is not returned in **executable JavaScript** **format** to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |",
+          "recorded_at": "2023-12-28T10:53:07Z"
+        }
+      ]
+    }
+  ]
+}

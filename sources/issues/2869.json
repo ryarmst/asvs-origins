@@ -1,0 +1,268 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **3.4.3** | Verify that every HTTP response includes a Content-Security-Policy header field to reduce the risk of malicious JavaScript. The directives object-src 'none' and base-uri 'none' must be defined. For an L3 application, a per-response policy with nonces or hashes must be defined. | 2 | v5.0.be-50.3.1 |\n\nIf the focus is \"to reduce the risk of malicious JavaScript\" then \"Verify that every HTTP response includes\" is not justified.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6lykEW",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would argue that there is limited value in setting the header for some responses, but it can still be justified. A strict policy on responses intended to be non-HTML could mitigate scenarios where attackers can coerce injected HTML to be rendered. An argument could be made that requirements already exist that should prevent this (V3.2, 4.1.1), but so too are there requirements that should prevent XSS (V1.2). CSP ultimately is a defense in depth mechanism in all cases. It just is likely to have more impact in specific responses.\n\nMy opinion is that it should be implemented in all responses. If a response is not intended to permit any rendering of JS, then it is a simple policy to implement. ",
+      "createdAt": "2025-04-06T16:15:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2781495574",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lymIE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I mostly with you Ryan. I think the only time CSP is not important is when you have static HTML. For any dynamically generated page that includes some untrusted data, CSP is a net security benefit.",
+      "createdAt": "2025-04-06T16:37:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2781504004",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lyoCw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think the only time CSP is not important is when you have static HTML. \n\nNot entirely true, but it is covered by another requirement - from an embedding point of view, it must always be disabled because, lacking CSP/XFO, for example, error messages give an option to bypass CSP rules in an HTML injection situation.\n\nI don't have any good proposal at the moment for the requirement, but at the same time, it is clear that the current one can cause false positives in reports, for example, when required for a response that serves a jpg image.\n\n---\n\nOne direction - we should ask for only responses that require content rendering from the browser.\n\nOther direction, (that we have at the moment) to allow situations where serving non-renderable content does not need to contain the header field, then most likely it will be missing also for error messages from the same endpoint.",
+      "createdAt": "2025-04-06T16:58:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2781511856",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mEpSM",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We could soften it to say:\n\n\"_Verify that HTTP responses include a Content-Security-Policy header field to reduce the risk of malicious JavaScript. The directives object-src 'none' and base-uri 'none' must be defined. For an L3 application, a per-response policy with nonces or hashes must be defined._\"\n\nI feel like messing more with it would make a mess....",
+      "createdAt": "2025-04-08T12:12:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2786235532",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mLrN9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> We could soften it to say:\n> \n> \"_Verify that HTTP responses include a Content-Security-Policy header field to reduce the risk of malicious JavaScript. The directives object-src 'none' and base-uri 'none' must be defined. For an L3 application, a per-response policy with nonces or hashes must be defined._\"\n> \n> I feel like messing more with it would make a mess....\n\nJust to make things complex,\nThe object-src and base-uri calls are the least important part of a good CSP. Nonces and/or a strict allow list is much more critical.\n\nWould you like me to get the CSP standard leads involved? I know the leads from Google who wrote CSP3 and authored docs on strict CSP. They might be able to help.",
+      "createdAt": "2025-04-09T01:54:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2788078461",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mOLOc",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am pretty sure it took us a lot of discussion to get to this point. Now we are just discussing which responses to apply it to.",
+      "createdAt": "2025-04-09T08:13:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2788733852",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mO1x_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "At this point, we prefer not to mess with it further to avoid overcomplicating or opening up edgecases but we are leaving this as a potential discussion for the future.",
+      "createdAt": "2025-04-09T09:10:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2788908159",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mQvHy",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "As it stands, we are now focusing on clear guidance to stop object tag injection and BASE jumping and are skipping guidance in the whole point of CSP - XSS defense.\n\nI think this is a lost opportunity. \n\nIt's very strange to see detailed focus on the least important parts of CSP injection resistance.",
+      "createdAt": "2025-04-09T11:44:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2789405170",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mQ3mp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> are skipping guidance in the whole point of CSP - XSS defense.\n\nSo I think that is what we mean by \"risk of malicious JavaScript\" but I know we had a long discussion on CSP and maybe you could dig that up to check how we ended up here?",
+      "createdAt": "2025-04-09T11:52:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2789439913",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mQ8b3",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I read and participated in it all. But it ended poorly and it's a lost opportunity. We're focusing on the least important parts of CSP. It's a very strange ending.",
+      "createdAt": "2025-04-09T11:58:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2789459703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mS8tM",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I went back and read the previous issue. This comment had the final proposal:\nhttps://github.com/OWASP/ASVS/issues/1311#issuecomment-2462485081\n\n\"_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reduce the risk of malicious JavaScript. For L2, allowlists and a global policy may be used. For L3, a per-response policy with nonces or hashes, and object-src and base-uri set to 'none,' must be defined._\"\n\nAlthough weirdly, the final PR was different and basically matches what we have today:\n\n\"_Verify that every HTTP response includes a Content-Security-Policy header to reduce the risk of malicious JavaScript. The directives object-src 'none' and base-uri 'none' must be defined. For an L3 application, a per-response policy with nonces or hashes must be defined._\"\n\nI would therefore suggest maybe we need to bring back the bits that went missing in a more specific way:\n\n\"_Verify that HTTP responses include a Content-Security-Policy header field to reduce the risk of malicious JavaScript. As a minimum, a global policy must be used which includes the directives object-src 'none' and base-uri 'none' and defines either an allowlist or uses nonces or hashes. For an L3 application, a per-response policy with nonces or hashes must be defined._\"\n\nDoes this solve your XSS concern @jmanico ?",
+      "createdAt": "2025-04-09T14:43:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2789985100",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mTajc",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Another option:\n\n\"_Verify that HTTP responses include a Content-Security-Policy (CSP) response header field which defines directives to ensure the browser only loads and executes trusted content or resources, in order to limit execution of malicious JavaScript. As a minimum, a global policy must be used which includes the directives object-src 'none' and base-uri 'none' and defines either an allowlist or uses nonces or hashes. For an L3 application, a per-response policy with nonces or hashes must be defined._\"",
+      "createdAt": "2025-04-09T15:24:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2790107356",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mTar9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang would also like to know which of the above you prefer",
+      "createdAt": "2025-04-09T15:24:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2790107901",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mT0-E",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> So I went back and read the previous issue. This comment had the final proposal: [#1311 (comment)](https://github.com/OWASP/ASVS/issues/1311#issuecomment-2462485081)\n> \n> \"_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reduce the risk of malicious JavaScript. For L2, allowlists and a global policy may be used. For L3, a per-response policy with nonces or hashes, and object-src and base-uri set to 'none,' must be defined._\"\n> \n> Although weirdly, the final PR was different and basically matches what we have today:\n> \n> \"_Verify that every HTTP response includes a Content-Security-Policy header to reduce the risk of malicious JavaScript. The directives object-src 'none' and base-uri 'none' must be defined. For an L3 application, a per-response policy with nonces or hashes must be defined._\"\n> \n> I would therefore suggest maybe we need to bring back the bits that went missing in a more specific way:\n> \n> \"_Verify that HTTP responses include a Content-Security-Policy header field to reduce the risk of malicious JavaScript. As a minimum, a global policy must be used which includes the directives object-src 'none' and base-uri 'none' and defines either an allowlist or uses nonces or hashes. For an L3 application, a per-response policy with nonces or hashes must be defined._\"\n> \n> Does this solve your XSS concern [@jmanico](https://github.com/jmanico) ?\n\nVery much so, this is exactly what I'm looking for. Thank you Josh.",
+      "createdAt": "2025-04-09T16:04:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2790215556",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mZaCU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [@elarlang](https://github.com/elarlang) would also like to know which of the above you prefer\n\nThis one: https://github.com/OWASP/ASVS/issues/2869#issuecomment-2790107356\n\nBut from this one \"Content-Security-Policy (CSP)\" needs some correction (the header name is not a source for acronym), as you have proposed in other options.",
+      "createdAt": "2025-04-10T06:22:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2869#issuecomment-2791678100",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-03T17:50:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 2869,
+  "state": "CLOSED",
+  "title": "3.4.3 / v5.0.be-50.3.1 - CSP for every HTTP response?",
+  "url": "https://github.com/OWASP/ASVS/issues/2869"
+}

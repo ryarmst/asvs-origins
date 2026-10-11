@@ -1,0 +1,287 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "The FAPI 2.0 profile have this [requirement](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#name-general-requirements):\r\n\r\n> Authorization Servers[...] if using DPoP, shall support \"Authorization Code Binding to DPoP Key\" (as required by Section 10.1 of [[RFC9449](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#RFC9449)]);\r\n\r\nwith this note:\r\n\r\n> NOTE 2: Although authorization servers are required to support \"Authorization Code Binding to DPoP Key\" (as defined by Section 10.1 of [[RFC9449](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#RFC9449)]), clients are not required to use it.\r\n\r\nShall we include a corresponding requirement: \"Verify that authorization server supports Authorization Code Binding to DPoP Key.\"? We could even go as far as require it it used by clients?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6QRNV_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If we only require that the AS need to support it, but not require the client to use it, it does not provide any security. So the question is - should it be required for the client?",
+      "createdAt": "2024-10-17T20:04:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2420430207",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRVgc",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If we only require that the AS need to support it, but not require the client to use it, it does not provide any security.\r\n\r\nI would not say it provides *no* security at all. It makes sure that any client which actually supports it will benefit from it.\r\n\r\nThen I agree, it makes sense to require it from the client as well. I don't see any reason why the client would not want to use it if it implements DPoP.",
+      "createdAt": "2024-10-17T20:11:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2420463644",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRY23",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We had the same discussion with PKCE requirement (Verify that the AS supports PKCE). If we have a requirement, that the client need to use PKCE, it means, the AS also need to support PKCE. Only requiring some support is functionality testing area for me and I prefer requirement for the client.\r\n\r\n",
+      "createdAt": "2024-10-17T20:19:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2420477367",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjP4_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> NOTE 2: Although authorization servers are required to support \"Authorization Code Binding to DPoP Key\" (as defined by Section 10.1 of [[RFC9449](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#RFC9449)]), clients are not required to use it.\r\n\r\nSo, our options:\r\n* option 1 - for just to be aligned with FAPI 2.0 - ask support from AS, without requiring it from the client\r\n* option 2 - we don't add any requirement for this. As stated already, in my opinion \"the option 1\" does not solve any problem to require it\r\n* option 2 - to be in conflict (more strict) with FAPI 2.0 and require it from clients\r\n\r\nI prefer \"option 2\".",
+      "createdAt": "2024-10-20T18:03:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2425159231",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qjrf5",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "FWIW, [here is the motivation](https://datatracker.ietf.org/doc/html/rfc9449#name-authorization-code-and-publ) for authorization code binding to a DPoP key:\r\n\r\n> If an **authorization server does not (or cannot) strictly enforce the single-use limitation** for authorization codes and **an attacker can access the authorization code** (and if PKCE is used, the **code_verifier**), the attacker can create a forged token request, binding the resulting token to an attacker-controlled key. For example, using XSS, attackers might obtain access to the authorization code and PKCE parameters. Use of the dpop_jkt parameter prevents this attack.\r\n\r\nI'm finding this somewhat far-fetched.",
+      "createdAt": "2024-10-20T22:53:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2425272313",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qk6ls",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Are we talking about level 3 requirement here?",
+      "createdAt": "2024-10-21T05:05:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2425596268",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qk_NW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would say that [the section](https://datatracker.ietf.org/doc/html/rfc9449#section-11.9-2) before the quoted section is more convincing for me.",
+      "createdAt": "2024-10-21T05:21:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2425615190",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QlwnH",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would say that [the section](https://datatracker.ietf.org/doc/html/rfc9449#section-11.9-2) before the quoted section is more convincing for me.\r\n\r\nYes but the section that I quoted, describes the scenario under which this may be useful:\r\n\r\n* the attacker has access to the authorization code;\r\n* *and* the attacker has access to the code verifier;\r\n* *and* the attacker has access to the *client credentials* (for confidential clients);\r\n* *and* the attacker manages to use the authorization code before it is invalidated (single-use).\r\n\r\n> Are we talking about level 3 requirement here?\r\n\r\nYes, I would say L3 but on the other hand L3 requires the usage of confidential clients which makes the attack scenario quite unlikely.\r\n\r\nMaybe option 2 is fine.",
+      "createdAt": "2024-10-21T07:16:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2425817543",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ql-oj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's get the requirement text in as L3 requirement. We need to justify all levels anyway, but as by spec it is not required, I'm not very keen to use it for L2.",
+      "createdAt": "2024-10-21T07:44:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2425874979",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S4Mk3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we have agreement here to add another requirement, @randomstuff - can you come up with proposal?",
+      "createdAt": "2024-11-08T09:17:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2464205111",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S-ad3",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposals below which separates in two different requirements. I'm not sure how to combined them in a single requirement (and whether this is desirable).\r\n\r\nRequirement for OAuth client (L3):\r\n\r\n> Verify that the OAuth client supports authorization code binding to a DPoP key when it uses DPoP by including its DPoP public-key in the authorization code request.\r\n\r\nNote: this can be achieved using the `dpop_jkt` parameter or, when using PAR, in a DPoP HTTP header.\r\n\r\nRequirement for Authorization server (L3):\r\n\r\n> Verify that the OAuth authorization server supports authorization code binding to a DPoP key when it supports DPoP. When it receives a authorization code request including a DPoP client public key, it must bind the resulting authorization code to this public key and must reject the subsequent access token request if it does not include a DPoP proof for the same public key.\r\n\r\nI'm am not very happy about this second requirement and would gladly see improvement proposition :)\r\n\r\n***\r\n\r\nFor references, [Authorization Code Binding to DPoP Key](https://www.rfc-editor.org/rfc/rfc9449.html#name-authorization-code-binding-) is about including a SHA-256 hash of the (DPoP) client public key inside the initial authorization request.\r\n\r\nThis is usually done using the `dpop_jkt` parameter:\r\n\r\n~~~\r\nGET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz\\\r\n    &redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb\\\r\n    &code_challenge=E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM\\\r\n    &code_challenge_method=S256\\\r\n    &dpop_jkt=NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs HTTP/1.1\r\n~~~\r\n\r\nor using a `DpoP` push when using PAR.\r\n",
+      "createdAt": "2024-11-08T22:15:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2465834871",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TBxMg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm back and forward with this one, the likelihood (as described in https://github.com/OWASP/ASVS/issues/2160#issuecomment-2425817543) seems here niche, and seems more like a level 5 requirement.\r\n\r\n@randomstuff - if you are sure that ASVS needs those requirements, we can have them as level 3 requirements. A bit updated formating:\r\n\r\n> Verify that the OAuth client supports authorization code binding to a Demonstrating Proof of Possession (DPoP) key when it uses DPoP by including its DPoP public-key in the authorization code request.\r\n\r\n> Verify that the OAuth authorization server supports authorization code binding to a Demonstrating Proof of Possession (DPoP) key when it supports DPoP. When it receives an authorization code request including a DPoP client public key, it must bind the resulting authorization code to this public key and must reject the subsequent access token request if it does not include a DPoP proof for the same public key.",
+      "createdAt": "2024-11-10T12:23:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2466714400",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TByC9",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> if you are sure that ASVS needs those requirements\r\n\r\nI believe we can probably skip this one.",
+      "createdAt": "2024-11-10T12:34:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2466717885",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TByrY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ack, proposals are written and ready for PR if we rethink that. Closing for now.",
+      "createdAt": "2024-11-10T12:42:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2160#issuecomment-2466720472",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-10-17T19:27:13Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2160,
+  "state": "CLOSED",
+  "title": "OAuth: require Authorization Code Binding to a DPoP Key",
+  "url": "https://github.com/OWASP/ASVS/issues/2160"
+}

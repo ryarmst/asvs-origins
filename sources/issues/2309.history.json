@@ -1,0 +1,101 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2024-11-06T20:45:52Z",
+      "diff": "I don't think there is a requirement which explicitly says that TLS certificates (and more generally any public-keys) are verified, not disabled.\r\n\r\nWe have these requirements on this topic:\r\n\r\n> 9.1.4 [ADDED] Verify that external facing services use publically trusted TLS certificates.\r\n>\r\n> 9.3.2 [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected.\r\n\r\nSomething like:\r\n\r\n> Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n>\r\n> Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nContext (and things I'm willing to prevent here):\r\n\r\n* In my experience there is a saddeningly high prevalence of \"TLS validation fails? Let's just disable TLS validation in code (as recommended in some random StackOverflow answer\".\r\n* Another thing I've seen too many times is « ssl_verify_client optional_no_ca; » where the application just blindly trusts the client identity (issuer) found in the certificate. (This is NOT safe at all as you can just self-sign your own certificate to assume any identity you wish)."
+    },
+    {
+      "editedAt": "2024-11-06T20:49:47Z",
+      "diff": "I don't think there is a requirement which explicitly says that TLS certificates (and more generally any public-keys) are verified, not disabled.\r\n\r\nWe have these requirements on this topic:\r\n\r\n> 9.1.4 [ADDED] Verify that external facing services use publically trusted TLS certificates.\r\n>\r\n> 9.3.2 [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected.\r\n\r\nSomething like:\r\n\r\n> Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n>\r\n> Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nContext (and things I'm willing to prevent here):\r\n\r\n* In my experience there is a saddeningly high prevalence of \"TLS validation fails? Let's just disable TLS validation in code (as recommended in some random StackOverflow answer\".\r\n* Another thing I've seen too many times is « ssl_verify_client optional_no_ca; » where the application just blindly trusts the client identity (issuer) found in the certificate. (This is NOT safe at all as you can just self-sign your own certificate to assume any identity you wish).\r\n\r\nSome additional considerations:\r\n\r\n* This could apply to other uses of certificates.\r\n* In some cases (OAuth mTLS), it is actually OK to use self-signed client certificates (but there is some additional mechanism which makes it possible to verify the binding of the certificate TLS public key in the intended usage context). The formulation of the requirements should allow this kind of usage.\r\n"
+    },
+    {
+      "editedAt": "2024-11-06T20:49:59Z",
+      "diff": "I don't think there is a requirement which explicitly says that TLS certificates (and more generally any public-keys) are verified, not disabled.\r\n\r\nWe have these requirements on this topic:\r\n\r\n> 9.1.4 [ADDED] Verify that external facing services use publically trusted TLS certificates.\r\n>\r\n> 9.3.2 [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected.\r\n\r\nSomething like:\r\n\r\n> Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n>\r\n> Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nContext (and things I'm willing to prevent here):\r\n\r\n* In my experience there is a saddeningly high prevalence of \"TLS validation fails? Let's just disable TLS validation in code (as recommended in some random StackOverflow answer\".\r\n* Another thing I've seen too many times is « ssl_verify_client optional_no_ca; » where the application just blindly trusts the client identity (issuer) found in the certificate. (This is NOT safe at all as you can just self-sign your own certificate to assume any identity you wish).\r\n\r\nSome additional considerations:\r\n\r\n* This could apply to other uses of certificates.\r\n* In some cases (OAuth mTLS-bound access tokens), it is actually OK to use self-signed client certificates (but there is some additional mechanism which makes it possible to verify the binding of the certificate TLS public key in the intended usage context). The formulation of the requirements should allow this kind of usage.\r\n"
+    },
+    {
+      "editedAt": "2024-11-06T20:50:28Z",
+      "diff": "I don't think there is a requirement which explicitly says that TLS certificates (and more generally any public-keys) are verified, not disabled.\r\n\r\nWe have these requirements on this topic:\r\n\r\n> 9.1.4 [ADDED] Verify that external facing services use publically trusted TLS certificates.\r\n>\r\n> 9.3.2 [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected.\r\n\r\nSomething like:\r\n\r\n> Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n>\r\n> Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nContext (and things I'm willing to prevent here):\r\n\r\n* In my experience there is a saddeningly high prevalence of \"TLS validation fails? Let's just disable TLS validation in code (as recommended in some random StackOverflow answer\".\r\n* Another thing I've seen too many times is « ssl_verify_client optional_no_ca; » where the application just blindly trusts the client identity (issuer) found in the certificate. (This is NOT safe at all as you can just self-sign your own certificate to assume any identity you wish).\r\n\r\nSome additional considerations:\r\n\r\n* This could apply to other uses of certificates.\r\n* In some cases ([OAuth mTLS-bound access tokens](https://www.rfc-editor.org/rfc/rfc8705.html)), it is actually OK to use self-signed client certificates (but there is some additional mechanism which makes it possible to verify the binding of the certificate TLS public key in the intended usage context). The formulation of the requirements should allow this kind of usage.\r\n"
+    },
+    {
+      "editedAt": "2024-11-06T20:50:39Z",
+      "diff": "I don't think there is a requirement which explicitly says that TLS certificates (and more generally any public-keys) are verified, not disabled.\r\n\r\nWe have these requirements on this topic:\r\n\r\n> 9.1.4 [ADDED] Verify that external facing services use publically trusted TLS certificates.\r\n>\r\n> 9.3.2 [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected.\r\n\r\nSomething like:\r\n\r\n> Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n>\r\n> Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nContext (and things I'm willing to prevent here):\r\n\r\n* In my experience there is a saddeningly high prevalence of \"TLS validation fails? Let's just disable TLS validation in code (as recommended in some random StackOverflow answer\".\r\n* Another thing I've seen too many times is « ssl_verify_client optional_no_ca; » where the application just blindly trusts the client identity (issuer) found in the certificate. (This is NOT safe at all as you can just self-sign your own certificate to assume any identity you wish).\r\n\r\nSome additional considerations:\r\n\r\n* This could apply to other uses of certificates.\r\n* In some cases ([OAuth mTLS-bound access tokens](https://www.rfc-editor.org/rfc/rfc8705.html)), it is actually OK (and the intended usage) to use self-signed client certificates (but there is some additional mechanism which makes it possible to verify the binding of the certificate TLS public key in the intended usage context). The formulation of the requirements should allow this kind of usage.\r\n"
+    },
+    {
+      "editedAt": "2024-11-06T20:51:10Z",
+      "diff": "I don't think there is a requirement which explicitly says that TLS certificates (and more generally any public-keys) are verified, not disabled.\r\n\r\nWe have these requirements on this topic:\r\n\r\n> 9.1.4 [ADDED] Verify that external facing services use publically trusted TLS certificates.\r\n>\r\n> 9.3.2 [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected.\r\n\r\nSomething like:\r\n\r\n> Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n>\r\n> Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nContext (and things I am trying to prevent here):\r\n\r\n* In my experience there is a saddeningly high prevalence of \"TLS validation fails? Let's just disable TLS validation in code (as recommended in some random StackOverflow answer\".\r\n* Another thing I've seen too many times is « ssl_verify_client optional_no_ca; » where the application just blindly trusts the client identity (issuer) found in the certificate. (This is NOT safe at all as you can just self-sign your own certificate to assume any identity you wish).\r\n\r\nSome additional considerations:\r\n\r\n* This could apply to other uses of certificates.\r\n* In some cases ([OAuth mTLS-bound access tokens](https://www.rfc-editor.org/rfc/rfc8705.html)), it is actually OK (and the intended usage) to use self-signed client certificates (but there is some additional mechanism which makes it possible to verify the binding of the certificate TLS public key in the intended usage context). The formulation of the requirements should allow this kind of usage.\r\n"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2462244210",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "> Something like:\r\n> \r\n> > Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n> >\r\n> > Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nI agree but I'd like to keep it very simple, something like:\r\n\r\n> Verify that TLS clients validate certificates received before communicating with a TLS server.\r\n\r\nWhat do you think @randomstuff ?\r\n\r\n",
+          "recorded_at": "2024-11-07T13:29:12Z"
+        },
+        {
+          "body": "> Something like:\r\n> \r\n> > Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n> > Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nI agree but I'd like to keep it very simple, something like:\r\n\r\n> Verify that TLS clients validate certificates received before communicating with a TLS server.\r\n\r\nWhat do you think @randomstuff ?\r\n\r\n",
+          "recorded_at": "2024-11-07T13:28:47Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2464464293",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "Yoink. @tghosth @randomstuff please see #2357. Dropped in V9.2. Please confirm levels.",
+          "recorded_at": "2024-11-08T11:23:01Z"
+        },
+        {
+          "body": "Yoink. @tghosth @randomstuff please see #2357. Dropped in V9.2.",
+          "recorded_at": "2024-11-08T11:22:35Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2464611321",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Is there an existing requirement we could add this to?",
+          "recorded_at": "2024-11-08T12:15:20Z"
+        },
+        {
+          "body": "Please open a ",
+          "recorded_at": "2024-11-08T12:14:55Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2466822782",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "So what is the proposal here @randomstuff ?",
+          "recorded_at": "2024-11-10T17:43:35Z"
+        },
+        {
+          "body": "So what is the proposal here @randomstuff ",
+          "recorded_at": "2024-11-10T17:43:27Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2485141326",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "> Validation of server certificate trust:\r\n> \r\n> > 9.2.6 [ADDED] Verify that TLS clients validate certificates received before communicating with a TLS server.\r\n> \r\n> is currently in 9.2 (General Service to Service Communication Security). This is probably OK. Would it make sense to move it into 9.4 (General TLS Security Guidance)?\r\n\r\nSure\r\n\r\n---\r\n\r\n> Validation of client certificate trust:\r\n> \r\n> > Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authorization.\r\n> \r\n> This could go into into 9.4 (General TLS Security Guidance)? It might go into V2 Authentication as well but this would be weird (it can apply to user authentication but is often going to be more about client/service authentication).\r\n\r\nI think this makes sense\r\n\r\n---\r\n\r\n> > I am also open to suggestions for restructuring V9\r\n> \r\n> This would probably be the topic of another issue but some considerations:\r\n> \r\n> * some requirement could be generalized to other secure protocols (eg. in my field SSH/SFTP is sometimes used for data transfer between systems) and the client/server identity validation apply equally there;\r\n> \r\n> * a \"general secure communication recommendations\" section, might be useful for discussing for example forward secrecy.\r\n\r\nIf you have some straightforward suggested moves then I am comfortable with that. Otherwise, please just open a PR with the simple changes discussed here.",
+          "recorded_at": "2024-11-19T09:23:05Z"
+        },
+        {
+          "body": "> Validation of server certificate trust:\r\n> \r\n> > 9.2.6 [ADDED] Verify that TLS clients validate certificates received before communicating with a TLS server.\r\n> \r\n> is currently in 9.2 (General Service to Service Communication Security). This is probably OK. Would it make sense to move it into 9.4 (General TLS Security Guidance)?\r\n\r\nSure\r\n\r\n---\r\n\r\n> Validation of client certificate trust:\r\n> \r\n> > Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authorization.\r\n> \r\n> This could go into into 9.4 (General TLS Security Guidance)? It might go into V2 Authentication as well but this would be weird (it can apply to user authentication but is often going to be more about client/service authentication).\r\n\r\nI think this makes sense\r\n\r\n---\r\n\r\n> > I am also open to suggestions for restructuring V9\r\n> \r\n> This would probably be the topic of another issue but some considerations:\r\n> \r\n>     * some requirement could be generalized to other secure protocols (eg. in my field SSH/SFTP is sometimes used for data transfer between systems) and the client/server identity validation apply equally there;\r\n> \r\n>     * a \"general secure communication recommendations\" section, might be useful for discussing for example forward secrecy.\r\n\r\nIf you have some straightforward suggested moves then I am comfortable with that. Otherwise, please just open a PR with the simple changes discussed here.",
+          "recorded_at": "2024-11-19T09:22:46Z"
+        }
+      ]
+    }
+  ]
+}

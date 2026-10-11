@@ -6,7 +6,7 @@ Changes here explain that argument.
 
 ## How to change the corpus
 
-1. Edit JSON under `data/` (or use the local editor, when it exists).
+1. Edit JSON under `data/` or use the local editor (`npm --prefix web run edit`).
 2. Run the validators.
 3. Open a pull request.
 
@@ -24,6 +24,8 @@ carry a `provenance` object.
 - `human` — a person wrote it. `authors` is required. `model` must be null.
 - `llm` — a model drafted it. `authors` must be empty.
 - `llm_reviewed` — a model drafted it and a named person accepted or edited it.
+- `deterministic` — produced by a script from git, mappings, or snapshots.
+  `authors` must be empty. `model` must be null.
 
 The site will show Human, AI, or AI-reviewed. It will not name a vendor.
 
@@ -33,11 +35,14 @@ pipeline. If inputs change, the pipeline adds a new unreviewed summary with
 
 ## Review actions
 
-- Accept — `origin` becomes `llm_reviewed`, `review.status` becomes `accepted`
-- Edit and accept — same, with the edited body. It is still `llm_reviewed`
-- Reject — keep the record, hide it from the public view, do not feed it back
+There is no review queue. Open a requirement, read the labeled notes, then
+enrich from sources when you have something to add.
+
+- Keep text — `origin` becomes `llm_reviewed`, `review.status` becomes `accepted`
+- Save edits — same, with the edited body. It is still `llm_reviewed`
+- Hide — keep the record, hide it from the public view, do not feed it back
   into later generations
-- Write — a new `human` artifact alongside the model draft
+- Write a human note — a new `human` artifact alongside the model draft
 - Flag — `changes_requested` plus a note
 
 Human-authored content is `accepted` on write, with the author as reviewer.

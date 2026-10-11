@@ -1,0 +1,156 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-824909373",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "The poster here is making a good point. Path has minimal value.\r\n\r\n1) A subdomain can CSRF the main domain\r\n\r\n2) Any path on the host can set a cookie for any other path, as the posted described\r\n\r\nI suggest we just delete this requirement. It's not helpful.\r\n\r\n- Jim\r\n\r\n",
+          "recorded_at": "2021-09-24T03:11:56Z"
+        },
+        {
+          "body": "The poster here is making a good point. Path has minimal value.\n\n1) A subdomain and CSRF the main domain\n\n2) Any path on the host can set a cookie for any other path, as the \nposted described\n\nI suggest we just delete this requirement. It's not helpful.\n\n- Jim\n\n",
+          "recorded_at": "2021-04-22T14:49:27Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-824931525",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "First priority - use `__Host-` prefix.\r\n\r\nIF this is not possible AND there are many applications on the same domain which all may want to use `JSESSIONID` for example, you need to specify as precise `Path` attribute as possible to avoid value leakage to another paths and to keep applications working.\r\n\r\nSimilar discussion, see: https://github.com/OWASP/ASVS/issues/555#issuecomment-467320056\r\n\r\nTill we don't have requirement like \"one application per domain\", we need to have this requirement.",
+          "recorded_at": "2021-04-22T18:38:51Z"
+        },
+        {
+          "body": "First priority - use `__Host-` prefix.\r\n\r\nIF this is not possible AND there are many application on the same domain which all may want to use `JSESSIONID` for example, you need to specify as precise `Path` attribute as possible to avoid value leakage to another paths and to keep applications working.\r\n\r\nSimilar discussion, see: https://github.com/OWASP/ASVS/issues/555#issuecomment-467320056\r\n\r\nTill we don't have requirement like \"one application per domain\", we need to have this requirement.",
+          "recorded_at": "2021-04-22T15:25:15Z"
+        },
+        {
+          "body": "First priority - use `__Host-` prefix.\r\n\r\nIF this is not possible AND there are many application on the same domain which all may want to use `JSESSIONID` for example, you need to specify as precise `Path` attribute as possible to avoid value leakage to another paths and to keep applications working.\r\n\r\nSimilar discussion, see: https://github.com/OWASP/ASVS/issues/555#issuecomment-467320056",
+          "recorded_at": "2021-04-22T15:21:59Z"
+        },
+        {
+          "body": "First priority - use `__Host-` prefix.\r\n\r\nIF this is not possible AND there are many application on the same domain which all may want to use `JSESSIONID` for example, you need to specify as precise `Path` attribute as possible to avoid value leakage to another paths and to keep applications working.",
+          "recorded_at": "2021-04-22T15:15:23Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-824993535",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "If a cookie has path `/path1/`, then how you can access it from application in `/path2/` folder?\r\n\r\nIntegrity problem exists here - you can overwrite cookie with `/path1/` by application in `/path2/`. But if there \r\nare no nice tricks available, then you can not access it. So it's vice versa, precise path parameter requirement is for confidentiality, not for (cookie) integrity.",
+          "recorded_at": "2021-04-22T16:35:04Z"
+        },
+        {
+          "body": "If a cookie has path `/path1/`, then how you can access it from application in `/path2/` folder?\r\n\r\nIntegrity problem exists here - you can overwrite cookie with `/path1/` by application in `/path2/`. But if there is are no nice tricks available, then you can not access it. So it's vice versa, precise path parameter requirement is for confidentiality, not for (cookie) integrity.",
+          "recorded_at": "2021-04-22T16:33:14Z"
+        },
+        {
+          "body": "If a cookie has path `/path1/`, then how you can access it from application in `/path2/` folder?",
+          "recorded_at": "2021-04-22T16:28:08Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-831049196",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I suggest we have problems covered with proposals in opened issue before PR.\r\n\r\nMulti-site situation: If you have XSS in `/pathX`, then yes, you can CSRF all sites on the same domain. Agree with that. It does not mean, that setting precise path to avoid session id leakage from path1 program to path2 program. Effect is minimum, but it's there.\r\n\r\nOne-site situation: let's say we have only one application per domain, `__Host-` does not give too much effect in this situation, just forces to use `Path=/`, no `Domain` attribute and use `Secure` attribute.\r\n\r\n[NIST 7.1.1](https://pages.nist.gov/800-63-3/sp800-63b.html#sec7)\r\n> Cookies:\r\n> 2. SHALL be accessible to the minimum practical set of hostnames and paths.\r\n\r\nLet's say we have setup:\r\n* `/` - static HTML\r\n* `/api/`\r\n* `/static/`\r\n\r\nIf you can use `Path=/api/` here, browser don't need to send cookie with every request to access content from `/static/`. In case some JWT format in use, it may take quite a overhead in HTTP traffic.\r\n\r\n\r\n> And per @elarlang I do agree using the cookie prefix __Host- does bind the cookie to that specific host only and is a better solution. So perhaps set a new requirement in that direction instead?\r\n\r\nAdditionally, what is the \"new requirement\" in this direction? We have 3.4.4 asking to use `__Host-` prefix.\r\n\r\nFor me it seems, that @timhemel was addressing the word \"override in current requirement, and I agree with that:\r\n\r\n> V3.4.5 Verify that if the application is published under a domain name with other applications that set or use session cookies that might **override** or disclose the session cookies, set the path attribute in cookie-based session tokens using the most precise path possible.\r\n\r\nMy current proposal is to fix this requirement to technically correct one:\r\n\r\n> V3.4.5 Verify that if the application is published under a domain name with other applications that set or use session cookies that might disclose the session cookies, set the path attribute in cookie-based session tokens using the most precise path possible.\r\n",
+          "recorded_at": "2021-05-04T17:16:40Z"
+        },
+        {
+          "body": "I suggest we have problems covered with proposals in opened issue before PR.\r\n\r\nMulti-site situation: If you have XSS in `/pathX`, then yes, you can CSRF all sites on the same domain. Agree with that. It does not mean, that setting precise path to avoid session id leakage from path1 program to path2 program. Effect is minimum, but it's there.\r\n\r\nOne-site situation: let's say we have only one application per domain, `__Host-` does not give too much effect in this situation, just forces to use `Path=/`, no `Domain` attribute and use `Secure` attribute.\r\n\r\nLet's say we have setup:\r\n* `/` - static HTML\r\n* `/api/`\r\n* `/static/`\r\n\r\nIf you can use `Path=/api/` here, browser don't need to send cookie with every request to access content from `/static/`. In case some JWT format in use, it may take quite a overhead in HTTP traffic.\r\n\r\n\r\n> And per @elarlang I do agree using the cookie prefix __Host- does bind the cookie to that specific host only and is a better solution. So perhaps set a new requirement in that direction instead?\r\n\r\nAdditionally, what is the \"new requirement\" in this direction? We have 3.4.4 asking to use `__Host-` prefix.\r\n\r\nFor me it seems, that @timhemel was addressing the word \"override in current requirement, and I agree with that:\r\n\r\n> V3.4.5 Verify that if the application is published under a domain name with other applications that set or use session cookies that might **override** or disclose the session cookies, set the path attribute in cookie-based session tokens using the most precise path possible.\r\n\r\nMy current proposal is to fix this requirement to technically correct one:\r\n\r\n> V3.4.5 Verify that if the application is published under a domain name with other applications that set or use session cookies that might disclose the session cookies, set the path attribute in cookie-based session tokens using the most precise path possible.\r\n",
+          "recorded_at": "2021-05-03T06:23:59Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-835244712",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> Restricting Path will only be relevant if there are two applications on the same host, but in different trust zones.\r\n\r\nNot that simple with cookies - we can not watch `Path` attribute separately, it all depends, is `Domain` attribute set or is it \"host-only\" cookie. If `Domain` is set to main domain (like `.example.com`), not subdomain (like `api.example.com`), then it leakes to another Host (another subdomain for the main domain). Domain vs Host is really underestimated problem in my opinion and that's why I see \"forcing\" usage of `__Host-` prefix as a good solution.\r\n\r\nPrefer \"host-only\" over setting a `Domain` attribute is not covered by ASVS at the moment (if do not take `__Host-` requirement in account). Maybe we should address this one here also.\r\n\r\n> Not specifying Path automatically restricts it to the current directory\r\n\r\nIf you don't specify `Path` attribute, it depends on software which writes the cookie - I would not relay on \"assumptions\" and recommend always to specify path \"manually\".",
+          "recorded_at": "2021-05-08T09:33:50Z"
+        },
+        {
+          "body": "> Restricting Path will only be relevant if there are two applications on the same host, but in different trust zones.\r\n\r\nNot that simple with cookies - we can not watch `Path` attribute separately, it all depends, is `Domain` attribute set or is it \"host-only\" cookie. If `Domain` is set to main domain (like `.example.com`), not subdomain (like `api.example.com`), then it leakes to another Host. Domain vs Host is really underestimated problem in my opinion and that's why I see \"forcing\" usage of `__Host-` prefix as a good solution.\r\n\r\nPrefer \"host-only\" over setting a `Domain` attribute is not covered by ASVS at the moment (if do not take `__Host-` requirement in account). Maybe we should address this one here also.\r\n\r\n> Not specifying Path automatically restricts it to the current directory\r\n\r\nIf you don't specify `Path` attribute, it depends on software which writes the cookie - I would not relay on \"assumptions\" and recommend always to specify path \"manually\".",
+          "recorded_at": "2021-05-08T09:33:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-835414236",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Your definitions are not correct in cookie context.\r\n\r\n* There is no \"port\" limitation for cookies. Cookie set on port 80 matching also for port 443, 8080 etc.\r\n* There is no \"schema\" limitation for cookies. Cookie set over http connection matching to https connection (that's why we have `Secure` flag and `__Secure-` prefix to fix that.\r\n* Domain in cookie context (`Domain` parameter) is always \"opened for subdomains with wildcard\". `Domain=.example.com` is matching for HTTP requests to `deep.inside.example.com`\r\n\r\nFor that reason Origin / SOP with cookie context is a bit different.",
+          "recorded_at": "2021-05-08T16:20:21Z"
+        },
+        {
+          "body": "Your definitions are not correct in cookie context.\r\n\r\n* There is no \"port\" limitation for cookies. Cookie set on port 80 matching also for port 443, 8080 etc.\r\n* There is no \"schema\" limitation for cookies. Cookie set over http connection matching to https connection (that's why we have `Secure` flag and `__Secure-` prefix to fix that.\r\n* Domain in cookie context (`Domain` parameter) is always \"opened for subdomains with wildcard\". `Domain=.example.com` is matching for HTTP requests to `deep.inside.example.com`\r\n\r\nFor that reason Origin and SOP with cookie context is a bit different.",
+          "recorded_at": "2021-05-08T16:10:23Z"
+        },
+        {
+          "body": "Your definitions are not correct in cookie context.\r\n\r\n* There is no \"port\" limitation for cookies. Cookie set on port 80 matching also for port 443, 8080 etc.\r\n* There is no \"schema\" limitation for cookies. Cookie set over http connection matching to https connection (that's why we have `Secure` flag and `__Secure-` prefix to fix that.\r\n\r\nFor that reason SOP with cookie context is a bit different.",
+          "recorded_at": "2021-05-08T16:06:52Z"
+        },
+        {
+          "body": "Your definition are not correct in cookie context.\r\n\r\n* There is no \"port\" limitation for cookies. Cookie set on port 80 matching also for port 443, 8080 etc.\r\n* There is no \"schema\" limitation for cookies. Cookie set over http connection matching to https connection (that's why we have `Secure` flag and `__Secure-` prefix to fix that.\r\n\r\nFor that reason SOP with cookie context is a bit different.",
+          "recorded_at": "2021-05-08T16:06:46Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-926312183",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "My definitions of host, domain and origin above are correct according to rfc6454 section 3.2\r\n\r\nQuoting https://datatracker.ietf.org/doc/html/rfc6454#section-3.2\r\n\r\n**Origin:** \r\n\r\n\"All of the following resources have the same origin:\r\n\r\n   http://example.com/\r\n   http://example.com:80/\r\n   http://example.com/path/file\r\n\r\n   Each of the URIs has the same scheme, host, and port components.\"\r\n\r\n**Host:** \r\n\r\nThe same RFC above also says: \"If user agents did not include the scheme, there would be no isolation between http://example.com and https://example.com because the two have the same host.\" from this I think we can deduce what host is. It's everything between the protocol and port. \r\n\r\n**Domain:** Is just site.com - what you register.\r\n\r\nAnd PS: As @ThunderSon mentioned above, the cookie domain property can be set to a domain or a host. Keep in mind cookies came on the scene way before origin was defined in 2011, so the domain property of a cookie is really not a clear name as you rightfully pointed out.",
+          "recorded_at": "2021-09-24T03:20:16Z"
+        },
+        {
+          "body": "My definitions of host, domain and origin above are correct according to rfc6454 section 3.2\r\n\r\nQuoting https://datatracker.ietf.org/doc/html/rfc6454#section-3.2\r\n\r\n**Origin:** \r\n\r\n\"All of the following resources have the same origin:\r\n\r\n   http://example.com/\r\n   http://example.com:80/\r\n   http://example.com/path/file\r\n\r\n   Each of the URIs has the same scheme, host, and port components.\"\r\n\r\n**Host:** \r\n\r\nThe same RFC above also says: \"If user agents did not include the scheme, there would be no isolation between http://example.com and https://example.com because the two have the same host.\" from this I think we can deduce what host is. It's everything between the protocol and port. \r\n\r\n**Domain:** Is just site.com - what you register.\r\n\r\nAnd PS: As @ThunderSon mentioned above, the cookie domain property is can be set to a domain or a host.",
+          "recorded_at": "2021-09-24T03:19:02Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-1103618354",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Probably we can not solve anything with \"improving\" this requirement - we can create many more new requirements to cover all the possible edge cases and at the end there is just more confusion.\r\n\r\nOnly way to go from here is to create requirement \"one application per ~~domain~~ (edit) Origin\".\r\n\r\nFrom https://github.com/OWASP/ASVS/issues/978#issuecomment-824931525\r\n> Till we don't have requirement like \"one application per domain\", we need to have this requirement.",
+          "recorded_at": "2022-04-20T09:06:24Z"
+        },
+        {
+          "body": "Probably we can not solve anything with \"improving\" this requirement - we can create many more new requirements to cover all the possible edge cases and at the end there is just more confusion.\r\n\r\nOnly way to go from here is to create requirement \"one application per domain\".\r\n\r\nFrom https://github.com/OWASP/ASVS/issues/978#issuecomment-824931525\r\n> Till we don't have requirement like \"one application per domain\", we need to have this requirement.",
+          "recorded_at": "2022-04-20T08:32:29Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/978#issuecomment-1106367001",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Yes. the difference comes with `__Host-` prefix.\r\n\r\nLet's say session cookie name is \"SID\". From host `a.example.com` it is possible to write cookie with Domain attribute value `.example.com` and it is matching for `b.example.com`. If `__Host-` prefix is used (cookie name `__Host-SID`), you can not use `Domain` attribute (need to use \"host-only\" cookies) and you can not write cookie from one subdomain for matching to another subdomain.\r\n\r\nBut this is something you also described yourself: https://github.com/OWASP/ASVS/issues/978#issuecomment-932448264\r\n\r\nSo maybe I misunderstood the question...",
+          "recorded_at": "2022-04-22T10:46:11Z"
+        },
+        {
+          "body": "Yes. the difference comes with `__Host-` prefix.\r\n\r\nLet's say session cookie name is \"SID\". From host `a.example.com` it is possible to write cookie with Domain attribute value `.example.com` and it is matching for `b.example.com`. If `__Host-` prefix is used (cookie name `__Host-SID`), you can not use `Domain` attribute (need to use \"host-only\" cookies) and you can not write cookie from one subdomain for matching to another subdomain.",
+          "recorded_at": "2022-04-22T10:45:12Z"
+        },
+        {
+          "body": "Yes. the difference comes with `__Host-` prefix.\r\n\r\nLet's say session cookie name is \"SID\". From host `a.example.com` it is possible to write cookie with Domain attribute value `.example.com` and it is matching for `b.example.com`. If `__Host-` prefix is used, you can not use `Domain` attribute (need to use \"host-only\" cookies) and you can not write cookie from one subdomain for matching to another subdomain.",
+          "recorded_at": "2022-04-22T10:44:41Z"
+        }
+      ]
+    }
+  ]
+}

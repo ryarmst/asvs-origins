@@ -1,0 +1,340 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Spin-off from #1917\r\n\r\nCurrent requirement:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **3.5.4** | [ADDED] Verify that stateless tokens are checked for expiration before processing them further. | ✓ | ✓ | ✓ | 613 |\r\n\r\nIt should be more abstract and cover \"time window\" when the token is valid.\r\n\r\nTo check the expiration, we need to require `exp` to be present and set. It is not set for example for refresh tokens when `offline_access` is used.\r\n\r\nTechnically it should also cover to check `nbf` (Not Before).\r\n\r\nRelated RFC https://datatracker.ietf.org/doc/html/rfc7519\r\n* [`exp`](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.4) - optional\r\n* [`nbf`](https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.5) - optional\r\n\r\nSo the requirement need to validate the \"time-window\", and it can be validated, if `nbf` and/or `exp` claims are provided in the token (both are optional).",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Q9ikn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Something like that?\r\n> Verify that stateless token is allowed to be used at the time of checking, using not-before ('nbf' claim in JWT) and expires ('exp' claim in JWT) values, if those are provided in the token.",
+      "createdAt": "2024-10-23T12:50:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2432051495",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RA5Kj",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For reference some wording about \"iat\" and \"nbf\" (but not \"exp\") from [FAPI 2.0](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html):\r\n\r\n> to accommodate clock offsets, shall accept JWTs with an iat or nbf timestamp between 0 and 10 seconds in the future but shall reject JWTs with an iat or nbf timestamp greater than 60 seconds in the future.",
+      "createdAt": "2024-10-23T17:21:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2432930467",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RBTbp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would not put `iat` here that quickly. From this you can assume are the clocks synced, but it is not meant for time-window validation.",
+      "createdAt": "2024-10-23T18:06:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2433038057",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RcnZ4",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would not put iat here that quickly. From this you can assume are the clocks synced, but it is not meant for time-window validation.\r\n\r\nNote that for DPoP, \"iat\" is the value used to check the validity of the DPoP proof.\r\n\r\n> Verify that stateless token is allowed to be used at the time of checking, using not-before ('nbf' claim in JWT) and expires ('exp' claim in JWT) values, if those are provided in the token.\r\n\r\nI'm wondering if there is something missing here (?):\r\n\r\n* it is the *consumer of the token* which must verify that the token is allowed to be used […]\r\n* and we must verify *that the consumer of the token verifies* that the token is allowed to be used.\r\n\r\nSo this should be something like:\r\n\r\n> *Verify the the consumer of a stateless token* verifies that stateless token is allowed to be used at the time of checking, using not-before ('nbf' claim in JWT) and expires ('exp' claim in JWT) values, if those are provided in the token.\r\n",
+      "createdAt": "2024-10-27T22:27:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2440197752",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rcnha",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What about something like:\r\n\r\n> Verify that the consumer of a stateless token accepts the token only if the verification time is within this validity time span in the token (if present). For example, for JWTs, this is typically conveyed using the  'nbf' and 'exp' claims.\r\n\r\nor\r\n\r\n> Verify that the consumer of a stateless tokens honors the validity time span associated with the token (if present). For example, for JWTs, this is typically conveyed using the  'nbf' and 'exp' claims.\r\n",
+      "createdAt": "2024-10-27T22:29:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2440198234",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RefF0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From last 2 proposals I prefer the first one. This \"honors\" feels a bit out of context, we need to use a strong and clear term such as \"must\" from https://datatracker.ietf.org/doc/html/rfc2119.\r\n\r\n`(if present)` feels like it is written for the token \"if token is present\", I think it should be repositioned to be clearly apply to time-window claims.\r\n\r\nconsumer - it can be there, but I think it is not necessary. If something is going to use the content from the token, is is consuming the content and is consumer by nature. Is there any other interpretation that we need to clarify this?",
+      "createdAt": "2024-10-28T06:47:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2440687988",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rgzbm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Rechecking it again, I think this one good enough:\r\n> Verify the the consumer of a stateless token verifies that stateless token is allowed to be used at the time of checking, using not-before ('nbf' claim in JWT) and expires ('exp' claim in JWT) values, if those are provided in the token.\r\n\r\n@randomstuff - any changes or improvement to apply from your [last proposal comment](https://github.com/OWASP/ASVS/issues/2185#issuecomment-2440198234) taking into account my [last comment](https://github.com/OWASP/ASVS/issues/2185#issuecomment-2440687988)?",
+      "createdAt": "2024-10-28T11:15:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2441295590",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RkImw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some more versions:\r\n* Verify that the stateless token is allowed to be used at the time of checking, using not-before ('nbf' claim in JWT) and expires ('exp' claim in JWT) values, if those are provided in the token.\r\n* Verify that if the stateless token has information about the time of being valid, such as 'nbf' and 'exp' claims in JWT, the consumer validates if the token is allowed to be used at the time of checking.\r\n* Verify that the stateless token is allowed to be used at the time of checking if the stateless token has information about the time of being valid, such as 'nbf' and 'exp' claims in JWT.",
+      "createdAt": "2024-10-28T17:12:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2442168752",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RlUXK",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'd like your second version better. The two other looks somewhat ambiguous to me.\r\n\r\n<details>\r\n<summary>Analysis of the third proposition</summary>\r\n\r\nFor example,\r\n\r\n> Verify that the stateless token is allowed to be used at the time of checking if the stateless token has information about the time of being valid, such as 'nbf' and 'exp' claims in JWT.\r\n\r\nI think this is ambiguous about the scope of the condition. This might be understood as:\r\n\r\n> Verify that the (stateless token is allowed to be used at the time of checking if the stateless token has information about the time of being valid), such as 'nbf' and 'exp' claims in JWT.\r\n\r\nwhereas we mean:\r\n\r\n> (Verify that the stateless token is allowed to be used at the time of checking) if the stateless token has information about the time of being valid, such as 'nbf' and 'exp' claims in JWT.\r\n \r\nThis would be clearer:\r\n\r\n> Verify, if the stateless token has information about the time of being valid (such as 'nbf' and 'exp' claims in JWT), the stateless token is allowed to be used at the time of checking.\r\n\r\nBut actually, something seems to be missing to me and we mean:\r\n\r\n> Verify, if the stateless token has information about the time of being valid (such as 'nbf' and 'exp' claims in JWT), the application verifies the token is currently valid according to this information before taking any actions based on this token.\r\n\r\n</details>\r\n\r\nWhat about:\r\n\r\n> Verify that application accepts an <del>stateless</del> token only if the verification time is within this validity time span in the token, if such a validity time span is present. For JWTs and OAuth Token Introspection, this is currently represented by the  'nbf' and 'exp' claims and properties respectively. \r\n\r\nor\r\n\r\n> Verify, if a <del>stateless</del> token is associated with some validity time span, the application verifies the token is currently valid according to this information before taking any action based on this token. For JWTs and OAuth Token Introspection, this is currently represented by the  'nbf' and 'exp' claims and properties respectively. \r\n\r\nI removed \"stateless\" here because this can apply to stateful tokens as well (i.e. when using OAuth token introspection), right?",
+      "createdAt": "2024-10-28T19:46:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2442479050",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rm6Cb",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "May I suggest wording that favours rejection over acceptance? For example, rather than \"accepts a token only if..\" what about \"rejects the token if...\"? ",
+      "createdAt": "2024-10-29T00:01:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2442895515",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6R49gk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm a bit lost now what is the latest proposal here :)\r\n\r\n@randomstuff - just in case, it is a V3 issue. If we want to have OAuth mentioned, it sounds like a specific requirement for V51. By content at the moment I see it as general requirement.\r\n\r\nIs OAuth Introspection defines nbf and exp or it uses the definitions from [JWT](https://datatracker.ietf.org/doc/html/rfc7519)?",
+      "createdAt": "2024-10-30T15:56:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2447628324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6R8VLL",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, the token introspection part can be skipped if needed.\r\n\r\nThe [definitions](https://www.rfc-editor.org/rfc/rfc7662#section-2.2) of nbf and exp from token introspection reference the definition from JWT (but use them in a separate context):\r\n\r\n> exp OPTIONAL.  Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token will expire, as defined in JWT [[RFC7519](https://www.rfc-editor.org/rfc/rfc7519)].\r\n>\r\n> [...]\r\n>\r\n> nbf OPTIONAL.  Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this token is not to be used before, as defined in JWT [[RFC7519](https://www.rfc-editor.org/rfc/rfc7519)].\r\n",
+      "createdAt": "2024-10-30T22:00:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2448511691",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SOzOy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Those definitions I referenced in the issue description.\r\n\r\nMy point here is that we should make \"in general\" valid requirements for (JWT) tokens. If there is a more specific case to cover with some specific, then there is a need to make a separate requirement for the related paragraph.",
+      "createdAt": "2024-11-03T09:11:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2453353394",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S_nRs",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A suggestion, as part of This is part of \"cleaning up 3.5\" see https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466143871, is to have: \r\n\r\n> Verify that the token is valid based on current time and, if present, the token identifier. For JWTs the claims 'iat', 'nbf' and 'exp' should be verified for time based validation. The claim 'jti' should be validated to identify a specific token, in example to assert that the token is only used once.",
+      "createdAt": "2024-11-09T09:45:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2466149484",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TA0TJ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The claim 'jti' should be validated to identify a specific token, in example to assert that the token is only used once.\r\n\r\nI would not include this. It's usually OK to use your access token many times while it's still valid.\r\n\r\nSome tokens are supposed to be used only once (ID token, DPoP proofs) but this is not the case for all tokens (such as access tokens).",
+      "createdAt": "2024-11-09T21:27:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2466464969",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TBrFA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The claim 'jti' should be validated to identify a specific token, in example to assert that the token is only used once.\r\n\r\nThis is a separate test and problem to solve. Let this requirement only focus on the time window.\r\n\r\nI would like the second part / example as it is:\r\n> For JWTs the claims 'iat', 'nbf' and 'exp' should be verified for time based validation.\r\n\r\nBut I did not find any solution for first part that I'm happy with. For a starter:\r\n> Verify that the token and it's content are accepted only if the verification time is within this validity time span in the token if such a validity time span is present in the token data.\r\n",
+      "createdAt": "2024-11-10T11:04:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2466689344",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TYPnG",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> This is a separate test and problem to solve. Let this requirement only focus on the time window.\r\n\r\nI agree, good to split this.\r\n\r\n> But I did not find any solution for first part that I'm happy with.\r\n\r\nIs this better?\r\n\r\n> Verify that, if validity time span is present in the token data, the token and it's content are accepted only if the verification time is within this validity time span. For JWTs the claims 'iat', 'nbf' and 'exp' should be verified.",
+      "createdAt": "2024-11-13T06:50:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2472606150",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TYpI2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some changes, including removed 'iat' claim, as it is not meant for time-window validation by JWT own spec. It can be used if the application logic works that way and the requirement is still valid for \"validity must be checked\" and for example, for JWT those claims must (I changed should to must) be used:\r\n> Verify that, if a validity time span is present in the token data, the token and it's content are accepted only if the verification time is within this validity time span. For example, for JWTs the claims 'nbf' and 'exp' must be verified.",
+      "createdAt": "2024-11-13T07:42:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2185#issuecomment-2472710710",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-10-23T06:38:50Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    }
+  ],
+  "number": 2185,
+  "state": "CLOSED",
+  "title": "3.5.4 - token time-window validation",
+  "url": "https://github.com/OWASP/ASVS/issues/2185"
+}

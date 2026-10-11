@@ -1,0 +1,297 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "The following verifications are suggested to address general client responsibilities.\r\n\r\n## V51.3 Client\r\n\r\nVerify that system integrations clients, service-to-service without (human) user interaction, are required to use the 'client-credentials' grant.\r\n\r\nVerify that clients used by (human) users are required to use the 'code' grant or, if considered more appropriate, the 'device_code' grant. Additional custom \"flows\", not known to be industry standard (preferably defined in RFCs), should be avoided.\r\n\r\nVerify that clients asserts least privilege in token requests, by minimizing the set of requested scopes or any other parameter that affects permissions.\r\n\r\nVerify that clients used by (human) users requires the users consent to initiate an authorization request. Note that the consent can be implicit or explicit, requires sufficient CSRF-protection and should (by default) request a minimal set of scopes.\r\n\r\n#### Notes\r\nNote that adding the second verification above and suggested verification for PKCE in #2041 covers the PKCE part of 51.2.2 and the other parts of 51.2.2 is OIDC which should not be part of OAuth2 verifications, so a suggestion is to remove  51.2.2 (given the scope discussion in #2039 and that PKCE verifications from #2041 are added).\r\n\r\nAlso note that if the scope will be defined as suggested in #2036 then 51.2.3 and 51.2.4 should be removed as they are not in that scope, or the scope need to include Resource indicators and RAR specs as well.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6KfZUq",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that system integrations clients, service-to-service without (human) user interaction, are **required to use the 'client-credentials' grant**.\r\n\r\nIn contrast to what? Static provisioning of (access) tokens (and mTLS)? ",
+      "createdAt": "2024-09-01T20:23:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2323485994",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KfbTI",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> In contrast to what? Static provisioning of (access) tokens (and mTLS)?\r\n\r\nI was thinking in the context of OAuth2, there are of course service-to-service integration scenarios where there is no need to use OAuth2, where just e g mTLS is all that is needed. Did that make it clearer?",
+      "createdAt": "2024-09-01T20:55:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2323494088",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KfclJ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@TobiasAhnoff I was just wondering which other OAuth flows you are intended to disallow here. Someone might attempt to automate an authorization code flow. Is this what you are trying to disallow here?\r\n\r\nOn the other hand, we would not want to disallow [Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693).\r\n\r\nWhat about something like: « Verify service-to-service authorization requests, without (human) user interaction, do not use flows which are intended to be used for interactive flows such as the authorization code grant, the implicit grant or CIBA. »",
+      "createdAt": "2024-09-01T21:14:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2323499337",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K7uv1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @randomstuff - as I can not tag you in the issues you are not taking part, I (mis)use this issue for that.\r\n\r\nI would like to get your feedback on every V51 tagged issue, but to set a more clear focus for getting things moving I set focus to:\r\n* https://github.com/OWASP/ASVS/issues/2039 - decide the chapter structure\r\n* https://github.com/OWASP/ASVS/issues/2040 - get feedback for refresh tokens\r\n* https://github.com/OWASP/ASVS/issues/2038 - general code-flow\r\n\r\nNice to have, to get issues closed and document updated:\r\n* https://github.com/OWASP/ASVS/issues/2036 - OAuth text\r\n* https://github.com/OWASP/ASVS/issues/2037 - OIDC text\r\n\r\n(but should be maybe combined, see https://github.com/OWASP/ASVS/issues/2039#issuecomment-2325137014)\r\n\r\nNote that, if you agree with proposals, it is also valuable feedback to share.\r\n\r\nWe also have one dedicated Slack channel for \"OAuth working group\" but I was not able to find your name from userlist.",
+      "createdAt": "2024-09-05T08:25:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2330913781",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LLx5r",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@randomstuff good point! I was thinking perhaps we try to rewrite this in a positive way, what do you think about this?\r\n\r\n> Verify service-to-service token requests, without (human) user interaction, use flows which are intended to be used for service-to-service, i e client-credentials or token-exchange.\r\n\r\nAnd if we introduce token-exchange here, we should also add that spec to the scope for OAuth (#2036)",
+      "createdAt": "2024-09-07T08:44:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2335121003",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LLyHf",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Client credentials grant has not been deprecated but it’s strongly encouraged that if you use it to use strong client authentication with it like mTLS.\r\n\r\nCan we perhaps add something like “… with strong client authentication” at the end of this or something similar?",
+      "createdAt": "2024-09-07T08:48:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2335121887",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LQ65q",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Can we perhaps add something like “… with strong client authentication” at the end of this or something similar?\r\n\r\nThis looks like a separate verification (not only ties to machine-to-machine interaction) and probably something you would not want in L1?",
+      "createdAt": "2024-09-07T22:25:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2336468586",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LRP_b",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think   “… with strong client authentication” maybe does not need to be added in this verification as it applies for all levels and mandating strong client authentication methods (mTLS or private-key-twt) is addressed in #2038 \r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. Note that L1-L2 applications could also use client-secret authentication and allow public clients. (L3)\r\n\r\nPerhaps that need to be rewritten/split to more clearly capture that good (sufficient for the level of security)  client authentication is a must on all levels for client-credentials (e g properly managed basic auth or mTLS etc), but for L3 strong mTLS or private-key-jwt is required.\r\n\r\nReading this suggested verification I also think it might be too strict, not allowing public code-flow native mobile app clients on L3, I will make a comment on that in #2038, worth a discussion!     ",
+      "createdAt": "2024-09-08T05:37:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2336554971",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MGCNz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify service-to-service token requests, without (human) user interaction, use flows which are intended to be used for service-to-service, i e client-credentials or token-exchange.\r\n\r\nShould it be authorization server requirement to say, that what is allowed for machine-to-machine clients and what is not? (It should not be allowed for the Client to decide)\r\n\r\n\r\n> Verify that clients used by (human) users requires the users consent to initiate an authorization request. Note that the consent can be implicit or explicit, requires sufficient CSRF-protection and should (by default) request a minimal set of scopes.\r\n\r\nHere seems to be 2 things - CSRF protection and minimal set of scopes.\r\n\r\nWe have requirement:\r\n> 3.2.5\t[ADDED] Verify that creating a session for the application requires the user's consent and that the application is protected against a CSRF-style attack where a new application session for the user is created via SSO without user interaction.\r\n\r\nDo you think it covers the case? At least I proposed the requirement keeping exactly this scenario in mind.\r\n\r\nPlease provide list of updated requirements.",
+      "createdAt": "2024-09-13T21:54:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2350392179",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M5DD-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @TobiasAhnoff - please provide latest list of proposed requirements.",
+      "createdAt": "2024-09-20T13:40:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2363764990",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE0v6",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Should it be authorization server requirement to say, that what is allowed for machine-to-machine clients and what is not? (It should not be allowed for the Client to decide)\r\n\r\n@elarlang I agree, and from #2043 we also have \r\n\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used.\r\n\r\nI suggest to simply remove \r\n\r\n> Verify that system integrations clients, service-to-service without (human) user interaction, are required to use the 'client-credentials' grant.\r\n\r\nand \r\n\r\n> Verify that clients used by (human) users are required to use the 'code' grant or, if considered more appropriate, the 'device_code' grant. Additional custom \"flows\", not known to be industry standard (preferably defined in RFCs), should be avoided.\r\n\r\nsince they are partly covered by #2043 and more guidance/education on when to use which flow, not mitigations for a known attack-type (the \"industry standard\" is part is overlap by #2047).\r\n\r\nAn alternative would be add something about grants to use, perhaps like this:\r\n\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use, e g 'code' or 'client-credentials'. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used.\r\n",
+      "createdAt": "2024-09-22T16:06:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2366852090",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE1KZ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think 3.2.5 covers most of it, perhaps modify 3.2.5 to also state that \"by default request a minimal set of scopes\"?\r\n\r\n> 3.2.5 [ADDED] Verify that creating a session for the application requires the user's consent, by default a minimal set of scopes should be requested, and that the application is protected against a CSRF-style attack where a new application session for the user is created via SSO without user interaction.",
+      "createdAt": "2024-09-22T16:09:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2366853785",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE2ZM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think 3.2.5 covers most of it, perhaps modify 3.2.5 to also state that \"by default request a minimal set of scopes\"?\r\n\r\nThose are different problems and I prefer to not merge them to one requirement. One requires defense against CSRF, another is default behavior for assigning privileges.\r\n\r\nI think the scope question is addressed here: https://github.com/OWASP/ASVS/issues/2043#issuecomment-2360032434",
+      "createdAt": "2024-09-22T16:18:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2366858828",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE_Vh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do I understand correctly, that we don't add anything from initial 4 requirements as those are covered one way or another somewhere else and it is proposed to update current 51.2.5\r\n\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use, **e g 'code' or 'client-credentials'**. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used.",
+      "createdAt": "2024-09-22T17:57:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2366895457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NNX1Y",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Almost, I will try to make a summary\r\n\r\nThe first two could be replaced by a modified 51.2.5\r\n\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use, e g 'code' or 'client-credentials'. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used.\r\n\r\nor even more specific on valid OAuth grants\r\n\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use, i e 'code', 'device_code', 'client-credentials' or 'token-exchange'. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used. \r\n\r\nThe third one is not addressed by in example #2043 so I think this should be added to address that clients should not request more scopes than needed on tokens requests (even if the client is allowed to use more scopes).\r\n\r\n> Verify that clients asserts least privilege in token requests, by minimizing the set of requested scopes or any other parameter that affects permissions. \r\n\r\nThe fourth one is almost covered by 3.2.5 but the aspect of secure defaults for consent pages is not addressed by #2043, since the focus is on configuration of the allowed scope for the client (not the ones selected by default on the consent page). It is a detail, but I think it is worth having this in ASVS since there are many applications that by mistake or with bad intent ask the user to consent for scopes that aren't really need for what the user wants to do (but might be needed for other user consents granted for the client).  \r\n\r\nSo a suggestion is to add this as separate requirement  \r\n\r\n> Verify that user consent by default requested a minimal set of scopes. ",
+      "createdAt": "2024-09-23T18:46:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2369092952",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N5Hmn",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think both \r\n\r\n> Verify that clients asserts least privilege in token requests, by minimizing the set of requested scopes or any other parameter that affects permissions.\r\n\r\nand \r\n\r\n> Verify that user consent by default requested a minimal set of scopes.\r\n\r\nare covered by the two requirements suggested in https://github.com/OWASP/ASVS/issues/2043#issuecomment-2380555332 and #2120 \r\n\r\nAs noted earlier other parts of this issue is covered by  https://github.com/OWASP/ASVS/issues/2043#issuecomment-2360032434 so, as far as I understand,  this issue can now be closed (replaced by #2043 and #2120 discussion).",
+      "createdAt": "2024-09-28T08:09:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2044#issuecomment-2380560807",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-31T15:07:17Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2044,
+  "state": "CLOSED",
+  "title": "V51 OAuth: Add client verifications",
+  "url": "https://github.com/OWASP/ASVS/issues/2044"
+}

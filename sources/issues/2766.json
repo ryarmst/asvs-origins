@@ -1,0 +1,557 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE5NzM2NzI3",
+    "is_bot": false,
+    "login": "ryarmst",
+    "name": "Ryan Armstrong"
+  },
+  "body": "Originating from #2409 \n\nI propose the addition of the following requirement:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **50.1.x** | [ADDED] Verify that every HTTP response includes a Cross-Origin-Opener-Policy header to prevent the application from sharing a browsing context group with cross-origin documents, mitigating tabnabbing attacks and potential information leakages. The same-origin directive should be used unless a less secure directive is required to support cross-origin flows. | 2 | |\n\nThis protection mitigates tabnabbing type attacks that can still occur within browsers and it also prevents some forms of XS-Leak type attacks. I think it's most appropriate to include in V50.1 (the section will require an update, but I assume this is on the agenda). It could arguably be included under V50.3.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6jvDtD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For tabnabbing we had discussion and concluded, that tabnabbing alone is not worth a requirement, especially on proposed level 2:\n* https://github.com/OWASP/ASVS/issues/1602#issuecomment-1497104029\n* https://github.com/OWASP/ASVS/issues/1602#issuecomment-1637654168\n* https://github.com/OWASP/ASVS/issues/1602#issuecomment-2464411561\n\nWhat is now different compared to that discussion?\n\n> it also prevents some forms of XS-Leak type attacks.\n\nI would like to know more about this vector and what is the likelihood/impact to be worth a requirement?\n\nOne of the \"metrics\" we have used for having requirements is the question: \"if this is reported as a problem, will it be useful and taken into action, or will it be ignored\".",
+      "createdAt": "2025-03-24T06:26:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2747022147",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6j_JmO",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The XS-Leak vector is entirely dependent on application functionality as far as likelihood/impact. COOP prevents leaks arising from access to a shared Window object. The most common form of attack appears to be Frame Counting, where a malicious origin counts the number of frames (via window.length) resulting from a cross-origin request to infer information.\n\nAn example from XS-Leaks Wiki is [here](https://xsleaks.dev/docs/attacks/frame-counting/), but there are a variety of actual instances documented as well:\n- [Here](https://mr-medi.github.io/research/2023/07/31/exploring-cross-site-frame-counting-attacks.html) is an example impacting GitHub\n- [Here](https://www.imperva.com/blog/archive/facebook-privacy-bug/) is the Facebook frame counting example\n- [Here](https://hackerone.com/reports/892289 )is an example where frame counting was used to infer user state as part of a larger vector\n\nAs far as \"will it be useful and taken into action, or will it be ignored\" I can only speculate. We do know that orgs like Facebook and GitHub are accepting (and sometimes paying for) reports for this class of vulnerability, but the issue does not appear to be very common. \n\nRegarding tabnabbing, I added additional information on possible vectors in https://github.com/OWASP/ASVS/issues/2409#issuecomment-2635324851 but I do think this is a less important issue as vulnerable patterns are probably rare.",
+      "createdAt": "2025-03-25T13:20:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2751240590",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6j_6hx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we can build some L3 requirement from this.\n\nBut first some finetunings and concerns.\n\nFrom https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cross-Origin-Opener-Policy\n\n> The HTTP Cross-Origin-Opener-Policy (COOP) response header allows a website to control whether a new top-level document, opened using Window.open() or by navigating to a new page, is opened in the same browsing context group (BCG) or in a new browsing context group.\n\nSo it rises a question, is it reasonable and justified to require it for every HTTP response?",
+      "createdAt": "2025-03-25T14:23:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2751441009",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kBK16",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My general thinking is this:\n- Most apps can likely set a strict policy app-wide without issue\n- Setting a single header for all responses is likely easiest and least likely to introduce gaps even if it's returned for resources where it has no impact\n\nHowever, the wording could be easily modified to something like:\n\n1. Verify that the Cross-Origin-Opener-Policy HTTP response header is set for all appropriate responses...\n\nOr:\n\n2. Verify that the Cross-Origin-Opener-Policy HTTP response header is set for all responses where <condition> ....\n\nBut for (1) above, it leaves ambiguity in the requirement and opportunity for interpretation and (2) brings the potential to be overly complex leading to poor compliance or misimplementation.",
+      "createdAt": "2025-03-25T16:03:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2751769978",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kIh88",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> My general thinking is this:\n> \n> * Most apps can likely set a strict policy app-wide without issue\n> * Setting a single header for all responses is likely easiest and least likely to introduce gaps even if it's returned for resources where it has no impact\n\nThis is something they _can_ do, but this is something we _can not_ have a as requirement with justification that this is in our opinion easiest way to implement.\n\nIf there is an HTTP response with `Content-Type: text/plain` and someone reports based on the ASVS requirement that it has now vulnerability due to missing `Cross-Origin-Opener-Policy` headed field, it is a incorrect finding or report.\n\nI think our direction here should be that if the HTTP response contains functionality to provide top-level navigation to cross-origin (or to untrusted?) hosts, including window.open, then to prevent the application from sharing a browsing context group with cross-origin documents, the `Cross-Origin-Opener-Policy` header field must be defined.\n\nFrom the structure point of view, I think it belongs to v5.0.be V50.3 as proposed as one option in the initial issue description. Level for the requirement: 3.",
+      "createdAt": "2025-03-26T09:16:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2753699644",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kKlk_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Abstractly the problem and solution from the requirement buildup is similar to referer leakage, and I opened issue #2789 to address that.\n\nOne option to avoid opener leakage is also to define it per link or functionality:\n\n* https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel/noopener\n* https://developer.mozilla.org/en-US/docs/Web/API/Window/open#noopener",
+      "createdAt": "2025-03-26T12:28:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2754238783",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kSQVs",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I understand the intent, though I do think that in practice, having conditionals like:\n\n> if the HTTP response contains functionality to provide top-level navigation to cross-origin (or to untrusted?) hosts, including window.open\n\nwill result in many missed instances where protections should be applied. ",
+      "createdAt": "2025-03-27T01:51:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2756248940",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kSbtR",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As far as what pages or functionality should be protected COOP is not just for outgoing links/navigation but can also mitigate XS-Leak attacks like Frame Counting (which will not be impacted by the use of `noopener`). Here is an example where the target page is opened by the malicious app:\n\n```js\n// some-malicious-site.com\n\n// create a new window\nvar target = 'https://www.target_site.com/vulnerable_page';\nvar w = window.open(target);\n\n// wait 2s for page load\nsetTimeout(() => {\n  // Log the number of frames on the target page, revealing some information\n  console.log(\"The page has %d iframes loaded\", w.length);\n}, 200);\n```\n\nThough this is a distinct attack from tabnabbing, we can conceptualize it as a single problem to mitigate:\n\n> Prevent malicious applications from sharing access to a Window object\n\nIf we try to make a precise conditional based on application functionality that could be impacted, it could get complex. ",
+      "createdAt": "2025-03-27T02:24:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2756295505",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kTvgN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like @elarlang suggesting noopener attributes.\n\nIt's a bit over-kill, but I tend to suggest rendering user-driven links with `<a target=\"_blank\" rel=\"noopener noreferrer\" href={(userLink)}>…</a>`.\n\nBut I get it per @ryarmst that a good COOP policy provides other forms of XS-Leak defense. Cool. 😎 ",
+      "createdAt": "2025-03-27T04:27:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2756638733",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kUjFR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I took your code-snippet.\n\nHave you played with that in practice?\n\nFirst, the pre-condition is that the victim needs to accept pop-ups from the malicious domain, which is not allowed by browsers by default.\n\nI can understand the example is copied from here:\nhttps://xsleaks.dev/docs/attacks/frame-counting/#code-snippet\n\nThe article is written 2020, we have now 2025. As in parallel we have discussion about Referer behaviour that has been changed from that time, my question is - is it still valid concern?\n\nFrom the attack code example, I did not see that the script can read frame count, not in a cross-origin or same-origin context.\n\nThere seems to be some missing pieces in it.",
+      "createdAt": "2025-03-27T06:11:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2756850001",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kUv2p",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Even without COOP, process isolation + opaque cross-origin window references prevent access to many properties, including .length, in modern Chromium-based browsers.\n\nFirefox 100+ blocks access to most window properties on cross-origin windows by default.\n\nIn recent Safari versions, reading .length of a cross-origin window returns 0 or throws a security error. Safari also uses intelligent tracking prevention (ITP) and opaque origin windows as default protection. Safari in particular has been super aggressive in stopping this form of attack by default.\n\nSo yes @elarlang this attack no longer works in modern browsers by default.",
+      "createdAt": "2025-03-27T06:39:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2756902313",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kYn6q",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "No, this attack does work in modern browsers (excluding Firefox and maybe Safari - I haven't tested Safari). \n\n> First, the pre-condition is that the victim needs to accept pop-ups from the malicious domain, which is not allowed by browsers by default.\n\nThis is not entirely true. Sorry, I realize this particular code snippet is out of date. Browsers permit popups resulting from user interaction. Here is an example:\n\n```html\n<button onclick=\"window.open('https://www.attacker.com:5001')\">\n            Open Attacker Site\n</button>\n```\n\n[Here](https://youtu.be/Wy3zjJjlLLM) is a video I just made to demonstrate the behavior in an up-to-date instance of Chrome (default configuration) cross-origin.\n\nFinally, keep in mind that this is just for the \"outgoing\" sharing of a Window object, but the \"incoming\" scenario can also be used for leaks using techniques like frame counting. I have tested also the scenario detailed in the XS Leak reference (not the exact code, but an `open` also triggered by user interaction) and this still works in Chrome as well.",
+      "createdAt": "2025-03-27T12:47:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2757918378",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kZN_j",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for the video.\n\nI replicated it and here again (for this example) - pre-conditions - there must be `window.open` (just a `target=\"_blank\"` link is not enough) from a target site to the attacker controlled site.\n* If an attacker is able to manipulate the output document, it is not the biggest concern to address.\n* If an attacker only controls the URL inside a `window.open`, it is also addressed by \n> v5.0.be-50.8.1 Verify that the application shows a notification when the user is being redirected to a URL outside of the application's control, with an option to cancel the navigation.\n\nSo the likelihood is really small, the impact is questionable (there are easier ways to lure victim to a phising site), and if could have Level 5, it could belong there.\n\nI'll come back to the wording later.",
+      "createdAt": "2025-03-27T13:38:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2758074339",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kZiq0",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If an attacker is able to manipulate the output document, it is not the biggest concern to address.\n\nDo you mean the scenario where an attacker controlled site initiates a connection to the target site via `window.open`? In this case I agree their ability to manipulate properties of the Window object is less of a concern, but their ability to read properties of the object (like `window.length` in Frame Counting attacks) is a greater concern.\n\nThat said, in both scenarios, these are likely rare issues that have the biggest impact in complex social apps (hence why Facebook has offered the classic example due to their Graph search API).",
+      "createdAt": "2025-03-27T13:58:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2758159028",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kb6Lj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Do you mean the scenario where an attacker controlled site initiates a connection to the target site via window.open?\n\nIsn't it vice-versa? The button is on the target/victim site, it sends user to attacker-controlled site and there attacker can send the target site via window.opener.location to other \"phishing\" site - and the point for the attack, victim still expects to find the target site from previously opened tab and may not notice the address change.",
+      "createdAt": "2025-03-27T16:58:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2758779619",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kgMIn",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Isn't it vice-versa? The button is on the target/victim site, it sends user to attacker-controlled site and there attacker can send the target site via window.opener.location\n\nThis is for the \"reverse tabnabbing\" scenario, yes, but for the XS-Leak attacks I have seen (Frame Counting) the attack happens in the other direction where the user is lured to the malicious site which makes a cross-origin request (authorized on behalf of the user) and then counts the frames in the response using `window.length`.",
+      "createdAt": "2025-03-28T00:48:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2759901735",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kxuNI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ryarmst - do you have or can you point me to proof-of-concept for such attack? I want to be sure that those are up-to-date problems before getting them into the requirements.",
+      "createdAt": "2025-03-30T10:44:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2764497736",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k4GlZ",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang Absolutely. Here is an example using up-to-date Chrome: https://youtu.be/uv-x6Z6TiVk",
+      "createdAt": "2025-03-31T13:06:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2766170457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k7rol",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you again for the video, makes it clear really fast.\n\nSo the problems to solve\n* in the first case - stop sharing the window.opener reference between windows\n* in the second case - stop sharing window.frame(.length) between windows\n\nFrom building the requirement for ASVS, the problem is that although `Cross-Origin-Opener-Policy` mitigates both, it is not the one and only solution to achieve that. It can be recommended, but can not be required.\n\nOption one is to require the COOP header and list the situation when it is required. Option 2 is to list attack vectors with possible mitigations, and COOP is one of the mitigations.",
+      "createdAt": "2025-03-31T18:47:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2767108645",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lSnBt",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In both cases, the underlying problem can be seen as shared access (cross-origin) to a Window object. Looking at other solutions to each of the listed vectors can be quite complex. There are also further properties that can be accessed cross-origin, such as determining whether a window has been closed with `window.closed` (though this has less utility for an attacker).\n\nI therefore that Option 1 makes the most sense, but in terms of \"when it is required\" it could be:\n1. Based on functionality that could introduce vulnerabilities.\n2. Based on content type returned (HTML).\n3. Something else?",
+      "createdAt": "2025-04-02T16:26:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2773119085",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6ZaC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang @ryarmst what is the proposal here?",
+      "createdAt": "2025-04-20T10:24:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2817103490",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7o7T",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @ryarmst, how does this look?\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.1.2** | [ADDED] Verify that any HTTP response capable of creating a new browsing context (e.g., uses window.open(), target _blank, or serves top‑level HTML navigations) includes Cross‑Origin‑Opener‑Policy: same-origin or functionally equivalent controls (such as consistently applying rel=noopener to all such navigations). This prevents opener and Frame‑based XS‑Leak as well as tab‑nabbing attacks.. | 3 |\n\n",
+      "createdAt": "2025-04-21T00:51:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2817429203",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7rZ0",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it should be expanded to all HTML docs as frame counting attacks typically originate from the attacker's context. How about this:\n\n> Verify that all HTTP responses returning HTML documents include the header Cross‑Origin‑Opener‑Policy with the same-origin directive or the same-origin-allow-popups directive as required. This prevents attacks that abuse shared access to Window objects, such as tabnabbing and frame counting. \n\nI think \"functionally equivalent controls\" are potentially too wide ranging when including XS-Leak type vectors. I merged \"tabnabbing\" into a single word based on [this OWASP reference.](https://owasp.org/www-community/attacks/Reverse_Tabnabbing).",
+      "createdAt": "2025-04-21T01:07:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2817439348",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oCnOo",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So is this all the right details and current place in ASVS?\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.1.2** | [ADDED] Verify that all HTTP responses returning HTML documents include the header Cross‑Origin‑Opener‑Policy with the same-origin directive or the same-origin-allow-popups directive as required. This prevents attacks that abuse shared access to Window objects, such as tabnabbing and frame counting. | 3 |\n\nIs there a term you like better than \"HTML documents\" @ryarmst  - to me this implies static HTML.\n\nAny thoughts on this @elarlang before we go PR?\n\n",
+      "createdAt": "2025-04-21T18:54:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2819257256",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oK4s4",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico \"HTML documents\" I think is fine, but if you feel \"documents\" implies static, it could be \"HTML content\" or just \"HTML\" instead. It could also be something like \"Verify that all HTTP responses that initiate a top-level document rendering (such as HTML responses)\" but this seems perhaps unnecessarily verbose.",
+      "createdAt": "2025-04-22T13:58:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2821425976",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oLPOT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Without trying it out myself, for me it seems, that the last proposal is correct - HTML document is not precise, it is important, that browser renders the content however it is called. It should apply also to SVG, that technically is not an HTML content.",
+      "createdAt": "2025-04-22T14:26:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2821518227",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oNsUn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "How about: \n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.1.2** | [ADDED] Verify that all HTTP responses returning top-level document rendering (e.g., HTML, SVG) include the header Cross‑Origin‑Opener‑Policy with the same-origin directive or the same-origin-allow-popups directive as required. This prevents attacks that abuse shared access to Window objects, such as tabnabbing and frame counting. | 3 |\n\n",
+      "createdAt": "2025-04-22T18:35:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2822161703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ogh3B",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang to open a PR",
+      "createdAt": "2025-04-24T10:21:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2827099585",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ol-tf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal update\n> Verify that all HTTP responses that initiate a document rendering (such as responses with Content-Type text/html), include the Cross‑Origin‑Opener‑Policy header field with the same-origin directive or the same-origin-allow-popups directive as required. This prevents attacks that abuse shared access to Window objects, such as tabnabbing and frame counting.\n\nChanges:\n* removed \"top level\" - I think if the content is parsed in iframe and some new window is opened from this, it also will have window reference object. @ryarmst can correct me if it is wrong and need to be changed\n* \"rendering (e.g., HTML, SVG)\" > \"rendering (such as responses with Content-Type text/html)\"\n* \"the header Cross‑Origin‑Opener‑Policy\" > \"the Cross‑Origin‑Opener‑Policy header field\"",
+      "createdAt": "2025-04-24T18:29:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2828528479",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ovmgl",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I think the changes are just fine. I believe you are correct on the iframe point, but the same content _could_ be used to render a top level document. All good with me.",
+      "createdAt": "2025-04-25T17:46:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2831050789",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ov1Ap",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As for which section to include under, \"V3.5 Browser Origin Separation\" feels most accurate by name because it restricts Window object access by Origin, but the existing section content is oriented around requests \"to sensitive functionality on the server side\". Therefore, it probably fits best under \"V3.4 Browser Security Mechanism Headers\" without further section description modifications. ",
+      "createdAt": "2025-04-25T18:18:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2766#issuecomment-2831110185",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-03-23T21:45:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2766,
+  "state": "CLOSED",
+  "title": "Proposed requirement for COOP: V50.1.x",
+  "url": "https://github.com/OWASP/ASVS/issues/2766"
+}

@@ -1,0 +1,327 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEyNDQwMDU=",
+    "is_bot": false,
+    "login": "sydseter",
+    "name": "Uncle Joe"
+  },
+  "body": "In https://github.com/OWASP/ASVS/issues/2970 it has been made clear that both phone providers and online IDP services widely support hardware-based authenticators. At the same time, users can use synced passkeys https://www.passkeycentral.org/introduction-to-passkeys/passkey-types, which now, by default, get backed up by Android and IOS \n\nAt the same time, the use of FIDO2/U2F tokens and [WebAuthn](https://webauthn.io/) makes it possible to implement MFA and passwordless authentication securely, making it easier for users to use web services without fearing phishing or credential stuffing.\n\nTherefore, supporting hardware-based authenticators for L2 is a must.\n\nSee: \n\nhttps://github.com/OWASP/ASVS/issues/2970#issuecomment-2853680112\n\nI am suggesting adding the following non-quoted section between these two quoted sections. (based on https://github.com/OWASP/ASVS/pull/3093/files)\n\n> ## V6.3 General Authentication Security\n> \n> This section contains general requirements for the security of authentication mechanisms as well as setting out the different expectations for levels. In particular, enforcing the use of multi-factor authentication (MFA) is required for L2 and hardware-based authentication, performed in an attested and trusted execution environment (TEE), is required for L3.\n\nApplications verified at L2 must support the use of hardware-based authenticators compliant with FIDO2 or equivalent standards. Where feasible, such authenticators should be required for all users performing sensitive operations or accessing administrative interfaces.\n\n> Whilst this is a relatively aggressive stance on MFA, it is critical to raise the bar around this to protect users and any attempt to relax these requirements should be accompanied by a clear plan on how the risks around authentication will be mitigated, taking into account NIST's guidance and research on the topic.\n\nand \n\nhttps://github.com/OWASP/ASVS/issues/2970#issuecomment-2853599126\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **6.3.3** | Verify that either a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms (such as using synced passkeys in conjunction with a password) must be used to access the application. Relaxing this requirement requires a fully documented rationale and comprehensive mitigating controls. | 2 | v5.0.be-2.2.9 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6qKrjS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There aren't many hills I will die on for ASVS but I will under no circumstances mandate that every L2 app has to support passkeys. \n\nThe only way you get a meaningful security uplift with passkeys is by taking draconian measures regarding alternative mechanisms and recovery flows which leads to significant user experience pain. Once you loosen the restrictions on alternative mechanisms, you lose the point of passkeys. The synced passkey experience is patchy at best and there are still major holes in support. Similarly the multi-device flows are also patchy. I say this having recently had to change both phone and laptop and experienced much confusion around which of my passkeys are where and where I can use them.\n\nPasskeys are a spectacular example of something that is brilliant in theory but doesn't yet work in real life. I know that ASVS is supposed to be forward looking but I don't think we will see a solution to this before the next ASVS version for the simple reason that there is no trivial solution. Passkeys are a user experience improvement masquerading as security improvement and whilst I am all for mandating user experience, I am not going to mandate it \"your app is not secure without this\".\n\nI accept that there are various other alternative approaches to hardware authentication but government provided solutions are not realistic for apps with a global userbase and anything more complicated than passkeys is even more unrealistic. \n",
+      "createdAt": "2025-05-06T15:10:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2854926546",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qLQWr",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Supported means that you can still store both TOTP and synced passkeys in your password manager of choice. \nYou don't necessarily need to remove the other options just because you use hardware-based authentication.\nI have most passkeys in my password manager, not on my phone. I would not lose them if I lost my laptop and phone, and as long as I have access to either iCloud or my password manager, I have no problem recovering them.",
+      "createdAt": "2025-05-06T15:45:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2855077291",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qLW1F",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is a whole load of hassle to start supporting passkeys for no security uplift.",
+      "createdAt": "2025-05-06T15:53:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2855103813",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qLcfz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For the context - L1 is \"this must be done before you can start talking about any security\", L2 - basic level of security that every application should reach, L3 - extra steps towards more advanced security.\n\nNot sure it fits that scheme.",
+      "createdAt": "2025-05-06T16:00:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2855127027",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qMCnh",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "The security uplift is that you can authenticate, if you want, with out worrying about being phished.\n\nPhishing is a huge problem. Even Troy Hunt can sign off on that.",
+      "createdAt": "2025-05-06T16:51:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2855283169",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qMMGI",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Supporting hardware-based authentcation means you promote passwordless authentication as well, both synced and device bound. Simplifying login and providing for a passwordless alternative should be the strategy for any global app that wants to minimize the risk of credential stuffing and phishing while improving their login experience.",
+      "createdAt": "2025-05-06T17:06:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2855321992",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qNepR",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> There aren't many hills I will die on for ASVS but I will under no circumstances mandate that every L2 app has to support passkeys.\n\nSo on the opposite hill of me.\n\n> For the context - L1 is \"this must be done before you can start talking about any security\", L2 - basic level of security that every application should reach, L3 - extra steps towards more advanced security.\n\n> Not sure it fits that scheme.\n\nI would argue that implementing MFA and password based login also isn’t easy. Almost all IDPs and ID server software out there supports passkeys out-of-the-box. ",
+      "createdAt": "2025-05-06T19:19:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2855660113",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qNqsB",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "In away, it would open up for the possibility for apps to drop the implementation of password and traditional MFA and only use passwordless login. It would be far cheaper and faster then old fashioned MFA.",
+      "createdAt": "2025-05-06T19:32:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2855709441",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qcJYk",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The security uplift is that you can authenticate, if you want, with out worrying about being phished.\n\nExcept if the site falls back to another method like OTP codes to SMS or email which many of the implementations do then you have rendered the phishing resistance irrelevant.\n\n> I would argue that implementing MFA and password based login also isn’t easy.\n\nBut there are tried and tested ways to do this securely which are already widely supported.",
+      "createdAt": "2025-05-07T17:34:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2859505188",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ql3cC",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Here is a report from Bitwarden concerning passkeys. \n\nPasskeys are taking off:\n\n- Over 15 billion online accounts can now use passkeys\n- Bitwarden reported a 550% jump in daily passkey creation in late 2024\n- 57% of consumers are now familiar with passkeys (up from 39% in 2022)\n- Major platforms report significant user uptake:\n\n\n- Google: Over 800 million accounts using [passkeys](https://www.authsignal.com/features/passkeys)\n- Amazon: 175 million users created passkeys in the first year\n- Microsoft: Expanded passkey support to Xbox, Microsoft 365, and Copilot in 2024\n- What's driving this success? People are discovering that passkeys are:\n\n\n- Faster: Amazon users log in 6x faster with passkeys, TikTok users 17x faster\n- More reliable: Microsoft reports a 98% sign-in success rate (versus just 32% for passwords)\n\nref: https://www.authsignal.com/blog/articles/world-passkey-day-the-state-of-passkeys-in-2025\n\n\nI think you definitely should require support. At a minimum, you will need a section for cryptographic authenticators. ",
+      "createdAt": "2025-05-08T07:27:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2862053122",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qmdjg",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "\n> Except if the site falls back to another method like OTP codes to SMS or email which many of the implementations do then you have rendered the phishing resistance irrelevant.\n\nA large portion of the world population is using it already. The phishing-resistance still applies for the times you and everyone else do use it. The effect doesn't require that your whole user base uses it. You can compare it with MFA adoption. 100% is better than 50%, but 50% is better than 0%.\n\n> But there are tried and tested ways to do this securely which are already widely supported.\n\nThe same can be said for FIDO2 and WebAuthN",
+      "createdAt": "2025-05-08T08:28:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2862209248",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qnUCr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> A large portion of the world population is using it already. The phishing-resistance still applies for the times you and everyone else do use it.\n\nNo, that's the point, as soon as you offer any sort of fallback, you lose the phishing resistance for the entire user base. Look at Kayak.com. They offer passkeys but as soon as anything goes wrong it falls back to email codes.\n\nLook at a company advertising their product to allow you to use passkeys, it itself falls back to email OTP. Boom, phishing.\nhttps://passkeys.eu/#login-init\n\nNow in principle you could configure a user account to now allow fallback but I know of no sensible guidance on how to do that or how to implement a recovery flow.",
+      "createdAt": "2025-05-08T09:45:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2862432427",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qpD9b",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "In Norway, we have a national page where you can get your eIDAS LoA3 authenticator activated using your passport or European ID card. https://bankid.no/hjelp-bankid-app (In Norwegian I am afraid)\nMost countries have similar pages. \n\n## Regarding passkeys\n\nPasskey fallback procedures\n\nExample 1: https://www.corbado.com/blog/passkey-fallback-recovery\nExample 2: https://www.authsignal.com/blog/articles/passkey-recovery-fallback\nExample 3: https://www.inverid.com/blog/why-european-identity-wallets-need-nfc-identity-verification\n\nRecovery procedure:\n\nExample 2: https://developers.circle.com/w3s/how-to-recover-passkey\nExample 3: https://developers.google.com/identity/passkeys/ux/user-journeys#recovery\nExample 4: https://support.apple.com/en-us/102195\nExample 5: https://support.microsoft.com/en-us/account-billing/restore-account-credentials-from-microsoft-authenticator-ce53096e-1e1c-4840-9e32-1618bc33cd43\nExample 6:  https://www.corbado.com/blog/passkey-fallback-recovery\n\n",
+      "createdAt": "2025-05-08T12:30:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2862890843",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qpIAm",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I can give you more, but there are a lot of examples here. \n\nThere are several options, but I find these 3 options to be the best:\n\n1. Use a cloud backup that is connected with your microsoft/apple/google credentials\n2. Use a recovery code\n3. Use valid MFA\n\nFor Level 2, all of these are ok. They come with caveats, yes, but the principle is the same.\n\nRegarding phishing resistance. Yes, if the user gets tricked into visiting a page with a passkey login that fails, and gets forced to use a backup. If he uses that backup, then he is phished, but implementing these increases the complexity for the bad actor and makes it harder to trick the victim as the initial login has to fail credibly, not to rouse suspicion. \nThis is several steps up from just building a landing page and asking for password+username+TOTP for the bad actor.",
+      "createdAt": "2025-05-08T12:37:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2862907430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qpo2u",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Regarding phishing resistance. Yes, if the user gets tricked into visiting a page with a passkey login that fails, and gets forced to use a backup. If he uses that backup, then he is phished, but implementing these increases the complexity for the bad actor and makes it harder to trick the victim as the initial login has to fail credibly, not to rouse suspicion.\n\nAll the attacker has to do is create a 2 step phish where it asks for their email address in the first step and then asks for an emailed code in the second step and then behind the scenes the attacker bypasses the passkey step and jumps straight to email code step. The user themselves doesn't see any failure.\n\nThe other fun part about this fallback is that it takes a passkey which is probably MFA and reduces it to a single emailed code factor.\n\n",
+      "createdAt": "2025-05-08T13:18:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2863041966",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qqBhI",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> All the attacker has to do is create a 2 step phish where it asks for their email address in the first step and then asks for an emailed code in the second step and then behind the scenes the attacker bypasses the passkey step and jumps straight to email code step. The user themselves doesn't see any failure.\n\nIn most of the phishing cases I have heard of, the page crashes once you are successfully phished. Implementing a proper login page that can trick users, especially if it needs multiple flows to be credible, takes skill. This is why most phishing scams still target username+password only. This is one of the reasons only 5% of the MFA phishing campaigns succeed. https://keepnetlabs.com/blog/understanding-mfa-phishing-protection-measures-and-key-statistics\nAdd passkeys on top, and the hacker goes somewhere else.  \n\n> The other fun part about this fallback is that it takes a passkey which is probably MFA and reduces it to a single emailed code factor.\n\nIt depends on whether the app is configured correctly. This is why you need a cryptographic authenticator section. Mandated or not mandated.\n\n\nBut besides all of this, giving the user a choice so that they can log in using their synced passkey only, which may be saved directly in their password manager, makes it possible for users to secure themselves against phishing. It was the same thing with MFA in the beginning. A lot of arguments, some pointing to its flaws. All identity solutions have flaws. The key is to raise the bar as much as possible. I hope ASVS will continue to do so in the future as you have been doing it in the past.",
+      "createdAt": "2025-05-08T13:50:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2863142984",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qqXxn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > All the attacker has to do is create a 2 step phish where it asks for their email address in the first step and then asks for an emailed code in the second step and then behind the scenes the attacker bypasses the passkey step and jumps straight to email code step. The user themselves doesn't see any failure.\n> \n> In most of the phishing cases I have heard of, the page crashes once you are successfully phished. Implementing a proper login page that can trick users, especially if it needs multiple flows to be credible, takes skill. This is why most phishing scams still target username+password only. This is one of the reasons only 5% of the MFA phishing campaigns succeed. https://keepnetlabs.com/blog/understanding-mfa-phishing-protection-measures-and-key-statistics Add passkeys on top, and the hacker goes somewhere else.\n\nI think maybe you are overestimating the difficulty of creating this type of phishing page but maybe let's discuss this in person at some point.\n\n> But besides all of this, giving the user a choice so that they can log in using their synced passkey only, which may be saved directly in their password manager, makes it possible for users to secure themselves against phishing. I\n\nPossible yes but also increases the likelyhood of locking themselves out, e.g. Android only supports using passkeys from password managers for Android 14 and up.\n\n> The key is to raise the bar as much as possible. I hope ASVS will continue to do so in the future as you have been doing it in the past.\n\nUltimately we are already making a significant uplift in authentication security for 5.0, requiring MFA to be enforced. Clearly a passkey implementation that falls back to an email code is not MFA anyway which I think causes even more problems. Perhaps it does however emphasize the value of mapping to things like AAL.\n\nThis issue as well as the fall back and recovery procedure references you give above are interesting and I'd like to review them in more detail but I won't be able to do in the run up to the 5.0 release. \n\nI am going to leave this issue open for future discussion but mark it as a non-blocker for 5.0.\n\n\n",
+      "createdAt": "2025-05-08T14:15:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2863234151",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qqrFl",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Android 13 will receive Security Patches until March 2026, but it's up to the manufacturers to support it. The marked share for later versions is close to reaching 50%. https://gs.statcounter.com/android-version-market-share\n\nASVS 5 will be used as a reference for years to come.",
+      "createdAt": "2025-05-08T14:42:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3095#issuecomment-2863313253",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-05-06T08:53:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 3095,
+  "state": "OPEN",
+  "title": "L2 should support the use of hardware-based authenticators",
+  "url": "https://github.com/OWASP/ASVS/issues/3095"
+}

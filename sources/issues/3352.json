@@ -1,0 +1,136 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwNjA3NDQ3",
+    "is_bot": false,
+    "login": "mirokarv",
+    "name": "Miro Karvonen"
+  },
+  "body": "Currently, ASVS v5.0 recommends the use of Pushed Authorization Requests (PAR) or JWT-Secured Authorization Requests (JAR) in two Level 3 requirements:\n\n[10.4.12](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x19-V10-OAuth-and-OIDC.md#v104-oauth-authorization-server) and [10.4.15](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x19-V10-OAuth-and-OIDC.md#v104-oauth-authorization-server)\n\nBut, there are no verification requirements to ensure these are implemented correctly.\n\nI think these requirements might be good to add:\n\n1. > Verify that when PAR is used, the authorization server binds each request_uri to the client_id of the client that created it. A request_uri issued for one client must be rejected when presented by a different client.\n\n[RFC 9126](https://datatracker.ietf.org/doc/html/rfc9126#name-successful-response) says: \"The request_uri value MUST be bound to the client that posted the authorization request.\"\n\n2. > Verify that when PAR is used, the authorization server treats request_uri values as one-time use and rejects expired request_uri values. The lifetime of the request_uri (expires_in) must be short, typically ≤ 90 seconds and must not exceed 600 seconds.\n\n[RFC 9126](https://datatracker.ietf.org/doc/html/rfc9126#name-request-object-replay) says \"An attacker could replay a request URI captured from a legitimate authorization request. In order to cope with such attacks, the authorization server SHOULD make the request URIs one-time use.\"\n\n3. > Verify that when JAR is used, the authorization server requires a unique jti claim in the request object and enforces replay protection by rejecting previously used jti values within the object's validity period. Verify that the request object contains an exp claim with a short lifetime.\n\nNo direct RFC or OIDC FAPI requirements, but replay protection and short lifetime is critical whenever the request object contains security-sensitive or dynamic parameters that should not be reusable. like authorization_details param, or custom parameters that carry session context or change the effective authentication/authorization level of an already-authenticated user.\n\n4. > Verify that when JAR is used (standalone or inside PAR), the client_id value in the authorization request query parameter exactly matches the client_id claim inside the signed request object.\n\n[RFC 9101](https://datatracker.ietf.org/doc/html/rfc9101/#name-request-parameter-assembly-) says \"The client ID values in the client_id request parameter and in the Request Object client_id claim MUST be identical.\"\n\n5. > Verify that when PAR or JAR is used, the authorization server does not allow query string parameters on the /authorize endpoint to override values contained in the pushed request or request object. The server must only use parameters from the request object / pushed data.\n\n[RFC 9101](https://datatracker.ietf.org/doc/html/rfc9101/#name-request-parameter-assembly-) says for JAR \"The authorization server MUST extract the set of authorization request parameters from the Request Object value. The authorization server MUST only use the parameters in the Request Object, even if the same parameter is provided in the query parameter.\" IMO, same applies to PAR too. Or does 15.3.7 already cover this? I think this is still specific enough to warrant its own requirement.\n\n\nThoughts?\n ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM75J3SA",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Where upstream RFCs use the MUST keyword, that's already part of the protocol and therefore non-compliant implementations aren't really using JAR/PAR. It seems redundant to repeat such requirements without further restrictions or addressing ambiguities.",
+      "createdAt": "2026-04-02T19:47:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3352#issuecomment-4180112512",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM75Kb77",
+      "author": {
+        "login": "mirokarv"
+      },
+      "authorAssociation": "NONE",
+      "body": "I can see the point, but a problem is that when I identify an issue defined in an RFC that has not been implemented correctly. In such cases, it is unclear where this should be reported within the ASVS audit report.\n\nCould one possible solution be to introduce a documentation requirement that specifically lists RFCs that have been explicitly implemented by the development team within the application? While excluding standards that are handled by underlying libraries or frameworks (such as HTTP), and only focus on RFCs with custom or application-level implementations. This might even help dev teams, where everyone understands that \"bob\" just didn't make it up.\n\nBut that then would require a requirement, to check that those have been implemented correctly....\n\nThis is a bit of problem, since companies do make their own OAuth client and server implementations time to time.",
+      "createdAt": "2026-04-02T20:18:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3352#issuecomment-4180262651",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM75LRnP",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yeah, I know the pain ... Not limited to OAuth, in my experience deviation from standards is among the top conditions leading to vulnerabilities, yet almost never black-and-white enough to classify as security failures, very frustrating.\n\nI'm very much in favor of compliance with applicable RFCs as a security requirement, but that can also be a double-edged sword and very tricky to define. That's just me though, and my ideas often aren't very mainstream. 😄 ",
+      "createdAt": "2026-04-02T21:07:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3352#issuecomment-4180482511",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM75R-wA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Moi, @mirokarv, thank you for your detailed input and proposals.\n\nI don't comment on proposals from the technical side, but more from a ASVS requirement buildup side.\n\nIf we have a requirement for something already (e.g., PAR must be used), it is good to have technical conditions in the same requirement. As PAR is mentioned in 3 requirements, it is a bit more complicated task.\n\nProposals are detailed (as there are many aspects to cover) and lead to the implementation guide area. An ASVS requirement should be more focused on the security weakness to cover - an ideal requirement is self-explanatory, what security problem it addresses. It may get lengthy to cover many situations, 10.4.5 can be example for such requirement.\n\nI'm not a big fan of the idea of pointing to external resources in a requirement text, such as an RFC, but we have done it for some requirements (5.4.2), and it may work in this situation. As rules for PAR and JAR are written in separate specifications, we may point to those specifications.\n\nping @randomstuff @TobiasAhnoff ",
+      "createdAt": "2026-04-03T07:05:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3352#issuecomment-4182240256",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM75ikPt",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Where upstream RFCs use the MUST keyword, that's already part of the protocol and therefore non-compliant implementations aren't really using JAR/PAR. \n\nI think that many requirements in the documents are checks of requirements of the related protocol standards. An auditor would still need to check that these requirements are actually (and properly) implemented. Moreover many requirements from existing protocol standards do not have a direct security impact and are not relevant here.\n\n***\n\n> Verify that when PAR is used, the authorization server binds each request_uri to the client_id of the client that created it. A request_uri issued for one client must be rejected when presented by a different client.\n\nI would say that this is not really specific to PAR.\n\nA related topic is:\n\n> 10.4.10 Verify that confidential client is authenticated for client‑to‑authorized server backchannel requests such as token requests, pushed authorization requests (PAR), and token revocation requests.\n\nWhat may be lacking in the context of PAR is the requirement that the `client_id` in the PAR body maps to the authenticated client (eg. if using a client assertion, basic authentication, TLS authentication, etc.).\n\n***\n\n> Verify that when PAR is used, the authorization server treats request_uri values as one-time use and rejects expired request_uri values. The lifetime of the request_uri (expires_in) must be short, typically ≤ 90 seconds and must not exceed 600 seconds.\n\nYes, this might be needed. I am wondering if it would make sense to include it into a more general requirement about short-lived AS state in general in order to avoid creating too many requirements.\n\n***\n\n> Verify that when JAR is used, the authorization server requires a unique jti claim in the request object and enforces replay protection by rejecting previously used jti values within the object's validity period. Verify that the request object contains an exp claim with a short lifetime.\n\nFor me, using `jti` is implementation detail and if a requirement is needed, it should be more general about implementing replay protection. <del>For example, an implementation could use a cryptographic hash of the token to more reliably identify the token for replay protection purpose.</del> → **EDIT:** that's actually a [bad idea](https://github.com/OWASP/CheatSheetSeries/issues/2235).\n\nAnother issue, is that the [example from RFC 9101](https://datatracker.ietf.org/doc/html/rfc9101#name-request-object) does not even include the `jti` claim.\n\nI believe that a more critical requirement would be to verify that that the client actually includes an (short-lived) expiration in the JAR JWT (as well as `nbf` and `iat` claims).. I do not believe this requirement is already covered anywhere else. (And a replay protection would face important scalability issues if the token does not include expiration.)\n\n***\n\n> Verify that when JAR is used (standalone or inside PAR), the client_id value in the authorization request query parameter exactly matches the client_id claim inside the signed request object.\n\nThis might better be part of a more general requirement about protecting against cross-client / client confusion attacks:\n\n* when client authentication is used (eg. PAR), the authenticated client must match with the client on the request (if any).\n\nThis should arguably part of a more general requirement about authorization in general which would be an argument against having an explicit requirement about this.\n\n***\n\n> Verify that when PAR or JAR is used, the authorization server does not allow query string parameters on the /authorize endpoint to override values contained in the pushed request or request object. The server must only use parameters from the request object / pushed data.\n\nSame thing here. I agree this is important but on the other hand this could be seen as a general requirement about request confusion ambiguity.\n\nI would formulate something like:\n\n> Verify that when the authorization request is secured (such as with PAR or JAR), the authorization server does not accept unverified request parameters or override existing request parameters (eg. by adding them in the query string).\n\nNitpick: when using OIDC, the request parameter could be passed in the request body, not only in the request parameter.\n",
+      "createdAt": "2026-04-04T06:39:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3352#issuecomment-4186588141",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM75mXl_",
+      "author": {
+        "login": "mirokarv"
+      },
+      "authorAssociation": "NONE",
+      "body": ">> Verify that when JAR is used (standalone or inside PAR), the client_id value in the authorization request query parameter exactly matches the client_id claim inside the signed request object.\n\n>This might better be part of a more general requirement about protecting against cross-client / client confusion attacks:\n\n> - when client authentication is used (eg. PAR), the authenticated client must match with the client on the request (if any).\n\nI agree, now that i think more about this, the first PAR suggestions and this can be combined. And authorization code also needs to be bound to the client who requested it and verified in /token endpoint. Is there any more these types of objects than code, PAR, and JAR?\n\nMaybe something like this:\n\n- Verify that the authorization server enforces strict client binding for every authorization artifact (e.g. code, PAR, JAR) it issues or accepts.\n\n\n",
+      "createdAt": "2026-04-04T18:59:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3352#issuecomment-4187584895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABHwa0gQ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "⚠️ I have edited my previous comment to delete an invalid statement I made about using hash of the token for revocation instead of `jti`. That is <em>not</em> secure in general because the JWT itself is [malleable](https://github.com/OWASP/CheatSheetSeries/issues/2235) (as I realized recently).",
+      "createdAt": "2026-06-27T06:04:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3352#issuecomment-4815500417",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2026-04-02T17:14:30Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 3352,
+  "state": "OPEN",
+  "title": "Proposal: add requirements to verify correct implementation of OAuth PAR and JAR",
+  "url": "https://github.com/OWASP/ASVS/issues/3352"
+}

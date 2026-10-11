@@ -1,0 +1,254 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "### Current state:\r\n\r\nWe currently have the following two requirements:\r\n\r\n[10.3.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x18-V10-Malicious.md#v103-application-integrity):\r\n\r\n> Verify that the application employs integrity protections, such as code signing or subresource integrity. The application must not load or execute code from untrusted sources, such as loading includes, modules, plugins, code, or libraries from untrusted sources or the Internet. ([CWE-353](https://cwe.mitre.org/data/definitions/353.html))\r\n\r\n[14.2.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x22-V14-Config.md#v142-dependency):\r\n\r\n> Verify that if application assets, such as JavaScript libraries, CSS or web fonts, are hosted externally on a Content Delivery Network (CDN) or external provider, Subresource Integrity (SRI) is used to validate the integrity of the asset. ([CWE-829](https://cwe.mitre.org/data/definitions/829.html))\r\n\r\n### Proposed state:\r\n\r\nIn my opinion, we are duplicating here and we should merge these to requirements as follows:\r\n\r\n**10.3.2:**\r\n\r\n> [MODIFIED, MERGED FROM 14.2.3] Verify that the application only loads or executes code or content from untrusted sources if it employs integrity protections, such as code signing or Subresource integrity (SRI). This could include loading includes, modules, plugins, code, or libraries from untrusted sources or using JavaScript libraries, CSS or web fonts hosted by an external provider or Content Delivery Network (CDN). ([CWE-829](https://cwe.mitre.org/data/definitions/829.html))\r\n\r\n**14.2.3:**\r\n\r\n> [DELETED, MERGED TO 10.3.2]\r\n\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5EOCI9",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree 101% with the 10.3.2 proposed modification. The more we emphasize responsible loading of all external components and libraries, the better we all will be. One wonders if there exists a need to have some dedicated allow list resource that defines said external resources and only loads those? or is that opening up a can of worms ",
+      "createdAt": "2022-06-02T07:16:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1144529469",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5EV16Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Those are duplicates, agree - we need to get rid one of them.\r\n\r\nAgree with category choice as well: \"V10 Malicious Code > V10.3 Application Integrity\" seems better choice than \"V14 Configuration > V14.2 Dependency\".\r\n\r\nWhat I'm not really happy with, is the length of the requirement. In a way I like the current 14.2.3 more as it is short and clear.\r\n\r\n> One wonders if there exists a need to have some dedicated allow list resource that defines said external resources and only loads those? or is that opening up a can of worms.\r\n\r\nWe basically have allow-list of sources covered with requirements:\r\n  * 14.2.4 Verify that third party components come from pre-defined, trusted and continually maintained repositories.\r\n  * 14.4.3 Verify that a Content Security Policy (CSP) response header is in place that helps mitigate impact for XSS attacks like HTML, DOM, JSON, and JavaScript injection vulnerabilities.\r\n\r\nAnd from this point of view - I would like to avoid the word \"untrusted\" in the proposed change. We should not take anything from untrusted sources. All we care, is external. What is trusted today, may not be trusted tomorrow when those trusted ones got hacked and SRI point is to cover that case.",
+      "createdAt": "2022-06-04T09:25:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1146576536",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Enhn5",
+      "author": {
+        "login": "SoftwareSinner"
+      },
+      "authorAssociation": "NONE",
+      "body": "I ran into this same issue while on an engagement trying to figure out a good spot to fit the finding. I think this would be highly beneficial if the requirements requiring checks for SRI get merged into its own section. \r\n\r\n\"Verify that if application assets, such as JavaScript libraries, CSS or web fonts, are hosted externally on a Content Delivery Network (CDN) or external provider,\" \r\n\r\nWould be good for its own section. ",
+      "createdAt": "2022-06-09T14:43:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1151212025",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FP4fP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I think the use of \"untrusted\" is important because it is not just external which is untrusted.\r\n\r\nWhat about:\r\n\r\n**10.3.2:**\r\n\r\n>  [MODIFIED, MERGED FROM 14.2.3] Verify that the application loads or executes code or content from **sources not under the application's direct control/protection** only if it also employs integrity protections, such as code signing or Subresource integrity (SRI). This could include loading includes, modules, plugins, code, or libraries from untrusted sources or using JavaScript libraries, CSS or web fonts hosted by an external provider or Content Delivery Network (CDN). ([CWE-829](https://cwe.mitre.org/data/definitions/829.html))\r\n\r\n@SoftwareSinner sorry I am not sure I understood what you are proposing.",
+      "createdAt": "2022-06-21T14:03:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1161791439",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FRKSp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How do you validate this signed code in practice? Is it more build pipeline question?\r\n\r\nMaybe we need to keep 2 requirements separately and just take duplicated part (subresource integrity) out of 10.3.2?",
+      "createdAt": "2022-06-21T18:05:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1162126505",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FU8gu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So one reason to keep them separate might be to separate client side and server side scenarios. Code signing would only be a server side scenario where for some reason the server was pulling a code module from an external source. It should then be expected to verify the imported module using a public key with the module having been signed on build by the external party.",
+      "createdAt": "2022-06-22T13:45:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1163118638",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FYrOn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As from testing perspective those are clearly separate scenarios and require separate permissions as well, I would keep them separately.\r\n\r\nMy current idea would be to clean up 10.3.2 the way it does not overlap with 14.2.3 - it means 10.3.2 is dealing only with signing code and 14.3.2 dealing with SRI part.",
+      "createdAt": "2022-06-23T08:13:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1164096423",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FaX1G",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I take your point, how about:\r\n\r\n10.3.2\r\n\r\n> Verify that the application only loads or executes code, modules, content or plugins from sources not under the application's direct control/protection if it employs integrity protections, such as code signing. ([CWE-829](https://cwe.mitre.org/data/definitions/829.html))\r\n\r\n14.2.3:\r\n\r\n> Verify that if browser assets, such as JavaScript libraries, CSS or web fonts, are hosted externally on a Content Delivery Network (CDN) or external provider, Subresource Integrity (SRI) is used to validate the integrity of the asset. ([CWE-829](https://cwe.mitre.org/data/definitions/829.html))",
+      "createdAt": "2022-06-23T15:15:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1164541254",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5GDd4f",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "10.3.2 - change is ok for me\r\n\r\n14.2.3 - proposal is to change \"application assets\" to \"browser assets\"? For me a \"browser assets\" relates more with something related only with browser like browser plugin. Following list of examples makes it clear, but I prefer to keep this requirement like it is.",
+      "createdAt": "2022-07-05T17:24:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1175313951",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5GULLr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So how about:\r\n\r\n14.2.3:\r\n\r\n> Verify that if **client-side** assets, such as JavaScript libraries, CSS or web fonts, are hosted externally on a Content Delivery Network (CDN) or external provider, Subresource Integrity (SRI) is used to validate the integrity of the asset. ([CWE-829](https://cwe.mitre.org/data/definitions/829.html))\r\n\r\n\"Application assets\" does not catch the key-point that we are talking about things which will be used client-side in the browse",
+      "createdAt": "2022-07-10T09:42:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1179693803",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5InJgh",
+      "author": {
+        "login": "andesec"
+      },
+      "authorAssociation": "NONE",
+      "body": "The proposed version is much more understandable. Thanks!",
+      "createdAt": "2022-08-17T16:07:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1218222113",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KQcxk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just in case - for 10.3.2 CWE change from 353 to 829 was intentional or happened because in the beginning those were seen as duplicates?",
+      "createdAt": "2022-09-13T18:49:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1245826148",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KVXsY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Intentional, I don't think 353 is correct",
+      "createdAt": "2022-09-14T17:55:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1247116056",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KVkBS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, then merged and closed.",
+      "createdAt": "2022-09-14T18:44:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1293#issuecomment-1247166546",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-06-02T07:07:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1293,
+  "state": "CLOSED",
+  "title": "Duplication on 3rd party Javascript",
+  "url": "https://github.com/OWASP/ASVS/issues/1293"
+}

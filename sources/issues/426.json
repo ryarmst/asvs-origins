@@ -1,0 +1,92 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "requirement 3.4.3\r\n\"Verify that cookie-based session IDs have minimum practical hostnames, domain and path attributes, along with the 'SameSite' attribute.\"\r\n\r\n1) \"minimum practical hostnames, domain\" is a bit too abstract. copy-paste from NIST.\r\n2) style: if secure and httponly are in separate requirements, why to put host/domain, path and samesite to one requirement?\r\n\r\nI explain why I would like to get a bit more attention to host/domain and path attributes.\r\n\r\n**host vs domain**\r\n\r\nhost attribute is set by browser when no domain parameter is set for cookie. it's precise value.\r\ndomain attribute is used when it's set by set-cookie command. it's wildcard.\r\n\r\nthere should be clear and separate requirement that host value is recommended to use for session cookie OR if domain parameter is set, domain value for cookie should be as precise as possible.\r\n\r\nWhy?\r\nIf domain parameter IS NOT set in set-cookie command, host value is used. Host value is precise - if set-cookie command came from domain.com it goes back only to domain.com (and not to www.domain.com etc).\r\nIf domain parameter IS set, then domain it always works as \"wildcard\". If value for domain parameter is \".domain.com\" (2 dots requirement) then browser sends it also to all subdomains (like www.domain.com, campaign.domain.com etc).\r\n\r\nAs an attack scenario - if an attacker gets control over some subdomain, he/she can lure victim browser to visit this site, and if victim has an active session, then attacker can steal it from another subdomain.\r\n\r\n**path**\r\nif application is located in some subfolder (and another application in different folders) and/or session cookie is actually required only by one path (ex /admin/) then with setting precise path value we can take away potential information leakage.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2MzQxMjk3Mw==",
+      "author": {
+        "login": "m8urnett"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree that this is not clear. Setting the domain attribute includes subdomains, but not setting it is the equivalent to host-only so that example.com, and www.example.com are different. Which you would use depends on the specific site and requirements. \r\n\r\n~~However,~~ ~~you~~ ~~can~~ ~~set~~ ~~the~~ ~~cookie~~ ~~domain~~ ~~to~~ ~~www.example.com~~ ~~and~~ ~~it~~ ~~will~~ ~~be~~ ~~valid~~ ~~at~~ ~~example.com~~ ~~but~~ ~~not~~ ~~evil.example.com.~~\r\n\r\nI'll take a closer look at this and see if I can word it better. \r\n",
+      "createdAt": "2019-02-13T23:07:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/426#issuecomment-463412973",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2MzQxNzIwMw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> However, you can set the cookie domain to [www.example.com](http://www.example.com) and it will be valid at example.com but not evil.example.com.\r\n\r\nHow?\r\nBased on my knowledge, cookie with domain value www.example.com is not valid for http://example.com. It is true vice-versa, but not that way.\r\n\r\nhttps://tools.ietf.org/html/rfc6265#section-5.1.3\r\n\r\n> \"The domain string is a suffix of the string.\"\r\nIn your example, www.example.com is not suffix for example.com.",
+      "createdAt": "2019-02-13T23:23:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/426#issuecomment-463417203",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2MzQyNzgyNw==",
+      "author": {
+        "login": "m8urnett"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "My bad, I read that too quickly.",
+      "createdAt": "2019-02-14T00:05:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/426#issuecomment-463427827",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NDE3NTA3NA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @elarlang can you look at 800c8c4 and let me know if this meets your approval?",
+      "createdAt": "2019-02-15T19:43:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/426#issuecomment-464175074",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NDE4MjQzMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes. (y)",
+      "createdAt": "2019-02-15T20:06:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/426#issuecomment-464182430",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-02-13T22:32:09Z",
+  "labels": [],
+  "number": 426,
+  "state": "CLOSED",
+  "title": "V3.4.3 - Clarification with host vs domain attribute for session-cookie.",
+  "url": "https://github.com/OWASP/ASVS/issues/426"
+}

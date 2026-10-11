@@ -1,0 +1,423 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **16.3.4** | Verify that the application can detect and log unusual activity, including business logic anomalies and abnormal or excessive request patterns, such as by IP, user, total per hour or day, based on documented limits. | 3 | v5.0.be-7.2.4 |\n\nBoah. \"unusual activity\", \"business logic anomalies\", \"abnormal request patterns\"\n\n\"limit\" and \"usual activity\" are different things.\n\n---\n\nUpdate:\n\n- unusual activity - how to measure it? It means there must be defined unusual activity (additionally to max limits?) per by IP, user, total per hour or day, or whatever makes sense for the application.\n- business logic anomalies - I would say, if you can already detect it, it is not anomaly anymore. Should we translate it to just \"business logic validation\" bypass attempts?\n- abnormal or excessive request patterns - is it by content? Does it ask to allow-list request patterns and everything else should be alerted? How it is related \"per IP, per user\" etc?\n- abnormal or excessive request patterns - is it by request order? is just validating that the user must do business logical requests in certain order? \n\n\nBackground for the requirement are not bringing any clarification either.:\n* base from: v4.0.3-11.1.7 Verify that the application monitors for unusual events or activity from a business logic perspective. For example, attempts to perform actions out of order or actions which a normal user would never attempt.\n* merged from: v4.0.3-8.1.4 Verify the application can detect and alert on abnormal numbers of requests, such as by IP, user, total per hour or day, or whatever makes sense for the application.\n\nLinked CWE's for those requirements are even more confusing (as those requirements were in the business logic chapter):\n* https://cwe.mitre.org/data/definitions/754.html\n* https://cwe.mitre.org/data/definitions/390.html",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6nTukQ",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "_I had written this prior to your update and thought I ought to post anyways._\n\nWhat about some alternative wording: \n\n> Verify that the application detects and logs potentially malicious patterns of interaction and actions that should not occur as a result of expected use of the application. This must include excessive interactions such as those resulting from unauthorized automation.\n\nNote on \"interactions\" rather than \"request patterns\": this is to generalize beyond HTTP. As an example, WebSocket communication does not use a request/response paradigm. \n\nI removed the \"documented limits\" component, but it seems to me there should probably be a corresponding documentation requirement for identification and documentation of application-specific (business) logic considerations and request/action rates that ought to be logged.",
+      "createdAt": "2025-04-15T17:30:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2806966544",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nUHvC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I struggle to understand what is the precise problem to solve for this requirement - why it exists.\n\nCan anyone think about any other meaning than catching events for anti-automation requirements:\n* 2.4.1 Verify that anti-automation controls are in place to protect against excessive calls to application functions that could lead to data exfiltration, garbage data creation, quota exhaustion, rate limit breaches, denial of service, or overuse of costly resources.\n* 2.4.2 Verify that business logic flows require realistic human timing, preventing excessively rapid transaction submissions.\n\nI would add \"business logic validation\" into 16.3.3, and focus 16.3.4 only on catching anti-automation events.\n\nGeneral anomalies, mass-scans, etc, may go around the application logic and responsibility, so it feels it is a bit higher-level monitoring task.",
+      "createdAt": "2025-04-15T18:09:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2807069634",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVesY",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "We even cover step skipping attacks already:\n\n _**2.3.1** | Verify that the application will only process business logic flows for the same user in the expected sequential step order and without skipping steps. | 1 | v5.0.be-11.1.1_ \n\nI think 16.3.4 is already well, well covered and can go away.",
+      "createdAt": "2025-04-15T20:33:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2807425816",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6neOG_",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If I correctly understand the intent of the original requirement, I think the question to ask is this: must the application log and detect usage that is technically permissible (should not or cannot be prevented with a strict control), but nevertheless may indicate malicious or unwanted activity? \n\n@jmanico A sequential workflow as per 2.3.1 should prevent users from bypassing steps, but is it there value in some situations in detecting attempts to circumvent the intended order? I agree @elarlang that this is more appropriately captured by 16.3.3 (side note: that requirement would be a substantial effort for an L2 app IMO).\n\nRegarding automation events, consider an application that prohibits automation in their ToS. Even if they implement rate limiting as a control, a user may automate within the limit, so the activity is not prevented, but this may be usage that the application owners would like to identify and investigate without applying stricter preventative controls to block legitimate users. I have encountered applications that appear to operate with permissive controls but seemingly employ a detect -> investigate -> action cycle of some sort.  There may be other cases where anti-automation controls cannot be strict to permit for outlier use cases, but there exists a need to detect this usage.\n\nRealistically, I think this may have limited applicability. ",
+      "createdAt": "2025-04-16T14:10:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2809717183",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nfuib",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> this is more appropriately captured by 16.3.3 (side note: that requirement would be a substantial effort for an L2 app IMO).\n\nI don't share the view that it requires a substantial effort.\n\n16.3.3 as it stands:\n* _16.3.3 Verify that the application logs attempts to bypass the security controls defined in the design documentation such as input validation._\n\nThis requirement does not ask you to implement any new security controls, but just to log the bypass attempts from every security control you need to implement based on other requirements. If you need to implement business logic requirements, such as check the step-order, then you just need to log also the bypass attempt from this check.\n\nBut I think \"defined in the design documentation\" can be improved. I need to think about it more a bit.\n\n",
+      "createdAt": "2025-04-16T16:30:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2810112155",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nf7Wo",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> @jmanico A sequential workflow as per 2.3.1 should prevent users from bypassing steps, but is it there value in some situations in detecting attempts to circumvent the intended or\n\nHey @ryarmst I do think this it's very critical. I'm seeing your point a bit more clearly now.\n\nI'm taking a close look at all of v16.\n\nConsidering everyones comments here, especially @elarlang original post, I want to suggest a few changes.\n\n**Let 16.3.3 own the control validation bypass logging — log what your validations c**atch\n\n_16.3.3 Verify that the application logs attempts to bypass implemented security and business logic validation controls, including but not limited to input validation, authentication, authorization, and enforced workflow sequencing._\n\n**And Let 16.3.4 focus on detecting misuses that may not hit validation failures, like:**\n- Abuse within allowed input ranges\n- Abnormal but technically valid behavior\n- Automation that mimics a real user\n\n_16.3.4 Verify that the application detects and logs suspicious usage behaviors that may indicate malicious or automated activity, such as excessive or abnormal request rates, unexpected interaction sequences, or use patterns inconsistent with typical human workflows._\n",
+      "createdAt": "2025-04-16T16:52:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2810164648",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ngK0I",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 16.3.3 Verify that the application logs attempts to bypass implemented security and business logic validation controls, including but not limited to input validation, authentication, authorization, and enforced workflow sequencing.\n\nWe already have separate requirements (16.3.1, 16.3.2) for auth* stuff.\n\n---\n\n- Abuse within allowed input ranges - if you are able to detect them, those are just business logic validation rules\n- Abnormal but technically valid behavior - what is it? how do you test it?\n- Automation that mimics a real user - if it really mimics user with user-pace, you can not detect it.",
+      "createdAt": "2025-04-16T17:21:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2810227976",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nhEKv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Totally makes sense @elarlang, how about:\n\n_16.3.3 Verify that the application logs attempts to bypass implemented security such as business logic validation controls or workflow sequence abuse._\n\nand then drop 16.3.4\n\nThis would allow us to cleanly remove 16.3.4 without losing coverage, since both requirements touch on similar suspicious patterns — particularly in cases of automation or sequence abuse.\n\nI realize there's a valid concern about overloading section 16, but I think business logic abuse deserves special attention — similar to how we treat authorization. It's uniquely difficult to log and detect, often requires contextual awareness, and plays a major role in real-world breaches. Does this address your concerns as well @ryarmst ?",
+      "createdAt": "2025-04-16T18:56:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2810462895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nqP8N",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I do think there is legitimacy in what I believe 16.3.4 ought to address around automation patterns, but it probably has limited applicability. I would not object strongly to removing it, but I'll provide an argument anyways.\n\n@elarlang \n> Abuse within allowed input ranges - if you are able to detect them, those are just business logic validation rules\n\nI offer as an example: sustained use within allowable interaction rates. Technically valid, but abnormal and possibly a violation of ToS or some other policy, leading to unwanted costs from non-human/automated service consumption. I think the argument for detection rather than blocking with a strict control is that anti-automation mechanisms can sometimes be crude and unable to distinguish between a human user and actual automation, necessitating manual investigation.\n\nI don't want to stray *too* off topic with 16.3.3, but I do think it \"attempts to bypass implemented security\" may be wide reaching and challenging to implement/verify. Workflow sequence abuse and input validation violations are fairly straightforward cases.",
+      "createdAt": "2025-04-17T13:17:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2812870413",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nqf2b",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In the initial issue I wrote:\n> unusual activity - how to measure it? It means there must be defined unusual activity (additionally to max limits?) per by IP, user, total per hour or day, or whatever makes sense for the application.\n\nSo @ryarmst - are you describing a need for extra set of limits or indicators as I wrote? From monitoring perspective I agree that this is something to do. My question and worry is - is that a responsibility for the application?\n\n---\n\n> I don't want to stray too off topic with 16.3.3, but I do think it \"attempts to bypass implemented security\" may be wide reaching and challenging to implement/verify. Workflow sequence abuse and input validation violations are fairly straightforward cases.\n\nWith \"such as input validation\" the meaning is like I described already, it is not limited to input validation.\n",
+      "createdAt": "2025-04-17T13:31:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2812935579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ntTg0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "16.3.4 is a hard one. And hey @ryarmst I really appreciate your time in articulating the nuance here so clearly.\n\nI want to support Ryan's core point: _**there is security value in detecting and logging technically allowed but contextually abnormal behavior**_ — particularly in cases of low-and-slow automation or interaction patterns that abuse legitimate functionality (e.g., scrapers, cost abuse, TOS violations). These behaviors often don’t trigger validation failures or alert monitoring limits but they are still problematic. But they can be detected if they are specifically looked for.\n\nTo Elar's fair concern — \"how to measure it?\" — this implies that we need a set of heuristics or behavioral metrics that may not always be implementable in application logic. But in environments where this is a business risk (e.g., rate-sensitive APIs, freemium abuse, scraping-sensitive data models), the application can log this type of behavior — even if detection and action happen (mostly) externally.\n\nSo here's a potential compromise: trying hard to account for *everyones* concern here.\n\n_16.3.4: Verify that the application logs for suspicious but technically valid interaction patterns that may indicate automation, policy violation, or other anomalous usage — even if these do not trigger explicit validation failures._ **L3**. \n\nWhat do you all think about this direction?",
+      "createdAt": "2025-04-17T17:55:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2813671476",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nuzYl",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang \n> So @ryarmst - are you describing a need for extra set of limits or indicators as I wrote? From monitoring perspective I agree that this is something to do. My question and worry is - is that a responsibility for the application?\n\nYes, I think a reasonable way to think about it is as a secondary set of indicators that do not result in blocking, but are used for monitoring capabilities. I don't work in detection, so I don't want to speculate too far out of my depth here, but it seems to me that a good general approach to rate limiting would be to set a strict rate (resulting in a blocking action), but to also have a lower rate approaching the limit that is used only for detection, permitting detection of lower threshold attacks while also permitting fine tuning. As far as responsibility, I think it would depend on the mechanism. \n\n> With \"such as input validation\" the meaning is like I described already, it is not limited to input validation.\n\nMy point is not that it is limited to input validation, but that attempted violations of input validation is an example of a simple case to implement and validate, yes, but the \"not limited to\" - the other security controls - is where complexity could arise in the details as far as implementation and validation.\n\n@jmanico \nI like the spirit of the requirement, but I think it's probably not practically verifiable. Considering the app and business specific nature, I less sure now of what it ought to look like🤷\n\nJust as a side note, the concept is similar to that of canary tokens: you are not trying to protect the tokens, but their access may tell you something about the actions taken against the application. ",
+      "createdAt": "2025-04-17T21:32:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2814064165",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nvso8",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I was once trying to stop someone from publicly scraping pricing info from a large chip manufacturer. It was a cat and mouse game, but I figured out that even though they were hitting us in one session within our established limits, the requests came at an exact time sequence that let me detect it was not a human so I give them a different data set.\n\nI also did data analysis to measure that most humans would only look at a couple different chips for pricing. Only the bots would look at more than five or six different chips for pricing within a certain amount of time and I could easily separate the scrapers from the humans by doing that kind of data analysis - it was really hard to automate and log, but it worked.\n\nIs that close to what you are saying @ryarmst ? I want to make sure this gets in somehow. 🤙🏽 ",
+      "createdAt": "2025-04-18T01:27:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2814298684",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6ezs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's see what @ryarmst says",
+      "createdAt": "2025-04-20T11:28:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2817125612",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6ffV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This kind of monitoring makes sense to a lot of applications, but... I doubt we can require it from everyone.\n\nWe can not require every application to contain monitoring capabilities.",
+      "createdAt": "2025-04-20T11:36:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2817128405",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7uKk",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico Your example fits, for sure. You monitored and analyzed permissible traffic to identify unwanted interactions that were nevertheless permitted. Your case sounds like quite a bit of manual effort, but there would have to be some initial indicator to detect potentially unwanted activity. This is the role I generally understand the requirement to sit in, but... it is very application-specific and often just applies in specific scenarios. As per @elarlang, it may be an unreasonable requirement. I do not have a strong opinion either way.",
+      "createdAt": "2025-04-21T01:22:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2817450660",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oCn-i",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What about moving this to recommendations in one of the sections? If not, then I guess we cal close this out if @elarlang and @ryarmst do not have a strong desire to see this in. I do not have a strong opinion either way.",
+      "createdAt": "2025-04-21T18:55:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2819260322",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oM-nF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What about moving this to recommendations in one of the sections?\n\nWhat do you mean by that?\n\n> If not, then I guess we cal close this out if @elarlang and @ryarmst do not have a strong desire to see this in. I do not have a strong opinion either way.\n\nIn 16.3 section we have text:\n> Note that while ASVS includes logging of security events in scope, alerting and correlation (e.g., SIEM rules or monitoring infrastructure) are considered out of scope and are handled by operational and monitoring systems.\n\nIt kind of covers it. If not, you can propose the improvement.\n\n---\n\nI need to re-analyze the situation a bit, a lot of content from 16.3.4 we don't need (can not require), but need to check, is there something we should.",
+      "createdAt": "2025-04-22T17:13:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2821974469",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oNwK-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Maybe change the control objective with this change:\n\n## Control Objective\n\nSecurity logs are distinct from error or performance logs and are used to record security-relevant events such as authentication, access control, privilege escalation and business logic anomalies. Their purpose is to support detection, response, and investigation by providing high-signal, structured data for analysis tools like SIEMs.",
+      "createdAt": "2025-04-22T18:42:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2822177470",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6opWqO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Reanalyzing the issue. There is nothing to keep from current 16.3.4, but there is a need to improve coverage for security events and for that I opened a separate issue: #3045\n\nFor this one I do the PR when we also have result from the new opened issue to skip one iteration of mapping updates.",
+      "createdAt": "2025-04-25T05:31:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2829413006",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pCh40",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Security logs are distinct from error or performance logs and are used to record security-relevant events such as authentication, access control, privilege escalation and business logic anomalies. \n\nI prefer to not add this  \"business logic anomalies.\" here, it makes all the items \"anomalies\" (can be read as \"authentication anomalies, access control anomalies, privilege escalation anomalies and business logic anomalies.\"\n\nAlso good question is, is any of those listed a \"security-relevant **event**\"?",
+      "createdAt": "2025-04-28T17:43:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2836012596",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pCl0f",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good point, these are not really events. To make it an event perhaps:\n\n_Security logs are distinct from error or performance logs and are used to record security-relevant events such as authentication failures, access control failures such as privilege escalation and business logic abuse._",
+      "createdAt": "2025-04-28T17:49:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2836028703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pCtHm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I propose something a bit different:\n> Security logs are distinct from error or performance logs and are used to record security-relevant events such as authentication decisions, access control decisions, and attempts to bypass security controls, such as input validation or business logic validation.",
+      "createdAt": "2025-04-28T18:02:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2836058598",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pCutB",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "That works for me @elarlang - I like it.",
+      "createdAt": "2025-04-28T18:04:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2963#issuecomment-2836065089",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-14T08:52:32Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABJFMusA",
+      "name": "V16 (prev V7)",
+      "description": "Temporary label for grouping logging related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2963,
+  "state": "CLOSED",
+  "title": "16.3.4 / v5.0.be-7.2.4 - define precise goal and update wording",
+  "url": "https://github.com/OWASP/ASVS/issues/2963"
+}

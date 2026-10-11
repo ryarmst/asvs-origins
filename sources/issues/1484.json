@@ -1,0 +1,388 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "This requirement was moved here as it was considered to be implementation specific.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.3.11** | [MOVED FROM 1.5.4] Verify that output encoding occurs close to or by the interpreter for which it is intended. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 116 |\r\n\r\nI am not sure I agree with that but in any case it is not clear to me how this would be tested.\r\n\r\nDo we think we need to return this to V1 and convert it into some sort of documentation requirement? Otherwise, I think we may have to eliminate it and leave it as a standard assumption for the correct implementation of any output encoding/sanitization.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5Rd9lG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(Bad) Example: data is converted for HTML output and stored to database and then it's \"safe\" to display it to the HTML. The problem is, if you need to display the same data in JavaScript or any other format, you have data in incorrect encoding and not in original way - may also cause integrity problem.\r\n\r\nWhat we expect - data is stored as it came from the source/user and it is converted for every component just before or by the component which uses the data.",
+      "createdAt": "2022-12-28T17:24:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1366808902",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rd93J",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Another example - data is converted for HTML in user browser when user is using some WYSIWYG kind of thing, user submits HTML encoded data...",
+      "createdAt": "2022-12-28T17:27:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1366810057",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rkh_v",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I understand the concept behind it but it is not really a requirement that itself can be specifically tested without separately looking at the implementation of all output encoding, I think maybe this should just be a factor within an existing output encoding requirement like 5.3.3.\r\n\r\nDo you disagree @elarlang ?",
+      "createdAt": "2023-01-01T20:41:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1368530927",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RkiOF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I disagree. It's not only output problem.\r\n\r\nIf the data from user modified to some encoding it means that it's already ruining the integrity.\r\n\r\nI have used this requirement for pen-test reports often enough to say it's clearly valid and needed.\r\n\r\nMaybe we can look to this problem from another angle with more clear statement (I don't have any problems with current one), but the it should exists in ASVS.",
+      "createdAt": "2023-01-01T20:50:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1368531845",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rkiu9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So what if we did something like this:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.3.3** | Verify that context-aware, preferably automated - or at worst, manual - output escaping protects against reflected, stored, and DOM based XSS **and that this is done close to or by the interpreter for which it is intended**. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 79 |",
+      "createdAt": "2023-01-01T21:01:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1368533949",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rkjs9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In practice it's mostly happening (or I have detected) with converted too early for HTML/XML. The same problem may happen with any other component/document - SQL, JavaScript, OS command, LDAP, ...\r\n\r\nFrom that I would say current requirement needs \"escaping\" to be covered additionally to output encoding. Also, current requirement maybe needs \"as a last step before executed by interpreter\". Otherwise we may have situation when something is first encoded or escaped, but then comes value max length truncation, sanitization etc.",
+      "createdAt": "2023-01-01T21:10:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1368537917",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TophV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I accept the \"as a last step before executed by interpreter\" point but I still don't see 5.3.11 as a separate, practically testable requirement. It still seems to be part of the general output encoding/escaping requirements.\r\n\r\nHow can we make this requirement practically testable? Right now it sounds like we are expecting the tester to review all encoding/escaping code to look where it is being done...",
+      "createdAt": "2023-01-25T06:42:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1403164757",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TpAOJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Meanwhile I'm more and more convinced that we need this as separate requirement.\r\n\r\nIt may require code review, but it may come out other ways. If encoding or escaping is done before max-length or truncation.\r\n\r\nAnd maybe we need matching requirement like \"Verify that decoding is done once and as first step e. g. decoding is not done after input validation or sanitization.\"",
+      "createdAt": "2023-01-25T08:34:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1403257737",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5YQfKs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I accept the \"as a last step before executed by interpreter\" point but I still don't see 5.3.11 as a separate, practically testable requirement. **It still seems to be part of the general output encoding/escaping requirements.**\r\n\r\nWe need it as separate requirement - for each separate technology requirement we say \"do the correct thing\" and with this requirement (current 5.3.11) we say \"do it in correct place\" / \"do things in correct order\", otherwise it may loose it's effect.\r\n\r\nEscaping things should be covered by #1589\r\n\r\nDecoding part should be covered by #1590\r\n\r\nFor current 5.3.11 we should \"inject\" the idea \"as a last step before executed by interpreter\"\r\n",
+      "createdAt": "2023-03-23T07:31:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1480716972",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dc7_O",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @tghosth ",
+      "createdAt": "2023-05-30T06:54:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1567866830",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5emdh-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this feels like something to consider alongside the rest of the issues in this chapter... marking for rework,",
+      "createdAt": "2023-06-12T11:27:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1587140734",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zRf1C",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We need to create an Validation and Sanitization Architecture section which contains this item and also #1590\r\n\r\nSuggested updated wording for this item:\r\n\r\n> [MODIFIED, MOVED FROM 1.5.4] Verify that output encoding is designed throughout the application to occur close to or by the interpreter for which it is intended. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering))\r\n\r\n",
+      "createdAt": "2024-02-08T11:59:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1933966658",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zRf3V",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang ",
+      "createdAt": "2024-02-08T11:59:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1933966805",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zRhFK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Like it, Josh",
+      "createdAt": "2024-02-08T12:02:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1933971786",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zc6E5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that output encoding and escaping are designed throughout the application to occur close to or by the interpreter for which it is intended.\r\n\r\n* I added \"escaping\"\r\n* is \"to occur close to or by the interpreter\" clear enough?\r\n  * compare with \"as a last step before executed by interpreter\"\r\n* should we make clear the intention of the requirement: \"data must be stored in the \"original\" state, not as encoded for some specific encoding (e.g. HTML encoding)?\r\n\r\nping @tghosth @jmanico ",
+      "createdAt": "2024-02-10T09:55:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1936957753",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5z_BgZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application performs output encoding and escaping either as a final step before being used by the interpreter for which it is intended or by the interpreter itself.\r\n\r\nThis is a good final wording.\r\n\r\n> should we make clear the intention of the requirement: \"data must be stored in the \"original\" state, not as encoded for some specific encoding (e.g. HTML encoding)?\r\n\r\n@elarlang to add this to the intro to the section.",
+      "createdAt": "2024-02-15T11:25:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1945901081",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM50ALoS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> should we make clear the intention of the requirement: \"data must be stored in the \"original\" state, not as encoded for some specific encoding (e.g. HTML encoding)?\r\n\r\nI need help with wording for this one.",
+      "createdAt": "2024-02-15T14:26:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1946204690",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM50AMET",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note that I also made the requirement Level 1.",
+      "createdAt": "2024-02-15T14:27:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1946206483",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM50PyL6",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > should we make clear the intention of the requirement: \"data must be stored in the \"original\" state, not as encoded for some specific encoding (e.g. HTML encoding)?\r\n> \r\n> I need help with wording for this one.\r\n\r\nIs the purpose of that one to prevent double encoding issues? \r\n\r\nIf yes, then how about \"Whenever data is being stored, ensure that it is stored in its original state and not in an encoded state (e.g. HTML encoding) to prevent double encoding issues\"",
+      "createdAt": "2024-02-17T19:54:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1950294778",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM50TzO3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > > should we make clear the intention of the requirement: \"data must be stored in the \"original\" state, not as encoded for some specific encoding (e.g. HTML encoding)?\r\n> > \r\n> > \r\n> > I need help with wording for this one.\r\n> \r\n> Is the purpose of that one to prevent double encoding issues?\r\n> \r\n> If yes, then how about \"Whenever data is being stored, ensure that it is stored in its original state and not in an encoded state (e.g. HTML encoding) to prevent double encoding issues\"\r\n\r\nI like this and I added a paragraph along these lines to the intro section @csfreak92 @elarlang \r\n",
+      "createdAt": "2024-02-18T14:47:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1951347639",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM50TzUI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Note that I also made the requirement Level 1.\r\n\r\nI think we should keep this L2. In an ideal world it would be the basis of all other requirements but practically speaking I think we have to accept that it probably wouldn't be covered in a basic verification, especially black box.",
+      "createdAt": "2024-02-18T14:48:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1951347976",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM50ULxl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Note that I also made the requirement Level 1.\r\n> \r\n> I think we should keep this L2. In an ideal world it would be the basis of all other requirements but practically speaking I think we have to accept that it probably wouldn't be covered in a basic verification, especially black box.\r\n\r\nAt the time when we don't have level's defined, it's pointless to discuss it. So I re-changed it\r\nhttps://github.com/OWASP/ASVS/commit/b251c3774695fcf3af69571e32cc2ae4525e056c",
+      "createdAt": "2024-02-18T21:19:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-1951448165",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Y-k5E",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note this requirement subsequently became 5.6.2 instead of 5.6.3 as something else got moved.",
+      "createdAt": "2024-12-31T15:34:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1484#issuecomment-2566540868",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-12-28T17:00:59Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 1484,
+  "state": "CLOSED",
+  "title": "5.3.11 is not practically testable",
+  "url": "https://github.com/OWASP/ASVS/issues/1484"
+}

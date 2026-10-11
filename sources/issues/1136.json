@@ -1,0 +1,84 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjY0OTExNw==",
+    "is_bot": false,
+    "login": "bretik",
+    "name": "Luboš Bretschneider"
+  },
+  "body": "> [12.3.1](https://github.com/OWASP/ASVS/blob/v4.0.3/4.0/en/0x20-V12-Files-Resources.md#v123-file-execution) Verify that user-submitted filename metadata is not used directly by system or framework filesystems and that a URL API is used to protect against path traversal.\r\n\r\nFrom the requirement, it is not clear what exactly is meant by \"URL API\" and how do I use it to protect against path traversal. If I go with common Java check for path traversal, is `File` class the \"URL API\" here?\r\n\r\n```\r\nFile file = new File(BASE_DIRECTORY, userInput);\r\nif (file.getCanonicalPath().startsWith(BASE_DIRECTORY)) {\r\n    // process file\r\n}\r\n```\r\n\r\nSearching cheat sheets and Google for URL API references, I got nothing but [URL Web API](https://developer.mozilla.org/en-US/docs/Web/API/URL) - not sure how would I use that for path traversal protection (maybe in Node.js?).\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM46Ea4c",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "First remember that a Webservice is a type of API but an API is not necessarily a webservice. An API can refer to a set of functions in a library.\r\n\r\nAn example of a safe URL API is:\r\n\r\nhttps://www.javadoc.io/doc/com.google.common.html.types/types/1.0.0/com/google/common/html/types/SafeUrl.html\r\n\r\n",
+      "createdAt": "2021-11-19T16:51:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1136#issuecomment-974237212",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46Ev_Z",
+      "author": {
+        "login": "bretik"
+      },
+      "authorAssociation": "NONE",
+      "body": "OK, I understand the concept of API as \"any application interface\". To comply with this level 1 requirement, it is required that I use **URL API** to protect against path traversal in my application. I am trying to understand what exactly should I do, it is probably just problem with terminology. If you tell me, that it is common to refer to canonicalization functions as **\"URL API\"**, I am OK with that. If it is not about path canonicalization, I would be glad for some explanation/example what exactly this requirement covers.\r\n\r\nHere is an example of what I understand under \"path traversal protection\" in the implementation phase:\r\n> Inputs should be decoded and canonicalized to the application's current internal representation before being validated (CWE-180). Make sure that the application does not decode the same input twice (CWE-174). Such errors could be used to bypass allowlist validation schemes by introducing dangerous inputs after they have been checked.\r\nUse a built-in path canonicalization function (such as realpath() in C) that produces the canonical version of the pathname, which effectively removes \"..\" sequences and symbolic links (CWE-23, CWE-59). This includes:\r\n> - realpath() in C\r\n> - getCanonicalPath() in Java\r\n> - GetFullPath() in ASP.NET\r\n> - realpath() or abs_path() in Perl\r\n> - realpath() in PHP\r\n\r\n_source: https://cwe.mitre.org/data/definitions/22.html_",
+      "createdAt": "2021-11-19T18:52:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1136#issuecomment-974323673",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46GHM1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For v5.0 I have to-do for myself for all the requirements on this subcategory, there is not much to keep to be honest.\r\n\r\nFrom ASVS v4.0.* point of view, the point for the requirement is simple: _Verify that application is not vulnerable to path traversal._ or _Verify that application has defense against path traversal._\r\n\r\nIn my opinion it does not matter how you build the defense (allow-list or sanitize), every part of the system must have this defense.",
+      "createdAt": "2021-11-20T17:13:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1136#issuecomment-974680885",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46G63a",
+      "author": {
+        "login": "bretik"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks, I think we can close this. My aim was to make sure I understand the requirement and that I am not missing something with the \"URL API\" and I think I got that. Thanks for your answers.",
+      "createdAt": "2021-11-21T20:42:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1136#issuecomment-974892506",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-11-19T07:12:34Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 1136,
+  "state": "CLOSED",
+  "title": "12.3.1 Clarification",
+  "url": "https://github.com/OWASP/ASVS/issues/1136"
+}

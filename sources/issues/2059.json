@@ -1,0 +1,536 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3Njc1OTA0",
+    "is_bot": false,
+    "login": "EnigmaRosa",
+    "name": "Shanni Prutchi"
+  },
+  "body": "Note: this is referenced as 4.1.10 in #2033, but I updating the numbering to account for the skipped requirements.\r\n\r\n**Ed note: _This is being merged as 4.1.6_**\r\n\r\nI propose the addition of a new requirement that addresses the need for access decisions to be made on the most current permissions information. For example, let's say a user's access permissions are modified while that user has an active session (i.e. admin revokes access to edit files) - if the system does not check the user's permissions in real time (i.e. instead relying on cached access information), the user would be able to edit a file, which they should no longer be able to do.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that the access control system makes real-time access control decisions based on current permissions values. | ✓ | ✓ | ✓ | |\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6K6tV2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We have a requirement\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.7** | [ADDED] Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked when admins change the entitlements or roles of the user. | ✓ | ✓ | ✓ | 613 | |\r\n\r\nI have proposed to move it to access control in https://github.com/OWASP/ASVS/issues/1917\r\n\r\n> We don't have a matching requirement for the same situation in the \"classical session management\" - if the permissions for the user are changed, it must have immediate effect. Such as in case those are buffered to session data, those also must be \"revoked\".\r\n\r\n> So maybe we need to make this requirement to cover both situations and to be more abstract. Or do we need to have another requirement for \"classical session management\".\r\n\r\nIt may make sense to read the issue, as there are other related comments, but let's continue the discussion in this issue.",
+      "createdAt": "2024-09-05T05:40:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2330645878",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K9THV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Note: revoking the token is pretty dramatic. I'd rather set up a rule with the new access control policy for that user (using some caching method) so the user experience is not effected. If you can revoke an active token, then having a \"access control over-ride\" list is just as easy.",
+      "createdAt": "2024-09-05T11:53:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2331324885",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LCaxP",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that all active stateless tokens\r\n\r\nApparently (today I learned), the blessed lingo for that would be/become [\"self-encoded tokens\"](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-10#name-access-token-validation)?",
+      "createdAt": "2024-09-05T21:34:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2332666959",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Pp-lP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So we currently have two proposals.\r\n\r\nI prefer @EnigmaRosa's requirement above https://github.com/OWASP/ASVS/issues/2059#issue-2506424424, because it is more outcomes focused than implementation focused. However, I think we do also need to address the token based situation as well.\r\n\r\nI would propose something like:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that the access control system makes real-time access control decisions based on current permissions values. Where the application is relying on roles and entitlements from a signed token, it will be necessary to either rotate this token when permissions change or ensure the token only has a very short lifetime.   | ✓ | ✓ | ✓ | |\r\n\r\nWhat do we think?",
+      "createdAt": "2024-10-14T06:29:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2410146127",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PqHYk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is a quite weird requirement by wording - \"You must do it immediately, ... or a bit later is also ok.\"\r\n\r\nWhat do you mean by \"rotate the token\" - from the OAuth perspective - is the requirement addressing refresh token's or access tokens? What means \"very short lifetime\"?\r\n\r\nIt overlaps with V3 stateful vs stateless and with OAuth topics. I think we need to find more general solution here than writing \"if stateless\" to each requirement.",
+      "createdAt": "2024-10-14T06:50:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2410182180",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PySk0",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What about something like \"ensure that changes of roles and entitlement are taken into account  in the policy enforcement points in at most `X`\".\r\n\r\nWhen using some kind of reference token which involves a request to a separate service for validation, you will probably end up using a small cache in order to avoid making the token validation request for each incoming request (based on the freshness of your last check and how critical the current request is).\r\n\r\nWhen using a self-encoded token, this is going to be implemented by the short validity of the token.\r\n",
+      "createdAt": "2024-10-14T20:52:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2412325172",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Py5do",
+      "author": {
+        "login": "EnigmaRosa"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Really the question is if we want to go high-level or make sure to include classical and stateless",
+      "createdAt": "2024-10-14T23:03:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2412484456",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P8fI5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is a quite weird requirement by wording - \"You must do it immediately, ... or a bit later is also ok.\"\r\n\r\nI can accept that, on the other hand, I don't want to overthink this too much.\r\n\r\n> Really the question is if we want to go high-level or make sure to include classical and stateless\r\n\r\nIn principle, I want to keep things high level.\r\n\r\nOn the other hand, in a system where the permissions mechanism relies on signed tokens, is it possible to comply with this requirement? \r\n\r\nMaybe the solution is to either allow a grace period or make this an L2 or L3 requirement.\r\n\r\nWhat do people think?",
+      "createdAt": "2024-10-15T20:37:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2414998073",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qb-Yd",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Maybe the solution is to either allow a grace period or make this an L2 or L3 requirement.\r\n\r\nYes, in practice for scalability reasons, you are often going to have some small grace period between the moment you modify some user permissions and the moment the modification is actually taken into account (especially in highly distributed and high-availability systems).\r\n\r\nSome examples:\r\n\r\nIf you are using some OIDC user claims for authorization decision and you want real-time access control decision, you are going to need to be a UserInfo request for each incoming request. (Another solution would be to rely on [Shared Signals](https://openid.net/specs/openid-sse-framework-1_0.html)).\r\n\r\nIf you are using OAuth access tokens and you want real-time access control decision, the resource server is going to need to check the status of the access token (using token introspection) for each incoming request.\r\n\r\nAnother case is if you are storing the user permissions in a database which features eventual consistency for high availability.\r\n\r\nGoogle's [Zanzibar](https://storage.googleapis.com/gweb-research2023-media/pubtools/5068.pdf) is certainly a  well-designed scalable system for this topic. However it does *not* feature real-time access control decision (in this sense) but only features *external consistency*:\r\n\r\n> Zanzibar’s external consistency model is one of its most salient features. It respects the ordering of user actions, yet\r\nat the same time allows authorization checks to be evaluated at distributed locations without global synchronization",
+      "createdAt": "2024-10-18T21:23:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2423252509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QeCk4",
+      "author": {
+        "login": "EnigmaRosa"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm good with making this L2 & L3",
+      "createdAt": "2024-10-19T12:05:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2423793976",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qw1ZJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Updated proposal. I have made this Level 2 and have reworded to try and focus on the problem. @elarlang is ok with it.\r\n\r\nWhat do you think @jmanico @EnigmaRosa?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that permissions values on which access control decisions are made, are updated as fast as possible. Where this is longer than a few minutes, it will be necessary to implement migrating controls to alert when a user performs an action when they should no longer be able to do so.  | | ✓ | ✓ | |",
+      "createdAt": "2024-10-22T09:10:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2428720713",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q7Y34",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A few suggestions:\r\n\r\n_Verify permission values used in access control decisions are updated in real-time or as quickly as possible. If updates exceed a few minutes, implement monitoring and alerts to detect and block unauthorized actions. Invalidate stale permissions promptly and refresh cached permissions regularly._",
+      "createdAt": "2024-10-23T09:32:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2431487480",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q7f6a",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement here should only be about V4 authorization. One thing per requirement.",
+      "createdAt": "2024-10-23T09:40:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2431516314",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q7im-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Fair point. I suggest we just keep is simple then.\r\n\r\n_Verify permission values used in access control decisions are updated in real-time._ ",
+      "createdAt": "2024-10-23T09:42:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2431527358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q7kIb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Also, I recommend thinking about and defining, what \"real time\" means.\r\n\r\nLet's say we have a \"classical\" server-side session, session token/id delivered in a cookie - if there is a permission change, account termination, etc - \"real-time\" means that in the very next second this user is logged out from the UI, and not waiting for the next request to the server. So it requires sockets to keep it \"real-time\".",
+      "createdAt": "2024-10-23T09:43:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2431533595",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q7v7R",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "That's fair. How about back to:\r\n\r\n_Verify permission values used in access control decisions are updated in real-time or as quickly as possible_",
+      "createdAt": "2024-10-23T10:00:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2431581905",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q74_h",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang \r\n\r\n> The requirement here should only be about V4 authorization. One thing per requirement.\r\n\r\nAre you talking about \"_If updates exceed a few minutes, implement monitoring and alerts to detect and block unauthorized actions._\"\r\n\r\nIf so, I think that this is an important mitigating control which is why I added it as there are a lot of reasons why \"immediate\" is not possible.\r\n\r\n> Let's say we have a \"classical\" server-side session, session token/id delivered in a cookie - if there is a permission change, account termination, etc - \"real-time\" means that in the very next second this user is logged out from the UI, and not waiting for the next request to the server. So it requires sockets to keep it \"real-time\".\r\n\r\nI think the implication is that the next time the user attempts to refresh data it will no longer be accessible. I don't think we can handle a situation where they have just left the screen open. That is what idle timeout is for :)\r\n\r\n---\r\n\r\nI also feel like the \"real time\" phrase is causing problems.\r\n\r\nI would suggest:\r\n\r\n_Verify that permission values used in access control decisions are updated **immediately** or as quickly as possible._\r\n",
+      "createdAt": "2024-10-23T10:15:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2431619041",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RdLd7",
+      "author": {
+        "login": "EnigmaRosa"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I feel like the \"as quickly as possible\" language is going to be a problem. I understand why we select that phrase, I'm just concerned users will have issues with it.",
+      "createdAt": "2024-10-28T01:56:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2440345467",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RfuN0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I feel like the \"as quickly as possible\" language is going to be a problem. I understand why we select that phrase, I'm just concerned users will have issues with it.\r\n\r\nI agree it is not ideal but I think real time is also a little relative :) Any thoughts on different wording?",
+      "createdAt": "2024-10-28T09:20:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2441012084",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RglKa",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> real time\r\n\r\nActually, the definition of \"real-time\" is that the delay must be bounded by some specified value, so if we wanted to paraphrase the meaning of this, it would be:\r\n\r\n> Verify permission values used in access control decisions are updated as quickly as possible and within a documented bound constraint defined according to the security requirements of the application. This time constraint may vary depending on the action to authorize and must be lower than XXX.\r\n",
+      "createdAt": "2024-10-28T10:48:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2441237146",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RiQ9F",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Feels like we are back to my previous proposal: https://github.com/OWASP/ASVS/issues/2059#issuecomment-2428720713\r\n\r\nThis proposal provides some practical bounds for what \"as fast as possible\" means as well as a practical mitigation. I think the second sentence is clearly relevant to the first sentence as a direct follow-on/consequence.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that permissions values on which access control decisions are made, are updated as fast as possible. Where this is longer than a few minutes, it will be necessary to implement mitigating controls to alert when a user performs an action when they should no longer be able to do so.  | | ✓ | ✓ | |",
+      "createdAt": "2024-10-28T14:02:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2441678661",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rj4Dx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "New bone to bite:\r\n> Verify that permissions values on which access control decisions are made (such as changes in user rights, roles, or account status) are effective immediately. There can be a maximum few minutes for changes to take effect for stateless tokens or synchronization issues, but then there must be a solution to monitor and revert changes that are made by the user after the permissions were changed to not allow that. Note that it is not possible to revert information leakage.",
+      "createdAt": "2024-10-28T16:42:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2442100977",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rof47",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good point about information leakage.\r\n\r\nComparing \"as fast as possible. Where this is longer than a few minutes,\" and \"are effective immediately. There can be a maximum few minutes for changes to take effect\", what do you specifically prefer about your wording?",
+      "createdAt": "2024-10-29T06:22:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2443312699",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RolP4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's too much to say that I prefer my wording, it's just different, and the reason for not using \"fast as possible\" is that it is relative depending on solution, for someone \"fast as possible\" is 10 minutes maybe.",
+      "createdAt": "2024-10-29T06:40:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2443334648",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rswsp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It's too much to say that I prefer my wording, it's just different, and the reason for not using \"fast as possible\" is that it is relative depending on solution, for someone \"fast as possible\" is 10 minutes maybe.\r\n\r\nOk but I also qualify with \"more than a few minutes\" which hopefully makes it less relative\r\n",
+      "createdAt": "2024-10-29T14:27:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2444430121",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RuR8n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe we take the time out from this, for the direction:\r\n> Verify that permissions values on which access control decisions are made (such as changes in user rights, roles, or account status) are effective immediately. If permission changes are not effective immediately then there must be a solution to monitor and revert changes that are made by the user after the permissions were changed to not allow that. Note that it is not possible to revert information leakage.\r\n\r\nBut we should mention the stateless token struggle there more clearly to cover current requirement:\r\n> V3.5.7 Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked when admins change the entitlements or roles of the user.",
+      "createdAt": "2024-10-29T16:49:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2444828455",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6R_Yn9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so how about:\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that values on which access control decisions are made, are updated immediately. Where values cannot be updated immediately, there must be mitigating controls to alert when a user performs an action when they should no longer be able to do so, and revert the change. Note that this would be unable to mitigate information leakage.  | | ✓ | ✓ | |\r\n\r\n> But we should mention the stateless token struggle there more clearly to cover current requirement:\r\n\r\nSorry I didn't understand your point",
+      "createdAt": "2024-10-31T08:32:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2449312253",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6R_kde",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Sorry I didn't understand your point\r\n\r\nAll this _Where values cannot be updated immediately_ part is basically meant for stateless tokens solutions, but it's not that clearly highlighted.\r\n\r\nFrom the first part you ignored my update proposal, and it's not clear, for whom/what the \"immediate update\" must be done.\r\n",
+      "createdAt": "2024-10-31T09:00:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2449360734",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SAovw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Final proposal discussed with @elarlang.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that changes to values on which access control decisions are made, are applied immediately. Where changes cannot be applied immediately, (such as when relying on data in cryptographically secured tokens), there must be mitigating controls to alert when a user performs an action when they should no longer be able to do so, and revert the change. Note that this would be unable to mitigate information leakage.  | | ✓ | ✓ | |\r\n\r\nThis should supersede 3.5.7 as a a more goal focused requirement.\r\n\r\n@set-reminder @tghosth to open PR in 1 hour",
+      "createdAt": "2024-10-31T11:35:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2449640432",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SAowx",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nThursday, October 31, 2024 1:35 PM (GMT+01:00)\r\n> @tghosth to open PR in",
+      "createdAt": "2024-10-31T11:35:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2449640497",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SBB8K",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/2059#issuecomment-2449640432) @tghosth\n> @tghosth to open PR in",
+      "createdAt": "2024-10-31T12:36:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2449743626",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SCiDw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "PR opened (requirement is 4.1.6), #2210",
+      "createdAt": "2024-10-31T15:13:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2450137328",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-09-04T22:36:07Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABKu5vbw",
+      "name": "V8 (prev V4)",
+      "description": "Temporary label for grouping authorization related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAByRg6iw",
+      "name": "summit-2024",
+      "description": "",
+      "color": "FBCA04"
+    }
+  ],
+  "number": 2059,
+  "state": "CLOSED",
+  "title": "4.1.7 - Real time access control decision making (ed note: initially became 4.1.6)",
+  "url": "https://github.com/OWASP/ASVS/issues/2059"
+}

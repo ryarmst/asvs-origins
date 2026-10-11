@@ -1,0 +1,370 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "spin-off from #2704\n\nAs I described here https://github.com/OWASP/ASVS/issues/2704#issuecomment-2731939454\n\nSRI check actually contains hidden requirement - for functionality, you can include from external sources only static and versioned content, otherwise you can not apply SRI check. We need to ask this clearly with the wording in the requirement.\n\nAlso, currently with level changes it is proposed L3 by Elar and Josh, but proposed to be lower (L2) by Jim and Gabriel.\n\nRequirement as it stands:\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **50.7.1** | [MODIFIED, MOVED FROM 14.2.3] Verify that if client-side assets, such as JavaScript libraries, CSS or web fonts, are hosted externally on a Content Delivery Network (CDN) or external provider, Subresource Integrity (SRI) is used to validate the integrity of the asset. | 3 | 829 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6i5aXk",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "( continuing the conversation from https://github.com/OWASP/ASVS/issues/2704 )\n\n> As an application owner you don't check the code for javascript snippet for each advertisement, I think this is more sandboxed iframe area.\n\nYou can't really sandbox ads because the ad network and advertiser would no longer get the page data they need for analytics. iFraming ads rarely happens (or at least the site gets paid less) last I looked.\n\n> Also, the risk here is quite different do we talk about SRI for CSS or JavaScript.\n\nJust to make this easier for now, I politely suggest we lump these together. But I do agree the risk is different, even though I've seen some pretty wild and creative attacks from CSS injection....",
+      "createdAt": "2025-03-18T11:57:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2732959204",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i6lgm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @jmanico,\n\nI think your example of ad networks is a good one, and highlights the impact on L2 sites.\n\nHowever, I am curious to hear your thoughts on the following points:\n\n* \"_SRI check actually contains hidden requirement - for functionality, you can include from external sources only static and versioned content, otherwise you can not apply SRI check. We need to ask this clearly with the wording in the requirement._\" - Mentioned [here](https://github.com/OWASP/ASVS/issues/2741#issue-2928246599) by @elarlang \n* \"_Also, implementing this from the beginning may be relatively straight forward to implement but for already existing apps this is a lot harder and might actually conflict with the way they are using 3rd party libraries._\" - Mentioned [here](https://github.com/OWASP/ASVS/issues/2704#issuecomment-2732161774) by @tghosth.\n* Do you think there is widespread support for this? [This article](https://help.silktide.com/en/articles/8536526-does-silktide-analytics-support-subresource-integrity-sri-checks) seems to indicate that 4 key analytics providers do not support it.",
+      "createdAt": "2025-03-18T13:36:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2733266982",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jBGqS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "As long as the libraries are static it’s fairly easy to implement SRI at any stage in the software lifecycle.\r\n\r\nAnd allowing a third party analytics site to deliver dynamic JS to your homepage is giving them full control of the page and it’s a huge potential security gap.\r\n\r\nMany of the requirements we state are not always implementable. But SRI is a big win and supported by every browser. But it’s admittedly used by less than 1% of sites.\r\n\r\nI think SRI it’s very interesting from a secure coding point of view, but not very interesting from a security testing point of view, FWIW.\r\n",
+      "createdAt": "2025-03-18T23:55:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2734975634",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jU87a",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I discussed this more with Elar. On the one hand, we think the control does have value against certain 3rd party supply chain attacks.\n\nOn the other hand, we think it should be L3 because:\n\n* There is a lack of support in many places which would make it not possible to implement. Once you get to L3, organizations should be more demanding or careful.\n* For some dynamic 3rd party scripts, this may never be possible. It is also an area where business will always win over security requirements, e.g. try telling the CEO that you can't use analytics scripts.\n* If we are talking about entirely static content then this is doable although will still require ongoing maintenance. For anything that changes more frequently, some automated solution will be needed (which is not exposed to the same type of supply chain attack) to keep the JavaScript resource and the SRI hash in sync.\n\n",
+      "createdAt": "2025-03-20T11:52:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2740178650",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6j8wlz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, it is L3, but the requirement text must be addressed as this was one of the reasons to open the issue:\n\n> SRI check actually contains hidden requirement - for functionality, you can include from external sources only static and versioned content, otherwise you can not apply SRI check. We need to ask this clearly with the wording in the requirement.\n\nIf we ask SRI, we can not ask it for everything that comes from third-party, at can be only applied to static and versioned content.\n\nIn the related section text we may hint to v5.0.be-10.6.2 requirement:\n> V10.6.2 Verify that third-party components and all of their transitive dependencies are included from the expected repository, whether internally owned or an external source, and that there is no risk of a dependency confusion attack.\n\nI think this could address most of the aspects that Jim and Gabriel pointed out as the need to have SRI from L2. But this one is also L3 requirement.",
+      "createdAt": "2025-03-25T09:22:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2750613875",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kHimv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How about:\n\n\"_[MODIFIED, MOVED FROM 14.2.3] Verify that client-side assets, such as JavaScript libraries, CSS or web fonts, are only hosted externally on a Content Delivery Network (CDN) or external provider if Subresource Integrity (SRI) is used to validate the integrity of the asset._\"\n\nA subtle change that maybe makes the \"hidden requirement\" clearer",
+      "createdAt": "2025-03-26T07:16:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2753440175",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kHi1a",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In the related section text we may hint to v5.0.be-10.6.2 requirement:\n\nI think this is talking about something different (dependencies at \"compile\" time) so not sure I want to mix these up",
+      "createdAt": "2025-03-26T07:16:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2753441114",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kJOiG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> How about:\n> \n> \"_[MODIFIED, MOVED FROM 14.2.3] Verify that client-side assets, such as JavaScript libraries, CSS or web fonts, are only hosted externally on a Content Delivery Network (CDN) or external provider if Subresource Integrity (SRI) is used to validate the integrity of the asset._\"\n> \n> A subtle change that maybe makes the \"hidden requirement\" clearer\n\nThis still disallows the use of external services with dynamic JavaScript; we can take analytics as an example here again.\n\nLeaving policies aside, by concept I can understand that an external JavaScript included from 3rd party means that 3rd party can control your application functionality. In practice, what is the likelihood or risk, if a site is using Google Analytics?\n\nAt the same time, to allow Google Analytics (or anything similar), we can not remove the requirement entirely, so maybe we need to come again with \"documented security decisions\" and \"trusted parties\" layer here.",
+      "createdAt": "2025-03-26T10:14:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2753882246",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kJuBN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For L3 sites, it feels reasonable that they either need to use SRI or explain why. Ultimately all of ASVS is basically either comply or explain with the responsibility on the application owner to explain why they don't comply with specific requirements.",
+      "createdAt": "2025-03-26T10:58:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2754011213",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kOoMz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would suggest that for L3 sites you would never want to allow analytics or advertising that serves dynamic content. This is especially important for login pages and similar. \n\nI really like the way this conversation went, it's incredibly insightful. \n\nBut I like the split where any L3 site must use SRI or should not allow content to be loaded from a third party. Maybe not the case for L1/L2 sites.",
+      "createdAt": "2025-03-26T17:45:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2755298099",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kYf50",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang ?",
+      "createdAt": "2025-03-27T12:34:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2757885556",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kyflw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Attempt to combine all the points into requirement:\n> Verify that client-side assets, such as JavaScript libraries, CSS or web fonts, are hosted externally (e.g., on a Content Delivery Network (CDN)) only if the resource is static and versioned and Subresource Integrity (SRI) is used to validate the integrity of the asset or it is explicitly analyzed and documented security decision for each resource.",
+      "createdAt": "2025-03-30T19:02:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2764700016",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k2g4O",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the last part is the same as any requirement, if you aren't going to do it you need to be clear as to why.\n\n\"_Verify that client-side assets, such as JavaScript libraries, CSS or web fonts, are only hosted externally (e.g., on a Content Delivery Network) if the resource is static and versioned and Subresource Integrity (SRI) is used to validate the integrity of the asset._\"\n\n\nDo we want to add CDN to the glossary?",
+      "createdAt": "2025-03-31T10:02:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2765753870",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k2xYg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think the last part is the same as any requirement, if you aren't going to do it you need to be clear as to why.\n\nI don't agree and I find it to be really important to be clearly stated out here. If you read this requirement, you'll immediately have the question - \"external JS 100% blocked?\"",
+      "createdAt": "2025-03-31T10:33:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2765821472",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k2xdL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think the last part is the same as any requirement, if you aren't going to do it you need to be clear as to why.\n\nI don't agree and I find it to be really important to be clearly stated out here. If you read this requirement, you'll immediately have the question - \"external JS 100% blocked?\"",
+      "createdAt": "2025-03-31T10:33:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2765821771",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k3LAg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, so how about this:\n\n\"_Verify that client-side assets, such as JavaScript libraries, CSS or web fonts, are only hosted externally (e.g., on a Content Delivery Network) if the resource is static and versioned and Subresource Integrity (SRI) is used to validate the integrity of the asset. Alternatively, there can be an exception process where mitigating controls are put into place and documented._\"",
+      "createdAt": "2025-03-31T11:18:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2765926432",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k3fM1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Alternatively, there can be an exception process where mitigating controls are put into place and documented.\n\nBut are those \"mitigating controls\"? I think it is basically accepted risk.",
+      "createdAt": "2025-03-31T11:59:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2766009141",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k3ynS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't see the difference between \"accepted risk\" and just not doing the requirement. I don't see why we would mention it. ",
+      "createdAt": "2025-03-31T12:34:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2766088658",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k4wDG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Documented accepted risk - you need to analyze the risks and have a security decision to accept it.\n\nIf we just blindly disallow everything from 3rd parties, we probably create just a requirement to be ignored as stated in https://github.com/OWASP/ASVS/issues/2741#issuecomment-2740178650\n",
+      "createdAt": "2025-03-31T14:01:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2766340294",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lc18o",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So how about:\n\n\"_Verify that client-side assets, such as JavaScript libraries, CSS or web fonts, are only hosted externally (e.g., on a Content Delivery Network) if the resource is static and versioned and Subresource Integrity (SRI) is used to validate the integrity of the asset. If this is not possible, there should be a documented security decision to justify this for each resource._\"\n",
+      "createdAt": "2025-04-03T13:30:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2741#issuecomment-2775801640",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-03-18T11:52:41Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2741,
+  "state": "CLOSED",
+  "title": "3.6.1 / v5.0.be-50.7.1 - SRI check for 3rd party content - requirement text and level",
+  "url": "https://github.com/OWASP/ASVS/issues/2741"
+}

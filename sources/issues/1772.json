@@ -1,0 +1,319 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwNTg2Mjg0",
+    "is_bot": false,
+    "login": "appills",
+    "name": ""
+  },
+  "body": "[2.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#user-content-v21-password-security)\r\n\r\nNeeds to be clarified to consider character encoding - 64 characters has loose interpretation. For example, this symbol [𐍈](https://en.wikipedia.org/wiki/Hwair) is 4 bytes in UTF-8 and can bypass certain string length functions that aren't multi-byte encoding aware (e.g. php's strlen() vs mb_strlen()). This is important because cryptography acts on bytes & is not character encoding aware. This means that 64 𐍈 symbols would be operating on more bytes than 128 \"A\"s. because 256 > 128. Note that this is different from the concerns in [756] (https://github.com/OWASP/ASVS/issues/756) because it does not reference the character encoding.\r\n\r\nI think the verbiage should be something along the lines of:\r\nVerify that passwords of at least 64 bytes are permitted after appropriate server-side character encoding [canonicalization](https://en.wikipedia.org/wiki/Canonicalization).\r\n\r\nSo that it does not contradict the \"printable Unicode character, including emojis\" requirement in 2.1.4",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5qH0YC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | Verify that passwords of at least 64 characters are permitted, and that passwords of more than 128 characters are denied. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 521 | 5.1.1.2 |\r\n\r\nFor me the section V2.1 is talking about password, or \"Memorized Secrets\" like NIST calling it, and this is the piece of text what user is using as a secret and entering to the form. Users are entering characters (from user point of view), not bytes. We are not talking about crypto in this chapter. From this point of view, correct way to measure password length is `mb_strlen` - \"logical characters\" for human, not bytes for computer.\r\n\r\nThe issue here describes storing the password, and those requirements are in chapter https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v24-credential-storage",
+      "createdAt": "2023-10-26T05:22:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1780434434",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qIuRL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thinking more about it - the actual need for requirement V2.1.2 comes from password storage and the opened issue makes sense from this point of view.\r\n\r\nIf one want to store 4-byte characters as password, then bcrypt can handle only 18 characters (72 bytes).",
+      "createdAt": "2023-10-26T08:42:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1780671563",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qapG1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @jmanico @tghosth ",
+      "createdAt": "2023-10-30T14:42:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1785369013",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhDYZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "yeah I would particularly like @jmanico's thoughts on this...",
+      "createdAt": "2023-10-31T11:40:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787049497",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhVf8",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "NIST language (and the typical classes that developers use with passwords) are all character-based (ie: the minimal length for passwords per NIST is 8 _characters_.). I know this is something devs may run into, but I suggest we drop it. Most of the abstractions to these password storage algorithms will handle this under the hood.",
+      "createdAt": "2023-10-31T12:28:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787123708",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhWVh",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here is what ChatGPT is saying on the topic. Summary, give both a character AND byte limit?\r\n\r\nWhen it comes to password storage, Argon2id is a state-of-the-art key derivation function that is designed to be secure against a wide range of attacks, including timing-based side-channel attacks and offline brute-force attacks. However, the strength of the stored password hash is only as good as the underlying password itself.\r\n\r\nWhen recommending password length, it's important to consider both the computational aspects (which Argon2id takes care of very well) and the human factors (ease of memorization and input). Generally, recommendations are given in terms of character length mainly for the latter reason, as it's easier for end-users to understand. The character length indirectly relates to the byte size, especially if you're using a character encoding where each character corresponds to a fixed number of bytes, such as UTF-8 for ASCII characters.\r\n\r\nThat being said, it's essential to understand that not all characters are equal in byte size when you move into multi-byte characters such as those found in UTF-8 encoding for non-ASCII characters. If your system is internationalized and allows for a wide range of Unicode characters in passwords, then focusing purely on character count could be misleading. In that context, byte size could be a more accurate measure of what you're actually storing and processing. However, moving to byte size might make the policy harder for end-users to understand, as they usually think in terms of characters, not bytes.\r\n\r\nTechnically speaking, Argon2id takes an arbitrary byte array as input, so it can handle both ASCII and Unicode without any issues. However, the processing time for Argon2id is more dependent on the computational parameters you set (time cost, memory cost, parallelism) than on the byte size of the input. Thus, from the algorithm's perspective, whether you use character length or byte size as a minimum requirement is not particularly critical.\r\n\r\nTo harmonize these factors, one approach could be to set a minimum character length (say, 8 characters, in line with NIST 800-63B) and then also have a byte-size check, especially if you're allowing a wide array of Unicode characters. This approach ensures a certain level of complexity from a human perspective (the character length) while also ensuring that you are accounting for the byte size, which could be variable due to multi-byte characters.\r\n\r\nIn summary, while character size is easier for humans to understand and is often used as a metric, byte size can be a more accurate representation of the \"weight\" of a password in an internationalized system. However, given that Argon2id's security parameters are far more dependent on its computational settings rather than the input length, the primary concern should be making a policy that encourages strong but memorable passwords from a user standpoint.",
+      "createdAt": "2023-10-31T12:30:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787127137",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhcUA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement points to NIST 5.1.1.2, but I can not see with quick review anything there to support the requirement.\r\n\r\nhttps://pages.nist.gov/800-63-3/sp800-63b.html#-5112-memorized-secret-verifiers",
+      "createdAt": "2023-10-31T12:46:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787151616",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhd85",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "https://pages.nist.gov/800-63-3/sp800-63b.html#-5112-memorized-secret-verifiers\n\nThe main sentence here at NIST is:\n\n/For purposes of the above length requirements, each Unicode code point \nSHALL be counted as a single character./\n",
+      "createdAt": "2023-10-31T12:50:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787158329",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhew8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The main sentence here at NIST is: /For purposes of the above length requirements, each Unicode code point SHALL be counted as a single character./\r\n\r\nThis is related to the opened issue, but not to the requirement.\r\n\r\n> Verify that passwords of at least 64 characters are permitted, and that passwords of more than 128 characters are denied. ",
+      "createdAt": "2023-10-31T12:53:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787161660",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhfLJ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So the requirement is clearly based on character length *regardless of \nbyte size of each character*\n\n",
+      "createdAt": "2023-10-31T12:54:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787163337",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhhr3",
+      "author": {
+        "login": "appills"
+      },
+      "authorAssociation": "NONE",
+      "body": "Maybe the OWASP requirement can be updated to:\r\n\r\nEnsure that passwords of at least 64 Unicode codepoints can be submitted and _INSERT REASONABLE UPPERBOUND HERE_ while being mindful of the 72-byte footgun in bcrypt",
+      "createdAt": "2023-10-31T13:00:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787173623",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhk_g",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "bcrypt part is covered by 2.4.4:\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.4** | [MODIFIED] Verify that if bcrypt is used, the work factor is a minimum of 10 and password size is limited to 72-bytes due to bcrypt's input limit. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nI think the goal for the requirement 2.1.2 is to disallow short max-length limits for passwords a'la \"your password can not be longer than 16 symbols\".",
+      "createdAt": "2023-10-31T13:08:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787187168",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhyyn",
+      "author": {
+        "login": "appills"
+      },
+      "authorAssociation": "NONE",
+      "body": "\r\n> I think the goal for the requirement 2.1.2 is to disallow short max-length limits for passwords a'la \"your password can not be longer than 16 symbols\".\r\n\r\nThis makes sense & I completely agree it's spirit. If I understand correctly then, the upper-limit of 128 in 2.1.2 is added because of potential DoS vectors? But otherwise no more than 128 Unicode symbols may be submitted as a password, so between 128 to 512 bytes in UTF-8.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | Verify that passwords of at least 64 characters are permitted, and that passwords of more than 128 characters are denied. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 521 | 5.1.1.2 |\r\n\r\nI think what I'll do is gather any requirement regarding passwords and compare them for any inconsistency & possible contradictions, then share them all at once so all context is available. I won't close this, but feel free to do so if you think we've milked this for all that it's worth. I don't have a reasonable solution for this, but I would like to continue the discussion elsewhere - is there an ASVS channel/forum somewhere?",
+      "createdAt": "2023-10-31T13:41:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787243687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qh87M",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As many of us got confused, it makes sense to rethink this requirement.\r\n\r\nFor me it seems, that lower limit is for users (that application need to allow at least 64 characters) and upper limit is for application/storage do not cause DoS attack from too long input.",
+      "createdAt": "2023-10-31T14:03:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787285196",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rthdl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> As many of us got confused, it makes sense to rethink this requirement.\r\n> \r\n> For me it seems, that lower limit is for users (that application need to allow at least 64 characters) and upper limit is for application/storage do not cause DoS attack from too long input.\r\n\r\nping @tghosth @jmanico (and anyone else) - do you have any ideas for improvements? If not, we can just close this.",
+      "createdAt": "2023-11-12T11:16:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1807095653",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ruG9l",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm ok to close this.",
+      "createdAt": "2023-11-12T21:45:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1807249253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5r65q5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's close for now",
+      "createdAt": "2023-11-14T16:23:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1810602681",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM56sGz_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note: the same topic continues in another issue: https://github.com/OWASP/ASVS/issues/1923",
+      "createdAt": "2024-04-16T07:06:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-2058382591",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-10-26T03:44:30Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1772,
+  "state": "CLOSED",
+  "title": "2.1.2 Verify that passwords of at least 64 characters are permitted",
+  "url": "https://github.com/OWASP/ASVS/issues/1772"
+}

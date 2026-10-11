@@ -1,0 +1,30 @@
+{
+  "author": {
+    "is_bot": true,
+    "login": "app/"
+  },
+  "body": "_(This is likely a post-4.0 topic, given how little time is left for 4.0 changes. @jmanico Requested that I take a look at the crypto section - so posting this as promised.)_\r\n\r\nSection 6.2 gives advice, though little of it is actually actionable - in that it stays out of specifics to the point that almost anything could be justified. For example, let's look at [6.2.3](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#62-algorithms):\r\n\r\n> Verify that encryption initialization vector, cipher configuration, and block modes are configured securely using the latest advice.\r\n\r\nIn this item, it refers to _latest advice_, but that's a complicated thing. There are a lot of people that talk about cryptography, but there are a small number that are actually qualified to give advice. For example, if you look for advice on how to use RSA, you'll find a ton of advice around using PKCS#1 v1.5, but less on OAEP (PKCS#1 v2) - using PKCS#1 v1.5 has lead to two decades of new variants of Bleichenbacher's attack. If a developer is relying on their top sources - Google and Stack Overflow, their view of the latest advice could be far from the truth. In reality, RSA shouldn't be used unless it's required for compatibility, and it's an unanswered question as to if it's even possible to implement PKCS#1 v1.5 in a way that's secure.\r\n\r\nThis could be addressed with something like this, without getting too specific:\r\n\r\n> Verify that known insecure block modes (i.e. ECB, etc.), padding modes (i.e. PKCS#1 v1.5, etc.), ciphers with small black sizes (i.e. Triple-DES, Blowfish, etc.), and weak hashing algorithms (i.e. MD5, SHA1, etc.) are not used unless required for backwards compatibility.\r\n\r\nAnother issue here would be block modes - if you look up how to encrypt data with AES, you are most likely to see samples using CBC mode. Problem is, CBC mode isn't authenticated - and it's malleable, meaning that an attacker can alter the ciphertext, resulting in the application decrypting a different value than it encrypted. The proper way to use CBC is to also use an HMAC (with a different key), though that's not something you are likely to see often if you are looking at samples.\r\n\r\nThis could be addressed with something like this:\r\n\r\n> Verify all encrypted data is authenticated via signatures, authenticated cipher modes, or HMAC to ensure that ciphertext is not altered by an unauthorized party.\r\n\r\nAnother issue with the advice is that re-use isn't addressed. Some things, such as IVs and nonces shouldn't be reused, and in some cases, such reuse can cause catastrophic failures (such as nonce reuse with GCM mode). The requirements for this are a bit complex, as in some cases (IV), you can safely randomly generate a value, where nonces with GCM are sensitive enough that if you randomly generate the same value twice, it can cause a catastrophic failure. This could be addressed with something like this:\r\n\r\n> Verify that nonces, initialization vectors, and other single use numbers must not be used more than once with a given encryption key. The method of generation must be appropriate for the algorithm being used.\r\n\r\nThere's also the important issue of crypto operations being constant-time. Timing side channels are a common way of extracting information from a system, so it's important that all crypto operations are written so that timing doesn't leak information. Could be addressed with something like this:\r\n\r\n> Verify that all cryptographic operations are constant-time, with no 'short-circuit' operations in comparisons, calculations, or returns, to avoid leaking information.\r\n\r\nAll of these suggestions avoid getting too far into the weeds on which algorithms or modes to use, while ensuring that best practices are enforced.  I may have some more suggestions on this area in the future - though I wanted to get what I had so far documented for discussion before too much more time goes by.\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NzU4NzIwOQ==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hi @adamcaudill - I'm about to check in your changes to V6 as new items. Please review in totality and let us know if it solves the problem.",
+      "createdAt": "2019-02-26T19:51:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/537#issuecomment-467587209",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-02-24T18:13:04Z",
+  "labels": [],
+  "number": 537,
+  "state": "CLOSED",
+  "title": "V6.2: Thoughts on Cryptographic Algorithms",
+  "url": "https://github.com/OWASP/ASVS/issues/537"
+}

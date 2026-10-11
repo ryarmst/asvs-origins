@@ -1,0 +1,114 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjM4Nzg5MzM=",
+    "is_bot": false,
+    "login": "stevespringett",
+    "name": "Steve Springett"
+  },
+  "body": "IMO this issue is very basic and perhaps overlooked.\r\n\r\nIf a user asserts values during authentication (username, password, token, etc), all values asserted should be checked.\r\n\r\nIn the case of optional MFA for a user account, login pages can be designed in two distinct ways.\r\n\r\n1. Ask the user for minimum system assertions (typically username and password). If the account is configured with MFA, display a secondary login prompt to enter the value (typically a token). This is a two-step login process.\r\n2. Display a login dialog with username and password and an optional token. This is a singe-step login process.\r\n\r\nNeither method likely has more desired traits over the other. #1 improves usability at the expense of minor information discloser.\r\n\r\n**Without exception, all values a user asserts should be verified by the server.**\r\n\r\nThis seems like a basic request, but it needs to be specifically called out.\r\n\r\nScenario:\r\nA user with valid username and password has been issued a token. The user asserts their username, password, and token value during authentication (single-step login process). The user is authenticated to the system.\r\n\r\n### Vulnerable Pseudo-Code:\r\n```java\r\nif (useraccount has MFA enabled) {\r\n    assert(username, password, token);\r\n} else {\r\n   assert(username, password, null);\r\n}\r\n```\r\n\r\nThe above pseudo-code, while not directly exploitable, has the following weaknesses:\r\n[CWE-287](https://cwe.mitre.org/data/definitions/287.html) - Improper Authentication\r\n[CWE-446](https://cwe.mitre.org/data/definitions/446.html) - UI Discrepancy for Security Feature\r\n\r\nIn this scenario, the user assumes their account is properly configured with MFA. In the event their account was not correctly configured (i.e. the token issued was for another account), the user could be asserting their username, password, and token, believing they are using MFA, when in fact, they are not. This leads to a false sense of security and CWE-446 is the result.\r\n\r\n### Corrected Pseudo-Code:\r\n```java\r\nassert(username, password, nullIfEmpty(token));\r\n```\r\n\r\nBy using the same logic to test a users assertions, a user who specifies a token value on an account without MFA enabled, would fail to be authenticated, even with the correct username and password supplied. This is the expected behavior.\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQzODg3MDkxMg==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "We are going to document a half-open attack in the session management chapter. Is that where this belongs?",
+      "createdAt": "2018-11-15T00:34:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/257#issuecomment-438870912",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ1Nzg2NjY4NA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @stevespringett, does the text of [3.7.1](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md#description-of-the-half-open-attack) address your concern? Do you have any suggested changes?",
+      "createdAt": "2019-01-26T21:15:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/257#issuecomment-457866684",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ1Nzg2ODE5NQ==",
+      "author": {
+        "login": "stevespringett"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@tghosth this is not a session management issue. I would think that https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md would have a mention, but I cannot find one.\r\n\r\nA well known security vendor had this issue last year in which they were not properly checking against ALL data a user was asserting during authentication. They were only doing partial checking.\r\n\r\nIf the assertion contained username, password, and token, the security vendor was only checking on username and password. It's one of these simple overlooked issues like \"is it plugged in\".\r\n",
+      "createdAt": "2019-01-26T21:39:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/257#issuecomment-457868195",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ1Nzg2ODM4Nw==",
+      "author": {
+        "login": "stevespringett"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In other words, authentication should not be driven by the configuration of the users account, but rather by what the user is asserting in relation to the accounts configuration.",
+      "createdAt": "2019-01-26T21:42:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/257#issuecomment-457868387",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ1Nzk0NDU1MQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks @stevespringett. I understand better now. \r\n\r\nPlease could you review commit https://github.com/OWASP/ASVS/commit/cab252a96ec8ba832c4f5bc30b0bb70c02185e1f in PR #381 and tell me if you think that is sufficient.",
+      "createdAt": "2019-01-27T19:02:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/257#issuecomment-457944551",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ1ODAxMjIwNA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for your [approval](https://github.com/OWASP/ASVS/commit/cab252a96ec8ba832c4f5bc30b0bb70c02185e1f#commitcomment-32082134) @stevespringett. Please feel free to let us know if you have any further feedback :)",
+      "createdAt": "2019-01-28T06:27:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/257#issuecomment-458012204",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2018-06-11T17:31:03Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxNDMyNTQwNzg=",
+      "name": "enhancement",
+      "description": "",
+      "color": "84b6eb"
+    }
+  ],
+  "number": 257,
+  "state": "CLOSED",
+  "title": "Authentication - Check all asserted values",
+  "url": "https://github.com/OWASP/ASVS/issues/257"
+}

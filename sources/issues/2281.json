@@ -1,0 +1,177 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjYwOTczNjk=",
+    "is_bot": false,
+    "login": "cronchie",
+    "name": "Eden"
+  },
+  "body": "Draft requirement:\r\n\r\n`Verify that transient errors are handled with a retry mechanism that includes backoff and jitter, ensuring retries are spaced effectively to prevent overwhelming the system or external service, and avoiding retries for errors that are not transient.`\r\n\r\nI propose this has an availability impact because without a retry and backoff strategy, clients may repeatedly hammer a server when transient errors (like timeouts or temporary unavailability) occur. This could overwhelm the target service or network, creating a DoS. As for the inverse-- there's no point retrying other kinds of errors (AuthN / AuthZ / 400 Bad Request) and doing so can also impact availability.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6SmJZT",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this is a good mechanism, but perhaps out of scope. There are many ways an app could be designed such that a sort of self-DoS could occur and there is not an immediate vector to abuse it. ",
+      "createdAt": "2024-11-06T11:16:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2459473491",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SmQLF",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> There are many ways an app could be designed such that a sort of self-DoS could occur and there is not an immediate vector to abuse it.\r\n\r\nVery true! Though I suggest that this is DoSing an external system. For instance, if a web app keeps retrying an operation with no backoff time, that could impact the service's availability.",
+      "createdAt": "2024-11-06T11:30:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2459501253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SvQqY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "potentially related: https://github.com/OWASP/ASVS/issues/1778",
+      "createdAt": "2024-11-07T10:26:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2461862552",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SwC2e",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@cronchie could you take a look at #1778 and see if the content there is similar to what you mention here?",
+      "createdAt": "2024-11-07T12:05:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2462068126",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TAG9D",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I rechecked, that this issue is not a duplicate of #1778, although related.\r\n\r\nFrom the issue description:\r\n> I propose this has an availability impact because, without a retry and backoff strategy, clients may repeatedly hammer a server when transient errors (like timeouts or temporary unavailability) occur. This could overwhelm the target service or network, creating a DoS. As for the inverse-- there's no point retrying other kinds of errors (AuthN / AuthZ / 400 Bad Request) and doing so can also impact availability.\r\n\r\nPoint of view: \"save 3rd party service from DoS\". Based on this description I would say, that every service must defend itself and can not rely on the hope their users are nice.\r\n\r\nThere are some risks for the application itself, when hammering other services - the application may get blocked from using the service - and this is a clear denial of service for the application itself (that is in scope for ASVS), not (only) for the external service (that is out of scope for ASVS).\r\n\r\nHow to solve the problem - as it may be done and achieved in many different ways, we just can highlight the problem in a documentation requirement.\r\n\r\nWe have a documentation requirement:\r\n\r\n> 1.14.7 Verify that all communication needs for the application are documented. This should include external services which the application relies upon and cases where an end user might be able to provide an external location to which the application will then connect.\r\n\r\nWe can ask \"Document how the connection to service should fail, and if retry is allowed, then retry strategy.\"\r\n\r\nIn case there is need to create a new documentation requirement for #1778, it may fit there better.",
+      "createdAt": "2024-11-09T16:40:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2466279235",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UHCrU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok. I have read back through this and I think that there are two main considerations here:\r\n\r\n1) How errors are handled between different components of the application in scope.\r\n2) How the app handles an external service not being available.\r\n\r\nI actually think that the new [7.4.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x15-V7-Error-Logging.md#v74-error-handling) could handle both these situations with some tailoring.\r\n\r\nI would therefore suggest the following:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.4.4** | [ADDED] Verify that the application is designed so that a failure to access **internal or** external resources does not result in the entire application failing. For example, by using **a gradual retry mechanism or** the circuit breaker pattern. | | ✓ | ✓ | |\r\n\r\nThoughts @cronchie @elarlang ?",
+      "createdAt": "2024-11-19T07:18:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2484873940",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UHa2E",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think 7.4.4 should cover the retry issue.\r\n\r\nRetry actually works against it - for synchronous flow, as most of the HTTP request-responses are - having retry for connection is just increasing the risk that we try to solve here. ",
+      "createdAt": "2024-11-19T08:03:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2484972932",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i_OqD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Not in the document yet, but the wording for requirements developed in #1778 that also addresses problems in this issue.\n\nDocumentation requirement:\n> Verify that where the application connects to separate services, each has a **documented connection failure strategy** which includes how fast the connection times-out and whether there is a **retry strategy**. External connections in synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections.\n\nImplementation requirement:\n> Verify that where the application connects to separate services, it follows the documented configuration for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and **retry strategies**.",
+      "createdAt": "2025-03-18T19:25:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2281#issuecomment-2734484099",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-06T10:03:57Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABJFMusA",
+      "name": "V16 (prev V7)",
+      "description": "Temporary label for grouping logging related issues",
+      "color": "6A5C69"
+    }
+  ],
+  "number": 2281,
+  "state": "CLOSED",
+  "title": "V7 Add transient error handling",
+  "url": "https://github.com/OWASP/ASVS/issues/2281"
+}

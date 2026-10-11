@@ -1,0 +1,208 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Jim [previously mentioned](https://github.com/OWASP/ASVS/issues/1589#issuecomment-2246983240) a requirement:\r\n\r\n> Verify that dynamically generated HTML is constructed safely using templates or frameworks that auto-encode outputs.\r\n\r\nJim says [in a comment below that table](https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248311422) that this is not sufficiently covered in [5.2.5](https://appsecg.host/5.2) and that \"_I think safely building HTML (encoding and similar) and avoiding template injection (avoid server side template assembly) are different controls._\"\r\n\r\nWe need to assess if there are any other related requirements and how to proceed with this.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6GByMr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder in 3 days @tghosth to look at this ",
+      "createdAt": "2024-07-24T18:03:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2248614699",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GByNh",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nSaturday, July 27, 2024 12:00 AM (GMT+02:00)\r\n> in @tghosth to look at this",
+      "createdAt": "2024-07-24T18:03:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2248614753",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GUq-u",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1998#issuecomment-2248614699) @tghosth\n> in @tghosth to look at this",
+      "createdAt": "2024-07-26T22:01:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2253565870",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Gb9n8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What case it should cover that is not covered by current requirements 5.2.5 and 5.3.1?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.5** | [MODIFIED] Verify that the application protects against template injection attacks by not allowing templates to be built based on untrusted input. Where there is no alternative, any untrusted input being included dynamically during template creation must be sanitized or strictly validated. | ✓ | ✓ | ✓ | 94 |\r\n| **5.3.1** | [MODIFIED] Verify that output encoding for an HTTP response/HTML document/XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, JavaScript, CSS, or HTTP headers, to avoid changing the message or document structure. | ✓ | ✓ | ✓ | 116 |\r\n",
+      "createdAt": "2024-07-29T09:44:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2255477244",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GcBdj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "When dynamically assembling HTML, sometimes escaping is not enough. Sometimes we need to sanitize blobs of user driven HTML or CSS, and sometimes escaping is not enough like in the case of a URL driven by a user that lands in a SRC or similar attribute.\r\n\r\nAny kind of HTML assembly will require a very tactical combination of contextual encoding (for data that you want to display exactly as the user typed it in), strict validation (like in the case of URL's or other content that cannot be safely escaped) and content sanitization (like in the case of rich content like user-driven HTML or CSS that cannot otherwise be validated). ",
+      "createdAt": "2024-07-29T09:52:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2255492963",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GkqXL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For sanitization we also have:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.1** | [MODIFIED] Verify that all untrusted HTML input from WYSIWYG editors or similar is properly sanitized using a well-known and secure HTML sanitization library or framework feature. | ✓ | ✓ | ✓ | 116 |\r\n| **5.2.2** | Verify that unstructured data is sanitized to enforce safety measures such as allowed characters and length. | ✓ | ✓ | ✓ | 138 |\r\n\r\nFor unintended content execution we have:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.4** | Verify that the application avoids the use of eval() or other dynamic code execution features. Where there is no alternative, any user input being included must be sanitized or sandboxed before being executed. | ✓ | ✓ | ✓ | 95 |",
+      "createdAt": "2024-07-30T08:19:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2257757643",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6HIGl0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "There are a few small edge cases not covered, but otherwise this collection of requirements are fairly complete.",
+      "createdAt": "2024-08-03T16:58:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2267048308",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IDmJy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico do you think any of the existing requirements could be enhanced to cover the edge cases or do you think these are best left to a cheat sheet?",
+      "createdAt": "2024-08-11T06:37:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2282644082",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IDmTr",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "These edge cases are so extensive I suggest we stick to a cheat sheet.\n",
+      "createdAt": "2024-08-11T06:40:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2282644715",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IDpOT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so I think I will close this issue if that is ok @jmanico ?",
+      "createdAt": "2024-08-11T07:34:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2282656659",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IDseq",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed 👍🏼 \r\n",
+      "createdAt": "2024-08-11T08:19:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1998#issuecomment-2282669994",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-07-24T18:03:27Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 1998,
+  "state": "CLOSED",
+  "title": "Dynamically generated HTML",
+  "url": "https://github.com/OWASP/ASVS/issues/1998"
+}

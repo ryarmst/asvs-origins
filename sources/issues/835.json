@@ -1,0 +1,144 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE3MDM3NDMx",
+    "is_bot": false,
+    "login": "TheAxZim",
+    "name": "Azeem Ilyas"
+  },
+  "body": "Brought to attention by @execjosh\r\n\r\nAccording to:\r\nhttps://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md\r\n\r\n| # | Description | \r\n| :---: | :--- | \r\n| **3.2.2** | Verify that session tokens possess at least 64 bits of entropy. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | \r\n\r\n## Aren't these values too short? That's just 8 bytes....\r\n\r\nAccording to OWASPs own guide:\r\nhttps://owasp.org/www-community/vulnerabilities/Insufficient_Session-ID_Length\r\n\r\n> Session identifiers should be at least 128 bits long to prevent brute-force session guessing attacks. \r\n> \r\n> The WebLogic deployment descriptor should specify a **session identifier length of at least 128 bits**. A shorter session identifier leaves the application open to brute-force session guessing attacks.\r\n\r\n> With a 64 bit session identifier, assume 32 bits of entropy. For a large web site, assume that the attacker can try 1,000 guesses per second and that there are 10,000 valid session identifiers at any given moment. Given these assumptions, the expected time for an attacker to successfully guess a valid session identifier is about 7 minutes. (32bit = 4294967296 / 10.000 = 429496. At 1000 attempts per second that is 429 seconds or 7.15 minutes.)\r\n\r\n**Recommendation: Update to a minimum of 128 bits, or a higher standard of 256 bits.**",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY2OTkzNjM1Mw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good argument here +1\n\n--\nJim Manico\n@Manicode\n\n\n> On Aug 6, 2020, at 7:01 AM, Azeem Ilyas <notifications@github.com> wrote:\n> \n> ﻿\n> Brought to attention by @execjosh\n> \n> According to:\n> https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md\n> \n> #\tDescription\n> 3.2.2\tVerify that session tokens possess at least 64 bits of entropy. (C6)\n> Aren't these values too short? That's just 8 bytes....\n> \n> According to OWASPs own guide:\n> https://owasp.org/www-community/vulnerabilities/Insufficient_Session-ID_Length\n> \n> Session identifiers should be at least 128 bits long to prevent brute-force session guessing attacks.\n> \n> The WebLogic deployment descriptor should specify a session identifier length of at least 128 bits. A shorter session identifier leaves the application open to brute-force session guessing attacks.\n> \n> With a 64 bit session identifier, assume 32 bits of entropy. For a large web site, assume that the attacker can try 1,000 guesses per second and that there are 10,000 valid session identifiers at any given moment. Given these assumptions, the expected time for an attacker to successfully guess a valid session identifier is about 7 minutes. (32bit = 4294967296 / 10.000 = 429496. At 1000 attempts per second that is 429 seconds or 7.15 minutes.)\n> \n> Recommendation: Update to a minimum of 128 bits, or a higher standard of 256 bits.\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-08-06T13:46:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-669936353",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5Mjg1NDM0Mw==",
+      "author": {
+        "login": "Racater"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "You're right, 64 bit is not enough to be really secure and is inconsistent with the OWASP web guidelines.\r\nThe 64 bit requirement is there to be compliant with [NIST 800-63b](https://pages.nist.gov/800-63-3/sp800-63b.html#71-session-bindings).\r\nAs written in the document, one of the objective of OWASP ASVS 4.0 is to minimize the number of standards and, to do so, has adopted the NIST 800-63b standard.\r\n\r\nSo either there is a modification of [the OWASP web guidelines](https://owasp.org/www-community/vulnerabilities/Insufficient_Session-ID_Length), or the recommendations deviates from each other.",
+      "createdAt": "2020-09-15T17:15:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-692854343",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5NjY2MjAwNQ==",
+      "author": {
+        "login": "TomTervoort"
+      },
+      "authorAssociation": "NONE",
+      "body": "The referenced guide also states:\r\n\r\n> Now assume a 128 bit session identifier that provides 64 bits of entropy. With a very large web site, an attacker might try 10,000 guesses per second with 100,000 valid session identifiers available to be guessed. Given these assumptions, the expected time for an attacker to successfully guess a valid session identifier is greater than 292 years.\r\n\r\nSo the guide actually does allow session identifiers with _64 bits of entropy_. It just presumes that a session ID with a _64-bit length_ actually contains 32 bits of entropy (due to hex encoding, I assume).\r\n\r\nI personally also agree with the guide that a session identifier that is some encoding of 8 cryptographically generated random bytes is perfectly fine. You can not brute-force session identifiers offline, nor have to worry about birthday attacks, so using 128or more bits should not be necessary.",
+      "createdAt": "2020-09-22T11:28:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-696662005",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5Njg0NDUxMQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "“bare minimum” recomendations concearn me. I suggest we strive to make suggestions that will stand the test of time so please try to keep away from bare minimum session size. Java and other languages have at least 160 bit session id’s. Let’s keep our recomendation at (at least) 128 bits, minimum, please.\n\n--\nJim Manico\n@Manicode\n\n\n> On Sep 22, 2020, at 1:28 AM, Tom Tervoort <notifications@github.com> wrote:\n> \n> ﻿\n> The referenced guide also states:\n> \n> Now assume a 128 bit session identifier that provides 64 bits of entropy. With a very large web site, an attacker might try 10,000 guesses per second with 100,000 valid session identifiers available to be guessed. Given these assumptions, the expected time for an attacker to successfully guess a valid session identifier is greater than 292 years.\n> \n> So the guide actually does allow session identifiers with 64 bits of entropy. It just presumes that a session ID with a 64-bit length actually contains 32 bits of entropy (due to hex encoding, I assume).\n> \n> I personally also agree with the guide that a session identifier that is some encoding of 8 cryptographically generated random bytes is perfectly fine. You can not brute-force session identifiers offline, nor have to worry about birthday attacks, so using 128or more bits should not be necessary.\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-09-22T16:47:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-696844511",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc1NTA1MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Im ready for a PR bumping this to 128 please! cc @TheAxZim or @Racater",
+      "createdAt": "2021-03-12T21:05:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-797755051",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgyMDk1MDQ0NQ==",
+      "author": {
+        "login": "TheAxZim"
+      },
+      "authorAssociation": "NONE",
+      "body": "@jmanico Sorry for the late reply.\r\nSince Josh is the original discoverer, he has raised a PR at #972 \r\nThanks ~",
+      "createdAt": "2021-04-16T06:41:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-820950445",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgyMTIzOTA4OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is merged and I also added the modified flag here https://github.com/OWASP/ASVS/commit/46318d2a42778eef621cfe7b659c30e29aa8c690\r\n\r\nClosing issue now :) please re-open if this was done in haste.",
+      "createdAt": "2021-04-16T15:01:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-821239088",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgyMzgyODg0MQ==",
+      "author": {
+        "login": "execjosh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you!",
+      "createdAt": "2021-04-21T07:03:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/835#issuecomment-823828841",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-08-06T11:00:58Z",
+  "labels": [],
+  "number": 835,
+  "state": "CLOSED",
+  "title": "V3.2.2 - Session token length only 8 bytes...",
+  "url": "https://github.com/OWASP/ASVS/issues/835"
+}

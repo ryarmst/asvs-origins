@@ -1,0 +1,267 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjMyNzgwMTgy",
+    "is_bot": false,
+    "login": "bitnesswise",
+    "name": "BitnessWise"
+  },
+  "body": "I want to propose two changes/additions in chapter 3 about Session Management:\r\n\r\n1. Add a section about Stateless Sessions\r\nPersonally I'm not so happy about the term Stateless Session as I (personally) think a session is always stateful, but it seems most of the internet uses this term to indicate an architecture where the server relies on the client keeping track of the session.\r\nHaving that defined, the dangers of these stateless sessions should be pointed out. This list might not be exhaustive, but for example:\r\n* When the server is not aware of the state, it's impossible to properly invalidate a session. If an attacker manages to compromise a session and gets hold of the token then the victim would never be able to 'log out', because the server relies on what the client sends. Also note that if a pentest is conducted, this will (should) also be flagged and marked as an issue.\r\n* Architectures where the client needs to keep track of the session often lead to developers storing the session in insecure ways. For example in session storage or cookies without the http flag, where javascript can also access them (which is dangerous from an xss perspective for example)\r\n* It's an architecture that makes it difficult to deal with session timeouts. In practice you often see that as a result, the session is very long-lived - often too long. When the duration is made shorter, it will require code on the server-side to generate replacement tokens with a new validity, which is complex.\r\n\r\nIn short: to overcome the drawbacks of Stateless Sessions, you would have to implement a lot of logic on the server-side and ultimately even add state (in order to know if a token was made invalid). This means the advantage of having a stateless session has been nullified and in return you have a lot of extra complexity where things can go wrong.\r\nA good security practice states that you shouldn't try implementing your own sessions, but better to rely on proven techniques. Building your own (stateful) stateless session goes against that.\r\nTherefor, stateless sessions should be avoided.\r\n\r\n2. In section 3.5 (Token-based Session Management), refer to the section about Stateless Sessions to point out that using JWT for sessions suffers from all the drawbacks mentioned there and is therefor discouraged",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5snu2p",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To open issue was recommended by me from Slack channel. I duplicate here also worth reading blog post for a starter:\r\nhttps://auth0.com/blog/stateless-auth-for-stateful-minds/\r\n\r\nI think there we need to be clear to not mix 2 different topics:\r\n- 1. discourage using JWT for any sessions\r\n- 2. discourage using JWT for stateful sessions\r\n\r\nEntire point of REST is to be stateless. So the option 1 should have it's own valid use-cases.\r\n\r\nOption 2 is the problem to solve here. I have seen many times in pen-tests usage of JWT without any need to use it - and then it provides just over-engineering nightmare and extra set of problems.\r\n\r\nFor this, again, there is relatively old blog post to cover that:\r\n- http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/\r\n- http://cryto.net/~joepie91/blog/2016/06/19/stop-using-jwt-for-sessions-part-2-why-your-solution-doesnt-work/ ",
+      "createdAt": "2023-11-22T08:58:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1822354857",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sn0SS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's take those requirements - are those actually setting the \"no go\" for using stateless solution for session?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.3.1** | [MODIFIED] Verify that logout and expiration invalidate the session token, such that the back button or a downstream relying party cannot resume an authenticated session. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 613 | 7.1 |\r\n| **3.3.3** | [MODIFIED, LEVEL L2 > L1] Verify that the application gives the option to terminate all other active sessions after a successful change or removal of any authentication factor (including password change via reset or recovery and, if present, an MFA settings update). This must be effective across the application, federated login (if present), and any relying parties. | ✓ | ✓ | ✓ | 613 | |\r\n| **3.3.4** | Verify that users are able to view and (having re-entered login credentials) log out of any or all currently active sessions and devices. | | ✓ | ✓ | 613 | 7.1 |\r\n| **3.3.6** | [ADDED] Verify that all active sessions are revoked when a user account is disabled or deleted (such as an employee leaving the company). | ✓ | ✓ | ✓ | 613 | |\r\n",
+      "createdAt": "2023-11-22T09:13:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1822377106",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sn6dO",
+      "author": {
+        "login": "bitnesswise"
+      },
+      "authorAssociation": "NONE",
+      "body": "CWE-613, to which they are all linked, is itself setting a no-go for a stateless solution in my opinion. All of these points rely on a central mechanism to revoke or verify the session, but a stateless solution doesn't provide that; in fact it's whole aim is to not have that. So it will cause a violation of all of these points you listed",
+      "createdAt": "2023-11-22T09:29:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1822402382",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5st5wE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From [NIST SP 800-63B version 4 (not released)](https://pages.nist.gov/800-63-4/sp800-63b.html#access-tokens)\r\n\r\n**7.1.2 Access Tokens**\r\n\r\n_An access token — such as found in OAuth — is used to allow an application to access a set of services on a subscriber’s behalf following an authentication event. The presence of an OAuth access token SHALL NOT be interpreted by the RP as presence of the subscriber, in the absence of other signals. The OAuth access token, and any associated refresh tokens, MAY be valid long after the authentication session has ended and the subscriber has left the application._",
+      "createdAt": "2023-11-23T08:27:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1823972356",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xtjjO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is the suggested action at the requirements level here @bitnesswise?\r\n\r\nWe are not going to rule out JWTs although we do need some form of session revocation mechanism. This gets easier if the JWT has a short lifetime.",
+      "createdAt": "2024-01-24T09:44:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1907767502",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xvduk",
+      "author": {
+        "login": "bitnesswise"
+      },
+      "authorAssociation": "NONE",
+      "body": "The suggested action is pretty much what I described in the issue description: 1) add a section about stateless sessions and what the issues are (@elarlang already listed an overview) and then update 3.5 to point out that if JWTs are used for sessions, it means that without additional mitigations it will have the same issues.\r\nPersonally I would also vote for discouraging the reader to attempt to fix it by making it stateful. The blogpost @elarlang referenced pretty much sums up why. It's a good security practice to use something that is proven instead of trying to implement it yourself (same as trying to write your own crypto). Besides that, in my professional career I've not seen 1 implementation of a JWT based session (and I've seen quite a few) that only had an issue related to CWE-613. It's an anti-pattern that encourages more insecure practices, like storing the JWT in places where javascript can access it and then create an architecture that depends on this. Which goes back to my previous point: don't try to reinvent sessions, because you're bound to make mistakes.\r\n\r\n> We are not going to rule out JWTs\r\n\r\nWith the proposed changes JWT is not ruled out. But I _would_ explicitly discourage its usage for this purpose, instead of letting the readers come to this conclusion themselves.\r\n\r\n> we do need some form of session revocation mechanism. This gets easier if the JWT has a short lifetime.\r\n\r\nIt's more than just the revocation mechanism in my opinion. Anyway, I'm not sure that I understand the comment why a short lifetime makes this easier? Did you mean that it becomes less of a risk? And are you suggesting that with a short lifetime it is OK to use?",
+      "createdAt": "2024-01-24T14:41:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1908267940",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x1ugh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sorry I think I was not clear enough when I said \"_What is the suggested action at the requirements level here @bitnesswise?_\"\r\n\r\nMy point was that ASVS is a standard made up of requirements. We cannot easily recommend, discourage or otherwise advise, that is more a job for the [Session Management cheatsheet](https://github.com/OWASP/CheatSheetSeries/commits/master/cheatsheets/Session_Management_Cheat_Sheet.md) (which to be honest looks like it could do with some love and attention...).\r\n\r\nWhat we can do is define requirements of things that app implementers have to do, such as implement allow invalidating sessions or allow a user account to be suspended.\r\n\r\nAs such, my question was more around if there are specific requirement changes you propose.",
+      "createdAt": "2024-01-25T10:52:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1909909537",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM510QPs",
+      "author": {
+        "login": "bitnesswise"
+      },
+      "authorAssociation": "NONE",
+      "body": "Besides requirements, I think the documentation should be clear on terminology. I personally don't agree with the term 'stateless session', but if the rest of the community is happy with that term, it should be explained what it is to avoid confusion.\r\n\r\nAs for requirements:\r\n1. Require that stateless sessions build state on the server side (so, make them stateful) and adhere to the requirements already pointed out in 3.3. Please note that then it's no longer a stateless session by the definition most people use, but that is part of my issue with using that term.\r\n2. Address other concerns that might be the result of implementing JWT for sessions. I've seen ASVS point out possible issues that need to be verified in other places, that should be done here as well:\r\na. Verify that the JWT is not stored in a place where javascript can access it\r\nb. Verify that the JWT does not contain personal data\r\nc. Verify that the application still has a short session-timeout (due to inactivity) that is appropriate for the application.\r\nIn my experience these are the most important issues I often see implemented wrong.\r\n\r\nPersonally I think we're putting requirements for something that is broken by design, so I would prefer to discourage this usage, but if that's not possible I guess it's better than nothing :-)",
+      "createdAt": "2024-03-04T13:54:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1976632300",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM510sa5",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Require that stateless sessions build state on the server side (so, make them stateful) and adhere to the requirements already pointed out in 3.3. Please note that then it's no longer a stateless session by the definition most people use, but that is part of my issue with using that term.This is the correct term when using JWT’s. All stateless session mechanisms have some state for revocation and more. The entire thing does need to be stateless just the individual token and house services process them. --Jim ***@***.***/manicodeSecure Coding EducationOn Mar 4, 2024, at 2:54 PM, BitnessWise ***@***.***> wrote:﻿\r\nBesides requirements, I think the documentation should be clear on terminology. I personally don't agree with the term 'stateless session', but if the rest of the community is happy with that term, it should be explained what it is to avoid confusion.\r\nAs for requirements:\r\n\r\nRequire that stateless sessions build state on the server side (so, make them stateful) and adhere to the requirements already pointed out in 3.3. Please note that then it's no longer a stateless session by the definition most people use, but that is part of my issue with using that term.\r\nAddress other concerns that might be the result of implementing JWT for sessions. I've seen ASVS point out possible issues that need to be verified in other places, that should be done here as well:\r\na. Verify that the JWT is not stored in a place where javascript can access it\r\nb. Verify that the JWT does not contain personal data\r\nc. Verify that the application still has a short session-timeout (due to inactivity) that is appropriate for the application.\r\nIn my experience these are the most important issues I often see implemented wrong.\r\n\r\nPersonally I think we're putting requirements for something that is broken by design, so I would prefer to discourage this usage, but if that's not possible I guess it's better than nothing :-)\r\n\r\n—Reply to this email directly, view it on GitHub, or unsubscribe.You are receiving this because you are subscribed to this thread.Message ID: ***@***.***>",
+      "createdAt": "2024-03-04T14:46:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1976747705",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM54aWOD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I proposed (https://github.com/OWASP/ASVS/issues/1917) to clean-up entire \"V3.5 Token-based Session Management\" as there is nothing session-specific there.\r\n\r\n> 1. Require that stateless sessions build state on the server side (so, make them stateful) and adhere to the requirements already pointed out in 3.3. Please note that then it's no longer a stateless session by the definition most people use, but that is part of my issue with using that term.\r\n\r\nI think this part is covered in general with section \"V3.8 Session Termination\"\r\nhttps://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v38-session-termination\r\n\r\nIt is not possible to achieve session termination without revoking the mechanism. There is also a line now:\r\n\r\n_For stateful session mechanisms, this should just require invalidating the session at the backend. If a stateless session mechanism with signed tokens is being used, a way to revoke these tokens will be needed._\r\n\r\n\r\n> 2. Address other concerns that might be the result of implementing JWT for sessions. I've seen ASVS point out possible issues that need to be verified in other places, that should be done here as well:\r\n> a. Verify that the JWT is not stored in a place where javascript can access it\r\n> b. Verify that the JWT does not contain personal data\r\n> c. Verify that the application still has a short session-timeout (due to inactivity) that is appropriate for the application.\r\n\r\n2.a - for SPA we can not require it\r\n2.b - access_token contains usually personal data, then we need to go that far and say, that access_tokens are not allowed on the browser side. Which in general is good way to build it, but I'm not sure yet we can require it (related with https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 1\"). Addressed with separate issue: https://github.com/OWASP/ASVS/issues/1919\r\n2.c - it is covered by section \"V3.3 Session Timeout\"\r\n\r\n\r\nIn case #1917 finds support and V3.5 gets cleaned up, I think it is more clear.",
+      "createdAt": "2024-03-26T11:27:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-2020172675",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-siC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some more quotes to the discussion from https://oauth.net/articles/authentication/ .\r\n\r\nWorth reading in full, but I point out one section from \r\n\"Common pitfalls for authentication using OAuth\" > \"Access of a protected API as proof of authentication\"\r\n\r\n> Furthermore, the access token will **generally be usable long after the user is no longer present**. Remember, since **OAuth is a delegation protocol, this is fundamental to its design**. This means that if a client wants to make sure that an authentication is still valid, it's not sufficient to simply trade the token for the user's attributes again because the OAuth protected resource, the identity API, **often has no way of telling if the user is there or not**.",
+      "createdAt": "2024-09-21T16:31:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-2365245570",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-szL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In translation - I'm not going against JWT, but I want to send a clear message to not use access token as session token or OAuth as replacement for the session management.",
+      "createdAt": "2024-09-21T16:35:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-2365246667",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NGU69",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> In translation - I'm not going against JWT, but I want to send a clear message to not use access token as session token or OAuth as replacement for the session management.\r\n> \r\n\r\nI hear you Elar and agree with that statement 100%. Thank you! 👍🏼 ",
+      "createdAt": "2024-09-23T05:05:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-2367246013",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WYwqV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that we have discussed this to death and that #2434 should finally close this",
+      "createdAt": "2024-12-06T12:04:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-2523073173",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-11-21T16:11:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    }
+  ],
+  "number": 1790,
+  "state": "CLOSED",
+  "title": "Discourage the use of Stateless Sessions (and therefor the usage of JWT for session)",
+  "url": "https://github.com/OWASP/ASVS/issues/1790"
+}

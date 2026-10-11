@@ -1,0 +1,151 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "> Verify that the application is protected against XPath injection attacks by using query parameterization or precompiled queries.\n\n### “query parametrization”\nThis is not widely supported(JavaScript’s document.evaluate()) in xPath and Lack of formal standard, The W3C XPath specifications (1.0, 2.0, 3.0, 3.1) do not define a formal parameterized query mechanism like SQL’s PREPARE statement.\n### “precompiled queries” \nThis is ambiguous, because this isn’t safe when user input is used unsafely.\n\nThe requirement lacks on strict input validation and escaping special characters as fallbacks when parameterization is not possible.\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM67d0Nq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think these are valid points, do you have a proposal for making this more relevant?",
+      "createdAt": "2025-08-01T16:39:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3145155434",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM68G4Hf",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Here is draft requirement suggestion:\n\n**Verify that user input is never directly concatenated into XPath queries. Use XML libraries that support query parameterization or precompiled queries to separate logic from input. If parameterization is unavailable (e.g., in JavaScript's document.evaluate()), validate input strictly using context-appropriate patterns and escape special characters according to XPath syntax.**",
+      "createdAt": "2025-08-05T17:00:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3155919327",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM68G-dk",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Just to go with @elarlang style guide and make it a bit more concise focusing on the positive defense strategy, I would suggest:\n\n_Verify that XPath injection is not possible. Defense strategies include the use of XML libraries that support query parameterization or precompiled queries to separate logic from input. If parameterization is unavailable (e.g., in JavaScript's document.evaluate()), validate input and escape special characters according to XPath syntax._",
+      "createdAt": "2025-08-05T17:08:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3155945316",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69H7vZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As a refinement:\n\n\"_Verify that the application is protected against XPath injection attacks by using XML libraries that support query parameterization or precompiled queries to separate logic from input. If parameterization is unavailable (e.g., in JavaScript's document.evaluate()), validate input and escape special characters according to XPath syntax._\"",
+      "createdAt": "2025-08-10T23:46:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3172973529",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69iLv-",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "\"**validate input**\" doesn’t provide **context-appropriate validation** patterns like regex for usernames, IDs, or emails, Without these, developers may apply incorrect validation.\n\n\"**untrusted input**\" is the primary threat and that is missing in the requirement. If we want this requirement to be clear and actionable for everyone from trainees to experienced developers then it needs to be reframed with explicit wording.\n",
+      "createdAt": "2025-08-12T15:29:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3179854846",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DHTWJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So as I mentioned elsewhere, I agree that maybe we are overstepping by putting \"validate input\" here as we handle it elsewhere.\n\nI think refering to untrusted input is a rabbit hole we don't want to go into. Untrusted input can come from lots of places and I think it is generally better to make dangerous sinks safe for all input without getting into a discussion about untrusted.\n\nI would refine the requirement to:\n\n\"_Verify that the application is protected against XPath injection attacks by using XML libraries that support query parameterization or precompiled queries to separate logic from data. If parameterization is unavailable (e.g., in JavaScript's document.evaluate()), escape or sanitize special characters using an XPath syntax based allowlist._\"\n",
+      "createdAt": "2025-09-10T06:20:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3273471369",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7D_K2l",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Josh, standard XML libraries typically do not support XPath variable binding. This is just a small nit, I like your direction. How about:\n\n\"Verify that the application is protected against XPath injection attacks by using XML query engines that support parameterized queries or precompiled queries to separate logic from data. If parameterization is unavailable (e.g., in JavaScript’s document.evaluate()), escape or sanitize special characters according to XPath syntax rules with a strict allowlist.\"",
+      "createdAt": "2025-09-13T11:20:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3288116645",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7EFS0i",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "The requirement should say: “**Untrusted data is never directly concatenated into XPath queries.**”\n\nI would suggest please replace this “**Verify that the application is protected against XPath injection attacks by** …” with specific, testable controls.",
+      "createdAt": "2025-09-14T17:52:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3213#issuecomment-3289722146",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-07-06T09:59:30Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3213,
+  "state": "OPEN",
+  "title": "Clarification: V1.2.7 “query parametrization” and  “precompiled queries”",
+  "url": "https://github.com/OWASP/ASVS/issues/3213"
+}

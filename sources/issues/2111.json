@@ -1,0 +1,311 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nSpin-off from https://github.com/OWASP/ASVS/issues/2040#issuecomment-2338933353\r\n\r\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user, using the AS user interface, or by a client using AS APIs for revocation. (L1, L2, L3)\r\n\r\n\r\nThere is feedback for the proposal in https://github.com/OWASP/ASVS/issues/2040#issuecomment-2339084447 to take into account.\r\n\r\nWe have requirements:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.1** | [GRAMMAR] Verify that the application allows users to revoke OAuth tokens that form trust relationships with linked applications. | | ✓ | ✓ | 290 | 7.1.2 |\r\n| **3.5.7** | [ADDED] Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked when admins change the entitlements or roles of the user. | ✓ | ✓ | ✓ | 613 | |\r\n\r\nThe requirement 3.5.1 is proposed to move to OAuth paragraph in #1917.\r\n\r\nThe requirement 3.5.7 is proposed to move to Access Control paragraph in #1917, also discussed in #2059",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Ncxgb",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Sounds good to move 3.5.1 to the OAuth chapter. In #2040 @randomstuff suggests to have two requirements to address this:\r\n\r\n> Verify that the user can revoke their grants by using the AS user interface and that this revokes any refresh tokens and reference access tokens associated with that grant (L1, L2, L3).\r\n\r\n> Verify that refresh tokens and reference access tokens can be revoked by a client using AS APIs (revocation endpoint) for revocation. (L1, L2, L3).\r\n \r\nI think this is good (perhaps change grant to consent?) and, if added, they replace 3.5.1.\r\n ",
+      "createdAt": "2024-09-25T06:21:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2373130267",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N_qXl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think we can or need to require end-user access to the authorization server interface where they can revoke tokens.\r\n\r\nThe user must have functionality and possibility to revoke given permissions, how this is technically achieved is out of ASVS scope.\r\n\r\nI used initial proposal and modified it a bit:\r\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user. It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation.",
+      "createdAt": "2024-09-30T07:04:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2382276069",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OADgM",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don't think we can or need to require end-user access to the authorization server interface where they can revoke tokens.\r\n\r\n> it can by achieved [...] by a client that is using authorization server APIs for revocation.\r\n\r\nIf we want to allow the user to revoke access tokens, it probably should not only be through interaction with the resource server. This is because the user might want to revoke access tokens because the user thinks the access tokens are being abused by the resource server which might compromised/malicious. Or maybe a malicious actor obtained the access from the authorization server and the resource server never had this token and cannot therefore revoke it.\r\n\r\nThe user should probably have a way to revoke his access grants (maybe all of them) through interaction with the authorization server without going through the resource server. This might be achieved by revoking his credentials (\"forgot my password\") which could provide an option to revoke the user's grants.",
+      "createdAt": "2024-09-30T07:57:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2382379020",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OAOhJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the current 3.5.1 is quite good with (not having) details saying how to achieve it, but just pointing out what must be done.",
+      "createdAt": "2024-09-30T08:18:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2382424137",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OwIV6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The latest proposal:\r\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user. It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation.\r\n\r\nThis is a requirement that involves the client and the authorization server.  For revoking the access token it probably should involve also the resource server, as it needs to check the revoke list. My first feeling is that it may make sense to have a separate requirement for access tokens, as this is the most widespread problem - access token is used as a replacement for the session key and those stay alive till token expiration although business logical \"user session\" is terminated (for example user logs out).\r\n\r\nAs those 2 requirements going to replace 3.5.1, then remove 3.5.1 with tag split to req1, req2.",
+      "createdAt": "2024-10-05T08:35:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2394981754",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PkFy0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Goes in via #2140 \r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.14** | [ADDED] Verify that refresh tokens and reference access tokens can be revoked by an authorized user. It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-10-12T15:32:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2408602804",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PlEz_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Status: the requirement for refresh token and ~~refresh~~ reference access token is in, we need another requirement for revoking access tokens. This issue here is short enough to keep going here (without opening a new issue).",
+      "createdAt": "2024-10-13T07:29:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2408860927",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PmBLR",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang did you mean \r\n\r\n> Status: the requirement for refresh token and **reference** access token is in, we need another requirement for revoking access tokens.\r\n\r\nCommon \"self-contained\" access tokens that are not reference tokens (like JWTs with an expiration) can´t be revoked, what kind of access tokens where you thinking of?",
+      "createdAt": "2024-10-13T20:07:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2409108177",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PpgPh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I meant reference tokens and the \"revoke\" is incorrect term for access tokens.\r\n\r\nShould we ask any blocklist of \"stolen tokens\" or similar, or short-lived access tokens is the solution here?",
+      "createdAt": "2024-10-14T05:57:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2410021857",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PrZx4",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "FWIW, the [Oauth Status List](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-00.html) draft is a \"CRL for access token\" and might be relevant.",
+      "createdAt": "2024-10-14T09:04:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2410519672",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PwLFq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, do/can we address access token anyhow at the moment or we are done here?",
+      "createdAt": "2024-10-14T16:47:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2411770218",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P0ysx",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> So, do/can we address access token anyhow at the moment or we are done here?\r\n\r\nI think we are done, this was news to me [Oauth Status List](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-00.html), but (in my opinion) but a bit early to have in ASVS",
+      "createdAt": "2024-10-15T06:11:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2412981041",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Tl8Hq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "re-open for cleanup current 3.5.1.",
+      "createdAt": "2024-11-14T12:13:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2476196330",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T5OVJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Previous OAuth specific requirement is moved from 3.5.1 to 51.2.14.\r\n\r\nThe separate question is, is there a need to have some abstract requirement into V4 for that.",
+      "createdAt": "2024-11-17T12:41:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2481251657",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U39-t",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\r\n> V51.2.14 Verify that refresh tokens and reference access tokens can be revoked by an authorized user. It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation.\r\n\r\n---\r\n\r\nConcern from @randomstuff \r\n> I think this should be \"must be revoked using the AS user interface\".\r\n> Revocation by the client is good to have but really should be optional. Revocation by the client is arguably not enough to have it (without revocation using the AS UI) as the user won't be able to do anything if the client is malicious/compromised in this case.\r\n\r\n---\r\n\r\nComment from me\r\n\r\nThe current requirement addresses the problem \"do not share your data longer than it is necessary\" and for that reason, there should be a possibility to revoke data. It does not take into account the situation, if the client itself is malicious.\r\n\r\nNow, if we require, that it must be done from AS, I'm not sure it is realistic to ask. It means every app using OAuth must also provide some UI to end-user from AS. Lets say, if the app/client is malicious, can end-user find the way to AS and revoke permissions?",
+      "createdAt": "2024-11-25T11:05:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2497699757",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U6ddy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Re-discussed it and the conclusion was - if the (OAuth/OIDC) client is malicious and the end-user can not revoke permissions, then the requirement is just not satisfied. The requirement text at the moment will be left as it is, it can always be opened for improvement and further discussions.",
+      "createdAt": "2024-11-25T15:36:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2111#issuecomment-2498353010",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-23T06:19:51Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2111,
+  "state": "CLOSED",
+  "title": "V51 revokation for OAuth tokens",
+  "url": "https://github.com/OWASP/ASVS/issues/2111"
+}

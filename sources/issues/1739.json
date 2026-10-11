@@ -1,0 +1,632 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "**What is a Cookie Bomb?**\r\nA cookie bomb is an attack vector where an attacker has the capability of adding a large number of large cookies to a user for a specific domain and its subdomains. The purpose is that when the victim subsequently tries to access resources on the domain or its subdomains, they will always send large HTTP requests due to the excessive cookies. Since many servers and applications have limitations on the size of HTTP requests they can handle, these large requests may be rejected. This can lead to a Denial of Service (DoS) situation for the user, preventing them from accessing any service within that domain and its subdomains.\r\n\r\n**Why is this relevant?**\r\nThere are real-world examples of this vulnerability such as the one that was found on Twitter (X), as detailed in this HackerOne report: https://hackerone.com/reports/57356. The vulnerability highlights the potential severity of the issue and showcases how even major platforms can be susceptible.\r\n\r\n**Proposed Verification Requirement:**\r\nApplications should have mechanisms in place to limit the number and size of cookies that can be set for a user.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5nt8Zy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Link points to 8 year old situation.\r\n\r\nHave you tried it in practice yourself?\r\n\r\nIf you write 2 cookies with max length (4k), you alread hit \"431 - Request Header Fields Too Large\" error.\r\n\r\nhttps://datatracker.ietf.org/doc/html/rfc6585#section-5 RFC does not say what the limit is, I have not seen it more than 8kB long time.\r\n\r\nBased on my experience it's not valid anymore.",
+      "createdAt": "2023-09-28T22:50:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740097138",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nt8ym",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Applications should have mechanisms in place to limit the number and size of cookies that can be set for a user.\r\n\r\nBrowsers have those limit as well, different browsers a bit different, but you can not write endless amount of cookies to the browser. Based on my knowledge, for an application it is impossible to control it. You can only cleanup everything with:\r\n```\r\nClear-Site-Data: \"cookies\"\r\n```",
+      "createdAt": "2023-09-28T22:52:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740098726",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nt-_D",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The users can delete the cookies and then it would fix their issue. But the most recent write-ups that I found in HackerOne are these two:\r\n[2020: Nord ](https://hackerone.com/reports/777984)\r\n[2020: Uber](https://hackerone.com/reports/847493) \r\n\r\nI've opened this issue to ensure comprehensiveness within the framework. ",
+      "createdAt": "2023-09-28T23:06:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740107715",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nt_kF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this is not large number of large cookies - it is exactly hitting this 8kB limit for the browser and then this browser will get always given error, which I call \"Client-Based Denial of Service\" (you need to infect each client separately).",
+      "createdAt": "2023-09-28T23:10:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740110085",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nuAEO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In this situation, often an application will not get the request, as web server serves the error (depends on solution).\r\n\r\nAs a defense on my training I recommend to have filters on WAF:\r\n* only cookies with those names which the application needs\r\n* only with expected value pattern (to allow only allowed characters and avoid 4kB values for allowed cookie names)",
+      "createdAt": "2023-09-28T23:13:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740112142",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nuAPT",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Based on my knowledge, for an application it is impossible to control it. You can only cleanup everything with:\r\n\r\nWhile browsers do have a limit on the number and size of cookies they accept for a domain, it's important to understand that the application itself can play a significant role in controlling the cookies it sets. Even before the browser limits come into play, the application can decide not to set a cookie in the first place. The application can also decide on the size of each cookie.\r\nYou're right about the `Clear-Site-Data: \"cookies\"` header. It's a way to instruct the browser to clear cookies for a site. However, it's a mitigation measure or a cleanup mechanism rather than a preventive measure. \r\nWhile useful, especially in scenarios like post-logout, it isn't directly related to prevention.",
+      "createdAt": "2023-09-28T23:14:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740112851",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nuAwV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The attack surface is a lot wider - you can write matching cookie from every subdomain (if you have cookie writing solution there, like \"XSS\"). One \"XSS\" in Same-Site scope is enough and you can not defend against it with application itself.",
+      "createdAt": "2023-09-28T23:18:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740114965",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nuBUj",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> As a defense on my training I recommend to have filters on WAF:\r\n\r\nConfiguring the WAF could be a solid solution. It's important to remember that while WAFs provide an essential layer of security, they should not be the sole line of defense.",
+      "createdAt": "2023-09-28T23:21:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740117283",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nuB-I",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And it's not only about cookie length, some web servers also can not handle certain symbols in cookie values (nowadays browsers are getting more restrictive on the topic and you can not write all symbols to cookie value anymore).\r\n\r\nExample with Apache Tomcat which I reported 9 years ago: https://seclists.org/bugtraq/2014/Sep/51",
+      "createdAt": "2023-09-28T23:26:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740119944",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nuaYN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is just a type of XSS payload, and is fixed via normal XSS defense.",
+      "createdAt": "2023-09-29T02:10:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740219917",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nu9Rz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is just a type of XSS payload, and is fixed via normal XSS defense.\r\n\r\nFirst: https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740114965\r\n\r\nThink about ISP giving for your internet connection hostname like `here-is-your-ip.something.isp.tld`, which means you can write matching cookies for every `*.isp.tld` from your own hosted HTTP service.\r\n\r\nAlso the vector may come available when user controls some part of the value which will be written to a cookie (by the application).\r\n\r\nIt stays valid even we merge requirement \"one application per hostname\" (https://github.com/OWASP/ASVS/issues/1299), as for cookies the scope is Site.",
+      "createdAt": "2023-09-29T06:14:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740362867",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nx5GR",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is just a type of XSS payload, and is fixed via normal XSS defense.\r\n\r\nThis code is vulnerable to Cookie Bomb but is not vulnerable to XSS\r\n\r\n```\r\nfrom flask import Flask, request, make_response\r\nimport bleach\r\n\r\napp = Flask(__name__)\r\n\r\n@app.route('/')\r\ndef index():\r\n    # Return a basic web page that doesn't reflect user input.\r\n    return \"Welcome to our website!\"\r\n\r\n@app.route('/setcookie', methods=['POST'])\r\ndef setcookie():\r\n    # Get the user input\r\n    key = request.form['key']\r\n    value = request.form['value']\r\n\r\n    # Sanitize the value using bleach\r\n    sanitized_value = bleach.clean(value)\r\n\r\n    resp = make_response(\"Cookie set!\")\r\n    resp.set_cookie(key, sanitized_value)\r\n    return resp\r\n\r\nif __name__ == \"__main__\":\r\n    app.run()\r\n```",
+      "createdAt": "2023-09-29T16:06:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1741132177",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nx_dF",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I stand corrected, nice Iman!!!\n",
+      "createdAt": "2023-09-29T16:16:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1741158213",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nyB2q",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for being open to feedback.",
+      "createdAt": "2023-09-29T16:20:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1741168042",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nyCwp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Sometimes… 😉 ",
+      "createdAt": "2023-09-29T16:23:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1741171753",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nydBL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Conclusion so far: requirement proposal: https://github.com/OWASP/ASVS/issues/1739#issuecomment-1740112142",
+      "createdAt": "2023-09-29T17:49:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1741279307",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oeDp7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi folks, I read through the comments above.\r\n\r\nIt seems to me that this would only be possible in two ways:\r\n\r\n1) An attacker can directly set the value of a cookie for a victim\r\n2) An attacker can *indirectly* set the value of a cookie for a victim, for example by sending them to a very long URL which the application then writes into the cookie value.\r\n\r\nI am not convinced that 1) should be possible but I would welcome being corrected :)\r\n\r\nFor 2) this is an untrusted/user-controlled input problem and we would need to either create a requirement or adapt an existing requirement along these lines.\r\n\r\nDo you disagree @ImanSharaf @elarlang @jmanico ?",
+      "createdAt": "2023-10-09T10:01:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1752709755",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5offxS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "XSS allows for \"cookie clearing\" or \"setting new cookies\"\n\n",
+      "createdAt": "2023-10-09T14:08:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1753087058",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ogLRB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> An attacker can directly set the value of a cookie for a victim\r\n\r\nI can not actually understand what do you mean with that.\r\n\r\n> An attacker can indirectly set the value of a cookie for a victim, for example by sending them to a very long URL which the application then writes into the cookie value.\r\n\r\nThis is more input validation question and controllable by application. Even if you fix that, it does not solve to issue here.\r\n\r\nLet's say we have target site on hostname `www.moreaboutcookies.com`.\r\n\r\nCookie security policy is based on Site, which means an attacker can write cookies, mathcing to `www.moreaboutcookies.com` from Same-Site scope: `*.moreaboutcookies.com`.\r\n\r\nExample possibilities:\r\n\r\nFrom directly `www.moreaboutcookies.com`\r\n\r\n  * \"XSS\" (JavaScript injection or execution) vulnerability\r\n  * not validated user-input, which goes to set-cookie value\r\n\r\nFrom `*.moreaboutcookies.com` (every subdomain)\r\n\r\n  * every subdomain can write cookie with `Domain` value `.moreaboutcookies.com` and it will be sent by browser to `www.moreaboutcookies.com`\r\n  * one \"XSS\" in `*.moreaboutcookies.com` is enough\r\n  * one attacker controlled set-cookie command from `*.moreaboutcookies.com` is enough\r\n\r\nIf `www.moreaboutcookies.com` does not have `Strict-Transport-Security` set with `includeSubdomains`, then an attacker can \"call\" victim in own-controlled network to `http://thisisnotvalid.moreaboutcookies.com` and write cookies there.",
+      "createdAt": "2023-10-09T15:52:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1753265217",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pyUwn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > An attacker can directly set the value of a cookie for a victim\r\n> \r\n> I can not actually understand what do you mean with that.\r\n\r\nI just mean that an attacker can some how write directly into the cookie value/cookies collection in the victim's browser. As I said, this should conceptually not be possible although I guess you could do it through XSS but then the fix is to not have XSS.\r\n \r\n> > An attacker can indirectly set the value of a cookie for a victim, for example by sending them to a very long URL which the application then writes into the cookie value.\r\n> \r\n> This is more input validation question and controllable by application\r\n\r\nI agree.\r\n\r\n> Even if you fix that, it does not solve to issue here.\r\n\r\nI don't agree. This seems to be the only situation that is actually directly a problem here.\r\n\r\n\r\n> Let's say we have target site on hostname `www.moreaboutcookies.com`.\r\n> \r\n> Cookie security policy is based on Site, which means an attacker can write cookies, mathcing to `www.moreaboutcookies.com` from Same-Site scope: `*.moreaboutcookies.com`.\r\n> \r\n> Example possibilities:\r\n> \r\n> From directly `www.moreaboutcookies.com`\r\n> \r\n> * \"XSS\" (JavaScript injection or execution) vulnerability\r\n\r\nFix by preventing XSS (which they should already be doing)\r\n \r\n> * not validated user-input, which goes to set-cookie value\r\n\r\nFix with input validation as we said above.\r\n\r\n> From `*.moreaboutcookies.com` (every subdomain)\r\n> \r\n> * every subdomain can write cookie with `Domain` value `.moreaboutcookies.com` and it will be sent by browser to `www.moreaboutcookies.com`\r\n> * one attacker controlled set-cookie command from `*.moreaboutcookies.com` is enough\r\n\r\nThis seems really niche because it means the attacker has control of an app subdomain, no and also this:\r\nhttps://speakerdeck.com/filedescriptor/the-cookie-monster-in-your-browsers?slide=73\r\n\r\n> * one \"XSS\" in `*.moreaboutcookies.com` is enough\r\n\r\nAgain, fix by preventing XSS\r\n\r\n> If `www.moreaboutcookies.com` does not have `Strict-Transport-Security` set with `includeSubdomains`, then an attacker can \"call\" victim in own-controlled network to `http://thisisnotvalid.moreaboutcookies.com` and write cookies there.\r\n\r\nPretty sure we require HSTS and also this which should hopefully cover this situation?\r\nhttps://speakerdeck.com/filedescriptor/the-cookie-monster-in-your-browsers?slide=73\r\n\r\nSo, in summary, I still think we need an input validation or sanitization requirement to address the indirect part of this issue.",
+      "createdAt": "2023-10-23T09:36:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1774799911",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pyatd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "`__Host-` do not help here - attacker can use whatever name for cookies. `__Host-` is for protecting application own cookies from overwriting from _same-site_ scope, but this is not the case here.\r\n\r\nattack scope is _same-site_ - \"fix XSS on all subdomains\" is outside of application scope and an application security should not depend on outside environment. Every a bit larger corporation has many subdomains for their main domain.",
+      "createdAt": "2023-10-23T09:50:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1774824285",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzGWZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So aside from sanitization when taking user input into a cookie, what additional protection/requirement are you advocating here @elarlang ?",
+      "createdAt": "2023-10-23T11:38:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1775003033",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzP2G",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There not much else you can do - in this scenario you can not control the source (like go and fix the XSS).\r\n\r\nAnother option is to use `Clear-Site-Data` for cleanup, but it clears all the cookies from _Same-Site_ scope and not supported by all browsers.",
+      "createdAt": "2023-10-23T12:03:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1775041926",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzX3-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> There not much else you can do - in this scenario you can not control the source (like go and fix the XSS).\r\n\r\nSo this is kinda my point, as I said in https://github.com/OWASP/ASVS/issues/1739#issuecomment-1752709755, we can create an input validation requirement but that is about it.\r\n\r\nWould you be comfortable for @ImanSharaf to try and draft a requirement?\r\n",
+      "createdAt": "2023-10-23T12:23:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1775074814",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzZ7y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  we can create an input validation requirement but that is about it.\r\n\r\nNo, we can not - HTTP server just responds with 400 or 431 and this request don't even reach to the application.\r\n\r\n... also, there is nothing to validate, as the application do not use this information.\r\n\r\nJust the web server fails to handle the request.",
+      "createdAt": "2023-10-23T12:28:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1775083250",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzjLw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > we can create an input validation requirement but that is about it.\r\n> \r\n> No, we can not - HTTP server just responds with 400 or 431 and this request don't even reach to the application.\r\n> \r\n> ... also, there is nothing to validate, as the application do not use this information.\r\n> \r\n> Just the web server fails to handle the request.\r\n\r\nThe input validation is not for after the cookie has been bombed but rather to prevent it from happening.\r\n\r\nI mentioned this above https://github.com/OWASP/ASVS/issues/1739#issuecomment-1752709755\r\n\r\n> 2. An attacker can _indirectly_ set the value of a cookie for a victim, for example by sending them to a very long URL which the application then writes into the cookie value.\r\n\r\n...\r\n\r\n> For 2) this is an untrusted/user-controlled input problem and we would need to either create a requirement or adapt an existing requirement along these lines.\r\n\r\nThe examples which Iman brought were along this line.",
+      "createdAt": "2023-10-23T12:49:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1775121136",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzrLD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Aha, ok. I overlooked this part. I agree this should be fixed with input validation in the same application but for me it's covered by basic input validation rules.",
+      "createdAt": "2023-10-23T13:07:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1775153859",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p0Wjr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Aha, ok. I overlooked this part. I agree this should be fixed with input validation in the same application but for me it's covered by basic input validation rules.\r\n\r\n@ImanSharaf, do you think this is covered by existing input validation requirements or do you have a suggestion for an additional requirement?",
+      "createdAt": "2023-10-23T14:28:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1775331563",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sS2tY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Aha, ok. I overlooked this part. I agree this should be fixed with input validation in the same application but for me it's covered by basic input validation rules.\r\n\r\nSome practice made me rethink some things... I think it makes sense to have separate requirement to address problems:\r\n\r\n  * limitation on the browser side: if user-controlled input reach to cookie value (or name), including base64 or inside JWT - browser must be able to write the cookie, so the cookie `key=value` can be max 4096 bytes (https://datatracker.ietf.org/doc/html/rfc6265#section-6.1)\r\n  * limitation on the server side: all cookie key-value pair lengths combined should not be longer than allowed max request field length (https://datatracker.ietf.org/doc/html/rfc6265#section-5)\r\n",
+      "createdAt": "2023-11-17T18:15:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1816882008",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xJm4C",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What do we think about the following requirement:\r\n\r\n> Verify that any untrusted input is validated for length before being included in a cookie. Where a derived cookie value such as a JWT is being stored in a cookie, the validation should be applied to the relevant parts of the derived value.",
+      "createdAt": "2024-01-18T11:58:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1898343938",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xMT2_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it, but can you use a different language than \"_the validation should be applied to the relevant parts of the derived value._\" I am not 100% sure what that means.",
+      "createdAt": "2024-01-18T19:06:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1899052479",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xtUPl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What do you think @elarlang @jmanico ?\r\n\r\n> Verify that any untrusted input is validated for length before being included in a cookie. Where multiple inputs are being combined into a single cookie value such as a JWT, the validation should be applied to each relevant input separately.",
+      "createdAt": "2024-01-24T09:14:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1907704805",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xxOlV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Excellent\n\n",
+      "createdAt": "2024-01-24T18:51:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1908730197",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x1usE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Any further comments @elarlang ?",
+      "createdAt": "2024-01-25T10:52:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1909910276",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ywiSB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I propose a bit different direction:\r\n> Verify that untrusted input, including being part of JWT, is validated for length before being included in a cookie and that the cookie name and value length combined are not over 4096 symbols.",
+      "createdAt": "2024-02-03T13:45:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1925325953",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yyXy6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that untrusted input is validated for length before being included in a cookie (including as part of a JWT) and that the cookie name and value length combined are not over 4096 bytes.\r\n\r\n@elarlang minor tweaks\r\n",
+      "createdAt": "2024-02-04T16:07:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1925807290",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zOsOK",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Verify that untrusted input is validated for length before being included in a cookie (including as part of a JWT) and that the cookie name and value length combined are not over 4096 bytes.\r\n> \r\n> @elarlang minor tweaks\r\n\r\nSorry for the delay, this works for me.",
+      "createdAt": "2024-02-08T01:40:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1933230986",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zQ3k3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Created #1865.\r\nI ignored CWE for now and I think this should be L2 because it is a lower impact issue.",
+      "createdAt": "2024-02-08T10:42:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1739#issuecomment-1933801783",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-09-28T22:41:54Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 1739,
+  "state": "CLOSED",
+  "title": "Proposal to Add \"Cookie Bomb\" Attack Vector to ASVS",
+  "url": "https://github.com/OWASP/ASVS/issues/1739"
+}

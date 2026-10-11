@@ -1,0 +1,165 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I noticed that the ASVS is missing a check for Regular Expression Denial of Service (ReDoS) vulnerabilities. As you know, ReDoS attacks can have a serious impact on application availability and performance, and are often overlooked in security testing.\r\n\r\nReDoS attacks occur when an attacker can manipulate an application's input in such a way that causes a regular expression pattern to take an extremely long time to process, leading to a denial of service condition. Since regular expressions are commonly used in applications for input validation, search functions, and more, it is crucial that ReDoS vulnerabilities are detected and mitigated.\r\n\r\nI strongly recommend that the ASVS be updated to include a ReDoS check, a sample check could be the following:\r\n\r\n- Verify that regular expressions used in the application have a reasonable upper limit on the length and complexity of input they can accept.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5WZgBM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just a comment - keep adding those issues, we will analyze them when can find reasonable amount of time for that, this is nice input material! :)",
+      "createdAt": "2023-03-01T08:07:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1449525324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5WdBr7",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I am an Application Security Lead [certified OSWE and AWS Security expert] at Forward Security (based in Vancouver - @jmanico knows us) and we use ASVS all the time in our engagements and I want to appreciate all your efforts for this awesome piece of work.",
+      "createdAt": "2023-03-01T16:33:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1450449659",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XnX7w",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(Just to second Elar's point, really appreciate all the effort you are putting in @ImanSharaf, thanks!!!)\r\n\r\nWhat do you think about the following:\r\n\r\n> Verify that regular expressions in use do not include unsafe elements which could lead to exponential processing and that untrusted input is not included in expressions without sanitization. This is to prevent a ReDOS / Runaway Regex attack.\r\n\r\nDo you have a good link reference that could go with this as it is a painfully complicated topic?",
+      "createdAt": "2023-03-15T12:43:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1469939440",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X4vlT",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for your positive feedback and for considering the addition of a ReDoS check to ASVS. I appreciate your dedication to making the standard as comprehensive as possible. For the reference, what do you think about [this](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS) one? \r\n\r\nIn a ReDoS attack, an attacker exploits weaknesses in a poorly designed regular expression by providing input that takes an extremely long time to process. This can cause the application to become unresponsive or slow, consuming excessive computational resources and potentially leading to a denial of service condition.\r\n\r\nThe main reason behind the vulnerability to ReDoS attacks lies in the use of \"greedy\" or \"catastrophic backtracking\" regular expressions. These expressions can lead to an exponential increase in processing time when matching certain inputs, especially those containing multiple repeating characters.\r\n\r\nTo simplify, imagine a poorly designed regular expression that is trying to match a pattern in a user's input. If the input contains repeating characters or a specific sequence that triggers the vulnerability, the regular expression engine might take an excessive amount of time to process the input, causing other users to experience delays or even making the application unresponsive.\r\n\r\nTo prevent ReDoS attacks, it is important to:\r\n\r\n1. Use efficient regular expressions that avoid catastrophic backtracking and do not have nested quantifiers.\r\n2. Limit the maximum length and complexity of input that is processed by regular expressions.\r\n3. Sanitize untrusted input before it is used in regular expressions.\r\n4. Implement timeouts or resource limits to prevent excessive processing.\r\n\r\nTo detect ReDoS vulnerabilities in JavaScript code, follow these steps:\r\n\r\n1. Locate regular expressions: Look for the use of `RegExp.test()`, `String.match()`, `String.search()`, or other regular expression functions (in JS). These functions are where regular expressions are being used and could potentially be vulnerable.\r\n2. Identify nested quantifiers: Examine the regular expression patterns for nested quantifiers, such as `*`,`+`, or `{m,n}`. Nested quantifiers can lead to excessive backtracking and are a common cause of ReDoS vulnerabilities. In the example above, the pattern `^(a+)+$` has nested quantifiers with the two `+` signs.\r\n3. Check for greedy matching: Greedy matching can also cause ReDoS vulnerabilities when the regular expression engine tries to consume as much input as possible. Look for patterns that use greedy matching, such as `.*`, `.+`, or `.{m,n}`.\r\n4. Test with crafted inputs: To confirm that a specific regular expression is vulnerable to ReDoS, you can test it with crafted inputs that exploit the vulnerability. For example, with the pattern `^(a+)+$`, you could test it with a string like `aaaaaaaaaaaaaaaaaaaaaaaaaaaaaab`. If the regular expression engine takes a long time to process this input, it's an indication of a ReDoS vulnerability.\r\n\r\nAlso, we always can use SASTs to help us find suspicious regexes.\r\n\r\n\r\n",
+      "createdAt": "2023-03-17T23:00:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1474492755",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmPHv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so @ImanSharaf it would be good if you could look through the [document you linked to](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS) and open a PR [here](https://github.com/OWASP/www-community/blob/master/pages/attacks/Regular_expression_Denial_of_Service_-_ReDoS.md) with any changes/enhancements you feel are necessary [based on your comment here](https://github.com/OWASP/ASVS/issues/1562#issuecomment-1474492755). Maybe even consider transforming it into an official [OWASP Cheat Sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/CONTRIBUTING.md#contributing-guide)?",
+      "createdAt": "2023-05-31T14:04:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1570304495",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dnHEW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For category it waits: https://github.com/OWASP/ASVS/issues/1643",
+      "createdAt": "2023-05-31T16:17:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1570533654",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e7SO3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Ok so @ImanSharaf it would be good if you could look through the [document you linked to](https://owasp.org/www-community/attacks/Regular_expression_Denial_of_Service_-_ReDoS) and open a PR [here](https://github.com/OWASP/www-community/blob/master/pages/attacks/Regular_expression_Denial_of_Service_-_ReDoS.md) with any changes/enhancements you feel are necessary [based on your comment here](https://github.com/OWASP/ASVS/issues/1562#issuecomment-1474492755). Maybe even consider transforming it into an official [OWASP Cheat Sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/CONTRIBUTING.md#contributing-guide)?\r\n\r\nHi @ImanSharaf, are you ok with this and would you accept my suggested proposal for now:\r\n\r\n> Verify that regular expressions in use do not include unsafe elements which could lead to exponential processing and that untrusted input is not included in expressions without sanitization. This is to prevent a ReDOS / Runaway Regex attack.\r\n",
+      "createdAt": "2023-06-15T08:28:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1592599479",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5lRxIW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Josh I think this is a great idea for a new requirement. I made it more concise.\r\n\r\n_Verify that regular expressions are free from elements causing exponential backtracking, and ensure untrusted input is sanitized to mitigate ReDOS / Runaway Regex attacks._",
+      "createdAt": "2023-08-30T13:18:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1699156502",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l60_f",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Created #1712 with Jim's wording. CWE-1333 seems correct and as per [my comment here](https://github.com/OWASP/ASVS/issues/1643#issuecomment-1592611926) I think it neatly fits into the sanitization category,",
+      "createdAt": "2023-09-07T10:38:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1562#issuecomment-1709920223",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-02-28T17:45:22Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1562,
+  "state": "CLOSED",
+  "title": "Request for Adding Regular Expression Denial of Service Check to ASVS",
+  "url": "https://github.com/OWASP/ASVS/issues/1562"
+}

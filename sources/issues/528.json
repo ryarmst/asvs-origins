@@ -1,0 +1,62 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQxNDc3MQ==",
+    "is_bot": false,
+    "login": "jaxley",
+    "name": "Jason Axley"
+  },
+  "body": "The wording doesn't seem to accurately describe this:\r\n\r\nCurrent:\r\n\r\n> Verify that the message payload is signed to ensure reliable transport between client and service, using JSON Web Signing or WS-Security for SOAP requests.\r\n\r\nProposed:\r\n\r\n> Verify that the message headers and payload are trustworthy and not modified in transit.\r\nRequiring strong encryption for transport (HTTPS only) may be sufficient in many cases as it provides both confidentiality and integrity protection.  Per-message digital signatures can provide additional assurance on top of the transport protections for high-security applications but bring with them additional complexity and risks to weigh against the benefits.\r\n\r\nSigning requests adds several additional items to the attack surface of a client and server (in order to sign, the client and server need key establishment and key protections).\r\n\r\n1. The JOSE standards that JSON Web Signatures are a subset of, have shown to be problematic due to the ciphersuite agility and the complexity of the standard.\r\n2. Proper signature by the client requires key establishment and secure key storage.  This will not be available to all clients of all services (e.g. web clients).  This is a nontrivial endeavor.\r\n3. JSON payload is not the *only* data that may require integrity protection in a request.  Services often depend on HTTP headers for routing and other things so they can have integrity assured.\r\n4. If you are including in the threat model a MiTM attacker who can see and modify plaintext, then you would also need to consider a MiTM attacker who can implement replay attacks as well.  Knowing that a message was not modified is not strictly required to prevent unauthorized requests.  Replaying captured messages that are already signed (e.g. a message to delete an object) can still accomplish the attacker's goal.  So any threat model would need to consider message replay prevention as well.\r\n\r\nI would suggest that for high-security applications, an approach that replaces bearer tokens with a proof-of-possession plus a request digital signature would be ideal.  That's akin to what AWS has done with its request signature approach. You get authentication and integrity protection in one and mitigate MiTM disclosure of API token risk.  But it's nontrivial to get requests to be canonicalized and ensure the right bits are protected for integrity.  And it does still require key establishment (although they use a key derivation algorithm with the existing secret key to generate dynamic signature keys)",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NjU1OTUyNA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Like this, do you have time to give us a pull request?\n\n> On Feb 22, 2019, at 9:48 PM, Jason Axley <notifications@github.com> wrote:\n> \n> The wording doesn't seem to accurately describe this:\n> \n> Current:\n> \n> Verify that the message payload is signed to ensure reliable transport between client and service, using JSON Web Signing or WS-Security for SOAP requests.\n> \n> Proposed:\n> \n> Verify that the message headers and payload are trustworthy and not modified in transit.\n> Requiring strong encryption for transport (HTTPS only) may be sufficient in many cases as it provides both confidentiality and integrity protection. Per-message digital signatures can provide additional assurance on top of the transport protections for high-security applications but bring with them additional complexity and risks to weigh against the benefits.\n> \n> Signing requests adds several additional items to the attack surface of a client and server (in order to sign, the client and server need key establishment and key protections).\n> \n> The JOSE standards that JSON Web Signatures are a subset of, have shown to be problematic due to the ciphersuite agility and the complexity of the standard.\n> Proper signature by the client requires key establishment and secure key storage. This will not be available to all clients of all services (e.g. web clients). This is a nontrivial endeavor.\n> JSON payload is not the only data that may require integrity protection in a request. Services often depend on HTTP headers for routing and other things so they can have integrity assured.\n> If you are including in the threat model a MiTM attacker who can see and modify plaintext, then you would also need to consider a MiTM attacker who can implement replay attacks as well. Knowing that a message was not modified is not strictly required to prevent unauthorized requests. Replaying captured messages that are already signed (e.g. a message to delete an object) can still accomplish the attacker's goal. So any threat model would need to consider message replay prevention as well.\n> I would suggest that for high-security applications, an approach that replaces bearer tokens with a proof-of-possession plus a request digital signature would be ideal. That's akin to what AWS has done with its request signature approach. You get authentication and integrity protection in one and mitigate MiTM disclosure of API token risk. But it's nontrivial to get requests to be canonicalized and ensure the right bits are protected for integrity. And it does still require key establishment (although they use a key derivation algorithm with the existing secret key to generate dynamic signature keys)\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or mute the thread.\n",
+      "createdAt": "2019-02-22T21:47:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/528#issuecomment-466559524",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NjY3MzAxMA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Thank you for the suggestion. I've incorporated it and included a tweak to its close cousin in V13.3. ",
+      "createdAt": "2019-02-23T17:48:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/528#issuecomment-466673010",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NzcyODc5Nw==",
+      "author": {
+        "login": "jaxley"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks!  Sorry, was out of pocket and couldn't respond",
+      "createdAt": "2019-02-27T05:24:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/528#issuecomment-467728797",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-02-22T20:48:34Z",
+  "labels": [],
+  "number": 528,
+  "state": "CLOSED",
+  "title": "V13.2.6: signing requests",
+  "url": "https://github.com/OWASP/ASVS/issues/528"
+}

@@ -1,0 +1,268 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **7.4.1** | Verify that logout and expiration terminate the user's session, such that the back button or a downstream relying party cannot resume an authenticated session. | 1 | v5.0.be-3.8.1 |\n\nThis is close to 1:1 carried over from the old version and is vague - what exactly it asks. With the \"back\" button, it may indicate cache problems, it may indicate to situation where the session token is part of the URL and the session was not terminated on the server side, and the user is again connected to the session data.\n\n\nI would say that the cache situation is covered by requirements in section \"V14.3 Client-side Data Protection\".\n\nThis requirement must say - previously valid session token must not be accepted anymore for using the service\n\n  * for reference token - the session must be terminated on the server side\n  * for self-contained token - till the token itself is still not expired, the service must \"remember\" that this is not valid anymore - keep the \"deprecated\" list of tokens.\n\n\nSo something like:\n> Verify that if the session termination is triggered (such as logout, expiration) the application disallows further usage of the session token. For reference token it means invalidating the session data on the server side. For self-contained tokens, the application must keep a list of deprecated tokens till they expire.\n\nAnd we don't ask anywhere that the application need to check against the \"deprecated list of tokens\"...",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6lsgCz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction, Elar. I'd suggest a small refinement.\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **7.4.1** | Verify that when session termination is triggered (such as logout or expiration), the application disallows any further use of the session or token. For reference tokens or server-side sessions, this means invalidating the session data on the server side. For self-contained tokens, the application must maintain a list of revoked tokens until they expire. | 1 | v5.0.be-3.8.1 |\n\n",
+      "createdAt": "2025-04-04T23:40:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2779906227",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mFNmr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This makes sense but we cannot be too prescriptive about solution for self-contained tokens.\n\nI also think we should unify our terminology on session tokens, see: #2924\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **7.4.1** | Verify that when session termination is triggered (such as logout or expiration), the application disallows any further use of the **session token**. For reference tokens or server-side sessions, this means invalidating the session data on the server side. **Applications using self-contained tokens will also need a solution for this**. | 1 | v5.0.be-3.8.1 |",
+      "createdAt": "2025-04-08T13:08:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2786384299",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mFStD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Applications using self-contained tokens will also need a solution for this.\n\nEeem, please no :)\n\nAs \"disallows any further use of the session token\" is already said, then if you don't want to have \"blocklist as one and only solution\", it can be solved like this (wording needs some work):\n> For self-contained tokens it can be achieved if the application maintains and compares the session token against a list of revoked tokens until they expire.",
+      "createdAt": "2025-04-08T13:15:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2786405187",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mG3aC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You could also stop the self-contained token from working by:\n\n* Having a per user signing key and rotating it\n* Having a setting not to accept tokens generated before the termination date.\n\nHence not wanting to provide a prescriptive solution.",
+      "createdAt": "2025-04-08T15:21:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2786817666",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mHAa4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would even list them all to send a clear message, that using self-contained token as a session token requires some proper thinking before taking into use.",
+      "createdAt": "2025-04-08T15:34:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2786854584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mHHON",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe in section text but not in a requirement",
+      "createdAt": "2025-04-08T15:43:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2786882445",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mPCXp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Updated suggestion:\n\n\"_Verify that when session termination is triggered (such  as logout or expiration), the application disallows any further use of  the session token. For reference tokens or server-side sessions, this means invalidating the session data on the server side. Applications using self-contained tokens will need a solution such as maintaining a list of terminated tokens, disallowing tokens produced before a per-user date and time or rotating a per-user signing key._\"\n",
+      "createdAt": "2025-04-09T09:19:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2788959721",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mP4pt",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2935",
+      "createdAt": "2025-04-09T10:21:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2789182061",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mQzBb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "To remove confusion may I suggest dropping token?\r\n\r\n\r\n\"Verify that when session termination is triggered (such as logout or expiration), the application disallows any further use of the session. For reference tokens or server-side sessions, this means invalidating the session data on the server side. Applications using self-contained tokens will need a solution such as maintaining a list of terminated tokens, disallowing tokens produced before a per-user date and time or rotating a per-user signing key.\"\r\n\r\nThis seems a bit less confusing to me. And I’m just removing one word.\r\n\r\n",
+      "createdAt": "2025-04-09T11:48:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2789421147",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mQ4qM",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I also want to refine this a little, thinking about it more:\n\n\"_Verify that when session termination is triggered (such as logout or expiration), the application disallows any further use of the session. For reference tokens or stateful sessions, this means invalidating the session data at the application backend. Applications using self-contained tokens will need a solution such as maintaining a list of terminated tokens, disallowing tokens produced before a per-user date and time or rotating a per-user signing key._\"\n\n@elarlang what do you think?",
+      "createdAt": "2025-04-09T11:54:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2789444236",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mRHEd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> further use of the session\n\nI think this is more confusing for self-contained tokens, because in theory, there is no session.\n\nRest of the changes are ok.",
+      "createdAt": "2025-04-09T12:15:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2789503261",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mRL2S",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think this is more confusing for self-contained tokens, because in theory, there is no session.\r\n\r\nThat’s a fair point. This is a hard topic to get right.\r\n\r\nSemantically:\r\n\r\n* You can say there’s a “session” in that the token authorizes access over time — but that’s logical, not technical.\r\n* The term “session token” is often used for convenience, not accuracy. It’s actually an incorrect term.\r\n\r\nTechnically: \r\n\r\nIt’s better to say:\r\n\r\n“This is a stateless authorization token that represents user identity, not a session in the classical server-side sense.”\r\n\r\nBut reference tokens and session ID’s do indeed map to a session.\r\n\r\n",
+      "createdAt": "2025-04-09T12:23:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2789522834",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mTbDv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It is not clear for me, is there agreement to use \"further use of the session\" instead of \"further us of the session token\" as the PR represents.\n",
+      "createdAt": "2025-04-09T15:25:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2790109423",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mTeST",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It is not clear for me, is there agreement to use \"further use of the session\" instead of \"further us of the session token\" as the PR represents.\n\nI think it helps focus things so I am good with it",
+      "createdAt": "2025-04-09T15:30:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2790122643",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mT1-2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this conclusion as well. Thank you for hearing me out.",
+      "createdAt": "2025-04-09T16:06:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2884#issuecomment-2790219702",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-04T17:41:02Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2884,
+  "state": "CLOSED",
+  "title": "7.4.1 / v5.0.be-3.8.1 - session termination",
+  "url": "https://github.com/OWASP/ASVS/issues/2884"
+}

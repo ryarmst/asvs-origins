@@ -1,0 +1,93 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "It's a nice base from Ralph / @csfreak92 , I try now to push those topics forward and validate some ideas.\r\n\r\nOAuth - dependency on web architecture\r\n\r\nWe don't have a link to \"OAuth 2.0 for Browser-Based Apps\" which should be probably the most relevant document to follow for ASVS.\r\n\r\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps\r\n\r\nFrom risk point of view, it's completely different, is it [BFF](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#section-6.1) solution or [browser communicates directly with a authorization server](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#section-6.3).\r\n\r\n## Discussion/Proposal 1\r\n\r\nThe [summary](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#section-6.3.3.3) for browser based communication says:\r\n\r\n> To summarize, the architecture of a browser-based OAuth 2.0 client application is straightforward, but results in a significant increase in the attack surface of the application. The attacker is not only able to hijack the client, but also to extract a full-featured set of tokens from the browser-based application.\r\n\r\n> This architecture is not recommended for business applications, sensitive applications, and applications that handle personal data.\r\n\r\nWrite requirement (preferred) or at least \"really strong recommendation\" to avoid architecture where the browser communicates directly with authorization server token request and handling access token and refresh token.\r\n\r\nOr in OAuth terminology, that OAuth confidential (and not public) client is used.\r\n\r\nMay be limited to first-party solutions.\r\n\r\nedit: moved to separate issue: https://github.com/OWASP/ASVS/issues/1963\r\n\r\n\r\n## Discussion/Proposal 2\r\n\r\nFor a situation, where OAuth is used as a \"first-party\" authorization solution and the application needs one and only way how it communicates with the authorization server, then for the OAuth client must be configured and the Authorization Server must validate, that: only the expected values are allowed, that is implemented by the client:\r\n\r\n  * response_type\r\n  * response_mode\r\n  * scope - here, support for the `offline_access` may be worth special mention\r\n\r\nedit: moved to separate issue: https://github.com/OWASP/ASVS/issues/1964\r\n\r\n\r\n## Discussion/Proposal 3\r\n\r\nProbably I was the first one to say that `redirect_uri` validation is a duplicate of general open-redirect but now I think it's important to have them as a separate requirement:\r\n\r\n`redirect_uri` must be validated with the _string-match_ method, which means no \"wildcard\" validations.\r\n\r\nThere are 2 parts:\r\n\r\n  * Authorization Server must not accept anything else than (one of) the precise URL from the pre-registered list\r\n  * As a precondition: the OAuth Client must not send business logic URL to the Authorization Server. It is pretty much the same as Referrer leakage.\r\n\r\nedit: moved to separate issue: https://github.com/OWASP/ASVS/issues/1965\r\n\r\n## Discussion/Proposal 4\r\n\r\nThere is a clear trend of overengineering using OAuth. One of them is using OAuth only for providing authentication. In this case, directly OIDC should be used without OAuth overhead.\r\n\r\nAlso addressed here: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#section-7.1\r\n\r\nedit: moved to separate issue: https://github.com/OWASP/ASVS/issues/1966",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM54stUU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussion/Proposal 1 - that sounds like a sensible extra requirement for L2 and L3\r\nOverall it seems like things in [Section 7](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#name-discouraged-and-deprecated-) are to be banned altogether and the [Browser-based OAuth 2.0 client](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#name-browser-based-oauth-20-clie).\r\n\r\nDiscussion/Proposal 2 - If this is a simple requirement then it sounds sensible as long as it is not too detailed.\r\n\r\nDiscussion/Proposal 3 - Suggest you propose an updated/added requirement.\r\n\r\nDiscussion/Proposal 4 - I agree this is an important idea but the idea needs to be actionable ",
+      "createdAt": "2024-03-28T11:44:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5404S5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @jmanico - I would like to get your opinions as input to move further",
+      "createdAt": "2024-03-29T11:45:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1916#issuecomment-2027127993",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-UpRf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I opened separate issue for each topic and close this issue:\r\n\r\n* https://github.com/OWASP/ASVS/issues/1963\r\n* https://github.com/OWASP/ASVS/issues/1964\r\n* https://github.com/OWASP/ASVS/issues/1965\r\n* https://github.com/OWASP/ASVS/issues/1966",
+      "createdAt": "2024-05-19T19:47:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1916#issuecomment-2119341151",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-03-26T07:37:04Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyfACQ",
+      "name": "Community needed",
+      "description": "This issue will not be progressed without community input. Will be closed if stale.",
+      "color": "fbca04"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 1916,
+  "state": "CLOSED",
+  "title": "oauth related discussions",
+  "url": "https://github.com/OWASP/ASVS/issues/1916"
+}

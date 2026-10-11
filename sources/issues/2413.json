@@ -1,0 +1,111 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "CCM8 is currently listed as approved in the crypto appendix (a previous version had this text: “CCM-8 is included in regard to TLS cipher suite”).\r\n\r\nCCM8 use a 64 bit MAC which is quite weak. It's supposed to be OK when used [for TLS](https://crypto.stackexchange.com/a/100157/2524) but it's not OK  but not for other protocols in general:\r\n\r\n> An 8-byte (64-bit) tag would be uncomfortably small in situations where the attacker can brute-force all possible tags. However, when the tag is used for TLS communication, if the attacker makes a wrong guess for the tag, the receiver will immediately close the connection, so each guess requires a new connection. This makes brute force very expensive.\r\n\r\nThis is not allowed in DTLS without additional safeguard.\r\n\r\n[RFC9147](https://datatracker.ietf.org/doc/rfc9147/) (DTLS 1.3):\r\n\r\n> The AEAD_AES_128_CCM_8 AEAD, as used in TLS_AES_128_CCM_8_SHA256, does not have a limit on the number of records that fail authentication that both limits the probability of forgery by the same amount and does not expose implementations to the risk of denial of service; see Appendix B.3.  Therefore, TLS_AES_128_CCM_8_SHA256 MUST NOT be used in DTLS without additional safeguards against forgery.  Implementations MUST set usage limits for AEAD_AES_128_CCM_8 based on an understanding of any additional forgery protections that are used.\r\n\r\n[QUIC](https://www.rfc-editor.org/rfc/rfc9001.html):\r\n\r\n> QUIC can use any of the cipher suites defined in [[TLS13](https://www.rfc-editor.org/rfc/rfc9001.html#TLS13)] with the exception of TLS_AES_128_CCM_8_SHA256. A cipher suite MUST NOT be negotiated unless a header protection scheme is defined for the cipher suite.\r\n\r\nI suggest, to add a note:\r\n\r\n> ** CCM-8 is only approved when using with TLS and must not be used with other protocols (including DTLS or QUIC).\r\n\r\nAdditional questions:\r\n\r\n* Do not allow it for L3?\r\n* Do not allow it at all? Is relevant anyway? [Mozilla SSL configuration generator](https://ssl-config.mozilla.org/#server=apache&version=2.4.60&config=old&openssl=1.1.1w&guideline=5.7) does not list any CCM (not CCM-8) ciphersuite in any configuration (event in \"old\" mode).",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Vxg53",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Tweaked formulation:\r\n\r\n> ** CCM-8 is only approved when using with TLS and must in general not be used with other protocols (including DTLS or QUIC).",
+      "createdAt": "2024-12-02T20:44:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2413#issuecomment-2512785015",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WxrOp",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @danielcuthbert ",
+      "createdAt": "2024-12-09T21:53:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2413#issuecomment-2529604521",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W4Ot8",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Tweaked formulation:\r\n> \r\n> > ** CCM-8 is only approved when using with TLS and must in general not be used with other protocols (including DTLS or QUIC).\r\n\r\nThis reads like a much better version! Yeah, you're right, it was just included for TLS because of its ubiquity and the need to _require_ to order _all_ ciphersuites in some situations. This should serve as a way to know to put it at the bottom of the list, so this disclaimer is entirely appropriate! ",
+      "createdAt": "2024-12-10T11:37:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2413#issuecomment-2531322748",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W46gn",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some context/references (as far as I understand them) below.\r\n\r\nCCM-8 uses a (truncated/small) 64-bit MAC tag. If the receiver receives more than [2^7=128](https://datatracker.ietf.org/doc/rfc9147/#:~:text=v%20%3C=%202^7) [forged packets](https://datatracker.ietf.org/doc/rfc9147/#:~:text=v:%20The%20number%20of%20forged%20packets), it would give a significant advantage to the attacker. \r\n\r\nIn TLS, the connection is dropped in case of forged packets so v<=1 (but the tag is still comparatively small which might be an issue).\r\n\r\nIn DTLS (and QUIC?), [this is not the case](https://datatracker.ietf.org/doc/rfc9147/#:~:text=Unlike%20TLS,%20DTLS%20is%20resilient%20in%20the%20face%20of%20invalid%20records). DTLS is expected to be resilient to invalid (and forged) records and therefore:\r\n\r\n>  Specifically, TLS_AES_128_CCM_8_SHA256 cannot be used [in DTLS] without additional measures to prevent forgery of records, or to mitigate the effect of forgeries.\r\n\r\nI'm wondering if some reference would be useful in the note to motivate the restriction.",
+      "createdAt": "2024-12-10T12:27:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2413#issuecomment-2531502119",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kymP6",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "CCM-8 has been moved in disapproved so we can close this one.",
+      "createdAt": "2025-03-30T20:15:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2413#issuecomment-2764727290",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-25T23:29:22Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABy9sfPQ",
+      "name": "AppendixV",
+      "description": "Appendix with crypto details",
+      "color": "540616"
+    }
+  ],
+  "number": 2413,
+  "state": "CLOSED",
+  "title": "Crypto Appendix - Restrictions on CCM8",
+  "url": "https://github.com/OWASP/ASVS/issues/2413"
+}

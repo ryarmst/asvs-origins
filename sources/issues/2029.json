@@ -1,0 +1,184 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Jim made the following suggestion for 8.2.2 [in this comment](https://github.com/OWASP/ASVS/issues/2010#issuecomment-2311829324):\r\n\r\n> 8.2.2: Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data. If sensitive data must be stored, ensure it is encrypted and integrity-protected, and that it is only stored temporarily with appropriate expiration mechanisms. Exceptions are made for session identifiers, provided their handling follows other guidance in the session management section, including the use of secure cookies and robust protection against cross-site scripting (XSS) attacks.\r\n\r\nThe [current requirement](https://appsecg.host/8.2) says the following: (the session token aspect is under [separate discussion](https://github.com/OWASP/ASVS/issues/2010))\r\n\r\n> Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session tokens which should be stored in either cookies or sessionStorage.\r\n\r\nAlthough I don't think we need to expand the current requirement, do we want to specifically allow for encrypted data to be stored in those mechanisms?\r\n\r\nIf so, do we also need to talk about key management?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6KiZ8C",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If sensitive data must be stored, ensure it is encrypted and **integrity-protected**, ...\r\n\r\nIntegrity protection does not protect against sensitive data leakage, e. g. sensitive data in JWT. In a way related to #1919.",
+      "createdAt": "2024-09-02T09:33:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2324274946",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KpIY_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree, this is why I suggest **encrypted **_and_** integrity-protected**",
+      "createdAt": "2024-09-03T09:26:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2326038079",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KpOuu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From V8 and sensitive information perspective, only the confidentiality-protection matters.",
+      "createdAt": "2024-09-03T09:38:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2326064046",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KpTo0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To be fair @elarlang, the beginning of the chapter talks about the full CIA triad:\r\nhttps://github.com/OWASP/ASVS/blob/master/5.0/en/0x16-V8-Data-Protection.md#control-objective",
+      "createdAt": "2024-09-03T09:47:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2326084148",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KpZzl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, what problem we are solving here? Pointing to CIA... how talking about availability makes sense for this requirement?\r\n\r\nThe requirement says, that verify that data stored in the client side does not contain sensitive data. It says quite clearly, what is the problem to solve - no plain-text readable sensitive data to the client side...",
+      "createdAt": "2024-09-03T10:00:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2326109413",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KpiX1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Everyones favorite and freshly modified 8.2.2 says:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.2.2** | [MODIFIED, MERGED FROM 3.2.3] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session identifiers. | ✓ | ✓ | ✓ | 922 |\r\n\r\nOptions:\r\n* to say, that the data stored in the client-side must not be plain-text recoverable\r\n* to add \"..., with the exception of session identifiers or encrypted data that is not plain-text recoverable\" + supporting requirements somewhere else to keep the focus for this requirement only to send the message \"no sensitive info to the client side\".",
+      "createdAt": "2024-09-03T10:16:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2326144501",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kqise",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico do you think it is critical to allow encrypted data stored in browser storage? To be honest, I feel like I'd rather not add it to the requirement.",
+      "createdAt": "2024-09-03T12:33:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2326407966",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kx8MN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If you must store sensitive data in the browser long term, then yes. Even better just don't store sensitive data in the browser long term. I think its way more critical to remove sensitive data via cache headers than it is to store it encrypted.\r\n\r\nSo I think we are in sync, Josh.",
+      "createdAt": "2024-09-04T09:19:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2328347405",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KzOhm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so I think we will leave the requirement as it is for now without getting into the question of encryption.",
+      "createdAt": "2024-09-04T11:29:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2029#issuecomment-2328684646",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-08-27T08:16:26Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    }
+  ],
+  "number": 2029,
+  "state": "CLOSED",
+  "title": "Should 8.2.2 specifically allow for encrypted data",
+  "url": "https://github.com/OWASP/ASVS/issues/2029"
+}

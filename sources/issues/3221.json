@@ -1,0 +1,180 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "> V1.4 Memory, String, and Unmanaged Code\n> The following requirements address risks associated with unsafe memory use, which generally apply when the application uses a systems language or unmanaged code.\n\nThis statement overgeneralizes integer overflow vulnerability as strictly a memory-unsafe risk relevant only to unmanaged code.  Which is not fully correct, as this issue remain relevant even in modern managed languages, particularly in specific contexts. I think there must be clear separation between memory management risks and data validation risks.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM67d8ye",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Are the risks of integer overflow in managed and non-managed languages the same or are they different?",
+      "createdAt": "2025-08-01T16:54:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3145190558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67fYTs",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Are the risks identical? No - they overlap, but the shape and severity differ between unmanaged and managed runtimes.\n\n\n| Aspect                            | Native / unmanaged (C, C++, Rust `unsafe`, assembly)                                                                                                           | Managed (Java, C#, Python, Go, JavaScript, etc.)                                                                                                                                                                                                                                           |\n| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |\n| **Overflow semantics**            | *Signed*: **undefined behaviour** in C/C++; compiler may delete code paths or optimize unpredictably. *Unsigned*: wraps modulo 2^n.       | Deterministic: <br>• **Java/C# (unchecked)** wrap two-complement 32/64-bit.  <br>• **C# (checked)** throws `OverflowException`.  <br>• **Python / JS** promote to arbitrary precision (DoS risk, not wrap).  |\n| **Typical exploit impact**        | • Wrong length → buffer overflow → memory corruption & RCE<br>• Pointer arithmetic wrap → arbitrary read/write<br>• Logic bypass (auth, bounds)                | • Logic / auth bypass (e.g., length check goes negative)<br>• Denial-of-service (huge allocations, long bignum math)<br>• **Memory-safe runtime blocks direct corruption**, but overflow *values* can reach native code (JNI/P-Invoke) and reignite classic memory bugs                    |\n| **Root-cause similarity**         | Both stem from *trusting arithmetic results* without range checking. CWE-190 tracks the defect generically.)                                         | same                                                                                                                                                                                                                                                                                       |\n| **Why the risk profile diverges** | UB lets the compiler erase safety checks; out-of-bounds writes are not trapped.                                                                                | Runtime arrays & strings have bounds checks; arithmetic is repeatable; the VM throws on illegal allocations.                                                                                                                                                                               |\n| **Real-world examples**           | • Heartbleed precursor bugs (length wrap) in OpenSSL<br>• IOSurface integer overflow → kernel RCE (iOS 14)<br>• Stagefright media length calc (Android native) | • Log4j CVE-2021-44228 bypass used an `int` wrap to skip size limit before JNDI payload (logic-level).<br>• .NET `DateTime.AddMilliseconds()` unchecked math let attackers prolong signed tokens.     ",
+      "createdAt": "2025-08-01T19:30:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3145565420",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67rX_h",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So @ajayojha can you think of another location where this requirement would fit in better?",
+      "createdAt": "2025-08-03T21:27:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3148709857",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67u2GT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> ... this requirement ...\n\nI think the issue is about the 1.4 chapter text\n\n",
+      "createdAt": "2025-08-04T08:26:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3149619603",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67x0a9",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> So [@ajayojha](https://github.com/ajayojha) can you think of another location where this requirement would fit in better?\n\nI would recommend **Input Validation 2.2**, in some cases sanitization is also used.",
+      "createdAt": "2025-08-04T12:20:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3150399165",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69H4fU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I like @elarlang's suggestion, do you think that maybe we could clarify the description of section 1.4 to resolve this rather than moving a requirement around @ajayojha ?",
+      "createdAt": "2025-08-10T23:19:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3172960212",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69uj2t",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I like [@elarlang](https://github.com/elarlang)'s suggestion, do you think that maybe we could clarify the description of section 1.4 to resolve this rather than moving a requirement around [@ajayojha](https://github.com/ajayojha) ?\n\nYes, we could clarify the description by adding something on the note of “high-level managed languages.”",
+      "createdAt": "2025-08-13T10:01:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3183099309",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DHUEq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so could you draft a suggested change to 1.4?",
+      "createdAt": "2025-09-10T06:21:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3273474346",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7E6NKz",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "The following requirements address risks associated with unsafe memory use, which generally apply when the application uses a systems language or unmanaged code. **Numeric & size risk control requirments apply to all stacks, including managed runtimes.**",
+      "createdAt": "2025-09-17T15:43:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3303592627",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qGjQ5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so we are thinking:\n\n\"_The following requirements address risks associated with unsafe memory use, which generally apply when the application uses a systems language or unmanaged code. Numeric and size risk control requirements apply   to all stacks, including managed runtimes._\"",
+      "createdAt": "2026-02-19T14:17:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3221#issuecomment-3927585849",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-07-21T09:48:53Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAACYnQLAA",
+      "name": "requires change control",
+      "description": "",
+      "color": "aaaaaa"
+    }
+  ],
+  "number": 3221,
+  "state": "OPEN",
+  "title": "Clarification: V1.4",
+  "url": "https://github.com/OWASP/ASVS/issues/3221"
+}

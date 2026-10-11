@@ -1,0 +1,256 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjMzNzQxODM=",
+    "is_bot": false,
+    "login": "sanmai-NL",
+    "name": "Sander Maijers"
+  },
+  "body": "> Verify that passwords are stored in a form that is resistant to offline attacks. Passwords SHALL be salted and hashed using an **_approved_** one-way key derivation or password hashing function. Key derivation and password hashing functions take a password, a salt, and a cost factor as inputs when generating a password hash. (C6)\r\n\r\nI couldn‘t find the criterion for ‘approved’.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3MDQwMzQzOA==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "It says so in [the intro of 2.4](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v24-credential-storage):\r\n\r\n> The list of approved one-way key derivation functions is detailed in NIST 800-63 B section 5.1.1.2, and in [BSI Kryptographische Verfahren: Empfehlungen und Schlussell&auml;ngen (2018)](https://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR02102/BSI-TR-02102.pdf?__blob=publicationFile). The latest national or regional algorithm and key length standards can be chosen in place of these choices.\r\n",
+      "createdAt": "2021-06-29T08:46:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-870403438",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3MDQxMjIzNQ==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Actually, it doesn't say so at all. \r\n\r\nNIST 800-63 B section 5.1.1.2 says:\r\n> Examples of suitable key derivation functions include Password-based Key Derivation Function 2 (PBKDF2)\r\n\r\nThis says that PBKDF2 is suitable, not that it's approved. It does state approved hash functions, but these are not suitable to hash passwords:\r\n\r\n> The key derivation function SHALL use an approved one-way function such as [HMAC, SHA2, SHA3, etc.]\r\n\r\nBSI Kryptographische Verfahren: Empfehlungen und Schlussellängen (2018) says very little on password authentication. I think it is not a suitable reference here. It says in appendix B:\r\n\r\n> Falls die Verwendung einer kryptographischen Sicherheitskomponente in solcher Weise zur\r\npasswortbasierten Schlusselableitung nicht moglich ist, sollte die Hashfunktion Argon2id genutzt\r\nwerden.\r\n\r\nThis is the only reference to any password hashing function in the whole document, so I don't think this is a proper document to reference for approved functions.\r\n\r\nFurthermore, the ASVS should be self-sufficient, so we should include a list of password hash functions that we think are OK. I would say:\r\n\r\n* PBKDF2\r\n* bcrypt\r\n* scrypt\r\n* argon2\r\n\r\nShould we specify a variant of argon2, like argon2i or argon2d? <s>NIST claims [Balloon](https://crypto.stanford.edu/balloon/) is suitable, should we include that?</s>\r\n",
+      "createdAt": "2021-06-29T08:58:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-870412235",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3MDU1ODYyOA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Argon2id\n\nAnd give https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html a read, it was recently updated by myself and a member of the hastcat team with deep expertise in the math behind these recommendations.",
+      "createdAt": "2021-06-29T12:30:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-870558628",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3MTI5MDE0NQ==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "[This page](https://paragonie.com/blog/2016/02/how-safely-store-password-in-2016) also includes \r\n\r\n> The other Password Hashing Competition finalists (Catena, Lyra2, Makwa, and yescrypt)\r\n\r\nI agree that Argon2id is preferred, but I wouldn't say that a webapp fails requirement 2.4.1 if they use Argon2i instead. So I think specifying only Argon2 is sufficient here.\r\n",
+      "createdAt": "2021-06-30T10:38:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-871290145",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3MTQ4NTY0NA==",
+      "author": {
+        "login": "sanmai-NL"
+      },
+      "authorAssociation": "NONE",
+      "body": "Rather than referring to a specific algorithm in the requirement, I prefer to refer to a mutable list of approved algorithms in e.g. an appendix.",
+      "createdAt": "2021-06-30T15:06:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-871485644",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3MTU0MTY1MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "These algorithms do not change much. Argon2id will last for the length of this standard iteration. So many folks use bad algorithms for password storage, I’d rather be specific.\n\n> On Jun 30, 2021, at 11:06 AM, Sander Maijers ***@***.***> wrote:\n> \n> ﻿\n> Rather than referring to a specific algorithm in the requirement, I prefer to refer to a mutable list of approved algorithms in e.g. an appendix.\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-06-30T16:16:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-871541650",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40lznC",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Was:\r\n\r\n> Verify that passwords are stored in a form that is resistant to offline attacks. Passwords SHALL be salted and hashed using an approved one-way key derivation or password hashing function. Key derivation and password hashing functions take a password, a salt, and a cost factor as inputs when generating a password hash. (C6)\r\n\r\nProposed:\r\n\r\n> Verify that any of the following password hashing functions are used when storing passwords: argon2, scrypt, bcrypt, PBKDF2, battcrypt, Catena, Lyra2, Makwa, Parallel, Pomelo, Pufferfish, or yescrypt. (C6)\r\n\r\nI wanted to avoid phrasing it like you have to store passwords. I removed the \"resistant to offline attacks\", because this implies a clear separation where there is none. Argon2 passwords can only be cracked offline. I removed the \"salted and hashed\", because this is abstracted away from the user by password hashing functions. I included PHC finalists, because I think these are proven algorithms, and an application that uses yescrypt shouldn't fail this. I included argon2 and not argon2id, because if you use argon2i you shouldn't fail this.\r\n\r\nIt's a rather long list, and it's pretty definitive: you should have one of these, otherwise you fail this requirement. But I think that makes it pretty clear.",
+      "createdAt": "2021-07-19T07:51:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-882325954",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40m0l0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Argon2i is vulnerable to side-channel attacks. I’d like to bump to Argon2id which has side-channel and time-memory trade off defense. Otherwise, I think this is a good proposal.\n",
+      "createdAt": "2021-07-19T14:24:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-882592116",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43MWl-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Can we kindly reduce the list of password algorithms to:\r\n\r\nargon2id, scrypt, bcrypt, PBKDF2? The other algorithms lost the competition and are not in frequent use. I'd like to keep this list small and in parity with other OWASP resources like https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+      "createdAt": "2021-09-23T16:49:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-925985150",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43MXi8",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I am proposing https://github.com/OWASP/ASVS/pull/1058 in an effort to partially resolve this issue and be in parity with the OWASP Cheatsheet on this topic.",
+      "createdAt": "2021-09-23T16:54:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-925989052",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43MpX5",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> be in parity with the OWASP Cheatsheet on this topic\r\n\r\nI don't think the ASVS should say the same thing as the cheat sheet. In my opinion, the cheat sheet gives guidance when developing a new application. The ASVS provides checks to determine whether a system is secure. Even though a new application should have 310,000 iterations of SHA256, an existing application is not insecure just because it has 100,000 iterations of SHA1.\r\n\r\nI think it's less valuable if we write the same thing twice, and more valuable if we have two separate documents, with their own audiences and recommendations.",
+      "createdAt": "2021-09-23T18:40:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-926062073",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Mq4U",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > be in parity with the OWASP Cheatsheet on this topic\r\n> \r\n> I don't think the ASVS should say the same thing as the cheat sheet. In my opinion, the cheat sheet gives guidance when developing a new application. The ASVS provides checks to determine whether a system is secure. Even though a new application should have 310,000 iterations of SHA256, an existing application is not insecure just because it has 100,000 iterations of SHA1.\r\n> \r\n> I think it's less valuable if we write the same thing twice, and more valuable if we have two separate documents, with their own audiences and recommendations.\r\n\r\nI politely disagree. If you are using weak work factors then you should upgrade to the minimum. These algorithms must be modified over time as Moore's law continues on.",
+      "createdAt": "2021-09-23T18:50:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-926068244",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NU9a",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "It is a high impact change if the work factor is modified from 100K to 310K as two password stores would need to retained until all the end user[s] change their password from 100K to 310K so ultimately the weakness remains until such time.",
+      "createdAt": "2021-09-23T23:39:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-926240602",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Njsm",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The original request in this thread has been clarified. If you want to continue parts of this thread please open a new issue.",
+      "createdAt": "2021-09-24T02:46:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-926300966",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Njup",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> It is a high impact change if the work factor is modified from 100K to 310K as two password stores would need to retained until all the end user[s] change their password from 100K to 310K so ultimately the weakness remains until such time.\r\n\r\nThis is a reasonable request. Can you open a new issue so we can discuss it separately?",
+      "createdAt": "2021-09-24T02:46:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1027#issuecomment-926301097",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-06-18T07:55:54Z",
+  "labels": [],
+  "number": 1027,
+  "state": "CLOSED",
+  "title": "v4.0.2 2.4.1: how to determine if algorithm is ‘approved’?",
+  "url": "https://github.com/OWASP/ASVS/issues/1027"
+}

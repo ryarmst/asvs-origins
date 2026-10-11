@@ -1,0 +1,71 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2025-01-20T13:48:38Z",
+      "diff": "Should we have a requirement, that a malicious user can not downgrade acr=high to acr=low?"
+    },
+    {
+      "editedAt": "2025-01-20T15:38:43Z",
+      "diff": "Should we have a requirement, that a malicious user can not downgrade acr=high to acr=low?\n\nissue was raised by @silviavali"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2607260183",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> shall we include something about max_age/auth_time as well? In the same requirement? In a separate requirement?\n\nI think we need to cover them both, and in case we don't want to use different levels from those, they can be in one requirement.\n\nFrom: https://datatracker.ietf.org/doc/html/rfc9470#section-2-3.2\n\n>   2.  The resource server determines that the circumstances in which\n       the presented access token was obtained offer insufficient\n       authentication strength and/or recentness; hence, it denies the\n       request and returns a challenge describing (using a combination\n       of acr_values and max_age) what authentication requirements must\n       be met for the resource server to authorize a request.\n\nAttempt to convert it into a requirement:\n> Verify that the resource server validates that the presented access token was obtained with the required authentication strength and recentness by checking acr_values and max_age.",
+          "recorded_at": "2025-01-22T19:45:16Z"
+        },
+        {
+          "body": "I think we need to cover them both, and in case we don't want to use different levels from those, they can be in one requirement.\n\nFrom: https://datatracker.ietf.org/doc/html/rfc9470#section-2-3.2\n\n>   2.  The resource server determines that the circumstances in which\n       the presented access token was obtained offer insufficient\n       authentication strength and/or recentness; hence, it denies the\n       request and returns a challenge describing (using a combination\n       of acr_values and max_age) what authentication requirements must\n       be met for the resource server to authorize a request.\n\nAttempt to convert it into a requirement:\n> Verify that the resource server validates that the presented access token was obtained with the required authentication strength and recentness by checking acr_values and max_age.",
+          "recorded_at": "2025-01-22T13:32:00Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2613969296",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "@elarlang good point, then maybe have something like this for the resource server?\n\n> Verify that, if specific user authentication strength or recentness are required , the resource server enforces authorization decisions based on claims from the access token that originates from the user authentication event. For example, if present, using OIDC claims such as 'acr' or 'auth_time'.",
+          "recorded_at": "2025-01-25T13:39:16Z"
+        },
+        {
+          "body": "@elarlang good point, then maybe have something like this for the resource server\n\n> Verify that, if specific user authentication strength or recentness are required , the resource server enforces authorization decisions based on claims from the access token that originates from the user authentication event. For example, if present, using OIDC claims such as 'acr' or 'auth_time'.",
+          "recorded_at": "2025-01-25T13:39:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2630081997",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "Looks good, but maybe clarify that the claims are OIDC claims and if not using OIDC (just OAuth) then other claims might be used by the resource server to verify this, often OIDC ID-token claims are also \"copied\" to the OAuth access token, but not always...perhaps like this?\n\n> Verify that, if the resource server requires specific authentication strength or recentness, it verifies that the presented access token satisfies these constraints. For example, if present, using the OIDC 'acr' and 'auth_time' claims respectively.\n\n\nAnd add this for the OIDC RP\n\n> Verify that, if specific authentication strength (using the 'acr_values' parameter) or recentness (using the 'max_age' parameter) is required, the RP verifies that the presented ID-token satisfies these constraints (for example using the 'acr' and 'auth_time' claims respectively).\n\nShould we also mention using the 'amr' claim?",
+          "recorded_at": "2025-02-03T06:42:41Z"
+        },
+        {
+          "body": "Looks good, but maybe clarify that the claims are OIDC claims and if not using OIDC (just OAuth) then other claims might be used by the resource server to verify this, often OIDC ID-token claims are also \"copied\" to the OAuth access token, but not always...perhaps like this?\n\n> Verify that, if the resource server requires specific authentication strength or recentness, it verifies that the presented access token satisfies these constraints. For example, if present, using the OIDC 'acr' and 'auth_time' claims respectively.\n\n\nAnd add this for the OIDC RP\n\n> Verify that, if specific authentication strength (using the 'acr_values' parameter) or recentness (using the 'max_age' parameter) is required, the RP verifies that the presented ID-token satisfies these constraints (for example using the 'acr' and 'auth_time' claims respectively).",
+          "recorded_at": "2025-02-03T06:30:12Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2634402110",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "> > Should we also mention using the 'amr' claim?\n> \n> Possibly, I'm not sure whether `amr` should be used or this vs. `acr`.\n\nA use case is to use amr instead of acr, where amr is \"free text\" to indicate a particular authentication method. The naming must not be standardized and could e g be \"BankID\" etc, but should be according to the spec\n\n> OPTIONAL. Authentication Methods References. JSON array of strings that are identifiers for authentication methods used in the authentication. For instance, values might indicate that both password and OTP authentication methods were used. The amr value is an array of case-sensitive strings. Values used in the amr Claim SHOULD be from those registered in the IANA Authentication Method Reference Values registry [[IANA.AMR]](https://openid.net/specs/openid-connect-core-1_0.html#IANA.AMR) established by [[RFC8176]](https://openid.net/specs/openid-connect-core-1_0.html#RFC8176); parties using this claim will need to agree upon the meanings of any unregistered values used, which may be context specific.\n\nLevels are hard, since the requirement has \"if\" I think it could be L2? ",
+          "recorded_at": "2025-02-04T19:09:38Z"
+        },
+        {
+          "body": "> > Should we also mention using the 'amr' claim?\n> \n> Possibly, I'm not sure whether `amr` should be used or this vs. `acr`.\n\nA use case is to use amr instead of acr, where acr is \"free text\" to indicate a particular authentication method. The naming must not be standardized and could e g be \"BankID\" etc, but should be according to the spec\n\n> OPTIONAL. Authentication Methods References. JSON array of strings that are identifiers for authentication methods used in the authentication. For instance, values might indicate that both password and OTP authentication methods were used. The amr value is an array of case-sensitive strings. Values used in the amr Claim SHOULD be from those registered in the IANA Authentication Method Reference Values registry [[IANA.AMR]](https://openid.net/specs/openid-connect-core-1_0.html#IANA.AMR) established by [[RFC8176]](https://openid.net/specs/openid-connect-core-1_0.html#RFC8176); parties using this claim will need to agree upon the meanings of any unregistered values used, which may be context specific.\n\nLevels are hard, since the requirement has \"if\" I think it could be L2? ",
+          "recorded_at": "2025-02-04T15:59:43Z"
+        }
+      ]
+    }
+  ]
+}

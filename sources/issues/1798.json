@@ -1,0 +1,230 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "With the growing adoption of HTTP/3, it's crucial to address security concerns specific to its protocols and implementations. One key area is the header compression mechanism used in HTTP/3, known as QPACK. While QPACK enhances efficiency, it may also introduce vulnerabilities similar to those seen with HTTP/2's HPACK, particularly compression-based security attacks like CRIME and BREACH.\r\n\r\nTo start this discussion around HTTP/3 security, I want to propose this:\r\n\r\n- Verify that HTTP/3 header compression (QPACK) is securely implemented to prevent compression-based attacks such as CRIME or BREACH. This verification should include checks to ensure that sensitive data is not subject to unsafe compression techniques that could expose information through side channels.\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5thlWY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I tried to get more into the issue, searched some materials, and found to be worth reading:\r\n\r\n* https://breachattack.com/\r\n* https://github.com/mpgn/CRIME-poc\r\n* https://www.blackhat.com/docs/asia-16/materials/asia-16-Karakostas-Practical-New-Developments-In-The-BREACH-Attack-wp.pdf\r\n\r\nThen I found a blog post:\r\n* https://www.sjoerdlangkemper.nl/2016/11/07/current-state-of-breach-attack/\r\n\r\nSo, instead of keeping digging myself, I hope @Sjord  can give us a quick overview:\r\n\r\n* for me it seems, that mentioned attacks are not HTTP/3 specific\r\n* are they still relevant?\r\n* there seems to be plenty of pre-conditions for the attack to work - what are those?",
+      "createdAt": "2023-12-03T15:43:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-1837520280",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5uQCK0",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A [compression side channel attack](https://www.sjoerdlangkemper.nl/2016/08/23/compression-side-channel-attacks/) is possible when some content contains both a secret and some user input and is then compressed. The assumption is that the attacker can observe the size of the compressed content, but not the content itself (because it is encrypted). Compression is more effective if the user input is more similar to the secret, so if the size decreases the attacker knows he is on the right track.\r\n\r\nBREACH targets compression of the request content. By sending many requests through a CSRF-like setup, and observing the size, a secret value in the request content (typically the CSRF token) can be guessed approx. one bit at a time.\r\n\r\nHPACK and QPACK have some mitigations against this, but do not offer total protection. Headers are not compressed at character-level, but headers with the same value are still compressed. This makes it impossible to guess character by character, so this makes the attack much harder.\r\n\r\nFrom [RFC 9204](https://www.rfc-editor.org/rfc/rfc9204.html#name-applicability-to-qpack-and-):\r\n\r\n> QPACK mitigates, but does not completely prevent, attacks modeled on CRIME by forcing a guess to match an entire field line rather than individual characters. An attacker can only learn whether a guess is correct or not, so the attacker is reduced to a brute-force guess for the field values associated with a given field name.\r\n\r\nThe usual recommendations of using sufficiently long keys and CSRF tokens would adequately prevent against a brute-force attack. We could also recommend to be cautious when using user-supplied information as header value. However, I think adding a requirement to never include user content in a request header may be a bit too much.\r\n\r\nThe typical attack scenario for BREACH was performing many CSRF-like requests. Same-site cookies make this scenario a lot harder. A possible attack scenario is when a web application accesses another service: it includes the API key in the request header, and also forwards the client's User-Agent header or some other header. However, the attacker then also needs a MitM position to observe the size of the compressed requests.\r\n\r\n> introduce vulnerabilities similar to those seen with HTTP/2's HPACK\r\n\r\nDo you have more specific information or a source for this? I was under the impression that HPACK in HTTP/2 was not vulnerable to compression attacks.\r\n\r\n",
+      "createdAt": "2023-12-11T09:51:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-1849696948",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5uQS55",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "(AI driven search on HPACK)\n\nHPACK (Header Compression for HTTP/2) is designed to be resistant to compression-based attacks, such as CRIME and BREACH, which exploited vulnerabilities in earlier HTTP compression methods. These attacks leveraged the fact that the size of the compressed payload can reveal information about the contents of the encrypted data, particularly when an attacker can control part of the input.\n\nIn HPACK, a few key strategies are implemented to mitigate such vulnerabilities:\n\n1. **Static and Dynamic Tables**: HPACK uses a combination of static and dynamic tables to encode headers. The static table contains common HTTP headers, and the dynamic table is built during the communication session. This approach ensures that repeated headers do not lead to a size change in the compressed data.\n\n2. **Huffman Coding**: HPACK uses Huffman coding for the representation of header names and values. While Huffman coding is a form of compression, it does not suffer from the same security issues as other compression schemes, since it does not vary the size of the output significantly based on the repetition of input values.\n\n3. **Limitation on Stateful Dynamic Compression**: HPACK limits how much of the headers are dynamically compressed. By controlling the amount of state shared between client and server, it reduces the potential for information leakage through changes in the size of the compressed headers.\n\n4. **No Compressing of Sensitive Data**: HPACK avoids compressing sensitive headers (like cookies and authentication tokens) that are often targeted in CRIME and BREACH attacks.",
+      "createdAt": "2023-12-11T10:29:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-1849765497",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xttXy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord so to be clear, are we saying that HTTP/3 is vulnerable to this attack in a way that HTTP/2 is not?\r\n",
+      "createdAt": "2024-01-24T10:07:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-1907807730",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xt0G9",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "No, I don't think there is a large difference between 2 and 3 regarding security against compression side channel attacks. How did you get that idea?",
+      "createdAt": "2024-01-24T10:23:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-1907835325",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xuztS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe I misunderstood what @ImanSharaf wrote here: https://github.com/OWASP/ASVS/issues/1798#issue-2021683053\r\n\r\n@ImanSharaf is there anything HTTP/3 specific here or do we need a more generic requirement?",
+      "createdAt": "2024-01-24T13:11:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-1908095826",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM57yc8_",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think there exists a need yet for specific mentions of HTTP/3 in this standard, as we don't delve deep into the underlying webserver part. However, there might be a need at some point and I'm open to any suggestions as to what ",
+      "createdAt": "2024-04-25T10:04:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-2076823359",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM58RNtI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to leave this as open but not blocking for 5.0",
+      "createdAt": "2024-04-30T10:03:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-2084887368",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM58U1MP",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth this requires an extensive research, thank you.",
+      "createdAt": "2024-04-30T16:16:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-2085835535",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rci9u",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is it fair to say that we don't have requirement to add on the topic and we can close this issue?",
+      "createdAt": "2024-10-27T21:23:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-2440179566",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RclV1",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(I don't believe there are requirements about compression side channels in general and BREACH in particular, are they?)",
+      "createdAt": "2024-10-27T21:59:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-2440189301",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RfWf2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang it is currently marked as a non-blocker so happy to leave it open for now",
+      "createdAt": "2024-10-28T08:55:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1798#issuecomment-2440914934",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-12-01T22:41:26Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyfACQ",
+      "name": "Community needed",
+      "description": "This issue will not be progressed without community input. Will be closed if stale.",
+      "color": "fbca04"
+    }
+  ],
+  "number": 1798,
+  "state": "OPEN",
+  "title": "Consideration for HTTP/3 Security",
+  "url": "https://github.com/OWASP/ASVS/issues/1798"
+}

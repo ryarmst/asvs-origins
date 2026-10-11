@@ -1,0 +1,48 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-1822354857",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "To open issue was recommended by me from Slack channel. I duplicate here also worth reading blog post for a starter:\r\nhttps://auth0.com/blog/stateless-auth-for-stateful-minds/\r\n\r\nI think there we need to be clear to not mix 2 different topics:\r\n- 1. discourage using JWT for any sessions\r\n- 2. discourage using JWT for stateful sessions\r\n\r\nEntire point of REST is to be stateless. So the option 1 should have it's own valid use-cases.\r\n\r\nOption 2 is the problem to solve here. I have seen many times in pen-tests usage of JWT without any need to use it - and then it provides just over-engineering nightmare and extra set of problems.\r\n\r\nFor this, again, there is relatively old blog post to cover that:\r\n- http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/\r\n- http://cryto.net/~joepie91/blog/2016/06/19/stop-using-jwt-for-sessions-part-2-why-your-solution-doesnt-work/ ",
+          "recorded_at": "2023-11-22T08:59:12Z"
+        },
+        {
+          "body": "To open issue was recommended by me from Slack channel. I duplicate here also worth reading blog post for a starter:\r\nhttps://auth0.com/blog/stateless-auth-for-stateful-minds/\r\n\r\nI think there we need to be clear to not mix 2 different topics:\r\n* 1. discourage using JWT for any sessions\r\n* 2. discourage using JWT for stateful sessions\r\n\r\nEntire point of REST is to be stateless. So the option 1 should have it's own valid use-cases.\r\n\r\nOption 2 is the problem to solve here. I have seen many times in pen-tests usage of JWT without any need to use it - and then it provides just over-engineering nightmare and extra set of problems.\r\n\r\nFor this, again, there is relatively old blog post to cover that:\r\n- http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/\r\n- http://cryto.net/~joepie91/blog/2016/06/19/stop-using-jwt-for-sessions-part-2-why-your-solution-doesnt-work/ ",
+          "recorded_at": "2023-11-22T08:58:49Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-2020172675",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I proposed (https://github.com/OWASP/ASVS/issues/1917) to clean-up entire \"V3.5 Token-based Session Management\" as there is nothing session-specific there.\r\n\r\n> 1. Require that stateless sessions build state on the server side (so, make them stateful) and adhere to the requirements already pointed out in 3.3. Please note that then it's no longer a stateless session by the definition most people use, but that is part of my issue with using that term.\r\n\r\nI think this part is covered in general with section \"V3.8 Session Termination\"\r\nhttps://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v38-session-termination\r\n\r\nIt is not possible to achieve session termination without revoking the mechanism. There is also a line now:\r\n\r\n_For stateful session mechanisms, this should just require invalidating the session at the backend. If a stateless session mechanism with signed tokens is being used, a way to revoke these tokens will be needed._\r\n\r\n\r\n> 2. Address other concerns that might be the result of implementing JWT for sessions. I've seen ASVS point out possible issues that need to be verified in other places, that should be done here as well:\r\n> a. Verify that the JWT is not stored in a place where javascript can access it\r\n> b. Verify that the JWT does not contain personal data\r\n> c. Verify that the application still has a short session-timeout (due to inactivity) that is appropriate for the application.\r\n\r\n2.a - for SPA we can not require it\r\n2.b - access_token contains usually personal data, then we need to go that far and say, that access_tokens are not allowed on the browser side. Which in general is good way to build it, but I'm not sure yet we can require it (related with https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 1\"). Addressed with separate issue: https://github.com/OWASP/ASVS/issues/1919\r\n2.c - it is covered by section \"V3.3 Session Timeout\"\r\n\r\n\r\nIn case #1917 finds support and V3.5 gets cleaned up, I think it is more clear.",
+          "recorded_at": "2024-03-26T13:06:32Z"
+        },
+        {
+          "body": "I proposed (https://github.com/OWASP/ASVS/issues/1917) to clean-up entire \"V3.5 Token-based Session Management\" as there is nothing session-specific there.\r\n\r\n> 1. Require that stateless sessions build state on the server side (so, make them stateful) and adhere to the requirements already pointed out in 3.3. Please note that then it's no longer a stateless session by the definition most people use, but that is part of my issue with using that term.\r\n\r\nI think this part is covered in general with section \"V3.8 Session Termination\"\r\nhttps://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v38-session-termination\r\n\r\nIt is not possible to achieve session termination without revoking the mechanism. There is also a line now:\r\n\r\n_For stateful session mechanisms, this should just require invalidating the session at the backend. If a stateless session mechanism with signed tokens is being used, a way to revoke these tokens will be needed._\r\n\r\n\r\n> 2. Address other concerns that might be the result of implementing JWT for sessions. I've seen ASVS point out possible issues that need to be verified in other places, that should be done here as well:\r\n> a. Verify that the JWT is not stored in a place where javascript can access it\r\n> b. Verify that the JWT does not contain personal data\r\n> c. Verify that the application still has a short session-timeout (due to inactivity) that is appropriate for the application.\r\n\r\n2.a - for SPA we can not require it\r\n2.b - access_token contains usually personal data, then we need to go that far and say, that access_tokens are not allowed on the browser side. Which in general is good way to build it, but I'm not sure yet we can require it (related with https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 1\").\r\n2.c - it is covered by section \"V3.3 Session Timeout\"\r\n\r\n\r\nIn case #1917 finds support and V3.5 gets cleaned up, I think it is more clear.",
+          "recorded_at": "2024-03-26T11:27:23Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1790#issuecomment-2365246667",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "In translation - I'm not going against JWT, but I want to send a clear message to not use access token as session token or OAuth as replacement for the session management.",
+          "recorded_at": "2024-09-21T16:35:17Z"
+        },
+        {
+          "body": "In translation - I'm not going against JWT, but I want to send clear a message to not use access token as session token or OAuth as replacement for the session management.",
+          "recorded_at": "2024-09-21T16:35:02Z"
+        }
+      ]
+    }
+  ]
+}

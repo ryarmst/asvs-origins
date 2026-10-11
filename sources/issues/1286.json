@@ -1,0 +1,232 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE5OTMzMzI5",
+    "is_bot": false,
+    "login": "RafaelGreen1",
+    "name": "Rafael Green"
+  },
+  "body": "I would mention css/style injection as part of the section 14.4.3 (HTTP security headers -> Content Security Policy (CSP))",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5DLHD8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.4.3** | Verify that a Content Security Policy (CSP) response header is in place that helps mitigate impact for XSS attacks like HTML, DOM, JSON, and JavaScript injection vulnerabilities. | ✓ | ✓ | ✓ | 1021 |\r\n\r\nHow often you have seen CSS injection? In general I think \"CSS injection\" case is covered at the moment with \"mitigate impact for XSS attacks\" and personally I don't think it needs extra attention in this \"like this and that\" list.",
+      "createdAt": "2022-05-15T17:48:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1126985980",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5DLI6i",
+      "author": {
+        "login": "RafaelGreen1"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have seen CSS injection in few security tutorials (one of them is https://learn.snyk.io/lessons/xss/javascript/)\r\nFrom what I understand, it's very important to protect against this attack because the attacker can change the whole view of the website via styling (and actually show on screen whatever they want).\r\nI just thought it might be good idea to add it to the list following the word \"like\". like this:\r\n\r\n> Verify that a Content Security Policy (CSP) response header is in place that helps mitigate impact for XSS attacks like HTML, DOM, **CSS**, JSON, and JavaScript injection vulnerabilities.\r\n\r\nBtw, it's achieved by using the [style-src directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src).",
+      "createdAt": "2022-05-15T18:37:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1126993570",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5DLMto",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My question was more for \"have you seen CSS injection in practice\", personally I can recall maybe few cases per 10 years and this is the reason why I say, that the case itself is covered with bubble name \"XSS attacks\".\r\n\r\nAnd to be clear - `Content-Security-Policy` is second layer defence - it tries to mitigate the impact if the problem already exists. \r\n\r\nIf you say, that `style-src` should mitigate CSS injection, it most likely means, that HTML document contains `<style>` tag and manipulatable userinput is presented in CSS syntax. In this case strict `style-src` value can not help you anymore - you can limit loading external CSS, but you can manipulate CSS in HTML document directly.\r\n\r\nFor actual mitigation you should look to requirements like:\r\n* V5.3.1 Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, URL parameters, HTTP headers, SMTP, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara).\r\n* V5.3.3 Verify that context-aware, preferably automated - or at worst, manual - output escaping protects against reflected, stored, and DOM based XSS.\r\n\r\nAll mentioned requirements can be improved, but I can not see the need to put CSS injection to special spotlight as it happens rarely enough and it is covered with bubble name \"XSS\".\r\n\r\nI leave issue opened for other comments.",
+      "createdAt": "2022-05-15T19:40:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1127009128",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5DLVNw",
+      "author": {
+        "login": "willfarrell"
+      },
+      "authorAssociation": "NONE",
+      "body": "This reminds me of a post @ScottHelme wrote recently, [`Can you get pwned with CSS?`](https://scotthelme.co.uk/can-you-get-pwned-with-css/), when considering changing the rating for https://securityheaders.com to allow `style-src 'self' 'unsafe-inline';` within CSP for an A+ rating. \r\n\r\n> With popular frameworks like Angular [requiring](https://angular.io/guide/security#content-security-policy) 'unsafe-inline' in the style-src, it may even be something that's totally out of your control.\r\n\r\nInlining css for elements above-the-fold is a known strategy for improving load time performance.",
+      "createdAt": "2022-05-15T21:36:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1127043952",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E3vC7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that this is a rare issue but I also note that ASVS is intended to be comprehensive. As such, I would consider mentioning this specifically as long as it is likely to be an achievable control that does not break things.\r\n\r\n@willfarrell can this be addressed in Content Security Policy without breaking things?\r\n\r\n@elarlang I don't see a major issue in a change:\r\n\r\n> V5.3.1 Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, **CSS**, URL parameters, HTTP headers, SMTP, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara).",
+      "createdAt": "2022-06-14T17:01:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1155461307",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E3_Mf",
+      "author": {
+        "login": "willfarrell"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth It can be addressed using `style-src` without including `unsafe-inline` in the Content Security Policy. \r\n\r\nIncluding CSS-injection within ASVS will, hopefully, push the browsers to include a way to inline css securely (i.e. `<style integrity=\"...\">...`).\r\n\r\nEdit: CSS XSS -> CSS-injection",
+      "createdAt": "2022-06-14T18:07:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1155527455",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E4B42",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Including CSS XSS within ASVS will, hopefully, push the browsers to include a way to inline css securely (i.e. `<style integrity=\"...\">...`).\r\n\r\nRelated issue(s) are discussed in: https://github.com/OWASP/ASVS/issues/1293\r\n",
+      "createdAt": "2022-06-14T18:20:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1155538486",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E4NAo",
+      "author": {
+        "login": "ScottHelme"
+      },
+      "authorAssociation": "NONE",
+      "body": "@willfarrell by 'CSS XSS' do you mean CSS-injection or have you seen more powerful XSS-like attacks with CSS? I think there's a big difference between the two and I'd like to check if I'm understanding properly!\r\n\r\nAs for a way to include inline CSS securely, CSP 2 already provides for inline style tags: https://www.w3.org/TR/CSP2/#source-list-valid-hashes\r\n\r\n```\r\nContent-Security-Policy: style-src 'sha256-RB20JxKPtBo78ZjWkZ+GR4yOncuhVeK20jxJPz4x86c='\r\n\r\n<html>\r\n    <style>\r\n         color: #e6400c;\r\n    </style>\r\n</html>\r\n```\r\n\r\nCSP 3 goes a little further and allows you to distinguish between `style-src-elem` and `style-src-attr` which breaks apart `<style>` tags and `style=\"\"` attributes: https://www.w3.org/TR/CSP3/#directive-style-src-attr",
+      "createdAt": "2022-06-14T18:32:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1155584040",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E4NzP",
+      "author": {
+        "login": "willfarrell"
+      },
+      "authorAssociation": "NONE",
+      "body": "@ScottHelme Yes, I was referring to CSS-injection (comment updated). Thanks for sharing that example, I wasn't aware one could CSP an integrity hash to an inline style, will be testing out for sure.",
+      "createdAt": "2022-06-14T18:36:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1155587279",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E7ZUY",
+      "author": {
+        "login": "RafaelGreen1"
+      },
+      "authorAssociation": "NONE",
+      "body": "another way to include CSS securely (without hash) is using nonce\r\nhttps://www.w3.org/TR/CSP2/#style-src-nonce-usage",
+      "createdAt": "2022-06-15T12:39:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1156420888",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5E814n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To make everyone happy, then...\r\n\r\nLevel 1 - avoid the main problem - \"CSS injection\"\r\n* Add \"CSS\" to V5.3.1\r\n\r\nLevel 2 - mitigate the impact\r\n* Add \"CSS injection\" to V14.4.3\r\n\r\nLevel 3 - check the integrity\r\n* Add CSS to V10.3.2 (related issue https://github.com/OWASP/ASVS/issues/1293)",
+      "createdAt": "2022-06-15T18:34:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1156800039",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FQ77i",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "CSS is now covered in V5.3.1 and V14.4.3 (see https://github.com/OWASP/ASVS/pull/1296/commits/96f3e6a8c34654c99ce7134ea0f22b99c9617250) and will be covered in V10.3.2 via #1293.\r\n\r\nClosing this one.",
+      "createdAt": "2022-06-21T17:34:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1286#issuecomment-1162067682",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-05-15T16:18:40Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 1286,
+  "state": "CLOSED",
+  "title": "mention css/style injection in 14.4.3",
+  "url": "https://github.com/OWASP/ASVS/issues/1286"
+}

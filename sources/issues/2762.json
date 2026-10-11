@@ -1,0 +1,168 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Spin-off from https://github.com/OWASP/ASVS/issues/1778#issuecomment-2734497590\n\nI added requirents into repo (must have), now there is need (nice to have) to rethink what is the best place for those.\n\n\nSection **V1.14 Configuration Documentation**\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **1.14.8** | [ADDED] Verify that where the application connects to separate services, the application's documentation indicates the maximum possible parallel connections (connection pool) to each service and how the application responds when this maximum is reached, to avoid a denial of service condition. | 3 | |\n| **1.14.9** | [ADDED] Verify that where the application connects to separate services, each has a documented connection failure strategy which includes how fast the connection times-out and whether there is a retry strategy. External connections in synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections. | 3 | |\n| **1.14.10** | [ADDED] Verify that the application documentation identifies functionality which is time-consuming or resource-demanding. This should include how to prevent a loss of availability due to overusing this functionality and how to avoid a situation where building a response takes longer than the consumer's timeout. Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application. | 2 | |\n\n\nSection **V14.7 Back-end Communication Configuration**\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **14.7.6** | [ADDED] Verify that where the application connects to separate services, it follows the documented configuration for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and retry strategies. | 3 | |\n| **14.7.7** | [ADDED] Verify that the application has implemented defences against loss of availability loss due to functionality which is time-consuming or resource-demanding, based on the documented security decisions and strategies for this. | 2 | |\n\n\nThe problematic part here is 1.14.10 + 14.7.7, which is not really a \"configuration problem\".\n\nWe can watch it as architecture problem to solve to be able to provide availability and to avoid resource overusage with mass-requests. Based on requirement content from 11.2.2, it kind of fits together, but 1.14.10 + 14.7.7 combo does not fit into \"business logic\" chapter, and is not clear match for the anti-automation section.\n\nAmount of communication requirements is also big enough to have a separate chapter as one option.\n\n---\n\nAlso we have section **V12 File and Resources** > **V12.7 Application Resources**\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **12.7.1** | [ADDED] Verify that the application proactively releases system resources, such as database connections, open files and threads when it finishes using them to prevent resource exhaustion. | 3 | 404 |\n\nProposals - if we don't plan to move anything from V1.14.x or V14.7.x to V12.7, then:\n* Current requirement 12.7.1 can be easly merged into 1.14.9.\n* With this, we can leave entire V12 to only files, which means renaming \"V12\" to \"V12 Handling files\"\n\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6jwLgF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I now read 1.14.10 and 14.7.7 and think about V10 where we have \"V10.6 Security Architecture and Dependencies\". What do you think @elarlang ?\n\nI agree with merging 12.7.1 into 1.14.9.",
+      "createdAt": "2025-03-24T08:41:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2747316229",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jw2Ia",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So I now read 1.14.10 and 14.7.7 and think about V10 where we have \"V10.6 Security Architecture and Dependencies\". \n\nI opened #2772\n\nThe section text for V10.6 should be reviewed as well.\n\n> I agree with merging 12.7.1 into 1.14.9.\n\nYou can add it into #2772\n\nAs 12.7.1 contained a CWE that does not make sense for the more general requirement 1.14.9, the mapping row should be removed from exported cwe mapping file. (I can handle this part)",
+      "createdAt": "2025-03-24T09:42:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2747490842",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jyyme",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What do you think about:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **1.14.9** | [ADDED] Verify that where the application connects to separate system resources or services (such as database connections, open files and threads), each has a documented resource release and connection failure strategy which includes how fast the connection times-out and whether there is a retry strategy. This is to prevent resource exhaustion. External connections in synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections. | 3 |",
+      "createdAt": "2025-03-24T12:42:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2748000670",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jy-5w",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok for me.\n\nDo you want me to handle the PR for that?",
+      "createdAt": "2025-03-24T12:58:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2748051056",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jzRuY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Ok for me.\n> \n> Do you want me to handle the PR for that?\n\nI'm on it",
+      "createdAt": "2025-03-24T13:25:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2748128152",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jzTSv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think about the updated #2772?",
+      "createdAt": "2025-03-24T13:27:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2748134575",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jzeMo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do you want to keep the V12 title \"File and resources\" or set more precise focus to \"Files\"?\n\nOtherwise merge-ready",
+      "createdAt": "2025-03-24T13:42:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2748179240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jz9xz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V12 chapter title will be discussed in #2774, the rest of the issue is done.",
+      "createdAt": "2025-03-24T14:23:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2762#issuecomment-2748308595",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-03-23T16:30:26Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSfggFQ",
+      "name": "V5 (prev V12)",
+      "description": "",
+      "color": "7412BF"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    }
+  ],
+  "number": 2762,
+  "state": "CLOSED",
+  "title": "rethinking and organizing resource and configuration requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/2762"
+}

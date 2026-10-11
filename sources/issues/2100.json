@@ -1,0 +1,379 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE5NzM2NzI3",
+    "is_bot": false,
+    "login": "ryarmst",
+    "name": "Ryan Armstrong"
+  },
+  "body": "I think it is necessary to provide definitions of terms used within V3 (and V1.3) and correlate to related and competing definitions. This is probably best added to the glossary when time to reorganize, but I would like to confirm terms for other V3 work. I added comments as indented bullets below items. Starting with the following:\r\n\r\n- **Stateful Mechanism or Token** - These mechanisms utilize the application server to retain session state and token data in full.\r\n\r\n- **Stateless Mechanism or Token** - These mechanisms encode information within the token(s) passed to clients that is not maintained by the server. A server may store *some* session information (such as a JWT revocation list) and be considered a stateless design.\r\n  - This definition settles ongoing debate over what constitutes a Stateless session by simply defining a version where we permit some server-side state.\r\n\r\n- **Opaque Token** - An opaque token is a token with no discernible structure or meaning outside of the issuing server. \r\n  - Note: I have defined opaque above as it appears used across various industry players, but V3 appears to conflate opaque tokens (original use in #1478 (@tghosth)] with randomly generated stateful tokens. This use is not universal. For example, Auth0 defines them with \"Tokens in a proprietary format typically contain some identifier to information in a server’s persistent storage\" and I also came across [Ory](https://www.ory.sh/docs/oauth2-oidc/jwt-access-token) which uses a signature with \"opaque\" tokens. Some additional requirement rework may be appropriate for clarity.\r\n  - I propose that a more clear and unconflicted term is used for this purpose (randomly generated stateful tokens). Please consider some candidate terms:  Stateful Token, Server-Side Token, Random Token, Identifier Token, or just Randomly Generated Stateful Tokens.\r\n  - Otherwise, I would suggest we simply adopt our own definition of Opaque Token as a randomly generated, high entropy string that is stored server-side to track sessions.\r\n\r\n- **Absolute Maximum Session Lifetime** - Also referred to as \"Overall Timeout\" by NIST, this is the maximal amount of time a session can remain active following authentication regardless of user interaction. This is a component of session expiration.\r\n\r\n- **Inactivity Timeout** - This is the length of time a session can remain active in the absence of user interaction with the application. This is a component of session expiration.\r\n\r\n- **Cryptographically Signed Token** - These tokens often contain claims or assertions, relying on cryptographic techniques such as signatures or message authentication codes (MAC) to ensure authenticity and integrity of data encoded within the token structure. \r\n\r\nFinal note: it may be worth defining \"Session ID\" and \"Session Token\". These appear to be used interchangeably by documents such as [OWASP Cheat Sheets](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html). I think of \"Session ID\" as an identifier unique to a session whereas a \"Session Token\" is the actual string/data transmitted between client and server. They *could* be one in the same.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6M-qtO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Convince me that the \"stateless session mechanism\" is not an anti-pattern. It is a widespread source of problems that the access token \"replaces\" the session mechanism, but it does not and should not. I think it is important not to put fuel and support for the incorrect usage of stateless tokens and to point out the side effects. For this \"rant\" there is a separate issue (https://github.com/OWASP/ASVS/issues/1790) - I just pointed it out here to highlight the topic, but it should be discussed in the separate issue.",
+      "createdAt": "2024-09-21T16:08:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2365238094",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-sb5",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I agree and #1790 is on my TODO list, but I want to have defined terminology first. The pattern is common enough that it is worth acknowledging, no? ",
+      "createdAt": "2024-09-21T16:30:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2365245177",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-sp7",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Acknowledging with discourage to keep using it :)",
+      "createdAt": "2024-09-21T16:32:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2365246075",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NF6k1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Convince me that the \"stateless session mechanism\" is not an anti-pattern\r\n\r\nI agree that over using access or identity tokens for sessions is an anti-pattern but there is nothing wrong with stateless session mechanisms as a whole catetogy. \r\n\r\nIn a high-traffic, multi-region microservice architecture, traditional session management relies on centralized session stores, which introduce latency and complexity. Stateless mechanisms like JWTs eliminate this bottleneck by allowing each service to validate tokens independently, improving performance and fault tolerance.\r\n\r\nBut you absolutely need to use them correctly. JWT’s and similar are new compared to traditional sessions and often are built without proper signature verification, revocation and other controls, but they scale way better than traditional sessions and are critical for microservice architectures where traditional sessions fall apart.",
+      "createdAt": "2024-09-23T02:39:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2367138101",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NLon2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang @jmanico I would rather not get into a discussion here of the relevant merits of stateless although we certainly need to highlight the security considerations.\r\n\r\nHi @ryarmst, \r\n\r\nBased on your comments above and my own thoughts, I would say:\r\n\r\n- **Random Token** - A random token is randomly generated by the application as a session identifier to be issued to clients to be able to maintain their stateful session.\r\n\r\n- **Cryptographically Signed Token** - These tokens will generally contain claims or assertions, relying on cryptographic techniques such as signatures or message authentication codes (MAC) to ensure authenticity and integrity of data encoded within the token structure. The most common examples are SAML assertions and JWTs.\r\n\r\n- **Stateful Session Mechanism** - A stateful mechanism utilizes the application to retain session state which corresponds to a random session identifier which is issued to the end user.\r\n\r\n- **Stateless Session Mechanism** - A stateless mechanism will use a cryptographically signed token which is passed to clients, and contains session information that is not necessarily stored within the service which receives and validates the token. In reality, a service will need to have access to *some* session information (such as a JWT revocation list) in order to be able to enforce required security controls.\r\n\r\nI think your descriptions of timeouts are great.\r\n\r\nI agree with your definition of a session identifier and have tried to use that above. I would argue that in \"stateless\" system, there is no real session identifier.\r\n",
+      "createdAt": "2024-09-23T15:26:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2368637430",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Naro3",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang As far as terminology, what do you think about adopting \"Stateless Session Mechanism\" as above? ",
+      "createdAt": "2024-09-24T23:45:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2372581943",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NdhVE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang As far as terminology, what do you think about adopting \"Stateless Session Mechanism\" as above?\r\n\r\nIt describes how you can \"make it work\", but I'm not confident to call it stateless.\r\n\r\nAlways worth pointing to: http://cryto.net/~joepie91/blog/2016/06/19/stop-using-jwt-for-sessions-part-2-why-your-solution-doesnt-work/\r\n\r\nping @randomstuff",
+      "createdAt": "2024-09-25T07:51:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2373326148",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ndnpc",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I think my description above acknowledges the fact that it is not truly stateless. I know people say it is a bad idea but practically speaking it is so widespread that it is almost an irrelevant discussion",
+      "createdAt": "2024-09-25T08:03:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2373352028",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NdtVs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang I think my description above acknowledges the fact that it is not truly stateless. \r\n\r\nThis is an example of \"stateless state\" solution and I commented:\r\n> It describes how you can \"make it work\", but I'm not confident to call it stateless.\r\n\r\n---\r\n\r\n> I know people say it is a bad idea but practically speaking it is so widespread that it is almost an irrelevant discussion\r\n\r\nThe more widespread the mistake is, the more relevant is to discuss it. ASVS must show the way to go, not following whatever way because it is so widespread.",
+      "createdAt": "2024-09-25T08:11:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2373375340",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NfGmx",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The debate between stateless and stateful sessions is often academic and unhelpful. Pure statelessness doesn't exist; all \"stateless\" solutions incorporate some form of tactical statefulness, such as databases, revocation lists, message buses, and more. Demanding pure statelessness ignores reality.\n\n",
+      "createdAt": "2024-09-25T10:50:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2373740977",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NfIDl",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Pure statelessness doesn't exist; all \"stateless\" solutions incorporate some form of tactical statefulness, such as databases, revocation lists, message buses, and more. \r\n\r\n… or public keys (which are rotated, revoked at some point) and current timestamp which are kind-of states as well :smile: ",
+      "createdAt": "2024-09-25T10:53:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2373746917",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqKyw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I had a discussion with Elar about this.\r\n\r\nI guess the question is, can we set out a set of conceptual security requirements for each area without getting bogged down into the details of what stateless or not. \r\n\r\nSo we would want to define a \"Random Token\" and a \"Cryptographically Signed Token\" but not get into definitions of \"Stateful Session Mechanism\" and \"Stateless Session Mechanism\" and the requirements would hopefully not need those definitions.\r\n\r\nDoes this sound achievable @ryarmst ?",
+      "createdAt": "2024-09-26T11:08:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2376641712",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NtXv_",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the ASVS can definitely set out requirements independent of the stateful vs. stateless debate and this is generally the direction that I personally would *prefer* V3 to go in (I was going to separately propose rearranging sections based on random vs. crypto token use, though this will require further discussion related to other outstanding issues...), BUT considering the prevalence of \"stateless\" patterns and existing inconsistent use of terminology, my thinking is that providing terminology and potentially requirements around them would make the ASVS easier to use and more likely to result in better design, especially for the *many* (from my experience) teams that have adopted the stateless paradigm. \r\n\r\nFor example, here is a rough documentation (V1) requirement that could be used to steer apps into a stateful session pattern without preventing stateless patterns from meeting ASVS requirements:\r\n\r\n> Verify that, if user sessions are not managed using a stateful session mechanism, documentation includes justification for using a stateless session mechanism as well as implementation details for all necessary session controls. ",
+      "createdAt": "2024-09-26T16:58:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2377481215",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_O6j",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ryarmst so my feeling is that I don't really want to steer apps to a particular pattern but rather I just want to state the security properties we need from a security mechanism. Maybe we could add a narrative note highlighting areas which might be difficult in a \"stateless\" mechanism.\r\n\r\nIs that something you could draft?",
+      "createdAt": "2024-10-08T06:14:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2398940835",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P-_5r",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth I'll drop that idea for now and suggest instead an update on V1.3 proposal text (#2103) to address mechanism pattern decisions. ",
+      "createdAt": "2024-10-16T03:34:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2415656555",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QpHIr",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Returning to the terminology, I would like to suggest the addition of the following items to Appendix A: \r\n\r\n- **Absolute Maximum Session Lifetime** - Also referred to as \"Overall Timeout\" by NIST, this is the maximal amount of time a session can remain active following authentication regardless of user interaction. This is a component of session expiration.\r\n\r\n- **Inactivity Timeout** - This is the length of time a session can remain active in the absence of user interaction with the application. This is a component of session expiration.\r\n\r\n- **Random Token** - A random token is randomly generated by the application as a session identifier to be issued to clients as part of a stateful session mechanism.\r\n\r\n- **Cryptographically Signed Token** - These tokens will generally contain claims or assertions, relying on cryptographic techniques such as signatures or message authentication codes (MAC) to ensure authenticity and integrity of data encoded within the token structure. The most common examples are SAML assertions and JWTs.\r\n\r\n- **Stateful Session Mechanism** - A stateful mechanism utilizes the application to retain session state which typically corresponds to a random session identifier which is issued to the end user.\r\n\r\n- **Stateless Session Mechanism** - A stateless mechanism will use a cryptographically signed token which is passed to clients, and contains session information that is not necessarily stored within the service which receives and validates the token. In reality, a service will need to have access to _some_ session information (such as a JWT revocation list) in order to be able to enforce required security controls.\r\n\r\n@tghosth I added the word *typically* to the stateful definition because I've seen crypto tokens used for this purpose as well.",
+      "createdAt": "2024-10-21T13:31:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2426696235",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QpOQY",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Absolute Maximum Session Lifetime - Also referred to as \"Overall Timeout\" by NIST\r\n\r\nIs our wording better than NIST's? Should we align with NIST? I quite like how \"overall timeout\" is consistent with \"inactivity timeout\".\r\n\r\n> Random Token - A random token is randomly generated by the application **as a session identifier** to be issued to clients as part of a stateful session mechanism.\r\n\r\nThat would be a random *session* token? You can have many different type of random tokens which are not session tokens (i.e. a Oauth `state` can be a random token, a PKCE code_verifier can be a random token, etc.).\r\n\r\nIs the random session token necessarily a random session *identifier* or does not only need to be a random session *verifier*. I might have to have a session identifier whose knowledge does not grant access to the session.\r\n\r\n> Cryptographically Signed Token \r\n\r\nOAuth talks about \"self-encoded tokens\". Should be align with this terminology or reference if as a synonym?",
+      "createdAt": "2024-10-21T13:42:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2426725400",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QqJJP",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff \r\n\r\n>Is our wording better than NIST's? Should we align with NIST? I quite like how \"overall timeout\" is consistent with \"inactivity timeout\".\r\n\r\nSorry, this was from another issue. Please see [this comment](https://github.com/OWASP/ASVS/issues/2076#issuecomment-2349065105) from @elarlang.\r\n\r\n> That would be a random session token? You can have many different type of random tokens which are not session tokens (i.e. a Oauth state can be a random token, a PKCE code_verifier can be a random token, etc.).\r\n\r\nYes, thinking about this again, I think it makes sense to add `Session` to disambiguate. \r\n\r\n> OAuth talks about \"self-encoded tokens\". Should be align with this terminology or reference if as a synonym?\r\n\r\nI think it may be worth referencing the term, but I think `Cryptographically Signed Token` captures a broader set of tokens. Based on my reading of the OAuth definition, `self-encoded tokens` are intended to encode all relevant info within the token. I have encountered tokens that are cryptographically signed, but not fully self-encoded. \r\n",
+      "createdAt": "2024-10-21T15:10:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2426966607",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QqSU5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  Should we align with NIST? \r\n\r\nOur main goal is to be understandable. NIST does not provide easy reading so we are not searching alignment with wording there.",
+      "createdAt": "2024-10-21T15:24:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2427004217",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QwUn4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Should we align with NIST?\r\n> \r\n> Our main goal is to be understandable. NIST does not provide easy reading so we are not searching alignment with wording there.\r\n\r\nYeah I think \"Absolute Maximum Session Lifetime\" is fine here.\r\n\r\n> Yes, thinking about this again, I think it makes sense to add `Session` to disambiguate.\r\n\r\nAgree, good point @randomstuff \r\n\r\n> I think it may be worth referencing the term, but I think `Cryptographically Signed Token` captures a broader set of tokens. \r\n\r\nAgree, I can see the use of the phrase \"self-encoded tokens\" and also \"self-contained tokens\" but I don't think either are as clear as \"Cryptographically Signed Token\".\r\n\r\n---\r\n\r\n@ryarmst I think open a PR for the terminology. Is there anything else we need from this issue?\r\n\r\n",
+      "createdAt": "2024-10-22T08:20:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2428586488",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rc77E",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth PR opened. There is nothing more for now, but I think terminology (both definitions used and how they are referenced throughout) may be worth returning to again later. ",
+      "createdAt": "2024-10-28T01:03:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2100#issuecomment-2440281796",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-21T15:21:17Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    }
+  ],
+  "number": 2100,
+  "state": "CLOSED",
+  "title": "V3 Terminology Addition",
+  "url": "https://github.com/OWASP/ASVS/issues/2100"
+}

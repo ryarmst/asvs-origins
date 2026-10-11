@@ -1,0 +1,99 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "## Background\n\nV13.2.4 and V13.2.5 sit next to each other in the Backend Communication Configuration section and both require allowlisting external communications:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **13.2.4** | Verify that an allowlist is used to define the external resources or systems with which the application is permitted to communicate (e.g., for outbound requests, data loads, or file access). This allowlist can be implemented at the application layer, web server, firewall, or a combination of different layers. | 2 |\n| **13.2.5** | Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from. | 2 |\n\nV13.2.5 appears to be a specific instance of V13.2.4 — if you satisfy V13.2.4 by configuring an allowlist at the web server level, you've also satisfied V13.2.5. Is there a reason to keep both?\n\n## How we got here\n\n**V13.2.5** is a direct descendant of [V12.6.1](https://github.com/OWASP/ASVS/blob/v4.0.3/4.0/en/0x20-V12-Files-Resources.md#v126-ssrf-protection) in v4.0.3:\n\n> Verify that the web or application server is configured with an allow list of resources or systems to which the server can send requests or load data/files from.\n\nThe wording changed only minimally (\"allow list\" → \"allowlist\"). It was moved from V12 to V14 in #1324/#1343, then renumbered through the v5.0.0 pipeline (V14.7.1 → V14.6.1 → V14.7.4 → V13.2.5).\n\n**V13.2.4** has a more complex history. Its *requirement slot* traces back to [V4.3.3](https://github.com/OWASP/ASVS/blob/v4.0.3/4.0/en/0x12-V4-Access-Control.md#v43-other-access-control-considerations) in v4.0.3, which was about step-up authentication and anti-fraud controls. That requirement was modified in #1437 to focus on protecting configuration changes for service credentials, moved to V14.7.3, and renumbered to V13.2.4. However, in #2951, @elarlang noted that the old V12.6.1 wording (then at V13.2.5) was too narrow — requiring configuration specifically in the \"web or application server\" when in practice the allowlist might be enforced by a WAF, firewall, application code, or a combination. @jmanico and @tghosth agreed and collaboratively drafted broader, technology-agnostic wording.\n\nThe agreed text was intended as a **replacement** for the old V12.6.1 wording. Instead, it was written into the V13.2.4 slot ([`e4c9d291`](https://github.com/OWASP/ASVS/commit/e4c9d291), PR #2982), leaving V13.2.5 unchanged. The overlap between the two was never discussed.\n\n## Question\n\nShould V13.2.5 be removed/merged into V13.2.4?\n\nOne reading is that they form a deliberate pair: V13.2.4 as the broad principle (allowlist at any layer) and V13.2.5 as a specific implementation requirement (configure it at the server level). But this distinction isn't obvious from the text, and an auditor could reasonably satisfy V13.2.5 by pointing to the same control that satisfies V13.2.4.\n\nNote: this also relates to the discussion in #3244 about the overlap between V1.3.6 and V13.2.4, where there is a proposal to either fold V1.3.6 into V13.2.4 or split into per-feature (V1/V2) and infrastructure (V13) requirements. If V13.2.4 is narrowed to infrastructure-only in that discussion, V13.2.5 would overlap even more directly.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7upm2s",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "See also #3344 — the same incident that created this overlap also accidentally deleted the V4.3.3-derived requirement that V13.2.4 previously contained, and left the mapping file stale.",
+      "createdAt": "2026-03-05T10:04:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3343#issuecomment-4003884460",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uqcOA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Quickreview.\n\nTLDR: seems that I updated a wrong requirement in the PR.\n\nhttps://github.com/OWASP/ASVS/issues/2951#issue-2990416263 - point 3 targets requirement **13.2.4**\n\n> 13.2.4 Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from.\n\nhttps://github.com/OWASP/ASVS/issues/2951#issuecomment-2801820745 - I acknowledge, that 13.2.4 is now 13.2.5\n\n> 13.2.4 now (after PR merge) has number 13.2.5\n\nand still updated 13.2.4 https://github.com/OWASP/ASVS/pull/2982/commits/a5c71f8302ea9a912658a4c7ec1b62a1f6946d71",
+      "createdAt": "2026-03-05T10:38:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3343#issuecomment-4004103040",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7utqRj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is this an easy fix @elarlang?",
+      "createdAt": "2026-03-05T13:08:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3343#issuecomment-4004947043",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ut1Vi",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Need to review it before any changes. For fixing only this issue, it seems that we just need to remove current 13.2.5 as duplicate of 13.2.4. But it is all just part of the #3344",
+      "createdAt": "2026-03-05T13:16:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3343#issuecomment-4004992354",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uuslW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you take this as an action?\n",
+      "createdAt": "2026-03-05T13:53:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3343#issuecomment-4005218646",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2026-03-05T10:03:22Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    }
+  ],
+  "number": 3343,
+  "state": "OPEN",
+  "title": "Are 13.2.4 and 13.2.5 duplicates?",
+  "url": "https://github.com/OWASP/ASVS/issues/3343"
+}

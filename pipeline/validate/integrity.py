@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import sys
+from pathlib import Path
 from urllib.parse import urlparse
 
 from pipeline.validate.schema import ROOT, SOURCES_DIR, iter_data_files, load_json
@@ -92,15 +93,15 @@ def validate_all() -> list[str]:
                 errors.extend(_check_citation(rel, location, node))
 
             origin = node.get("origin")
-            if origin in {"human", "llm", "llm_reviewed"}:
+            if origin in {"human", "llm", "llm_reviewed", "deterministic"}:
                 authors = node.get("authors") or []
                 model = node.get("model")
-                if origin == "llm" and authors:
-                    errors.append(f"{rel}:{location}: llm provenance must not have authors")
+                if origin in {"llm", "deterministic"} and authors:
+                    errors.append(f"{rel}:{location}: {origin} provenance must not have authors")
                 if origin in {"human", "llm_reviewed"} and not authors:
                     errors.append(f"{rel}:{location}: {origin} provenance requires authors")
-                if origin == "human" and model is not None:
-                    errors.append(f"{rel}:{location}: human provenance must not set model")
+                if origin in {"human", "deterministic"} and model is not None:
+                    errors.append(f"{rel}:{location}: {origin} provenance must not set model")
 
     return errors
 

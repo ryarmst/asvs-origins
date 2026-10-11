@@ -1,0 +1,766 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "The following verifications are suggested to address code+PKCE, note that the last three are from #1971 where the second has a minor modification, but are included here as well.\r\n \r\n## V51.2 Authorization Server\r\n\r\nVerify that codes are can only be  used once and are valid for at most 10 minutes. (L1,L2,L3)\r\n\r\nVerify that grant type 'code' is always used together with PKCE and requires S256 as the code challenge method. (L1,L2,L3)\r\n\r\nVerify that if a Client sends a valid PKCE \"code_challenge\" parameter in the authorization request, the Authorization Server enforces the correct usage of \"code_verifier\" at the token endpoint. (L1,L2,L3)\r\n\r\nVerify that Authorization Servers are mitigating PKCE Downgrade Attacks by ensuring a token request containing a \"code_verifier\" parameter is accepted only if a \"code_challenge\" parameter was present in the authorization request. (L1,L2,L3)",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6KdayF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The \"V51.1 Authorization Server\" as it stands at the moment.\r\n\r\nThis is just for information and we should discuss only PKCE related requirements in this issue.\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.1.1** | [ADDED] Verify that the Authorization Server supports CSRF protection either using the mechanism provided by PKCE, the \"nonce\" parameter or the \"state\" parameter. | ✓ | ✓ | ✓ |\r\n| **51.1.2** | [ADDED] Verify that the replay of authorization codes into the authorization response is prevented either by using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. The PKCE challenge or OpenID Connect \"nonce\" must be transaction-specific and securely bound to the client and the user agent in which the transaction was started. | ✓ | ✓ | ✓ |\r\n| **51.1.3** | [ADDED] Verify that Authorization Servers are mitigating PKCE Downgrade Attacks by ensuring a token request containing a \"code_verifier\" parameter is accepted only if a \"code_challenge\" parameter was present in the authorization request. | ✓ | ✓ | ✓ |\r\n| **51.1.4** | [ADDED] Verify that refresh tokens are sender-constrained or use refresh token rotation to prevent token replay attacks. Refresh token rotation prevents usage in the event of a compromised refresh token. Sender-constrained refresh tokens cryptographically binds the refresh token to a particular Client. | ✓ | ✓ | ✓ |\r\n| **51.1.5** | [ADDED] Verify that if a Client sends a valid PKCE \"code_challenge\" parameter in the authorization request, the Authorization Server enforces the correct usage of \"code_verifier\" at the token endpoint. | ✓ | ✓ | ✓ |\r\n| **51.1.6** | [ADDED] Verify that the Resource Owner password credentials grant is not used or configured by the Authorization Server. This grant type insecurely exposes the credentials of the Resource Owner to the client, increasing the attack surface of the application. | ✓ | ✓ | ✓ |\r\n| **51.1.7** | [ADDED] Verify that redirect URIs in authorization requests are absolute, using the HTTPS scheme, and validated by the Authorization Server using exact string comparison based on a client-specific allow list of pre-registered URIs. | ✓ | ✓ | ✓ |\r\n\r\n---\r\n\r\n> Verify that codes are can only be used once and are valid for at most 10 minutes. (L1,L2,L3)\r\n\r\nWhat is the argumentation for 10 minutes? Is it supported by any spec?\r\n\r\nDo we have any matching requirement in \"V2.8 One-Time Verifier\" or is it that OAuth specific thing that is worth a separate requirement?\r\n\r\n> Verify that grant type 'code' is always used together with PKCE and requires S256 as the code challenge method. (L1,L2,L3)\r\n\r\nIf should be maybe more clear wording, is it \"verify that always grant type code is used\" or \"verify, that if grant type code is used\".\r\n\r\n> Verify that if a Client sends a valid PKCE \"code_challenge\" parameter in the authorization request, the Authorization Server enforces the correct usage of \"code_verifier\" at the token endpoint. (L1,L2,L3)\r\n\r\nIt is / should replace current 51.1.5\r\n\r\n> Verify that Authorization Servers are mitigating PKCE Downgrade Attacks by ensuring a token request containing a \"code_verifier\" parameter is accepted only if a \"code_challenge\" parameter was present in the authorization request.\r\n\r\nIt is / should replace current 51.1.3",
+      "createdAt": "2024-08-31T16:58:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2322967685",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KefOq",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> What is the argumentation for 10 minutes? Is it supported by any spec?\r\n\r\nYes, it is from https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-4.1.2 and also https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.3.2.2 notes that codes should have a short lifetime.\r\n\r\n> Do we have any matching requirement in \"V2.8 One-Time Verifier\" or is it that OAuth specific thing that is worth a separate requirement?\r\n\r\nMaybe not, this is addressed in 2.8.1 and 2.8.4, but for readers of ASVS it might not be obvious to make the connection from OAuth codes to OTP? In a way this is done by the suggested scope text \"Please read this chapter in combination with all other chapters...\", so maybe just keep tha OAuth specific part \"Verify that codes are valid for at most 10 minutes.\"? \r\nNote that  https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-4.1.2 also states that \"The authorization code is bound to the client identifier, code challenge and redirect URI.\", perhaps this is more important to include? Finding a good balance for all OAuth details is hard! \r\n\r\n> If should be maybe more clear wording, is it \"verify that always grant type code is used\" or \"verify, that if grant type code is used\".\r\n\r\nYes, maybe  \"Verify that if grant type 'code' is used, it is always used together with PKCE and requires S256 as the code challenge method.\"\r\n\r\n> It is / should replace current 51.1.5\r\n\r\nYes\r\n\r\n> It is / should replace current 51.1.3\r\n\r\nYes",
+      "createdAt": "2024-09-01T09:15:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2323248042",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KelkR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I also ask for opinions from everyone to combine all 3 PKCE-related requirements into one requirement.",
+      "createdAt": "2024-09-01T10:24:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2323274001",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kl2y6",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would like to suggest we drop the discussion on the \"nonce\" parameter or the \"state\" parameter and only focus on PKCE for CSRF protection.",
+      "createdAt": "2024-09-02T18:23:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2325179578",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kl3Wc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with @elarlang and think 51.1.1-51.1.3 can all be merged into one concise requirement like:\r\n\r\n51.1.1 | [ADDED] Verify that the Authorization Server supports CSRF protection using the mechanism provided by PKCE. | ✓ | ✓ | ✓\r\n-- | -- | -- | -- | --\r\n\r\n... and then drop 51.1.2 and 51.1.3\r\n\r\nThis kind of simplicity will have a longer \"life\" in ASVS.",
+      "createdAt": "2024-09-02T18:25:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2325181852",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kl4Ll",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "nonce is OIDC and ID-Token topic, 51.1.2 will be moved. ( https://github.com/OWASP/ASVS/issues/2002 )",
+      "createdAt": "2024-09-02T18:29:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2325185253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K3r_M",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @randomstuff @csfreak92 @deleterepo @ThunderSon ",
+      "createdAt": "2024-09-04T19:52:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2329853900",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LhNge",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "**authorization code expiration**\r\n\r\nProposed:\r\n> Verify that codes are can only be used once and are valid for at most 10 minutes. (L1,L2,L3)\r\n\r\nHow to sneak in the message actually 30sec is usually more than enough...\r\n\r\n**PKCE**\r\n\r\nMy attempt to combine 3 proposed PKCE requirements into one requirement, input for collecting feedback and for further wordsmithing:\r\n\r\n> Verify that grant type 'code' is always used together with PKCE - for authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed), for token request it requires code_verifier with value calculated from code_challenge.\r\n\r\nping @randomstuff @TobiasAhnoff ",
+      "createdAt": "2024-09-10T13:14:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2340739102",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LlZpU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that grant type 'code' is always used together with PKCE - for authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed), for token request it requires code_verifier with value calculated from code_challenge.\r\n\r\nThat is … dense :)\r\n\r\nI *think* I would better have several more granular verifications. (but maybe after some ironing-out …)\r\n",
+      "createdAt": "2024-09-10T19:19:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2341837396",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LleBo",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [ADDED] Verify that redirect URIs in authorization requests are absolute, **using the HTTPS scheme,** and validated by the Authorization Server using exact string comparison based on a client-specific allow list of pre-registered URIs.\r\n\r\nShould this allow the usage of [`http://127.0.0.1:{port}/{path}` and `http://[::1]:{port}/{path}`](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-loopback-interface-redirect)?\r\n\r\nAlso, should there be a discussion about [private-Use URIs](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-private-use-uri-scheme-redi)? (Is this in scope?)",
+      "createdAt": "2024-09-10T19:29:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2341855336",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LobUO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > [ADDED] Verify that redirect URIs in authorization requests are absolute, **using the HTTPS scheme,** and validated by the Authorization Server using exact string comparison based on a client-specific allow list of pre-registered URIs.\r\n> \r\n> Should this allow the usage of [`http://127.0.0.1:{port}/{path}` and `http://[::1]:{port}/{path}`](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-loopback-interface-redirect)?\r\n> \r\n> Also, should there be a discussion about [private-Use URIs](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-private-use-uri-scheme-redi)? (Is this in scope?)\r\n\r\nFor this discussion I re-opened related issue: https://github.com/OWASP/ASVS/issues/1965#issuecomment-2342621496",
+      "createdAt": "2024-09-11T05:04:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2342630670",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LoxdZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Verify that grant type 'code' is always used together with PKCE - for authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed), for token request it requires code_verifier with value calculated from code_challenge.\r\n> \r\n> That is … dense :)\r\n> \r\n> I _think_ I would better have several more granular verifications. (but maybe after some ironing-out …)\r\n\r\nBut how to split them the way that they separately make sense and does not duplicate each other. I would just ask to implement PKCE correctly without providing functionality testing-guide against authorization server.\r\n\r\nBasically the idea is to ask:\r\n> Verify that grant type 'code' is always used together with PKCE following RFC 7636.\r\n\r\nAt the moment it was a bit more technical.",
+      "createdAt": "2024-09-11T06:23:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2342721369",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L-CEN",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": ">>Verify that grant type 'code' is always used together with PKCE - for authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed), for token request it requires code_verifier with value calculated from code_challenge.\r\n\r\n>That is … dense :)\r\n\r\nI agree that it is hard to put all that in one verification.  I think the important thing for ASVS would be to make it clear that PKCE should be used and if motivated also address important hardening requirements. In my experience authorization servers which supports PKCE does that correctly and clients using PKCE also do that well (in general), the issue is that some AS might not support PKCE and some clients are not aware that PKCE needs to \"enabled\" (not all client frameworks have PKCE on by default)     \r\n\r\nSo, perhaps this is enough? \r\n\r\n> Verify that grant type 'code' is always used together with PKCE and requires S256 as the code challenge method. (L1,L2,L3) \r\n\r\nor even just\r\n\r\n> Verify that grant type 'code' is always used together with PKCE. (L1,L2,L3) \r\n\r\nYou could argue that today it is unlikely to use PKCE in the wrong way, given updated client frameworks and well-known authorization servers, but maybe there is an security issue with e g using weak code challenge methods or down-grade attacks that is important for ASVS to address? If so, I suggest having separate verifications to make the easy to read and apply.       \r\n",
+      "createdAt": "2024-09-13T08:02:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2348294413",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L-UjS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would say PKCE-related misconfiguration is not that rare - widespread classics:\r\n* the client by default is using PKCE, but the flow also works without PKCE (supported, but not required by AS)\r\n* method=plain is allowed",
+      "createdAt": "2024-09-13T08:37:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2348370130",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L_HDX",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with @elarlang here",
+      "createdAt": "2024-09-13T10:13:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2348576983",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MCSSI",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree with @elarlang, should we then have one or split? I think I agree with @randomstuff and prefer to have separate, but one will work as well ",
+      "createdAt": "2024-09-13T16:51:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2349409416",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MD8DU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One more point of view - from the ASVS perspective, should we care that PKCE is there or should we care, that authorization code interception is not possible. I think in general we should have focused on mitigating and pointing out, that \"Verify you have defense against this kind of vulnerability\" instead of \"Verify that you have this configuration set to this value\" without saying, why it is needed. If we focus on principles, it is more \"time-proof\", especially in the OAuth topic, where there are many new RFCs per year that all deprecate something from previous ones and it's hard to track what is the most up-to-date recommendation today and are different \"best practices recommending the same thing\".\r\n\r\nIs it one or two requirements, I don't care - it is more important, that those are logical, logically separated and make sense as independent requirements.",
+      "createdAt": "2024-09-13T18:38:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2349842644",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKn1a",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang do I understand you correctly that we should have something like \"Verify that code injection attacks are mitigated by always using the Code flow together with PKCE. For authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed). For token request it requires code_verifier with value calculated from code_challenge.",
+      "createdAt": "2024-09-15T13:30:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2351594842",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKp6P",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I think it nicely covers all. It is a bit long, but it does the job providing the reason, principle and also technical guidance.\r\n\r\nPersonally I don't know what could be the logical way to split it to many requirements, as the main goal is still protection against authorization code interception. Although one can say the likelihood is taken down when BFF and confidential clients are in use.",
+      "createdAt": "2024-09-15T13:52:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2351603343",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKsaM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First part:\r\n> Verify that if the code flow is used, the authorization server requires to use PKCE to mitigate authorization code interception attacks.\r\n\r\nAny improvements?",
+      "createdAt": "2024-09-15T14:18:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2351613580",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKtXJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The other requirement.\r\n\r\nInitially proposed:\r\n> Verify that codes are can only be used once and are valid for at most 10 minutes. (L1,L2,L3)\r\n\r\nI propose update:\r\n> Verify that if the authorization server returns the authorization code, it can be used only once for the token request and is valid for at most 10 minutes.",
+      "createdAt": "2024-09-15T14:27:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2351617481",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MK6Vq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I would suggest:\r\n\r\n> Verify that, if the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks.\r\n\r\n> Verify that, if the authorization server returns the authorization code, it can be used only once for a token request and it is only valid for up to 10 minutes.\r\n",
+      "createdAt": "2024-09-15T16:43:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2351670634",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MT3cH",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the replay of authorization codes into the authorization response is prevented either by using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. The PKCE challenge or OpenID Connect \"nonce\" must be transaction-specific and securely bound to the client and the user agent in which the transaction was started.\r\n\r\nIs there any need to say the the nonce must be a unpredictable?",
+      "createdAt": "2024-09-16T20:56:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2354018055",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MVwjV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the last proposed requirement belongs to the oauth client section that handles the authroization response and is duplicate of csrf protection example?\r\n\r\n> Is there any need to say the the nonce must be a unpredictable?\r\n\r\nThis is something we need to cover _somewhere_ but for sure not in every requirement that mentions state, nonce or PKCE.\r\n",
+      "createdAt": "2024-09-17T04:56:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2354514133",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MWS17",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current proposal:\r\n> Verify that codes are can only be used once and are valid for at most **10 minutes**. (L1,L2,L3)\r\n\r\nFAPI https://openid.net/specs/fapi-2_0-security-profile.html#section-5.3.1.1-2.11.1\r\n> shall issue authorization codes with a maximum lifetime of **60 seconds**\r\n",
+      "createdAt": "2024-09-17T06:35:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2354654587",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MXZTY",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Maybe this will capture both?\r\n\r\n> Verify that authorization codes can only be used once and are valid for at most 10 minutes. Note that for L3 this should be at most 60 seconds. (L1,L2,L3)",
+      "createdAt": "2024-09-17T08:59:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2354943192",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MdE2T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think I'm going to ignore the FAPI topic at the moment. Maybe it's worth opening separate issue.\r\n\r\nAt the moment I'm going to put those to \"OAuth Authorization Server\" section. Any last comments? (We can always improve the wording etc, I just want to get the requirements in and kill down the duplicate issues).\r\n\r\n**requirement authorization code**\r\n> Verify that, if the authorization server returns the authorization code, it can be used only once for a token request and it is only valid for up to 10 minutes.\r\n\r\n\r\n**requirement pkce usage**\r\n> Verify that, if the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks. For authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed). For token request it requires code_verifier with value calculated from code_challenge.",
+      "createdAt": "2024-09-17T16:48:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2356432275",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Md8Zj",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that, if the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks. For authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed). For token request it requires code_verifier with value calculated from code_challenge.\r\n\r\nSome minor tweaks. This looks more natural this way (but is it?):\r\n\r\n> Verify that, if the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks. For authorization requests, the authorization server requires a valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed). For token requests, the authorization server requires code_verifier with value calculated from code_challenge.\r\n\r\n> For token request it requires code_verifier with value calculated from code_challenge.\r\n\r\nNitpick: it's actually the other way around code_challenge is calculated from code_verifier :)\r\n\r\nDo we need include this much details, though? What about something like: “Verify that, when the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks. The plain code_challenge_method must not be accepted.“\r\n",
+      "createdAt": "2024-09-17T18:51:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2356659811",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MeDMQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Do we need include this much details, though? \r\n\r\nThe reason for this long requirement is to address the PKCE downgrade attack.",
+      "createdAt": "2024-09-17T19:05:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2356687632",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MeGSv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The reason for this long requirement is to address the PKCE downgrade attack.\r\n\r\nWouldn't hat be covered by:  “Verify that, when the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks. The \"plain\" code_challenge_method must not be accepted.“\r\n\r\nMoreover, this should be stated explicitly? (That it should not be vulnerable t PKCE downgrade attacks?",
+      "createdAt": "2024-09-17T19:12:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2356700335",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MeK_d",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The downgrade can be also the mistake on the AS side in token request, if it accepts the code_challenge value as code_verifier value. Also when code_challenge was not sent in the authorization request but code_verifier was sent in the token request.\r\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#section-4.8\r\n\r\n> Verify that, if the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks. **For mitigating PKCE downgrade attack** - for authorization request, authorization server requires valid code_challenge value and accepts code_challenge_method value S256 (plain is not allowed). For token request it requires code_verifier with value calculated from code_challenge.\r\n\r\nOr we should keep and modify the separate requirement as we have/had:\r\n> 51.1.3 Verify that Authorization Servers are mitigating PKCE Downgrade Attacks by ensuring a token request containing a \"code_verifier\" parameter is accepted only if a \"code_challenge\" parameter was present in the authorization request.\t",
+      "createdAt": "2024-09-17T19:23:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2356719581",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Me2WW",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The downgrade can be also the mistake on the AS side in token request, if it accepts the code_challenge value as code_verifier value. Also when code_challenge was not sent in the authorization request but code_verifier was sent in the token request.\r\n\r\nAll of this is not possible as long as the authorization server ensures that proper code_challenge and code_challenge_method (not plain) are included the authorization request (?).",
+      "createdAt": "2024-09-17T20:45:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2356897174",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MhGy5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It does not cover the code_verifier verification in the token request. If it is accepted as code_challenge value or just not validated correctly.\r\n\r\nAnyway, it goes a bit to technical checklist side and it is up to us to choose the level of details to cover to goals we want to achieve.",
+      "createdAt": "2024-09-18T04:48:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2357488825",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MhYFI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note, that these requirement are now in the document:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.1** | [ADDED] Verify that, if the authorization server returns the authorization code, it can be used only once for a token request and it is only valid for up to 10 minutes. | ✓ | ✓ | ✓ |\r\n| **51.2.3** | [ADDED] Verify that, if the code flow is used, the authorization server requires the use of PKCE to mitigate authorization code interception attacks. For authorization requests, the authorization server must require a valid code_challenge value and must only accept code_challenge_method value S256 (plain is not allowed). For a token request it must require acode_verifier whose value is calculated from the code_challenge. | ✓ | ✓ | ✓ |\r\n\r\nLet's try to solve in this issue the requirement text for the PKCE requirement (added as 51.2.3) and I open a separate issue (https://github.com/OWASP/ASVS/issues/2090) for the authorization code requirement.",
+      "createdAt": "2024-09-18T05:49:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2357559624",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MydlJ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "51.2.3 is a bit long, perhaps split like this?\r\n\r\n> Verify that, if the grant code is used, the authorization server mitigates authorization code interception attacks by requiring a valid PKCE \"code_challenge\" parameter in the authorization request, with the code_challenge_method value S256.\r\n\r\n> Verify that Authorization Servers are mitigating PKCE Downgrade Attacks by ensuring that all token request using the grant authorization_code requires validation of the \"code_verifier\" parameter. ",
+      "createdAt": "2024-09-19T19:40:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2362038601",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MzEQc",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that, if the grant code is used, the authorization server mitigates authorization code interception attacks by requiring a valid PKCE \"code_challenge\" parameter in the authorization request, with the code_challenge_method value S256.\r\n\r\nSome tweaks: \"Verify that, if the code grant is used, the authorization server mitigates authorization code interception attacks by requiring a valid PKCE \"code_challenge\" parameter in the authorization request, with the code_challenge_method value S256 or better.\"\r\n\r\n> Verify that Authorization Servers are mitigating PKCE Downgrade Attacks by ensuring that all token request using the grant authorization_code requires validation of the \"code_verifier\" parameter.\r\n\r\nSome tweaks: \"Verify that Authorization Servers are mitigating PKCE downgrade attacks by ensuring that all token requests using the authorization code grant require validation of the \"code_verifier\" parameter.\"\r\n\r\nor is it simply \"Verify that the Authorization Servers expect a code verifier the token request of the code grant and validate it.\"?",
+      "createdAt": "2024-09-19T21:05:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2362197020",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-kL3",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I like the tweaks from @randomstuff  \r\n\r\n> Verify that, if the code grant is used, the authorization server mitigates authorization code interception attacks by requiring a valid PKCE \"code_challenge\" parameter in the authorization request, with the code_challenge_method value S256 or better.\r\n\r\nand \r\n\r\n> Verify that Authorization Servers are mitigating PKCE downgrade attacks by ensuring that all token requests using the authorization code grant require validation of the \"code_verifier\" parameter.\r\n\r\nHaving \"are mitigating PKCE downgrade attacks\" is from original text from @csfreak92 and based on general input from @elarlang, that ASVS requirements preferably should be motivated with what kind of attack they mitigates. I think it is good, even if there are many requirements that currently just say what to do (not why).  ",
+      "createdAt": "2024-09-21T14:38:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2365211383",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-roJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think splitting PKCE can be better and I don't think it's correct way. I'll try to come up with a proposal. Maybe I just need to think more about it and then I can agree with the proposal :)\r\n\r\n> ... based on general input from @elarlang, that ASVS requirements preferably should be motivated with what kind of attack they mitigates. I think it is good, even if there are many requirements that currently just say what to do (not why).\r\n\r\nWe have had quite many issues and most of them opened by ourselves because we can not understand, why some requirements have been made in the past in previous versions. So now I try to avoid this kind of issues in the future, so that the requirement author can understand why it was made, but others need some translation.",
+      "createdAt": "2024-09-21T16:19:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2365241865",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NFAek",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that, if the code grant is used, the authorization server mitigates authorization code interception attacks by requiring a valid PKCE \"code_challenge\" parameter in the authorization request, with the code_challenge_method value S256 or better.\r\n\r\nIs this requirement independently incorrect, as the defense against authorization code interception is done in the token request?\r\n\r\nBased on my knowledge, currently there are 2 options for the code_challenge_method - those are plain and S256, so there is no \"or better\" available and it can be misleading.\r\n\r\nIn short, I have not found a good way to split this requirement. If it is too long, we can just cut the details.",
+      "createdAt": "2024-09-22T18:11:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2366900132",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NNk4G",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "\"2 options\" is basically true, but the RFC opens up for other methods as well (even if not commonly implemented today)\r\nhttps://datatracker.ietf.org/doc/html/rfc7636#section-7.2\r\n\"The \"S256\" code challenge method or other cryptographically secure code challenge method extension SHOULD be used.\" \r\n\r\nSo \"or better\" aligns with the RFC, but it could also be removed it there are no known implementations today, perhaps @randomstuff knows more about this?\r\n\r\n@elarlang  Maybe a misunderstanding, but I think there are examples of requirements that depends on other requirements, like requiring mTLS (9.3.3) and strong ciphers separately (9.4.1). Without properly configured TLS (allowing downgrade or even unencrypted traffic), MTLS will be weak. Just like PKCE wont protect against code injection if downgrade attacks are possible.\r\n\r\nI might be wrong, but I think it works having the two PKCE requirements separated (but close together). Having them in one will works as well, in my opinion either will work.    ",
+      "createdAt": "2024-09-23T19:11:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2369146374",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NOMLw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The point of my \"S256 or better\" comment was just to try to be forward looking in case new methods would be added in the future, similar to when we have “Verify that only the latest recommended versions of the TLS protocol are enabled, such as TLS 1.2 and TLS 1.3. The latest version of the TLS protocol should be the preferred option.” instead of “Use TLS 1.2 or 1.3”. AFAIU, there is no plan to do add new code challenge method though.\r\n\r\n\r\n",
+      "createdAt": "2024-09-23T20:25:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2369307376",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NRh-A",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@TobiasAhnoff - 2 separate requirements must be valid independently, one can be extra layer of security on top of another, but my question was, is the proposed requirement for PKCE valid independently, as it only describes validation during authorization request, but the defense must take in place in token request.\r\n\r\n@randomstuff - the point and idea behind that is understandable, I think in this case \"negative requirement\" works well and we can just say no to the \"plain\" value. If this is going to change in the future, it can be fixed with \"patch release of ASVS\", such as 5.0.1. The meaning for the requirement stays the same.",
+      "createdAt": "2024-09-24T05:10:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2370183040",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NVrSk",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Maybe like this?\r\n\r\nVerify that, if the code grant is used, the authorization server mitigates authorization code interception attacks by requiring PKCE. For authorization requests, the authorization server must require a valid code_challenge value and must not accept code_challenge_method 'plain'. For a token request it must require validation of the \"code_verifier\" parameter. \r\n",
+      "createdAt": "2024-09-24T13:24:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2371269796",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N1-TL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Update (via PR #2122)\r\n**V51.2 OAuth Authorization Server**\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.3** | [ADDED] Verify that, if the code grant is used, the authorization server mitigates authorization code interception attacks by requiring PKCE. For authorization requests, the authorization server must require a valid code_challenge value and must not accept code_challenge_method 'plain'. For a token request, it must require validation of the \"code_verifier\" parameter. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-09-27T17:19:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2041#issuecomment-2379736267",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-31T14:51:05Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2041,
+  "state": "CLOSED",
+  "title": "V51 OAuth: Add code and PKCE related verifications",
+  "url": "https://github.com/OWASP/ASVS/issues/2041"
+}

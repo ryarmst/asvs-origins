@@ -1,0 +1,173 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirement:\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **3.4.5** | Verify that the application sets a referrer policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. This can be done using the Referrer-Policy HTTP response header field or via HTML element attributes. Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname. | 2 |\n\nPreviously discussed in:\n\n  * #2789\n\nProblem to solve:\n\n  * The focus point is not fully correct: it requires to have a referrer policy, but it is not required if there are no resources loaded from external addresses and no links provided to external addresses.\n\nProposal - change to focus to \"verify that technically sensitive information is not leaked via the 'Referer' header field\"\n\n> Verify that the **web server configuration or application prevents** leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. This can be done using the Referrer-Policy HTTP response header field or via HTML element attributes. Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname.\n\nProposed changes:\n* \"application\" > \"web server configuration or application\"\n* \"sets a referrer policy to prevent\" > \"prevents\"\n\nI consider it not to be a breaking change.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6-mF0V",
+      "author": {
+        "login": "andres-halls"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'm not sure this is a good idea. Applications are often not static. Even if today there are no resources loaded from external addresses and no links provided to external addresses, it doesn't guarantee there won't be any tomorrow. That's why I think a referrer policy should always be set regardless.",
+      "createdAt": "2025-08-18T16:39:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3197656341",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-uwfB",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I'm not sure this is a good idea. Applications are often not static. Even if today there are no resources loaded from external addresses and no links provided to external addresses, it doesn't guarantee there won't be any tomorrow. That's why I think a referrer policy should always be set regardless.\n\nI tend to agree. But there are cases where want to add say a stronger referrer policy to the detail. Maybe the default is sameorigin in the response header, but I may want to use noreferrer in a HTML element of some kind. So perhaps lets suggest: (including @elarlang changes)\n\n_Verify that the web server configuration or application prevents leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. This must be done using the Referrer-Policy HTTP response header field. Setting policy via HTML element attributes is also acceptable as a secondary measure. Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname._\n\n",
+      "createdAt": "2025-08-19T09:15:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3199928257",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-vEC3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I described the problem to solve in the issue, and it is basically to avoid false positives. If there is no actual problem to solve, we can not require a solution for it just because tomorrow you may change your application. If the application is changed, then it requires reevaluating the related security, and this is true for any changes in the application.\n\nNote that I only address the problem when there is no need to require referrer-policy. It does not disallow anyone to use a stronger configuration \"just in case\" or for tomorrow.\n\nThe requirement text has been through long discussion, and I would not touch the other part of it. Especially when it goes to the style \"it **must** be one way, but the other way is also ok\" (it just does not make sense).",
+      "createdAt": "2025-08-19T09:39:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3200008375",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-wtAU",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have a few suggestions:\n\n> Verify that the web server configuration or application prevents leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. This can be done using the Referrer-Policy HTTP response header field or via HTML element attributes. Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname.\n\n* Instead of \"**web server configuration**,\" it's better to use \"**web content delivery stack configuration** (web server, CDN, reverse proxy, Azure Web App, AWS EBS, or app) or something else.\" The web server configuration is highly interpreted as IIS or Apache-level configuration on a VM. \n* In the ASVS context, what is \"**Technically Sensitive Data**\", this is confusing in broader aspect?\n* \"HTML element attributes\" and \"**meta tags**\" — since meta tags are also HTML elements but have a distinct nature, it's good to mention meta tags separately.",
+      "createdAt": "2025-08-19T11:51:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3200438292",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-yceb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Instead of \"web server configuration,\" it's better to use \"web content delivery stack configuration (web server, CDN, reverse proxy, Azure Web App, AWS EBS, or app) or something else.\" The web server configuration is highly interpreted as IIS or Apache-level configuration on a VM.\n\nTo avoid that, it makes sense to avoid listing them at all - as those are defined or listed in solutions anyway.\n\nSo the first part can be:\n> Verify that leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field is prevented.\n\n---\n\n> In the ASVS context, what is \"Technically Sensitive Data\", this is confusing in broader aspect?\n\nIt is literally defined in the requirement: _Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname._\n\n---\n\n> \"HTML element attributes\" and \"meta tags\" — since meta tags are also HTML elements but have a distinct nature, it's good to mention meta tags separately.\n\nmeta tags can be listed separately, but then HTML element attributes sounds too wide.\n",
+      "createdAt": "2025-08-19T14:01:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3200894875",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-4QCT",
+      "author": {
+        "login": "andres-halls"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I described the problem to solve in the issue, and it is basically to avoid false positives. If there is no actual problem to solve, we can not require a solution for it just because tomorrow you may change your application. If the application is changed, then it requires reevaluating the related security, and this is true for any changes in the application.\n\nIt's not strictly necessary for the application source code to be changed for the problem to arise.\n\nAnd if going that route, the same could be argued about other security headers, why single out referrer policy. Some examples below.\n\n- Why demand a CSP header if there's no XSS and embedding is not a concern for a particular application?\n- Why do all HTTP responses have to contain an XCTO header if there's no actual problem caused by its absence?\n\nHow is saying that there's no XSS in the application, therefore a CSP is not required any different from saying there are no links in the application, therefore a referrer policy is not required?\n\nI would leave the ASVS requirement description as is to always require a policy to be set similar to all other header requirements.",
+      "createdAt": "2025-08-19T22:18:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3202416787",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-_6JB",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> It is literally defined in the requirement: Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname.\n\nMy question was specifically about the term  \"**Technically sensitive data**\", but your answer pointed to the \"**Sensitive data**\" term. If these terms are intended to be the same, would like to know is there specific reason to use different terminology the same requirement?\n\nFor reference, the phrase “**technically sensitive data**” does not appear in OWASP, NIST, or W3C documentation.\n\n> but then HTML element attributes sounds too wide.\n\nAny thought on too wide?\n\n> meta tags can be listed separately,\n\nok, so by following multiple requirements to secure the application from one vulnerability.",
+      "createdAt": "2025-08-20T06:49:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3204424257",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6_Ayrc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree with the argument that referrer policy can be useful for \"just in case,\" for example, when an unexpected error happens and extra resources are loaded on the error page. At the same time I don't like to see reports that contain \"you have an 'referrer-policy' missing from your application/json response\".\n\nAt the same time, putting CSP and XCTO equal with referrer-policy is \"a bit violent\":\n\n  * XCTO is required for every response that it can not be included as javascript resource (as an example)\n  * A missing CSP response header field may provide a bypass in an HTML injection situation, and yes, it is a 2nd layer of defense\n\n> I would leave the ASVS requirement description as is to always require a policy to be set, similar to all other header requirements.\n\nSo, choosing from two options, the safer is to keep it as it is, although it has some side effects.\n\n---\n\n\"Technically sensitive data\" - it can also be used in full length the requirement text twice; do not rely on common sense, as it can be different for everyone.\n\nThe rest I prefer to not touch.\n\n> > meta tags can be listed separately,\n\n> ok, so by following multiple requirements to secure the application from one vulnerability.\n\nWas meant \"listed separately in the requirement\". It is hard to see good intentions for such comments:\n\n  * It was clear that the response was for a proposal _\"HTML element attributes\" and \"meta tags\" — since meta tags are also HTML elements but have a distinct nature, it's good to mention meta tags separately._\n  * It is clear that we do not create multiple requirements for this kind of situations.",
+      "createdAt": "2025-08-20T07:41:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3204655836",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6_E-8u",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> meta tags can be listed separately,\n\nI misunderstood earlier due to a quick read, apologies for that misinterpretation.\n\n> \"Technically sensitive data\" - it can also be used in full length the requirement text twice; do not rely \non common sense, as it can be different for everyone.\n\nSimply using it twice doesn’t resolve its non-standard nature or clarify its meaning . This remains ambiguous, as the term remains undefined. I think in standards writing, it is not good to rely on implicit interpretation. terms must be explicit, consistent, and referenceable, otherwise auditors and implementers will interpret them differently.\n\n\n",
+      "createdAt": "2025-08-20T11:23:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3243#issuecomment-3205754670",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-08-18T11:55:12Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 3243,
+  "state": "OPEN",
+  "title": "v5.0.0-3.4.5 focus to avoid leakage from 'referer' instead of \"have a policy\"",
+  "url": "https://github.com/OWASP/ASVS/issues/3243"
+}

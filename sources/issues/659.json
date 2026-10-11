@@ -1,0 +1,121 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUyNTIyMTM5",
+    "is_bot": false,
+    "login": "mak1yama",
+    "name": "Mitsuaki Akiyama"
+  },
+  "body": "Some documents published by OWASP-related projects mentions the importance of generic error messages during the login process, and ASVS 4.0 also mentions about this in v7 (specifically in v7.4.1). I would like ASVS to strengthen the descriptions about error messages, because I have found a number of web services which display specific and inconsistent messages during login-related functions such as login, password recovery (password reset), and account creation. These services have a risk of account harvesting or enumeration.\r\n\r\nv7 has already had a reference of [OWASP Testing Guide 4.0 content: Testing for Error Handling](https://www.owasp.org/index.php/OWASP_Testing_Project), which mentions the importance of generic error messages during the login process. I think v7 should refer more detailed information about this problem and countermeasures. I think [Authentication Cheat Sheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Authentication_Cheat_Sheet.md#authentication-and-error-messages) is good for the reference of v7, because it shows both incorrect and correct message examples. \r\n\r\nAdditionally, I think the descriptions of OWASP Testing Guide and Authentication Cheat Sheet are not enough to explain the risk, because they implicitly focus on a “login” function. For example, Authentication Cheat Sheet only gives error message examples for a login function.  On the basis of my study, “password recovery” and “account creation” functions are potentially abusable as well as “login” function. So an administrator should take care of all these login-related functions. I think all these login-related functions also should be mentioned explicitly in any OWASP documents. ",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUwOTI3NTM3Ng==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I think the main control for harvesting/enumeration should be anti-automation which is mentioned in 2.2.1. What do you think?\r\n\r\nI think for more sensitive applications, maybe more aggressive user discovery controls such as generic login errors are required. However, this gets more complicated, especially for something like an account creation flow. Can you think of a control which could be added to V7 which would cover this?\r\n",
+      "createdAt": "2019-07-08T15:32:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/659#issuecomment-509275376",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUwOTY2NjUwNg==",
+      "author": {
+        "login": "mak1yama"
+      },
+      "authorAssociation": "NONE",
+      "body": "> So I think the main control for harvesting/enumeration should be anti-automation which is mentioned in 2.2.1. What do you think?\r\n\r\nYes. Anti-automation techniques such as CAPTCHA can interfere with brute-force attempts. This type of attack assumes outsider attackers. However, anti-automation techniques are not effective for insider attackers (e.g., victim’s acquaintance who knows the victim’s email address), because insider attackers require a small amount of attempts to know whether the victim (e.g., friend) has an account on a specific “sensitive” service on the basis of the inconsistency of error messages. Therefore, even if services use anti-automation techniques, they should pay attention to error messages. \r\n\r\n> I think for more sensitive applications, maybe more aggressive user discovery controls such as generic login errors are required. However, this gets more complicated, especially for something like an account creation flow. Can you think of a control which could be added to V7 which would cover this?\r\n\r\nI think you see through the essence of this problem. There are different stages of \"account lifecycle\": before registration, after registration, update (i.e., changing the registered email address as user-ID), and account closure. Error messages should be consistent for all these stages. As I previously mentioned, I found three login-related functions (i.e., login, password recovery, and account creation) which are potentially abusable. \r\n\r\nIn Authentication Cheat Sheet, examples for a login function are shown as follows.\r\n```\r\nIncorrect Response Examples\r\n\"Login for User foo: invalid password\"\r\n\"Login failed, invalid user ID\"\r\n\"Login failed; account disabled\"\r\n\"Login failed; this user is not active\"\r\nCorrect Response Example\r\n\"Login failed; Invalid userID or password\"\r\n```\r\n\r\nIn addition to these examples, I can give some examples for password recovery and account creation functions as follows. \r\n\r\n```\r\nIncorrect Response Examples for password recovery\r\n\"We just sent you a password-reset link\"\r\n\"This email address doesn’t exist in our database\"\r\nCorrect Response Example for password recovery\r\n\"If that email address is in our database, we’ll send you an email to reset your password\"\r\n\r\nIncorrect Response Examples for account creation\r\n\"This user ID is already in use\"\r\n\"Welcome! You have signed up successfully\"\r\nCorrect Response Example for account creation\r\n\"A link to activate your account has been emailed to ⟨input email address⟩\"\r\n```\r\n\r\nI'm concerned that these response examples are too much detail for v7. If so, should they be added in Authentication Cheat Sheet? \r\n\r\nIt's OK for me that (i) the detailed information is added in Authentication Cheat Sheet, and (ii) the high-level view of the risk is added in v7.4.1 and v7 just refers Authentication Cheat Sheet. ",
+      "createdAt": "2019-07-09T14:30:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/659#issuecomment-509666506",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUwOTkyNTYyNg==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that those examples are too much detail but that they are useful in the cheatsheet.\r\n\r\nSo do you think something extra is needed for V7?",
+      "createdAt": "2019-07-10T06:21:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/659#issuecomment-509925626",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUxMDMyMzM5NQ==",
+      "author": {
+        "login": "mak1yama"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks. It would be great if [Authentication Cheat Sheet (Authentication and Error Messages)](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Authentication_Cheat_Sheet.md#authentication-and-error-messages) is just added to the references of V7.\r\n\r\nI'll discuss this problem at [OWASP/CheatSheetSeries](https://github.com/OWASP/CheatSheetSeries/issues) in order to add the detailed information to Authentication Cheat Sheet (Authentication and Error Messages). ",
+      "createdAt": "2019-07-11T04:22:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/659#issuecomment-510323395",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUxMjk0Njg5Ng==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @mak1yama, do you think #661 handles this?",
+      "createdAt": "2019-07-18T19:06:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/659#issuecomment-512946896",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUxMzIwNzQ3MQ==",
+      "author": {
+        "login": "mak1yama"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, that's good! Thanks @tghosth.",
+      "createdAt": "2019-07-19T12:17:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/659#issuecomment-513207471",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-07-05T09:11:57Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    }
+  ],
+  "number": 659,
+  "state": "CLOSED",
+  "title": "Login error messages and ASVS v7",
+  "url": "https://github.com/OWASP/ASVS/issues/659"
+}

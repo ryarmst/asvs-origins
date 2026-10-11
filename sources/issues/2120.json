@@ -1,0 +1,690 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "In OAuth / OpenID Connect, checking of the user's consent (before issuing the tokens to the client application and before exposing the users information to a client application) is an important topic. Authorization server often have features which make it possible to remember which authorization the user has already consented to and may skip the user consent verification in some cases.\r\n\r\nSome excerpts of the Oauth 2.1 draft:\r\n\r\n> The Authorization Server might make policy decisions about things such as whether to prompt the user for consent on every authorization or only the first based on the confidence that the Authorization Server is actually communicating with the legitimate client.\r\n> \r\n> [...]\r\n>\r\n> Authorization servers SHOULD consider the level of confidence in a client's identity when deciding whether they allow a client access to more sensitive resources and operations such as the Client Credentials grant type and how often to prompt the user for consent.\r\n>\r\n> [...]\r\n>\r\n> As stated above, the authorization server SHOULD NOT process authorization requests automatically without user consent or interaction, except when the identity of the client can be assured.\r\n\r\nThere is currently no wording about the consent verification (and especially under which conditions the authorization may skip the verification of the user's consent) outside of a generic things in V3:\r\n\r\n> 3.2.5 [ADDED] Verify that creating a session for the application requires the user's consent and that the application is protected against a CSRF-style attack where a new application session for the user is created via SSO without user interaction.\r\n\r\nThreat: if consent verification can be skipped some may (usually on the ground that the user consent has already been given in a previous grant), this could be exploited by an attacker in order to have the authorization server issue access tokens without the user's consent.\r\n\r\nShould some verification/wording about user consent verification be included somewhere in the OAuth chapter?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Nqbfe",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Example of Keycloak not checking user consent for UMA grants: https://github.com/keycloak/keycloak/issues/30779#issuecomment-2192706558 :wink: ",
+      "createdAt": "2024-09-26T11:44:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2376710110",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqkeP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With 3.2.5 I addressed (https://github.com/OWASP/ASVS/issues/1815) (in my opinion) this problem - that you can not create a session for the user without user interaction / consent.\r\n\r\nAt the moment I can not see the need to create a new and separate requirement. Or this there specific aspect that is not covered? The text for current 3.2.5 can be improved for sure.",
+      "createdAt": "2024-09-26T12:03:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2376746895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Nvs7B",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> With 3.2.5 I addressed (https://github.com/OWASP/ASVS/issues/1815) (in my opinion) this problem - that you can not create a session for the user without user interaction / consent.\r\n\r\nThe 3.2.5 talks about session and is discussed in the context of session management. This actually applies to OAuth (*authorization*) flows as well which are not really sessions.",
+      "createdAt": "2024-09-26T23:02:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2378092225",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Nw-4q",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "At the moment 3.2.5 just got in with the first wording that came to mind and to the first place that seems suitable.\r\n\r\nIf we will create new requirement for authorization or for OAuth, it must be some clear and specific reason to do that. My first option could be cover new needs into current 3.2.5, make it more abstract or wider, and maybe cover it in business logic flows.\r\n\r\nWe can make 3.2.5 more towards asking consent, as for CSRF we have a separate requirement to cover that.",
+      "createdAt": "2024-09-27T05:27:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2378427946",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NxBeE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A note on terminology: OAuth is not really an authorization framework, even though the documentation says it is. This implies traditional access control, which is not OAuth’s job.\r\n\r\nOAuth is about access delegation - granting a third-party application or service limited access to resources without sharing credentials.\r\n\r\nThis distinction is important. Many have noted that it's confusing to call OAuth an authorization framework, and I agree. It can mislead developers. Calling it an access delegation framework—a distinct subset of authorization—is much clearer, and I believe the ASVS documentation should clarify this.",
+      "createdAt": "2024-09-27T05:38:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2378438532",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N7pPs",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> We can make 3.2.5 more towards asking consent, as for CSRF we have a separate requirement to cover that.\r\n\r\nSounds like a good approach to address consent, if it is clear that this also applies to OAuth scenarios (access delegation)  \r\n\r\n>The 3.2.5 talks about session and is discussed in the context of session management. This actually applies to OAuth (authorization) flows as well which are not really sessions.\r\n\r\nAs a side note, in #2044 it is suggested to have a requirement like \"Verify that user consent by default requested a minimal set of scopes.\". I think it should be part of this discussion.  ",
+      "createdAt": "2024-09-29T07:33:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2381222892",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OwHvu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The goal here probably should be a quite abstract requirement. To achieve that, I think we should list situations it must cover.\r\n\r\n@randomstuff - I think you can provide some examples for a starter?",
+      "createdAt": "2024-10-05T08:25:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2394979310",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O6adr",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> A note on terminology: OAuth is not really an authorization framework\r\n\r\nWell it *is* (still) (in a sense) an authorization framework in the sense that it is about resource owner authorizing access to the resource but not an authorization framework in the sense that its not so much about enforcing business rules about the deciding if this user actually has access to the resource. (?)",
+      "createdAt": "2024-10-07T19:06:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2397677419",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O6vTA",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Wording a requirement on this is not easy because on the one hand consent verification is important but on the other hand some uses cases will require to skip user consent in some cases (for example some [Token Exchange](https://datatracker.ietf.org/doc/html/rfc8693) use cases).\r\n\r\nStraw man proposal:\r\n\r\n> Verify that, the authorization server does not process interactive authorization requests automatically without user consent if the identity of the client cannot be assured. (← this one comes straight from the OAuth 2.1 draft)\r\n>\r\n> Verify that the authorization server does not process interactive authorization requests automatically unless skipping consent verification has been explicitly configured for this trusted client or the user has consented to this authorization recently. If the authorization server remembers user consents, these remembered consents must have an expiration after which a new user consent verification is required again. ( ← this is hairy)\r\n>\r\n> Verify that, if the the authorization server remembers consents, it provides a mean for the user to revoke them. (?)\r\n\r\nNor covered (for now?): things like [Token Exchange](https://oauth.net/2/token-exchange/) which might be exploited for \"consent escalation\".",
+      "createdAt": "2024-10-07T19:51:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2397762752",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Pu7vE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is the \"interactive\" here understandable?\r\n\r\nQuotes from \"The OAuth 2.1 Authorization Framework\"\r\n\r\n<https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-7.3>:\r\n> The authorization server SHOULD NOT process repeated authorization requests automatically (without active resource owner interaction) without authenticating the client or relying on other measures to ensure that the repeated request comes from the original client and not an impersonator.\r\n\r\n<https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-7.3.1>:\r\n> As stated above, the authorization server SHOULD NOT process authorization requests automatically without user consent or interaction, except when the identity of the client can be assured. This includes the case where the user has previously approved an authorization request for a given client ID -- unless the identity of the client can be proven, the request SHOULD be processed as if no previous request had been approved.",
+      "createdAt": "2024-10-14T14:34:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2411445188",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PvD7I",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Is the \"interactive\" here understandable?\r\n\r\nMaybe \"user-to-machine\"? The meaning is not exactly the same but I supposed that would do?\r\n",
+      "createdAt": "2024-10-14T14:47:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2411478728",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P9im4",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Coming from #2036, I'm adding to the scope of this issue the question of including sufficient information about the content of the `authorization_details` (RAR) in the consent validation.",
+      "createdAt": "2024-10-15T22:24:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2415274424",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QZnn_",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps this works?\r\n\r\n> Verify that, if the identity of the client cannot be assured, the authorization server requires user consent for all user interactive authorization requests. \r\n\r\n> Verify that processing interactive authorization requests automatically (without user consent) is only allowed if skipping consent verification has been explicitly configured for a trusted (identified) client or if the user has consented to this authorization recently.  If the authorization server remembers user consents, these remembered consents must have an expiration. \r\n\r\n> Verify that, if the the authorization server remembers consents, it provides a mean for the user to revoke them.",
+      "createdAt": "2024-10-18T14:39:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2422635007",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QZt9H",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Given that RAR is included as suggested in #2151 then it is also good to add \"sufficient information about the content of the authorization_details (RAR) in the consent validation\", perhaps\r\n\r\n> Verify that the user consent contains sufficient information about the content of the RAR authorization_details parameter.",
+      "createdAt": "2024-10-18T14:52:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2422660935",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjKqw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is additional 4 requirements?",
+      "createdAt": "2024-10-20T17:23:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2425137840",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjnBd",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes this is all quite complexe/cumbersome.\r\n\r\nCould be simplify/merge all these requirements into something like:\r\n\r\n> Verify that the authorization server does not process user authorization requests without the user consent. If user consent is verified interactively, the consent prompt must contain sufficient and clear information about the content of the requested authorizations. This include the identity of the client application, the nature of the requested authorizations (scope, resource servers, RAR authorization details) and the lifetime of these authorizations.\r\n>\r\n> Verify that, if the authorization server remembers user consent across different authorization requests, it is only done if the identity of the client can be assured and that remembered consents have a expiration.\r\n\r\nThis skips the \"bypass consent completely for some trusted clients\".",
+      "createdAt": "2024-10-20T22:16:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2425253981",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qjogf",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Or maybe:\r\n\r\n> Verify that the authorization server mitigates client impersonation by always explicitly asking for user consent in user authorization requests if the identity of the client cannot be assured.",
+      "createdAt": "2024-10-20T22:28:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2425260063",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RVjiz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussion:\r\n* consent management can be wider topic than OAuth / OIDC, maybe something to V8.3\r\n* todo: recheck V8 and asking permissions from a end-user",
+      "createdAt": "2024-10-25T17:01:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2438346931",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RZqC5",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Here follows an attempt to move part of the requirement outside of the OAuth chapter.\r\n\r\nGeneral requirement which could be outside of the OAuth chapter:\r\n\r\n> Verify the any consent prompt to the user contains sufficient and clear information about what is being consented to and that the user can revoke his persistent user consents.\r\n\r\nRequirement for the OAuth chapter:\r\n\r\n>  Verify that the authorization server mitigates malicious authorization requests by malicious clients by ensuring that the user consents to each authorization request. This consent must include the identity of the client application, the nature of the requested authorizations (scope, resource servers, RAR authorization details) and the lifetime of these authorizations.\r\n\r\n> Verify that the authorization server mitigates client impersonation by always explicitly asking for user consent in user authorization requests if the identity of the client cannot be assured.\r\n",
+      "createdAt": "2024-10-26T07:56:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2439422137",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RpMmF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In V8.3 we have requirement V8.3.3:\r\n> V8.3.3 Verify that the application provides guidance regarding how it collects and uses of personal data and that users have to provide opt-in consent for this use.\r\n\r\nBut with this wording it covers only informing the user, but does not cover \"consent management\".\r\n\r\n---\r\n\r\nChange in the first part:\r\n> Verify that the authorization server ensures that the user consents to each authorization request to mitigate malicious authorization requests by malicious clients. This consent must include the identity of the client application, the nature of the requested authorizations (scope, resource servers, rich authorization request (RAR) authorization details) and the lifetime of these authorizations.\r\n\r\nTo be sure - is the second proposed requirement is alternative to the first one or additionally to the first one?",
+      "createdAt": "2024-10-29T07:56:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2443495813",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SajGU",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think the second is in addition to the first one, where the first one is suggested \"outside of the OAuth chapter\". A suggestion is to also include \"requested a minimal set of scopes\", and add this to the first one. Then, if I have understood discussion in this topic, we would have three requirements (where the first one is not for the OAuth chapter)\r\n\r\n> Verify that any consent prompt to the user contains sufficient and clear information about what is being consented to, **requests a minimal set of privileges**, and that the user can revoke his persistent user consents. \r\n\r\n> Verify that the authorization server ensures that the user consents to each authorization request to mitigate malicious authorization requests by malicious clients. This consent must include the identity of the client application, the nature of the requested authorizations (scope, resource servers, rich authorization request (RAR) authorization details) and the lifetime of these authorizations.\r\n\r\n> Verify that, if the identity of the client cannot be assured, the authorization server mitigates client impersonation by always explicitly asking for user consent in user authorization requests.",
+      "createdAt": "2024-11-05T07:33:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2456433044",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SbFor",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": " > Verify that any consent prompt to the user contains sufficient and \nclear information about what is being consented to, *requests a minimal \nset of privileges*, and that the user can revoke his persistent user \nconsents.\n\nJust a brief note on this. Some services (like my bank) forces a set of \npermissions on the client. Some services (like Google) gives the user \nthe option to choose from a larger list of scopes.\n\nI'm not sure how to add this in but I think it's important.\n\n- Jim\n",
+      "createdAt": "2024-11-05T08:49:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2456574507",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sc0Rc",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps this?\r\n\r\n>  Verify that any consent prompt to the user contains sufficient and\r\nclear information about what is being consented to, by default requests a minimal\r\nset of scopes needed by the client, and that the user can revoke his persistent user\r\nconsents.\r\n\r\nBased on discussions concerning the first part of 3.2.5, the suggestion is to have all three suggested \"consent requirements\" in the OAuth chapter (and update 3.2.5)",
+      "createdAt": "2024-11-05T12:20:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2457027676",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sc1_U",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think the second is in addition to the first one, where the first one is suggested \"outside of the OAuth chapter\".\r\n\r\nYes, my intent was to have the first one outside of OAuth section.",
+      "createdAt": "2024-11-05T12:24:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2457034708",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SphSW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that any consent prompt to the user contains sufficient and\r\nclear information about what is being consented to, by default requests a minimal\r\nset of scopes needed by the client, and that the user can revoke his persistent user\r\nconsents.\r\n\r\nI think there is 3 separate requirements:\r\n* user is informed - easy to test, does not require extra access to program code, level 2\r\n* minimal set of scopes - complicated to test, may require access to program code, level 3. Sure, that is not covered by any other requirement?\r\n* user can revoke consent - separete test-case, level 2",
+      "createdAt": "2024-11-06T17:19:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2460357782",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SvMoX",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "How about this? (one for when consent is required, one for what the consent must (or should?) include and one for managing consents)\r\n\r\nVerify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured, the authorization server must explicitly prompt the user for consent. \r\n\r\nVerify that any consent prompted to the user contains sufficient and clear information about what is being consented to. This must include: The identity of the client application, the nature of the requested authorizations (typically based on scope, resource servers, RAR authorization details), the lifetime of these authorizations, and by default only request required authorizations.\r\n\r\nVerify that the user can review, modify and revoke granted consents at any time.",
+      "createdAt": "2024-11-07T10:19:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2461846039",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SvVQX",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In v4 we change the word \"user\" to \"consumer\" so its more generic, my suggestion.",
+      "createdAt": "2024-11-07T10:35:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2461881367",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SvYhV",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@TobiasAhnoff, OK for me.\r\n\r\nI'd want to add \"always\" here:\r\n\r\n> Verify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured, the authorization server must *always* explicitly prompt the user for consent.\r\n\r\nIt's not strictly needed but I feel it might better convey the meaning?",
+      "createdAt": "2024-11-07T10:40:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2461894741",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SvtlM",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> In v4 we change the word \"user\" to \"consumer\" so its more generic, my suggestion.\r\n\r\nGood point, but I think in this context is is more clear since we have user consent for authorizing a client, in V4 consumer is used to include both users and clients since it applies to both.\r\n\r\nSo I suggest to keep user and client separate here, ok? @jmanico ",
+      "createdAt": "2024-11-07T11:21:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2461981004",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TADoR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that any consent prompted to the user contains sufficient and clear information about what is being consented to. This must include: The identity of the client application, the nature of the requested authorizations (typically based on scope, resource servers, RAR authorization details), the lifetime of these authorizations, and by default only request required authorizations.\r\n\r\nIs this \"must include\" part written somewhere in specification? If we can be abstract enough with this one, we can include it into the other one\r\n> Verify that the authorization server ensures that the user consents to each authorization request **and provides information about what is being consented to**. If the identity of the client cannot be assured, the authorization server must always explicitly prompt the user for consent.",
+      "createdAt": "2024-11-09T15:53:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2466265617",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TAD48",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Section: I think we can handle the topic with 2 requirements. One (ask consent) is a clear fit to the authorization server section, other (provide functionality for revoke) is general and can be done many ways, so it is a general requirement.\r\n\r\nAnother option is to create a section \"Consent\" in V51.",
+      "createdAt": "2024-11-09T15:57:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2466266684",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TAMVH",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > This must include: The identity of the client application, the nature of the requested authorizations (typically based on scope, resource servers, RAR authorization details), the lifetime of these authorizations, and by default only request required authorizations.\r\n> \r\n> Is this \"must include\" part written somewhere in specification?\r\n\r\nYes, this [comes](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-client-impersonation) from the OAuth 2.1 draft security considerations:\r\n\r\n> The authorization server SHOULD enforce explicit resource owner authentication and provide the resource owner with information about the **client** and the requested authorization **scope** and **lifetime**. It is up to the resource owner to review the information in the context of the current client and to authorize or deny the request.\r\n\r\n***\r\n\r\n> One (ask consent) is a clear fit to the authorization server section\r\n\r\nI would have this requirement *outside* on the OAuth chapter. It does not only applies to OAuth flows but is applicable anytime the application prompts for user consent: the user might be tricked into consenting to things he does not intend to consent if the consent prompt is not clear enough.",
+      "createdAt": "2024-11-09T17:10:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2466301255",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TBu5J",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As it is with \"SHOULD\" and I prefer to include it to general requirement:\r\n\r\n> Verify that the authorization server ensures that the user consents to each authorization request and provides information about what is being consented to (such as scope and lifetime). If the identity of the client cannot be assured, the authorization server must always explicitly prompt the user for consent.\r\n\r\n---\r\nDo we watch it as authorization topic? Or business logic or data protection or ...\r\n\r\n> Verify that the user can review, modify and revoke granted consents at any time.",
+      "createdAt": "2024-11-10T11:55:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2466704969",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TKsif",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For the future of 3.2.5, I have opened #2368",
+      "createdAt": "2024-11-11T21:31:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2469054623",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Tgwpm",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I took the last proposition about the \"general consent\" requirement and removed some passive form to end-up with:\r\n\r\n> Verify that when the applications prompts for user consent, it presents sufficient and clear information about what is being consented to. This must include, when applicable: the nature of the requested authorizations (typically based on scope, resource servers, RAR authorization details), the identity of the authorized application, the lifetime of these authorizations, and by default only request required authorizations.\r\n\r\nThe last part (\"and by default only request required authorizations\") is a separate concern for me and I would like to move it out of this requirement (is this not already covered somewhere?).\r\n\r\nFormulated like this, it could be moved outside of the OAuth chapter into V4 (?).\r\n\r\nI suggest we focus on this requirement for now and discuss the other requirement(s) when this one is somewhat settled.\r\n",
+      "createdAt": "2024-11-13T21:33:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2474838630",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TjXOM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please compare it with https://github.com/OWASP/ASVS/issues/2120#issuecomment-2466704969\r\n\r\nFirst sentence - clear.\r\n\r\n2nd sentence - \"must include\" - in spec it was \"should\". I would not like to have a situation, when first part is covered - a clear message to user about the consent, but let's say \"not enough information about resource servers\". It may be understandable based on context. In this situation - is the requirement satisfied or not?\r\n\r\n> and by default only request required authorizations\r\n\r\nThis part is hard to test and it is a separate topic as I mentioned in https://github.com/OWASP/ASVS/issues/2120#issuecomment-2460357782 (minimal set of scopes)\r\n\r\nIf it requires more discussion, maybe it's better to have some quick call. It's 36th comment for this issue, does not feel like an effective way :)",
+      "createdAt": "2024-11-14T06:32:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2475520908",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Tmqin",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Direction here - we should find at least some solution based on OAuth/OIDC specs and then see, is there any reason and solution to have an abstract version of the requirements.",
+      "createdAt": "2024-11-14T13:40:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2476386471",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ToxiI",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposition based on your feedback, comments and our discussion:\r\n\r\n> Verify that when the authorization server prompts for user consent, it presents sufficient and clear information about what is being consented to. This should include, when applicable: the nature of the requested authorizations (typically based on scope, resource servers, RAR authorization details), the identity of the authorized application, the lifetime of these authorizations.\r\n>\r\n> Verify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured, the authorization server must always explicitly prompt the user for consent.\r\n\r\nAbout:\r\n\r\n> 2nd sentence - \"must include\" - in spec it was \"should\". I would not like to have a situation, when first part is covered - a clear message to user about the consent, but let's say \"not enough information about resource servers\". It may be understandable based on context. In this situation - is the requirement satisfied or not?\r\n\r\nA malicious application A might attempt to fake a authorization request from target application B (for example using an open redirect or by adding a malicious link in application B) in order to trick the user into granting an authorization to A whereas the user thinks he is granting an authorization to B. This can be mitigated (somehow) by the authorization server by displaying the identity of the client application in the user consent prompt.\r\n\r\nTherefore, I would argue that the requirement should not be satisfied in this case (lack of sufficient information).\r\n\r\n",
+      "createdAt": "2024-11-14T16:53:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2476939400",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UdVyw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "2 requirements added:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.16** | [ADDED] Verify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured, the authorization server must always explicitly prompt the user for consent. | | ✓ | ✓ |\r\n| **51.2.17** | [ADDED] Verify that when the authorization server prompts for user consent, it presents sufficient and clear information about what is being consented to. When applicable this should include the nature of the requested authorizations (typically based on scope, resource server, rich authorization requests (RAR) authorization details), the identity of the authorized application and the lifetime of these authorizations. | | ✓ | ✓ |\r\n\r\nOne requirement for consent management I left out from the PR and I opened a separate issue for that #2401",
+      "createdAt": "2024-11-21T10:22:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2120#issuecomment-2490719408",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-26T11:39:40Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    }
+  ],
+  "number": 2120,
+  "state": "CLOSED",
+  "title": "V51 OAuth: discuss verification of the user consent",
+  "url": "https://github.com/OWASP/ASVS/issues/2120"
+}

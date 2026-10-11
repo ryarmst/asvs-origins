@@ -1,0 +1,303 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nspinf-off from https://github.com/OWASP/ASVS/issues/1620#issuecomment-1750098336\r\n\r\nSomthing to discuss and maybe cover as requirement.\r\n\r\nFor every resource or external connection, there must be analyzed and documented expected behaviour - how application need to behave if some resource (e.g. some external API) is not available.\r\n\r\nIt is related with #1620 as if resource is not available, there is possibility that all connection start waiting some timeout, which can be too long (example 30sec or 5min) and it gives quite easy vector for denial of service.\r\n\r\nSo additionally, documentation must contain - what is the timeout for each service (default timeout) or request (if some requires extra solution) and an application should monitor \"slow responses\" (which also requires definition, what is \"slow\").\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5pa18L",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "That is indeed an interesting situation, where one service being unavailable brings down the whole application. It would make the application fragile, but I am not sure it would be a *security* issue. If an attacker cannot bring the service down on purpose, then there does not seem to be an attack vector.",
+      "createdAt": "2023-10-18T14:55:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1768644363",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pbRYB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If an attacker cannot bring the service down on purpose, then there does not seem to be an attack vector.\r\n\r\nAttack vector is just one way. Every application need to provide also availability and if it crashes because some external connection is not available, there is no availability - was it taken down by external attacker or by internal code/configuration issue or by external service problem, does not matter anymore.\r\n\r\nThe goal should be to provide information about the situation and maybe some extra temporary workaround - like data which you need to send to external API you can temporarily save on the application side (yes, not always possible but just an example).",
+      "createdAt": "2023-10-18T15:39:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1768756737",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p03Ul",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this is a concept that already exists in the [SRE](https://en.wikipedia.org/wiki/Site_reliability_engineering) world: https://microservices.io/patterns/reliability/circuit-breaker.html \r\n\r\nDo you think still think we should still be referencing it?",
+      "createdAt": "2023-10-23T15:30:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1775465765",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qUgw8",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, would this topic also cover the problem of let's say an application depending on an API, but if that API is down then it hangs, brings down the application or even causes it to have unintended behavior such as crashes? If it is, then it is indeed an interesting case of denial of service and I believe it is worth noting to add. I've only seen this behavior twice on an application pentest. Maybe it is more common than I know of. Anyone who can attest more to it? \r\n\r\nJust throwing out more scenarios to paint this issue well. ",
+      "createdAt": "2023-10-28T09:41:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1783761980",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qUiOC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So this is a concept that already exists in the [SRE](https://en.wikipedia.org/wiki/Site_reliability_engineering) world: https://microservices.io/patterns/reliability/circuit-breaker.html\r\n> \r\n> Do you think still think we should still be referencing it?\r\n\r\nI don't get it - how covering it in the SRE covers it in/for the ASVS?\r\n\r\n@csfreak92 - I feel I have answered to those questions here: https://github.com/OWASP/ASVS/issues/1748#issuecomment-1768756737 . So, yes, it should cover the case when some API is down, but not limited to it.\r\n",
+      "createdAt": "2023-10-28T10:08:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1783767938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qiS11",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I mean that whilst technically it is a security issue but it is something that is more suited to the SRE function to address and therefore do we specifically want a separate requirement for it?",
+      "createdAt": "2023-10-31T14:50:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1787374965",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qieLF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's up to discussion. I have seen it as a problem during pen-tests and that is the reason to rise it here.\r\n\r\nI can see this one more important as requirement compared to \"just close everything nicely when everything works anyway\" (https://github.com/OWASP/ASVS/issues/1620) but I can see those can be combined.",
+      "createdAt": "2023-10-31T15:12:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1787421381",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qi7yh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So you are thinking of a requirement along the lines of:\r\n\r\n> Verify that the application is designed in a way that a failure to access external resources does not result in the entire application failing, for example using the circuit breaker pattern.",
+      "createdAt": "2023-10-31T16:14:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1787542689",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qjMWD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we can finetune some words here, but the direction is really good one",
+      "createdAt": "2023-10-31T16:54:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1787610499",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qjOBj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, please can you suggest category, CWE (if possible) and level :)",
+      "createdAt": "2023-10-31T16:58:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1787617379",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qjq1W",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "## Category / section - not easy task.\r\n\r\nBy just section title it fits to \"V1.9 Communications Architecture\". In reality V1.9 probably will be cleaned up via https://github.com/OWASP/ASVS/issues/1443 and section name is out of sync from V9 Communication Encryption.\r\n\r\nBy just section title it fits to \"V9.2 General Service to Service Communication Security\". In reality V9 is limited to encryption related requirements.\r\n\r\nBy category title it fits to \"V12 Files and Resources\". In reality V12 do not contain this kind of resource handling requirements.\r\n\r\nBy category name it may fit to \"V13 API and Web Service\", but the category is more providing the service, not using the service.\r\n\r\nBy idea it also fits to V7.4 Error handling - that application should not die completely when communication with external resource fails.\r\n\r\n\r\n## CWE\r\n\r\nAfter searching suitable one, I gave up. What fits by title do not fit by description etc.\r\n\r\n\r\n## Level\r\n\r\nBy current logic, it's level 2.\r\n",
+      "createdAt": "2023-10-31T18:12:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1787735382",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5q-Y7U",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In terms of chapter, I think V12 makes the most sense. Maybe we need a new section there called application resources which would include this requirement as well as the new requirement from #1620. What do you think?\r\n",
+      "createdAt": "2023-11-06T12:45:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1794739924",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rBOeW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It fits together with #1620. I'm not fan ot the service section in V12, but as I don't have any better idea, then let's put those requirements there and we can move them around later if needed.",
+      "createdAt": "2023-11-06T16:53:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1795483542",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5s1pkp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Reopen for clarification.\r\n\r\nAs added requirement 12.7.1 purpose was not clear (discussion in https://github.com/OWASP/ASVS/issues/1778), it makes sense to improve it.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.7.1** | [ADDED] Verify that the application is designed in a way that a failure to access external resources does not result in the entire application failing, for example using the circuit breaker pattern. | | ✓ | ✓ | |\r\n\r\nThe main purpuse is the point - application must handle the situation when some connection is not available, so it puts me to rethink (https://github.com/OWASP/ASVS/issues/1748#issuecomment-1787735382) the category/section and it seems better match for V7.4.\r\n\r\nCurrent V7.4 Error Handling\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.4.1** | Verify that a generic message is shown when an unexpected or security sensitive error occurs, potentially with a unique ID which support personnel can use to investigate. | ✓ | ✓ | ✓ | 210 |\r\n| **7.4.2** | [MODIFIED] Verify that a consistent and standardized exception handling mechanism (or a functional equivalent) is used across the codebase. | | ✓ | ✓ | 544 |\r\n| **7.4.3** | Verify that a \"last resort\" error handler is defined which will catch all unhandled exceptions. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 431 |\r\n\r\n\r\n* Option 1 - to just move current 12.7.1 to 7.4 (I prefer this to put special spotlight for the problem - nowadays most web application have some external connections to handle)\r\n* Option 2 - as \"handle the error\" in an abstract way it is already covered, maybe just merge that into 7.4.3 (mention there)\r\n* Option 3 - leave it in V12.7",
+      "createdAt": "2023-11-24T19:03:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1826003241",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5s1zTj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Suggestion to enhance 7.4.2 to make sure granularity is used.\n\n7.4.2 [MODIFIED] Verify that a consistent and standardized exception \nhandling mechanism, or a functional equivalent, is uniformly implemented \nacross the codebase, and ensure it adequately addresses distinct error \ntypes including system, application,user-generated and security-specific \nexceptions\n\n",
+      "createdAt": "2023-11-24T19:52:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1826043107",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5s-1tO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Suggestion to enhance 7.4.2 to make sure granularity is used. 7.4.2 [MODIFIED] Verify that a consistent and standardized exception handling mechanism, or a functional equivalent, is uniformly implemented across the codebase, and ensure it adequately addresses distinct error types including system, application,user-generated and security-specific exceptions\r\n\r\nFor me it feels like a separate issue.",
+      "createdAt": "2023-11-27T18:41:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1748#issuecomment-1828412238",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-10-09T15:25:32Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 1748,
+  "state": "CLOSED",
+  "title": "clarification: application need to behave the situation when some resource is not available (current 12.7.1)",
+  "url": "https://github.com/OWASP/ASVS/issues/1748"
+}

@@ -1,0 +1,976 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirement:\n* v5.0.be-50.3.4 [MODIFIED, MOVED FROM 14.4.6] Verify that an suitable Referrer-Policy header field is included to prevent sensitive information in the URL from being exposed to untrusted parties via the Referer header.\n\nInitiated from the reasoning https://github.com/OWASP/ASVS/issues/2766#issuecomment-2753699644.\n\nThings to solve here:\n\n  * `Referrer-Policy` is needed, if there is a content that is rendered in the browser and the content contains links or loads cross-origin resources\n  * `Referer` leakage can be also mitigated by defining `Referrer-Policy` in HTML `<meta>` elements, or per link or resource attributes in HTML document, such as `rel` or `referrerpolicy`.\n  * if the requirement is not fully modified, \"Verify that an suitable Referrer-Policy header field is included\" must define \"included where?\"\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6kMIfh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How about:\n\n\"_v5.0.be-50.3.4 [MODIFIED, MOVED FROM 14.4.6] Verify that the application implements a mechanism to prevent sensitive information in the URL from being exposed to untrusted parties via the Referer header. Possible options include returning a suitably configured Referrer-Policy header field in the response or using HTML meta tags or using the `rel` or `referrerpolicy` HTML attributes when defining links._\"",
+      "createdAt": "2025-03-26T14:31:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2754643937",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kMhFi",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yeah, I think this is nice direction.\n\nReading it, we may want to make another changes:\n\n* \"sensitive information\" > to avoid path and query leakage from URL to cross-origin parties or avoid entire URL leakage (we should not have sensitive information part of the URL in the first place per v5.0.be-8.1.11)\n* \"via the Referer header\" > \"via the Referer HTTP request header field\"\n\nPossible options include returning a\n\n* per HTTP response - suitably configured Referrer-Policy header field in the response - maybe we should highlight it somehow, that this is preferred solution to cover any cross-origin resource loading\n* per HTML or other renderadble document - or using HTML meta tags\n* per reference or resource tag from HTML document (or DOM? It should be valid for SVG as well) - or using the rel or referrerpolicy HTML attributes when defining links.\n\n---\n\nOne concern - at the moment the focus is on HTML document, but referer leakage goes also from CSS using `import()` or background-uri's.\n\n",
+      "createdAt": "2025-03-26T15:01:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2754744674",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kNIbm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Reading it, we may want to make another changes:\n\nSo I have tried to address these\n\n> Possible options include returning a\n\nI'm not sure I want to get into this level of detail\n\n\"_v5.0.be-50.3.4 [MODIFIED, MOVED FROM 14.4.6] Verify that the application implements a mechanism **to prevent path and query data in the URL from being exposed to 3rd party services** via the Referer http request header field. Possible options include returning a suitably configured Referrer-Policy header field in the response or using HTML meta tags or using the rel or referrerpolicy HTML attributes when defining links._\"",
+      "createdAt": "2025-03-26T15:49:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2754905830",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kPLem",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Attempt to apply all details:\n> Verify that the application instructs the browser not to leak path and query data of URL via the 'Referer' HTTP request header field to 3rd party services. It is recommended to apply the 'Referrer-Policy' HTTP response header field for HTTP responses, or it may be achieved on the document level by setting the policy into a meta element per document or separately for each related HTML tag attribute (such as 'rel' and 'referrerpolicy').\n\nProblem: there can be need that the application should not send any `Referer` (`no-referrer`), not only hiding path and query (`origin-when-cross-origin`)",
+      "createdAt": "2025-03-26T18:46:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2755442598",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kPvhW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A brief note that I think we should consider.\n\n**strict-origin-when-cross-origin** is the default policy if no policy is specified for most browsers since November 2020 which does not leak query string parameters. Previously the default was **no-referrer-when-downgrade** which is horrific. \n\nIf folks just don't set a Referrer-Policy header, they are well protected these days. I do not think setting this header should be required for all apps, making sure users are not using old browsers is much more important IMO.",
+      "createdAt": "2025-03-26T19:47:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2755590230",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kSNrb",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As per @jmanico's comment and when also considering v5.0.be-8.1.11 as mentioned by @elarlang, I don't see the justification for the case \"_to prevent path and query data in the URL_\". I think it's still worthwhile to set/declare a policy, but does it warrant a requirement?",
+      "createdAt": "2025-03-27T01:48:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2756238043",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kTk92",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In September 2021 Safari started supporting strict-origin-when-cross-origin as the default. This is the last major browser to enable this default.\n\nReference:\n\nhttps://caniuse.com/mdn-http_headers_referrer-policy_default_strict-origin-when-cross-origin\n\nSo one viable option to to prevent referrer leakage is just to do *nothing* and let the browser defaults take over.\n\nThe % of sites seeing older browsers before this time (Sept 2021/Safari before v15) is much less than 1% and will likely see the site in a broken condition if they are even allowed.",
+      "createdAt": "2025-03-27T04:12:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2756595574",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kUMXZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The question of the path-query part is valid. But if we do not have this requirement, I think we will not have a no-opener requirement either - the effect there is questionable.\n\nBut one more use-case with Referer - sometimes there are situations, where applications are hosted in an internal network or in addresses that should not advertise their existence and probably should not leak any referer at all.",
+      "createdAt": "2025-03-27T05:42:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2756756953",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kUrOM",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think that is fair, @elarlang - perhaps suggest removing referrer headers completely for L3 apps? \n\nThis is a bit tricky. I think L3 apps (in general) should not be hosting advertisements or depending on content from third party sites in the first place regardless of referrer policy.\n\nThe only way an internal website could lead to a referrer header leak is if they \"link out\" somehow in the first place, which is likely a no-go for L3 apps. Especially for private internal L3 apps.\n\nBut I agree with your post @elarlang - I just want to make sure we somehow consider the default browser behavior that has been around for the last 3+ years.",
+      "createdAt": "2025-03-27T06:27:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2756883340",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kZ6gQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Lots of good points in this thread and I am glad we can bring this requirement up to date.\n\n> But one more use-case with Referer - sometimes there are situations, where applications are hosted in an internal network or in addresses that should not advertise their existence and probably should not leak any referer at all.\n\nDo we think this convincingly passes the test of \"your app is not secure if it doesn't implement this requirement\"?\n\nAlso, it looks like you can do this with the [`no-referrer`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy#no-referrer_2) value of the Referrer-Policy but do we think there is a risk that it will break applications?",
+      "createdAt": "2025-03-27T14:26:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2758256656",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kaFNl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "There are several main ways to drop a referrer header.\n\n- rel=\"noreferrer\" in anchor tags.\n- no-referrer, no-referrer-when-downgrade, same-origin, strict-origin and strict-origin-when-cross-origin of the Referrer-Policy will drop the referrer from cross-origin requests or when downgrading from HTTPS to HTTP\n- `<meta name=\"referrer\" content=\"no-referrer\">` when you cannot control headers or for static pages\n- `fetch(\"https://api.example.com/data\", { referrer: \"no-referrer\" })` works for JS requests\n- some sites use a proxy layer or server-side middleware to drop referrer headers\n\nPS: And be careful no-referrer-when-downgrade and other more obscure policies for Referrer-Policy are not supported by Safari and FireFox.",
+      "createdAt": "2025-03-27T14:36:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2758300517",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kaKdz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Also, it looks like you can do this with the [`no-referrer`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy#no-referrer_2) value of the Referrer-Policy but do we think there is a risk that it will break applications?\n\nIt's typically dangerous to depend on a Referrer-Header for functionality or security.\n\n",
+      "createdAt": "2025-03-27T14:41:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2758322035",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kaWTd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Responses to Jim\n\n> I think that is fair, @elarlang - perhaps suggest removing referrer headers completely for L3 apps?\n\nNo, it is not up to us decide that.\n\n> The only way an internal website could lead to a referrer header leak is if they \"link out\" somehow in the first place, which is likely a no-go for L3 apps. Especially for private internal L3 apps.\n\n1. internal apps can be backoffice apps and visiting external links based on input data can be part of the workflow\n2. but no need to have links, loading any resource is sending referer, including css, fonts, background images etc\n\nResponses to Josh:\n\n> Also, it looks like you can do this with the no-referrer value of the Referrer-Policy but do we think there is a risk that it will break applications?\n\nAs users may disable sending in their browsers anyway, no-one can rely on that.\n\n---\n\nFrom information leakage perspective from path and query part - browser defaults handle the default case, the question is - do we need to address potential misconfiguration?\n\nFor internal apps that are located away from public access, there is no reason to leak their internal hostname.\n",
+      "createdAt": "2025-03-27T14:55:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2758370525",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kc6-P",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "\n> > The only way an internal website could lead to a referrer header leak is if they \"link out\" somehow in the first place, which is likely a no-go for L3 apps. Especially for private internal L3 apps.\n> \n> 1. internal apps can be backoffice apps and visiting external links based on input data can be part of the workflow\n> 2. but no need to have links, loading any resource is sending referer, including css, fonts, background images etc\n\nYup, I am with you. I consider loading resources from external domains as a way to link out, and I do not suggest that at all with L3 apps apps. Take a look at how many external javascript files github.com links to, it's zero. That's best practice for L3. They do that for a good reason at great expense of time.\n\nAnd here is yet another way to drop referrer headers when you are loading content from a external source. crossorigin=\"anonymous\" like so:\n\n`<script src=\"https://example.com/example-framework.js\" integrity=\"sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC\"\ncrossorigin=\"anonymous\">`",
+      "createdAt": "2025-03-27T18:25:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2759045007",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kc8yy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Too lazy to recheck this at the moment, but crossorigin=\"anonymous\" should not affect referer, but only user-credentials:\nhttps://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/crossorigin#anonymous",
+      "createdAt": "2025-03-27T18:28:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2759052466",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kc-nK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "You're absolutely right. Here is the fix:\n\n`<script src=\"https://example.com/example-framework.js\" integrity=\"sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC\"\ncrossorigin=\"anonymous\" referrerpolicy=\"no-referrer\">`\n\n",
+      "createdAt": "2025-03-27T18:31:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2759059914",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kigvn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Additionally, we should watch the Referer leakage as a privacy thing (not as a technical information leakage only).\n\nIt leaks the information, that this user, with this IP, with this user-agent, came from this site at this time.\n\nThis applies also to hosting contents in CDN's, including Google Fonts.\n\nThere have been interesting court cases on that field:\nhttps://www.llp-law.de/en/a-wave-of-warnings-and-google-fonts-what-do-you-need-to-watch-out-for-munich-regional-court-judgement-of-30-03-2023-ref-4-o-13063-22/",
+      "createdAt": "2025-03-28T08:12:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2760510439",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kiiGH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The privacy comment is very interesting Elar. I'm with you on this 100%. \n\nAll the more reason why L3 apps should really consider not hosting any content from a third party site, IMO.",
+      "createdAt": "2025-03-28T08:15:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2760515975",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kxaiN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I don't think I got an answer to this question: in it's current form where parameters are not leaked, do we think this issue convincingly passes the test of \"your app is not secure if it doesn't implement this requirement\"?",
+      "createdAt": "2025-03-30T06:52:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2764417165",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kxb88",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> So I don't think I got an answer to this question: in it's current form where parameters are not leaked, do we think this issue convincingly passes the test of \"your app is not secure if it doesn't implement this requirement\"?\n\nBased on existing browser standards since 2021, developers doing nothing will lead to query parameters not being leaked via referrer headers.\n\nBut if you support older browsers pre-2021 then the answer is absolutely yes, if you don't (somehow) prevent referrer leakage based on one of the methodologies above, then you have an insecure app.\n\nWhat makes this even more interesting is that some of these older browsers do not support the newer referrer leakage prevention methologies.",
+      "createdAt": "2025-03-30T07:11:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2764422972",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kxmm6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We talk about L2 and potentially L3 requirements here and I would say that by default this is not an issue because most likely that old browsers lack some other security features and getting stuck into related requirements.\n\nAt the moment we have 2 issues to solve\n* The main one is actually privacy thing if the application leaks the fact that this user, from this IP, this user-agent, at this time, visited a site on that hostname.\n* The second one is, if someone is messing with default header setup and causing a technical information leakage.\n\nedit: for sensitive data we have a L2 requirement:\n> V14.2.3 / v5.0.be-8.1.8 Verify that defined sensitive data is not sent to untrusted parties (e.g., user trackers) to prevent unwanted collection of data outside of the application's control.",
+      "createdAt": "2025-03-30T09:16:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2764466618",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kyeih",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, one a bit lengthy proposal to conclude all that:\n> Verify that the application instructs the browser to not leak data to 3rd parties via the Referer HTTP request header field, that can be technically sensitive (such as path and query part of the URL, or the hostname from the application that is not public) or contain privacy concerns (the fact that given user-agent visited the application on that time). It can be achieved to apply a suitable configuration via the 'Referrer-Policy' HTTP response header field for HTTP responses, or on the document level by setting the policy into a meta element per document, or separately for each related HTML tag attribute (such as 'rel' and 'referrerpolicy').",
+      "createdAt": "2025-03-30T18:49:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2764695713",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k2f5S",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we need something shorter. I also think that the privacy concern should be moved to section text as otherwise it gets really long...\n\nHow about:\n\n\"_Verify that the application implements a mechanism to prevent sensitive data from the Referer HTTP request header field leaking to 3rd party services, (such as path and query data in the URL or the hostname from an application that is not public). Possible options include returning a suitably configured Referrer-Policy header field in the response or using HTML meta tags or using the 'rel' or 'referrerpolicy' HTML attributes when defining links._\"",
+      "createdAt": "2025-03-31T10:00:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2765749842",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6k6-b4",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is the right direction but I am concerned that we are not addressing the default behavior. Very often the right answer is not to instruct the browser to remove headers from the application but to do nothing and accept browser defaults. Sometimes we need to handle privacy for internal apps but sometimes we need to at least send the origin to get advertising credit.\n\nThis is complex. But I'm happy to let it go and accept the current suggestions.",
+      "createdAt": "2025-03-31T17:38:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2766923512",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lBXt3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the problem @jmanico is that in the privacy scenario which Elar outlines, the default [`strict-origin-when-cross-origin`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy#strict-origin-when-cross-origin_2) setting still discloses the origin which might be sensitive for internal apps.",
+      "createdAt": "2025-04-01T08:33:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2768599927",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lHnWL",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My point is if you monetize your application via advertising or affiliate links, then you *need* to send the origin in the referrer header for monetization.\n\nIf it's an internal application that requires privacy, then I agree - you don't want to send any referrer header at all. But we can't suggest this for all apps. It will break things.\n\nEither way, the most important security aspect here is not to send query string parameters cross origin which is the browser default.",
+      "createdAt": "2025-04-01T17:47:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2770236811",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lagET",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(Note that this is now [3.4.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Web-Frontend-Security.md#v34-browser-security-mechanism-headers))\n\nSo how about:\n\n\"_Verify that the application implements a mechanism to prevent sensitive data from the Referer HTTP request header field leaking to 3rd party services, (such as path and query data in the URL or the hostname from an application that is not public). Note that this is default behavior on modern browsers. Otherwise, possible options include returning a suitably configured Referrer-Policy header field in the response or using HTML meta tags or using the 'rel' or 'referrerpolicy' HTML attributes when defining links._\"\n\n",
+      "createdAt": "2025-04-03T10:10:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775187731",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lbS88",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There is mismatch between\n\n> or the hostname from an application that is not public\n\nand\n\n> Note that this is default behavior on modern browsers\n",
+      "createdAt": "2025-04-03T11:04:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775396156",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lbvHw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ah yeah, sorry. So I think we should do:\n\n\"_Verify that the application implements a mechanism to prevent sensitive data from the Referer HTTP request header field leaking to 3rd party services, (such as path and query data in the URL ~~or the hostname from an application that is not public~~). Note that this is default behavior on modern browsers. Otherwise, possible options include returning a suitably configured Referrer-Policy header field in the response or using HTML meta tags or using the 'rel' or 'referrerpolicy' HTML attributes when defining links._\"",
+      "createdAt": "2025-04-03T11:52:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775511536",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lc1Be",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So Elar wants to keep the privacy thing in which makes sense and I agree with Jim that we should also be highlighting the default behaviour.\n\nSo how about:\n\n\"_Verify that the application implements a mechanism to prevent sensitive data from the Referer HTTP request header field leaking to 3rd party services, (such as path and query data in the URL). Note that this is default behavior on modern browsers. Otherwise, possible options include returning a suitably configured Referrer-Policy header field in the response or using HTML meta tags or using the 'rel' or 'referrerpolicy' HTML attributes when defining links. For an application that is not public, the configuration should be strengthened to ensure that the hostname will also not leak via the Referer HTTP request header field._\"\n",
+      "createdAt": "2025-04-03T13:29:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775797854",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lc6qM",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction. Here is my suggestion:\n\n_Verify that the application explicitly sets a Referrer-Policy to prevent leakage of sensitive URL data to third-party origins via the Referer header. While modern browsers default to strict-origin-when-cross-origin, explicitly setting no-referrer, origin, or strict-origin is recommended. Internal applications should prefer no-referrer to maximize privacy and prevent hostname leakage._",
+      "createdAt": "2025-04-03T13:37:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775820940",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lc75F",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I purposely dropped the different ways to set a referrer policy to keep it concise. 🤷‍♂️ This one is getting hefty. ",
+      "createdAt": "2025-04-03T13:38:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775825989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ldD0Q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I can support that, some tweaks:\n\n\"_Verify that the application explicitly sets a Referrer-Policy to prevent leakage of sensitive URL data **(such as path and query data)** to third-party **services** via the Referer **HTTP request header field**. While modern browsers default to strict-origin-when-cross-origin, **this will need to be explicitly set for older browsers or where a stricter policy is required**. Internal applications should use no-referrer to prevent hostname leakage._\"",
+      "createdAt": "2025-04-03T13:49:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775858448",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ldS2Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I really don't think the requirement text is the place to explain browser default behavior. If this is really needed at all, it can be done in the section text.",
+      "createdAt": "2025-04-03T14:08:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775920024",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ldiq4",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I have to agree Elar, that removing default behavior cleans this up. I'm with you now.\n\nThere are a limited number of policies and not all of them are safe. I suggest we recommend policies that never send the query string. Either way, I suggest we aim for exact policy suggestions.\n\n- Referrer-Policy: no-referrer (super safe)\n- Referrer-Policy: no-referrer-when-downgrade (awful)\n- Referrer-Policy: origin (always sends (only) the origin - good for public, bad for private)\n- Referrer-Policy: origin-when-cross-origin (leaks query string same origin, bad)\n- Referrer-Policy: same-origin (leaks query string same origin, bad)\n- Referrer-Policy: strict-origin (Don't send the referrer for cross-origin requests, ok for private).\n- Referrer-Policy: strict-origin-when-cross-origin (browser default, sends the querystring)\n- Referrer-Policy: unsafe-url (awful)\n\nI think the only policies we want to suggest will drop the referrer and never send a querystring.\n\nSo no-referrer, origin and strict-origin are the safest for public sites. So perhaps something like:\n\n_Verify that the application explicitly sets a Referrer-Policy to no-referrer, origin or strict-origin to prevent leakage of sensitive URL data (such as path and query data) via the Referer HTTP request header field. Internal applications should use no-referrer to prevent hostname leakage._\n",
+      "createdAt": "2025-04-03T14:29:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2775984824",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ldw8i",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "... and if we do not mind sending the referrer and query string for _same origin requests_, then:\n\n- **same-origin and no-referrer** are ok for even internal sites since they does not send any referrer cross-origin. \n- **no-referrer, origin, origin-when-cross-origin, strict-origin and strict-origin-when-cross-origin** are ok for public sites since they leak no referrer cross-origin but do leak the query string same origin for some of these policies.\n\n... if we _never_ want to suggest sending the query string then when should suggest\n\n- **no‑referrer** for private sites\n- **no‑referrer, origin or strict‑origin** for public sites\n\n",
+      "createdAt": "2025-04-03T14:47:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2776043298",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ld6Ft",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so how about:\n\n\"_Verify that the application explicitly sets a Referrer-Policy of strict-origin-when-cross-origin to prevent leakage of technically sensitive data to third-party services via the Referer HTTP request header field. This could include the path and query part of the URL or contain privacy concerns (the fact that given user-agent visited the application on that time). Internal applications should use same-origin or no-referrer to prevent hostname leakage as well._\"",
+      "createdAt": "2025-04-03T14:59:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2776080749",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lgZCY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For the focus - we don't need implementation details, we need to say what is the problem to solve.\n\nAll we need to say is:\n> Verify that the application instructs the browser not to have an unintended data leak from data of the URL via the 'Referer' HTTP request header field to 3rd party services.\n\nThe rest is cheat sheet material and nice to have.",
+      "createdAt": "2025-04-03T19:27:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2776731800",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lgaxQ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So we are back to (close to) the original requirement.\n\n_Verify that an suitable Referrer-Policy is included to prevent sensitive information in the URL from being exposed to untrusted parties via the Referer header._\n\nI personally think we **_do_** want to add implementation details here. Otherwise how can we test this? As is, it just means a Referrer-Policy needs to be there, and several of those policies are super insecure. In order for this to be testable, I think we need to explain WHAT to test for.\n\nOther questions are: is it ok to send a query string to the same origin? That is debatable and testing this will change based on our opinions here.\n\nBut I am worried I am keeping this conversation going longer than needed and for that I am sorry. You are welcome to just make a call here if you do not want to get into the details of how to test for this.",
+      "createdAt": "2025-04-03T19:30:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2776738896",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lgeTb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So we are back to (close to) the original requirement.\n\nNo, it is/was solution oriented. It asked Referrer-Policy to be used, but this is not the only solution to solve the problem.\n\n> I think we need to explain WHAT to test for.\n\nTo be more precise, we need to define what kind of data we don't want to leak. Not the techniques for n+1 cases.\n\nWhat solution is used for that is not important. If there is no reference in any form to 3rd party, you don't even have this problem in theory.\n\n> Other questions are: is it ok to send a query string to the same origin? \n\nYes, you can watch pretty much the same information from access logs anyway.",
+      "createdAt": "2025-04-03T19:38:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2776753371",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lgjcG",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If it's ok to send query string data cross-origin, then the rules are specific:\n\n* **same-origin and no-referrer** are ok for internal sites since they does not send any referrer cross-origin.\n* **no-referrer, origin, origin-when-cross-origin, strict-origin and strict-origin-when-cross-origin** are ok for public sites since they leak no referrer cross-origin.\n\nAnd these rules are really specific and work for all modern browsers.\n\nWhen we suggest CSP in other requirement we get really specific about some implementation details, why not here too?",
+      "createdAt": "2025-04-03T19:49:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2776774406",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lgj6X",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": ".. and Elar. I am really excited about this topic for some reason and I do not want to upset you. You can make the call and end this conversation any time you want and I am cool with it. 🆒 ",
+      "createdAt": "2025-04-03T19:51:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2776776343",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lj6R5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You can not apply general rules because situations can be different and can be overridden per HTTP response, HTML document or HTML tag. Even if you have `Referrer-Policy: no-referrer` set, you can make an HTML tag with `referrerpolicy=\"unsafe-url\"` and it overrides the declaration from the HTTP response.\n\nSo, we can only say that do not leak information through the `Referer` header.\n\n> When we suggest CSP in other requirement we get really specific about some implementation details, why not here too?\n\nWe can be strict and precise when there is a clear situation to handle. Here, for every application and for every situation, the sensitivity of the URL can be very different, and we can not create a specific requirement that fits all.",
+      "createdAt": "2025-04-04T06:17:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2777654393",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lj-_N",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Even if you have Referrer-Policy: no-referrer set, you can make an HTML tag with referrerpolicy=\"unsafe-url\" and it overrides the declaration from the HTTP response.\n\n\nBut these are not conflicting and they are both referrer policies deployed in different ways, one is page level and one is surgical for that one url that (I think) over rides the page policy.\n\nI still suggest that only certain policies be used to avoid cross origin leakage of query string data, the leakage that really ends up being a top tier security issue. Tis why browsers changed the default. If I leak an internal origin (privacy) the damage is minimal compared to leaking sensitive query string safe cross origin.\n\nSo could I get you at least consider adding a blacklist of policies that leak query string data cross origin so they are avoided? This might be a place where a negative requirement is helpful.",
+      "createdAt": "2025-04-04T06:31:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2777673677",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lkBWA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So could I get you at least consider adding a blacklist of policies that leak query string data cross origin so they are avoided? This might be a place where a negative requirement is helpful.\n\nNo, it is situation specific - URL (path, query) what is technically sensitive information in one application it is not technically sensitive information for other application (public, non-auth functionality). Both have privacy concerns.",
+      "createdAt": "2025-04-04T06:37:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2777683328",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mD5lB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For the focus - we don't need implementation details, we need to say what is the problem to solve.\n> \n> All we need to say is:\n> \n> > Verify that the application instructs the browser not to have an unintended data leak from data of the URL via the 'Referer' HTTP request header field to 3rd party services.\n> \n> The rest is cheat sheet material and nice to have.\n\n\n\nI agree in principle and I think the subtleties about doing it using headers or meta tags or whatever definitely belong in a cheatsheet and not here. \n\n\nHowever...\n\n> I personally think we do want to add implementation details here. Otherwise how can we test this? As is, it just means a Referrer-Policy needs to be there, and several of those policies are super insecure.\n\nI think this point is also valid and that maybe we need to be a little clearer about the policy value are expecting.\n\n> You can not apply general rules because situations can be different and can be overridden per HTTP response, HTML document or HTML tag. Even if you have `Referrer-Policy: no-referrer` set, you can make an HTML tag with `referrerpolicy=\"unsafe-url\"` and it overrides the declaration from the HTTP response.\n\nI don't think this matters. We can still say what should happen, whether they implement it correctly is on the tester to verify.\n\nI therefore think that the following strikes a balance between being clear about what we are looking and the different risks in different situations, without getting to stuck into implemnentation details:\n\n\"_Verify that the application uses Referrer-Policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. The default of modern 'strict-origin-when-cross-origin' will be suitable for public sites but non-public, internal applications should use same-origin or no-referrer to prevent hostname leakage as well._\"",
+      "createdAt": "2025-04-08T10:54:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786040129",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mD_Tr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have explained why I don't like this too much.\n\n> public sites but non-public, internal applications should use same-origin or no-referrer to prevent hostname leakage as well.\n\n~~This phrase is technically incorrect, 'same-origin' leaks the origin value as the Referer value to 3rd parties.~~ \nedit: it is correct.\n\nEspecially for this case I don't like to require general rule - you may have `Referrer-Policy` to say `strict-origin-when-cross-origin` and then per external link or reference in HTML have attributes set to avoid leakage and this is the perfect situation - you have information for internal analytics (if needed) and no leakage to 3rd parties.\n\nActually, the situation is a bit annoying - the issue is not technically impactful, but I don't want to ignore it and have a technically incorrect requirement in ASVS.",
+      "createdAt": "2025-04-08T11:04:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786063595",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mEuo3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This phrase is technically incorrect, 'same-origin' leaks the origin value as the Referer value to 3rd parties.\n\nThat is not what I understand from here:\nhttps://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy#same-origin_2\n\n> Especially for this case I don't like to require general rule - you may have `Referrer-Policy` to say `strict-origin-when-cross-origin` and then per external link or reference in HTML have attributes set to avoid leakage and this is the perfect situation - you have information for internal analytics (if needed) and no leakage to 3rd parties.\n\nDo you mean that an app might want to set a more granular policy so we don't want to be too specific?",
+      "createdAt": "2025-04-08T12:21:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786257463",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mEzew",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > This phrase is technically incorrect, 'same-origin' leaks the origin value as the Referer value to 3rd parties.\n> \n> That is not what I understand from here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Referrer-Policy#same-origin_2\n\nMy bad. That is correct.\n\n> Do you mean that an app might want to set a more granular policy so we don't want to be too specific?\n\nYes. And in general, I opened the issue to get rid off this \"one fits for all\" solution that is incorrect to _require_ from everyone.",
+      "createdAt": "2025-04-08T12:28:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786277296",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mFy1N",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Yes. And in general, I opened the issue to get rid off this \"one fits for all\" solution that is incorrect to require from everyone.\n\nOk so how about one of these then:\n\n\n1) \"_Verify that the application uses Referrer-Policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. Sensitive data could include path and query data in the URL for public applications and also the hostname for non-public, internal applications._\"\n\n2) \"_Verify that the application uses Referrer-Policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field._\"\n\nI prefer Option 1 but included Option 2 as a 2nd preference.",
+      "createdAt": "2025-04-08T13:58:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786536781",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mF-As",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Something is getting lost \"in translation\" here. We can not require the  Referrer-Policy response header because this is not the only way to solve the information leakage from the Referer request header field. Why keep proposing it?\n\nAnyway, I marked it as \"next meeting\". Meanwhile the point is available in https://github.com/OWASP/ASVS/issues/2789#issuecomment-2764695713",
+      "createdAt": "2025-04-08T14:08:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786582572",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mG_Ew",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so we need to be more exact and refer to \"a referrer policy\" rather than \"Referrer-Policy\". A Referrer Policy can be set in all the ways you mentioned see: https://www.w3.org/TR/referrer-policy/#referrer-policy-delivery\n\nSo updated suggestions:\n\n\n1) \"_Verify that the application **sets a referrer policy** to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. Sensitive data could include path and query data in the URL for public applications and also the hostname for non-public, internal applications._\"\n\n2) \"_Verify that the application **sets a referrer policy** to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field._\"\n\nWe should link to the link above or the MDN link somewhere in the chapter.",
+      "createdAt": "2025-04-08T15:32:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786849072",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mHJXj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With option 1, tiny change with the 2nd part:\n> Verify that the application sets a referrer policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname.\n\nCurrent 1st part still kind of hints to use referrer-policy header or is not clear about that and the focus is \"use the soluton\" not \"solve the security problem\".",
+      "createdAt": "2025-04-08T15:46:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786891235",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mHaWa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the problem is pretty clear and I am not sure there is another way to solve this specific problem other than referrer policy. Do you know of another way?",
+      "createdAt": "2025-04-08T16:08:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2786960794",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mLouF",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is a hard one, I appreciate everyone's perspective here. Everyone. It's hard to be specific but we can't allow certain policies.\n\nHow about this or something like this? \n\n\n_Verify that the application sets a strict Referrer-Policy header (e.g., strict-origin-when-cross-origin or stricter) and does not include any sensitive information (such as authentication tokens, PII, or internal identifiers) in URLs that could be exposed via the Referer header._\n\nI think this is not that specific but specific enough to reject dangerous policies.\n\n\n\n",
+      "createdAt": "2025-04-09T01:43:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2788068229",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mOvF3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Final option:\n\n\"_Verify that the application sets a referrer policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP request header field. This can be done using the Referrer-Policy HTTP response header field or via HTML element attributes. Sensitive data could include path and query data in the URL, and for internal non-public applications also the hostname._\"\n",
+      "createdAt": "2025-04-09T09:06:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2788880759",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mP5qQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2937",
+      "createdAt": "2025-04-09T10:23:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2789#issuecomment-2789186192",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-03-26T12:25:00Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2789,
+  "state": "CLOSED",
+  "title": "v5.0.be-50.3.4 referer leakage",
+  "url": "https://github.com/OWASP/ASVS/issues/2789"
+}

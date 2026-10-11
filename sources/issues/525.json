@@ -1,0 +1,171 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQxNDc3MQ==",
+    "is_bot": false,
+    "login": "jaxley",
+    "name": "Jason Axley"
+  },
+  "body": "I'm all for schema validation where it adds value without risk, but to suggest it for all REST services seems overkill.\r\n\r\nThe JSON schema is not even standardized yet (latest draft is 07 from a year ago -- latest on IETF is 01) . Do implementations adequately keep up with the drafts and implement reliable validations?  How secure are the implementations?\r\n\r\nI worry about the additional attack surface that JSON validation adds and wonder what additional tangible benefits it provides that are worth that additional attack surface.  e.g. this nodejs library for doing schema validation introduced a regex DoS that wouldn't have been there without adding JSON schema:  https://snyk.io/test/npm/json-schema-validation\r\n\r\nThe recommendation currently applies this to L1, L2 and L3.  That seems excessive.\r\n\r\nI see \"input validation\" mentioned in the overview, but there aren't any requirements listed specific to input validation.  There could be levels of validation.\r\n\r\n1. schema validation (there are varying tolerances here as well depending on the schema definition)\r\n2. JSON parsing validation (there are varying tolerances for extra properties or missing properties when deserializing)\r\n3. Validation of the values in each JSON object value by standard input validation rules (they all still apply to APIs) -- data type, data format, length, etc.\r\n\r\nI'll add another issue related to deserialization issues and another for serialization.  I don't see any coverage of these in the guidelines.\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NjU1ODg5NA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If you do JSON sanitization before JSON validation you mitigate these risks.\n\nI think it’s otherwise •absolutely fundamental• to do JSON schema validation to ensure only specific JSON allowed for each endpoint.\n\nI ask us to please keep this is, and potentially add JSON sanitization. Folks can remote it in their fork.\n\n> On Feb 22, 2019, at 9:05 PM, Jason Axley <notifications@github.com> wrote:\n> \n> I'm all for schema validation where it adds value without risk, but to suggest it for all REST services seems overkill.\n> \n> The JSON schema is not even standardized yet (latest draft is 07 from a year ago -- latest on IETF is 01) . Do implementations adequately keep up with the drafts and implement reliable validations? How secure are the implementations?\n> \n> I worry about the additional attack surface that JSON validation adds and wonder what additional tangible benefits it provides that are worth that additional attack surface. e.g. this nodejs library for doing schema validation introduced a regex DoS that wouldn't have been there without adding JSON schema: https://snyk.io/test/npm/json-schema-validation\n> \n> The recommendation currently applies this to L1, L2 and L3. That seems excessive.\n> \n> I see \"input validation\" mentioned in the overview, but there aren't any requirements listed specific to input validation. There could be levels of validation.\n> \n> schema validation (there are varying tolerances here as well depending on the schema definition)\n> JSON parsing validation (there are varying tolerances for extra properties or missing properties when deserializing)\n> Validation of the values in each JSON object value by standard input validation rules (they all still apply to APIs) -- data type, data format, length, etc.\n> I'll add another issue related to deserialization issues and another for serialization. I don't see any coverage of these in the guidelines.\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or mute the thread.\n",
+      "createdAt": "2019-02-22T21:45:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-466558894",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NjY3Mzk1MA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree that chasing drafts of standards is sub-optimal, but many are not even aware of them. If we can't drive adoption, the draft RFCs will dry up and we're stuck with a nothing burger again. \r\n\r\nWe need to button this issue up this weekend, so please suggest some extra words to 13.2.2 that might ameliorate the issue for you, such as urging caution with draft validation standards.",
+      "createdAt": "2019-02-23T18:00:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-466673950",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NzE5OTIxMg==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @jaxley do you have any suggestions of how to reword 13.2.2?\r\nDeserialiazation is covered in 5.5.",
+      "createdAt": "2019-02-25T21:54:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-467199212",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NzM5ODg0OA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I've left 5.2.2 as is per Jim, but put in some informative text at the top. \r\n\r\n@jaxley please re-open if you think this is not sufficient, but otherwise, this is it for 4.0",
+      "createdAt": "2019-02-26T11:13:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-467398848",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NzczNDIxNA==",
+      "author": {
+        "login": "jaxley"
+      },
+      "authorAssociation": "NONE",
+      "body": "It's probably ignorance of a particular attack vector, but I'm not seeing what makes JSON schema validation *essential* as a primary control, especially given that it would expose you to god knows how much attack surface as a tradeoff.  It may be appropriate in some contexts to be explicit, but in large part, it is really duplicating the validation that would be done as recommended in section 5\r\n\r\n* The typical JSON deserializer library that is secure will catch any JSON syntactical deviation so invalid JSON will not be accepted\r\n* The typical JSON deserializer is already going to enforce most, if not all, of the structural validation of a JSON document based on the deserialization configuration directives or conventions of the JSON library. \r\n* 5.1.2 covers mass assignment risks already\r\n* 5.1.4 covers validation of the individual data properties that would be inside the JSON payload\r\n* Many cases in programming do not require deserialization to strongly-typed data; leaving values as maps and lists is sufficient and data can be validated as it is extracted and converted to the appropriate type, if necessary, or just leave as strings if that is all that is required.  Or using JSON parsing APIs to extract strings directly without marshaling to another data structure may be appropriate.\r\n\r\n@jmanico can you help fill in the gaps that JSON schema validation addresses?\r\n\r\nIt's the additional attack surface tradeoff that I'm not sure I would say is always weighted toward adding this from a risk/reward standpoint.  If there is a compelling case where this kills whole classes of attacks that otherwise would be difficult to mitigate or left unmitigated, then by all means we should recommend it, but definitely not for L1 IMO.  I'm all for layered defenses, but would possibly see this as a nice-to-have defense-in-depth secondary control, not a primary control.\r\n\r\nThe fact that JSON schema is a moving target and who knows how complete the implementations are is a minor thing by comparison.",
+      "createdAt": "2019-02-27T05:54:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-467734214",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NzczNjcyNg==",
+      "author": {
+        "login": "jaxley"
+      },
+      "authorAssociation": "NONE",
+      "body": "Here's a fun one:\r\n\r\n```\r\njson-schema-validator jaxley$ snyk test\r\n\r\nTesting /private/tmp/json-schema-validator...\r\n\r\n✗ Medium severity issue found in org.mozilla:rhino\r\n  Description: MPL-2.0 license\r\n  Info: https://snyk.io/vuln/snyk:lic:maven:org.mozilla:rhino:MPL-2.0\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > org.mozilla:rhino@1.7.7.1\r\n\r\n✗ Medium severity vulnerability found in com.google.guava:guava\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMGOOGLEGUAVA-32236\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.fge:uri-template@0.9 > com.google.guava:guava@16.0.1\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.google.guava:guava@16.0.1\r\n\r\n✗ Medium severity vulnerability found in com.fasterxml.jackson.core:jackson-core\r\n  Description: Denial of Service (DoS)\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-31519\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3 > com.fasterxml.jackson.core:jackson-core@2.2.3\r\n\r\n✗ Medium severity vulnerability found in com.fasterxml.jackson.core:jackson-core\r\n  Description: Denial of Service (DoS)\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-31520\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3 > com.fasterxml.jackson.core:jackson-core@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-31507\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-31573\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-32043\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-32044\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-32111\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72445\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72446\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72447\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72448\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72449\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72450\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72451\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72882\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72883\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n\r\n✗ High severity vulnerability found in com.fasterxml.jackson.core:jackson-databind\r\n  Description: Deserialization of Untrusted Data\r\n  Info: https://snyk.io/vuln/SNYK-JAVA-COMFASTERXMLJACKSONCORE-72884\r\n  Introduced through: com.github.java-json-tools:json-schema-core@1.2.9\r\n  From: com.github.java-json-tools:json-schema-core@1.2.9 > com.github.java-json-tools:jackson-coreutils@1.9 > com.fasterxml.jackson.core:jackson-databind@2.2.3\r\n```",
+      "createdAt": "2019-02-27T06:08:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-467736726",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53yc4c",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Re-opening this issue as I wanted to check the status of JSON Schema, my understanding is that it is now considered stable but I am waiting for final confirmation. I have opened #1914 and will merge when I have final confirmation",
+      "createdAt": "2024-03-20T14:31:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-2009714204",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM539jhf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is the current state of the JSON schema validation spec:\r\nhttps://json-schema.slack.com/archives/C5CF75URH/p1710669238547779\r\n\r\n![image](https://github.com/OWASP/ASVS/assets/13623828/1359e923-84ca-4722-b169-8d40a5813371)\r\n\r\nSome supporting links:\r\n* https://json-schema.org/blog/posts/future-of-json-schema\r\n* https://github.com/orgs/json-schema-org/discussions/671\r\n\r\nAs such, I am going to make a small modification to the wording and I am going to make the requirement level 2.",
+      "createdAt": "2024-03-21T15:24:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-2012624991",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM57Q0TN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "At the request of @elarlang [in this comment](https://github.com/OWASP/ASVS/pull/1913#pullrequestreview-2013359354), we will make the requirement L3.",
+      "createdAt": "2024-04-21T11:12:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/525#issuecomment-2068006093",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2019-02-22T20:05:27Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    }
+  ],
+  "number": 525,
+  "state": "CLOSED",
+  "title": "13.2.2 schema validation concerns",
+  "url": "https://github.com/OWASP/ASVS/issues/525"
+}

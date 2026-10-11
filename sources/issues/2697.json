@@ -1,0 +1,139 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "The parent issue with description is #2690 \n\nProposed level changes for requirement in chapter \"V8 Data Protection\"\n\nFull list of requirements for the chapter is listed here: https://github.com/OWASP/ASVS/blob/master/5.0/en/0x16-V8-Data-Protection.md\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **8.1.7** | [ADDED] Verify that caching mechanisms are configured to only cache responses which have the correct content type and do not contain sensitive, dynamic content. The web server should return a 404 or 302 response when an non-existent file is accessed rather than returning a different, valid file. This should prevent Web Cache Deception attacks. | 2 > 3 |\n| **8.2.1** | [MODIFIED] Verify that the application sets sufficient anti-caching HTTP response header fields (i.e., Cache-Control: no-store) so that sensitive data is not cached in browsers. | 1 > 2 |\n| **8.2.2** | [MODIFIED, MERGED FROM 3.2.3] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session identifiers. | 1 > 2 |\n| **8.3.9** | [ADDED] Verify that sensitive information is removed from the metadata of user-submitted files unless storage is consented to by the user. | 2 > 3 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6idQUb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "8.2.2 is such a big problem in complex sites. I leads to a lot of major data leakage. And it's easy for a developer to get this right. I suggest leaving it at level 1.\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **8.2.2** | [MODIFIED, MERGED FROM 3.2.3] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session identifiers. | 1 > 2 |",
+      "createdAt": "2025-03-14T19:30:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2697#issuecomment-2725578011",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igGH3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Level for 8.2.2 is not black-n-white choice, but I don't share the vision that this is a cause of major data leakage.\n\nThe main reason for the level choice comes from security decision requirements 1.8.1 and 1.8.2 - we don't ask to define and document \"what is sensitive data and how to divide it into protection levels\" for level 1, so we also can not ask to have defense against it in a level 1 requirement.",
+      "createdAt": "2025-03-15T08:03:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2697#issuecomment-2726322679",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igtrG",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree this is not a black and white decision. I was looking at data from my WhiteHat days (where we released a lot of vuln reports to the public) and the OWASP Top Ten data call, and this is a fairly common problem.\n\nI realize we do not define \"what is sensitive data\". But this is one of the main ways developers expose sensitive data that is common to all applications, like PII and AuthN data, in a way that persists long term in a browser. And there is no way to protect it like a normal web page where you control the cache, or a cookie where you can flag it as HTTPOnly.\n\nThese storage mechanisms are special, and lead to very long term exposure of sensitive data, that's why I vote for L1. ",
+      "createdAt": "2025-03-15T12:19:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2697#issuecomment-2726484678",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iof8L",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The impact is per user, per user device - an attacker must achieve access to it, and this is out of scope for ASVS.\n\nIf an attacker has access to a user's device, the attacker can most likely also read the sensitive data during the active session. In other words - 8.2.2 itself is not that impactful requirement at the end.\n\nNote that we have a L1 requirement to say, that authenticated data must be cleared from the client storage on session termination:\n> V8.2.3 Verify that authenticated data is cleared from client storage, such as the browser DOM, after the client or session is terminated. The \"Clear-Site-Data header\" may be able to help with this but the client-side should also be able to clear up if the server connection is lost.\n\nMaybe this addresses your concern?",
+      "createdAt": "2025-03-17T08:10:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2697#issuecomment-2728525579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i2aMZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "8.2.2 has strong vibes of, \"something else bad has to happen in order for this issue to matter\".\n\nThe most obvious example is a public PC but as Elar says, we have 8.2.3 to cover that concern.\n\nAs such, I support having 8.2.2 as L2 as per the original issue proposal.",
+      "createdAt": "2025-03-18T08:55:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2697#issuecomment-2732172057",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i40mw",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yep. This is only a problem if XSS or other client side injection exists. Also V8.2.3 partially addressed this. I am ok with L2 and I think we are ready to go PR with your suggestions above.",
+      "createdAt": "2025-03-18T11:16:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2697#issuecomment-2732804528",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-03-14T16:22:15Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB1p1gwg",
+      "name": "levels",
+      "description": "",
+      "color": "44DF16"
+    }
+  ],
+  "number": 2697,
+  "state": "CLOSED",
+  "title": "Level changes for V8",
+  "url": "https://github.com/OWASP/ASVS/issues/2697"
+}

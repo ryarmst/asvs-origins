@@ -1,0 +1,400 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "spin-off from https://github.com/OWASP/ASVS/issues/1925 \"proposal 7\", from @TobiasAhnoff\r\n\r\n> 7 Verify that refresh-tokens expires according to threat model and business requirements\r\n\r\n\r\nProppoal from Elar:\r\n\r\nThe refresh_token topic requires more attention. But there is more than one point of view.\r\n\r\nIt is different attitude, is the OAuth used as first-party or 3rd party solution. For the first-party and \"session management replacement\" (which should be disallowed or not recommended) I would say we can apply [V3.3 Session Timeout](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v33-session-timeout) and [V3.8 Session Termination](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v38-session-termination) requirements.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.3.2** | [MODIFIED, SPLIT TO 3.3.5] Verify that there is an absolute maximum session lifetime such that re-authentication is required at least every 30 days for L1 applications or every 12 hours for L2 and L3 applications. | ✓ | ✓ | ✓ | 613 | 7.2 |\r\n\r\nFor 3rd party solution, we have a requirement currently located in 3.5.1 (it is subject to change via https://github.com/OWASP/ASVS/issues/1917#issuecomment-2027058608)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.1** | [GRAMMAR] Verify that the application allows users to revoke OAuth tokens that form trust relationships with linked applications. | | ✓ | ✓ | 290 | 7.1.2 |\r\n\r\nI think we need to be really precise, about what architecture and solution we address with the requirement.\r\n\r\nOne extra issue to cover with the refresh_token topic expiration is that with new refresh_token the AS must keep the `exp` value like it was before (and not extend it).",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6NGj4Q",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I move discussion from https://github.com/OWASP/ASVS/issues/2040#issuecomment-2338933353 to this issue. The latest proposal:\r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication should be forced at some point in time. Note that how often depends on the application in scope, from e g hours to months. (L1, L2, L3)",
+      "createdAt": "2024-09-23T06:12:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2367307280",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NGw0e",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposed update:\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication must be forced after a defined absolute lifetime.",
+      "createdAt": "2024-09-23T06:52:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2367360286",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NZq87",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We are in OAuth, so we are talking about *authorization* but …\r\n\r\n> Even if sliding refresh token expiration is applied, user re-*authentication* should be forced at some point in time. \r\n\r\nDo we need to talk about re-*authentication* here or about re-*authorization*? Would it be considered bad practice to re-*authorize* without going through all the OAuth flow dance?\r\n\r\nWould it be OK if the authorization server was sending you a notification saying \"authorization XXX which was granted for application YYYY is about to expire\" and then you could expand its lifetime from the authorization server instead? One downside of this approach is that there might be a higher chance that a rogue application/instance would impersonate a legitimate one.",
+      "createdAt": "2024-09-24T20:30:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2372316987",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NcqZQ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication must be forced after a defined absolute lifetime.\r\n\r\nI believe this is correct, at some point the user should re-authenticate doing the full \"OAuth dance\" to prove that the user is in control of the users credentials (in example MFA), not allowing \"forever sliding\" refresh tokens (or sessions). \r\n\r\nBut as @randomstuff noted, the way this was written it is unclear (or if it also forbids) the use of re-authorization, which was not intended...perhaps this will make it clearer? \r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication must be forced after a defined absolute lifetime. Note that before the absolute expiration point in time, sliding expiration might be applied allowing the user to re-authorize presenting a valid refresh token.  (L1,L2,L3)",
+      "createdAt": "2024-09-25T06:01:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2373101136",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ncw4o",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Note that before the absolute expiration point in time, sliding expiration might be applied allowing ...\r\n\r\nEven in this case sliding can not go over refresh token expiration time.\r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication must be forced after a defined absolute lifetime. Before the absolute expiration point, the application should allow the user to re-authorize by presenting a valid refresh token.\r\n\r\nAt the same time I'm not convinced we should cover to extension in the same requirement, Maybe the focus should be only on the expiration time.",
+      "createdAt": "2024-09-25T06:19:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2373127720",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NfNI9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I do not think refresh-refresh or expiration is enough of a control for refresh tokens in L 2/3 apps.\n\nFAPI mandates sender-constrained tokens using Mutual TLS (MTLS), Proof of Possession (PoP) or similar - to avoid any kind of token theft reuse - which is still possible even with refresh-refresh or tight expiration windows. I think is a very wise constraint from FAPI that we should emulate.",
+      "createdAt": "2024-09-25T11:03:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2373767741",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NfO8s",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> But as @randomstuff noted, the way this was written it is unclear (or if it also forbids) the use of re-authorization, which was not intended...perhaps this will make it clearer?\r\n\r\n@TobiasAhnoff, This is actually not what I meant, sorry :)",
+      "createdAt": "2024-09-25T11:07:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2373775148",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqRQJ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I do not think refresh-refresh or **expiration is enough of a control for refresh tokens** in L 2/3 apps.\r\n>\r\n> FAPI mandates sender-constrained tokens using Mutual TLS (MTLS), Proof of Possession (PoP) or similar\r\n\r\n@jmanico, I don't think anyone was saying that refresh token expiration was in any way an alternative to sender-constrained tokens. The idea here is that is that all grants should eventually expire after a given duration even if it tokens are being refreshed periodically.\r\n\r\nThe proposal from https://github.com/OWASP/ASVS/issues/2040#issuecomment-2338933353 was “user re-authentication should be forced at some point in time» i.e. OAuth 2.0 code flow should be done again after this duration.\r\n\r\nMy argument was that the authorization server might accept other methods for extending the duration of the grant through user interaction involving verification of the user consent.",
+      "createdAt": "2024-09-26T11:22:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2376668169",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N0h7d",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> This is actually not what I meant, sorry :)\r\n\r\nmy apologies :)  \r\n\r\n> My argument was that the authorization server might accept other methods for extending the duration of the grant through user interaction involving verification of the user consent.\r\n\r\n@randomstuff maybe a dumb question, but could you give an example on  verification methods (if not using the same method as the initial user authentication)?",
+      "createdAt": "2024-09-27T14:01:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2379357917",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N0tf0",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Even if sliding refresh token expiration is applied, *user re-authentication* should be forced at some point in time.\r\n\r\n@TobiasAhnoff, actually I understood “user re-authentication” as “the user must use the client application to restart the OAuth flow in order to obtain new refresh token” which is actually not exactly what is being said in the text. I retract the comments on this topic which were useless :)\r\n\r\n(My point was, it might (maybe) be OK for the user to extend the lifetime of the existing grant by going directly from the authorization server without going through the client application.)",
+      "createdAt": "2024-09-27T14:24:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2379405300",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N7TKF",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@randomstuff not useless at all, now I understand! And yes, I was actually thinking of \"using the same client\", but as you noted the way it is written it allows for other scenarios as well (like \"going directly from the authorization server\").   ",
+      "createdAt": "2024-09-29T06:42:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2381132421",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N_l1d",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm a bit lost here in comments, what is the latest proposal to discuss?",
+      "createdAt": "2024-09-30T06:53:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2382257501",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ObyJC",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think the last comments are on\r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication must be forced after a defined absolute lifetime. Before the absolute expiration point, the application should allow the user to re-authorize by presenting a valid refresh token. (L1,L2,L3)\r\n\r\nBut, as you noted, maybe it is good to just focus on expiration time? Then it could be like this\r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, where the user to re-authorize by presenting a valid refresh token, user re-authentication must be forced after a defined absolute lifetime. (L1,L2,L3)\r\n\r\nor\r\n\r\n> Verify that refresh tokens have an absolute expiration, where user re-authentication must be forced after a defined absolute lifetime. (L1,L2,L3)\r\n ",
+      "createdAt": "2024-10-02T20:33:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2389647938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OfFUt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it makes sense just to deliver the point of absolute expiration.\r\n\r\nping @randomstuff - any comments?",
+      "createdAt": "2024-10-03T04:50:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2390512941",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OhupS",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Last version from @TobiasAhnoff looks good to me. I guess it should be enough (?).\r\n\r\nCould this be formulated as?\r\n\r\n> Verify that refresh tokens have an maximum absolute expiration, after which user re-authentication must be forced. (L1,L2,L3).\r\n\r\nWhat worries me somewhat with this formulation is that it's not the refresh token which has a maximum expiration time but the grant. When you do the token refresh token request you (may) obtain a new refresh token but the expiration delay is not restarted i.e. the expiration deadline is shared for all associated refresh tokens.\r\n\r\nWould something like this be OK?\r\n\r\n> Verify that each grant has an maximum absolute expiration, after which all associated tokens must be invalid and user re-authentication must be forced. Token refresh requests must not expand the duration of the expiration deadline (L1,L2,L3).",
+      "createdAt": "2024-10-03T11:40:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2391206482",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OpUAh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - for example Keycloak extending (sliding?) the refresh_token exp but still has maximum lifespan set. I would like to have wording to cover / not restricting that.\r\n\r\nI agree that terminology \"refresh token\" vs \" grant\" requires some work.",
+      "createdAt": "2024-10-04T08:57:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2393194529",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Oxw8E",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think the suggested requirement from @randomstuff  is good and address that sliding must not pass the expiration deadline, or is something missing @elarlang ?\r\n\r\nUsing the right terminology is a bit challenging...this is the best guidance I know of https://aaronparecki.com/2024/03/29/3/oauth-terminology. Aaron notes that \r\n\r\n>\"Grant\" also refers to the abstract concept of the user having granted authorization, which is expressed as the authorization code, or implicitly with the client credentials grant. This is a bit of an academic definition of the term, and is used much less frequently in normal conversation around OAuth.\r\n\r\nPerhaps add \"authorized\" to make it a little more clear to ASVS readers what \"grant\" means?\r\n\r\n> Verify that each **authorized** grant has an maximum absolute expiration, after which all associated tokens must be invalid and user re-authentication must be forced. Token refresh requests must not expand the duration of the expiration deadline (L1,L2,L3).\r\n\r\nOne more note, since \"grant\" is more general than \"refresh-token lifetime\", and applies to both code and client-credentials, maybe remove \"user\" or add \"and client\"?\r\n",
+      "createdAt": "2024-10-06T11:53:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2395410180",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O6QMV",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@TobiasAhnoff, \"authorized grant\" is probably more explicit although \"authorized grant\" seems somewhat tautological to me :laughing: ",
+      "createdAt": "2024-10-07T18:43:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2397635349",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_Hwt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I try to keep it as simple as possible with only one clear focus - if a new refresh token is provided, it does not extend the max lifetime, including when sliding exp is used. Whatever business logical decision needs to be made before the expiration happens, is not in the scope of this requirement.\r\n> Verify that refresh tokens have an absolute expiration, including if sliding refresh token expiration is applied.\r\n\r\nThe more interesting part is, should we cover somehow the ['offline_access'](https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess) in this requirement?",
+      "createdAt": "2024-10-08T05:52:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2398911533",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PYWdY",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The more interesting part is, should we cover somehow the ['offline_access'](https://openid.net/specs/openid-connect-core-1_0.html#OfflineAccess) in this requirement?\r\n\r\nI don't think this is really related, is it? This should probably go into the OpenID Connect chapter, instead.",
+      "createdAt": "2024-10-10T16:09:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2405525336",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PYXzZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don't think this is really related, is it? This should probably go into the OpenID Connect chapter, instead.\r\n\r\nYes, but this is an option to remove expires time for refresh token JWT.\r\n",
+      "createdAt": "2024-10-10T16:12:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2405530841",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PkFq1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Goes in via #2140 \r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.13** | [ADDED] Verify that refresh tokens have an absolute expiration, including if sliding refresh token expiration is applied. | ✓ | ✓ | ✓ |\r\n\r\nIf it requires update, we can do that. It's more to get the requirement in and having a number for it.",
+      "createdAt": "2024-10-12T15:30:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1968#issuecomment-2408602293",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-05-21T06:48:44Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 1968,
+  "state": "CLOSED",
+  "title": "proposal/discussion: OAuth: requirement for refresh_token lifetime",
+  "url": "https://github.com/OWASP/ASVS/issues/1968"
+}

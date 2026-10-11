@@ -1,0 +1,162 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "This requirement got added as a result of #934\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **15.3.1** | Verify that the application only returns data which the user has permission to access. For example, the API response does not return a full object with attributes that contain values the user has no permission to access, despite having permission to access the data object itself. | 1 | v5.0.be-10.4.5 |\n\nIf I understand correctly, the reason it is here is because it is talking about data that *no* user should have access to and therefore it is not a question of different permissions for different users.\n\nIf this is the case, I think we should refine as follows:\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **15.3.1** | Verify that the application only returns data which users should be able to access. For example, the API response does not return a full object which includes data attributes that no user should be able to see, despite having permission to access the data object itself. | 1 | v5.0.be-10.4.5 |\n\nWhat do you think @elarlang ?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6rESAm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The diff.\n\nCurrent:\n> Verify that the application only returns data which **the user has permission to access**.\n\nProposed\n> Verify that the application only returns data which **users should be able to access**.\n\nSo \"has permission to access\" vs \"should be able to access\". The proposed one is maybe better, it may even contain a hint: \"through this functionality\".\n\n---\n\nCurrent:\n> For example, the API response does not return a full object **with attributes that contain values the user has no permission to access,**\n\nProposed:\n> For example, the API response does not return a full object **which includes data attributes that no user should be able to see,**\n\nI think this is not a good proposal - we don't care about \"any user\", we only care about the current user. We may have a situation where some users may have permission to see the data, but the current user must not see it.\n",
+      "createdAt": "2025-05-11T17:49:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3109#issuecomment-2870026278",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rESc0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> We may have a situation where some users may have permission to see the data, but the current user must not see it.\n\nThis is exactly my problem here, if we are talking about a permissions issue then I cannot understand why this is not in the AuthZ chapter. If this is data that no one should have access to then I understand the secure coding categorisation.",
+      "createdAt": "2025-05-11T17:54:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3109#issuecomment-2870028084",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rES-4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Access control is based on what you decide you can access.\n\nFor this one, access control may be done correctly, but it just returns too much data about the object.\n\nPreviously described here that made sense for you back then: https://github.com/OWASP/ASVS/issues/934#issuecomment-2410159288",
+      "createdAt": "2025-05-11T18:00:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3109#issuecomment-2870030264",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rEYgQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So the parallel is mass assignment which when you can edit data that no one should be able to edit. That is what I was trying to clarify here: https://github.com/OWASP/ASVS/issues/3109#issuecomment-2870028084\n\n> For this one, access control may be done correctly, but it just returns too much data about the object.\n\nI can't tell the difference between this and field level access control.",
+      "createdAt": "2025-05-11T19:03:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3109#issuecomment-2870052880",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rH3ko",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's take SQL sentence as metaphore.\n\n```sql\nSELECT\n  object_id\n  , field_permission_and_need\n  , field_permission_and_no_need\n  , field_no_permission\nFROM\n  TABLE\nWHERE\n  object_id=userinput\n  , field_for_permission_check=userinput_state\n  , user_id=ownserhipinput\n```\n\nBy my philosophy, when creating a wording for 15.3.1, it is for a situation:\n* from WHERE conditions, all criteria are satisfied\n* but in the SELECT area, `field_permission_and_no_need` and `field_no_permission` are included to the output\n\nBut this is a bit of an IDOR point of view, thinking on the object-level permissions. If to adjust the thinking to field-level and watch it from \"you must be able to select only data fields you have permission\", we can watch as field field-level permission violations. So, probably it is not wrong to move it to the authorization chapter and merge it to 8.2.3 (but it is L2, compared to 15.3.1 L1)\n\nIn practice, I like 15.3.1 to be away from authorization control (or at least as a separate requirement), because it is a different problem to solve in the program code, and it is a different test case. If to merge them, this point of view will get lost. Plus the level difference (L2 vs L1).\n\nBased on the SQL example I gave, the program code most likely selects information from the database that the user has no permission to see (for the object the user has permission to see) and what the program code requires for decisions, but should not return this into the output. Access control mostly focuses on the step, which objects you can access at all.\n\n---\n\n> So the parallel is mass assignment which when you can edit data that no one should be able to edit. That is what I was trying to clarify here: #3109 (comment)\n\nThe requirement:\n> 15.3.3 Verify that the application has countermeasures to protect against mass assignment attacks by limiting allowed fields per controller and action, e.g., it is not possible to insert or update a field value when it was not intended to be part of that action.\n\nLogic for this one is based on \"if it was not intended to be part of that action\":\n* if the user did not have a permission to edit it at all, it is a field-level access control problem - here I can see the parallel with the previous example, based on \"where conditions\" vs \"updated fields\" and we can argue, that is object vs field level point of view question\n* If the user had permission to change those fields via some other form, but not by this current action or controller, then it is a separate problem from the classical permission check layer.\n\n---\n\nIn conclusion, I can see the interpretation problem here and I can fit them to the authorization chapter if needed, but I would like to keep them as separate requirements, because those are clearly separate problems in program code and separate test-cases to test, although the abstract end-problem is the same.",
+      "createdAt": "2025-05-12T06:13:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3109#issuecomment-2870966568",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rL2A_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A feature that provides more data access than planned or designed, or a feature that is providing more data access than needed, can also be seen as a type of access control/authorization problem.\n\nMITRE CWE-284, NIST SP 800-53 and others cite this to some degree.\n\nI think the explanation from @elarlang above is very well said.",
+      "createdAt": "2025-05-12T10:39:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3109#issuecomment-2872008767",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6r3D2e",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Josh todo:\n* Update 15.3.1 to be clear that it is about an application wide restriction on returning certain data (sort of information leakage)\n* Update 8.1.2 to make sure it is considering both read and write and also that this might change depending on the object state.",
+      "createdAt": "2025-05-15T10:29:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3109#issuecomment-2883337630",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-05-11T09:05:30Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 3109,
+  "state": "CLOSED",
+  "title": "Clarify why 15.3.1/v5.0.be-10.4.5 is not access control",
+  "url": "https://github.com/OWASP/ASVS/issues/3109"
+}

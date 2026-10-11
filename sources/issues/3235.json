@@ -1,0 +1,230 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "<!---\nBEFORE YOU OPEN AN ISSUE:\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\n- Please search the issues in case your question has been discussed before.\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\n- When you reference requirements, please include them as a link, similarly to this:\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\n\nOTHER NOTES:\n- Please do not open a pull request without first opening an associated issue.\n- Please carry out all discussion in the associated issue only.\n-->\n> 1.3.5 Verify that the application sanitizes or disables user‑supplied scriptable or\nexpression template language content, such as Markdown, CSS or XSL\nstylesheets, BBCode, or similar.\n\n* I think The term “**disable**” is unclear, and “**sanitize**” is too broad and weak.\n* The Server-side processing should also be emphasized\n* It’s also unclear why different execution models and attack vectors, like template/content rendering and expression evaluation—are being grouped together. These are distinct scenarios with different risks, so combining them without clarification makes the requirement harder to understand and apply correctly.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM69winS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This requirement is confusing to me. Where do we disable what? How do you disable content?",
+      "createdAt": "2025-08-13T12:16:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3183618514",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qCKIW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sanitize will be handled elsewhere.\nI think this is talking about executable content so maybe we could be more clear.\n\n\"_Verify that the application sanitizes user‑supplied scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode, or similar or ensures in some other way that scripts will not execute._\"",
+      "createdAt": "2026-02-19T10:50:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3926434326",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qCyiY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \"Verify that the application sanitizes user‑supplied scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode, or similar or ensures in some other way that scripts will not execute.\"\n\nSome proposals.\n\nRemove \" or similar\" - it does not add any meaning, it is already a list defined as \"such as\".\n\n> or ensures in some other way that scripts will not execute\n\nWhat is \"some other way\"? If we don't want to say that \"the sanitization is the only option\", but want to say \"avoid malicious content execution\" we need to change the build-up for the requirement to: Verify that the application defends against X. It can be achieved by doing Y\". ",
+      "createdAt": "2026-02-19T11:20:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3926599832",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7q4z2j",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Remove \" or similar\" - it does not add any meaning, it is already a list defined as \"such as\".\n\nMakes sense\n\n> > or ensures in some other way that scripts will not execute\n>\n> What is \"some other way\"? If we don't want to say that \"the sanitization is the only option\", but want to say \"avoid malicious content execution\" we need to change the build-up for the requirement to: Verify that the application defends against X. It can be achieved by doing Y\".\n\nI guess \"some other way\" would be some sort of configuration or sandboxing option but I don't have specifics. Arguably it would be better the other way around:\n\n\"_Verify that the application has protection against malicious code execution when using scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode. Where no built-in functionality for preventing this is available or usable,  user‑supplied input should sanitized._\"",
+      "createdAt": "2026-02-22T11:39:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3940760995",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7q5FKn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some additional context: the proposed wording works well because built-in functionality genuinely exists for most of the listed technologies. I have not validated every option here but the overall idea is to demonstrate the concept. Here are some examples:\n\n<details>\n<summary>Examples of built-in protection functionality</summary>\n\n\n\n### Markdown\n\nMost modern Markdown parsers are **safe by default** -- they disable raw HTML rendering and strip dangerous URI protocols (`javascript:`, `vbscript:`, `file:`, `data:`) unless the developer explicitly opts into unsafe mode:\n\n- [**cmark**](https://github.com/commonmark/cmark#security) (CommonMark reference implementation) -- safe by default; raw HTML replaced with a placeholder comment. Must opt in via `CMARK_OPT_UNSAFE`.\n- [**markdown-it**](https://github.com/markdown-it/markdown-it/blob/master/docs/security.md) -- `html: false` by default; has a `\"zero\"` preset where all rules are disabled and you enable only what you need.\n- [**goldmark**](https://github.com/yuin/goldmark#security) (Go) -- does not render raw HTML unless [`WithUnsafe()`](https://pkg.go.dev/github.com/yuin/goldmark/renderer/html#WithUnsafe) is explicitly passed.\n- [**micromark**](https://github.com/micromark/micromark/blob/main/packages/micromark/readme.md#security) -- `allowDangerousHtml` and `allowDangerousProtocol` both default to `false`.\n\nAdditionally, libraries like [**react-markdown**](https://github.com/remarkjs/react-markdown#security) use AST-based rendering (Markdown -> syntax tree -> React elements) rather than `innerHTML`, so injected scripts become inert text.\n\n### XSL/XSLT\n\nXSLT processors have the richest set of built-in security configuration:\n\n- **.NET [`XslCompiledTransform`](https://learn.microsoft.com/en-us/dotnet/standard/data/xml/xslt-security-considerations)** -- `EnableScript` and `EnableDocumentFunction` are both `false` by default. Passing `null` as `XmlResolver` blocks all external resource resolution.\n- **[MSXML 6.0](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/ms763800(v=vs.85))** -- `AllowXsltScript = false`, `AllowDocumentFunction = false`, `ProhibitDTD = true` all by default.\n- **Java [JAXP](https://docs.oracle.com/en/java/javase/11/security/java-api-xml-processing-jaxp-security-guide.html)** -- `FEATURE_SECURE_PROCESSING` applies security restrictions; `enableExtensionFunctions` can be set to `false` to prevent arbitrary Java method calls; `ACCESS_EXTERNAL_STYLESHEET = \"\"` blocks external stylesheet loading.\n- **[Saxon](https://www.saxonica.com/html/documentation12/configuration/configuration-file/config-global.html)** -- [`allowExternalFunctions`](https://www.saxonica.com/html/documentation12/configuration/configuration-file/config-global.html) and `allowedProtocols` settings restrict extension functions and URI resolution.\n- **[libxslt](https://gnome.pages.gitlab.gnome.org/libxslt/devhelp/libxslt-security.html)** -- fine-grained access controls for file I/O and network via `xsltSecurityPrefs`. Python [lxml](https://lxml.de/api/lxml.etree.XSLTAccessControl-class.html) offers `XSLTAccessControl(read_file=False, write_file=False, read_network=False, write_network=False)`. PHP's [`XSLTProcessor::setSecurityPrefs()`](https://www.php.net/manual/en/xsltprocessor.setsecurityprefs.php) disables file writing by default.\n\n### BBCode\n\nBBCode is inherently **allowlist-based by design**: the parser defines a fixed set of recognized tags and everything else becomes plain text. There is no `[script]`, `[style]`, or event handler syntax.\n\n- [**genert/bbcode**](https://github.com/genert/bbcode) (PHP) -- [`only('bold', 'italic')`](https://github.com/genert/bbcode#only) restricts conversion to named tags only.\n- [**BBob**](https://github.com/JiLiZART/BBob) (JS) -- [`onlyAllowTags`](https://github.com/JiLiZART/BBob#onlyallowtags) option; uses an AST-based parse -> transform -> render pipeline.\n- [**Python `bbcode`**](https://dcwatson.github.io/bbcode/) -- `install_defaults=False` starts with zero tags; `escape_html=True` by default auto-escapes HTML entities in output.\n- [**NBBC**](https://nbbc.sourceforge.net/) (PHP) -- guarantees XHTML-valid output regardless of input; `ClearRules()` lets you build a ruleset from scratch.\n\nNote: as [Chris Shiflett argues](https://shiflett.org/articles/bbcode), the security benefit comes from the allowlist *implementation pattern* rather than the bracket syntax itself, but the practical effect is a much smaller attack surface than HTML sanitization.\n\n### CSS\n\nCSS has less parser-level protection than the others, relying more on browser-level defenses:\n\n- **CSP [`style-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/style-src)** -- controls which stylesheets can load. With nonces or hashes, only explicitly approved styles execute. `style-src-attr 'none'` blocks all inline `style=\"\"` attributes.\n- **CSP resource directives** -- CSS exfiltration relies on `url()`, `@font-face`, `@import` loading external resources. [`img-src`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/img-src), `font-src`, `default-src` directives block these outbound channels.\n- **[MediaWiki css-sanitizer](https://github.com/wikimedia/css-sanitizer)** -- parses CSS at the grammar level per the [CSS Syntax Module Level 3](https://www.w3.org/TR/css-syntax-3/) spec and only allows known-safe properties/values (allowlist at the parser level).\n- Historical attack vectors like `expression()` (IE) and `-moz-binding` (Firefox) have been removed from modern browsers.\n\n</details>\n",
+      "createdAt": "2026-02-22T12:16:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3940831911",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7rKxc_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This requirement as-is conflates injection. \n\n- **Markdown**: typically renders text/HTML; code execution only occurs if unsafe extensions are allowed. This was solved a long time ago with one switch flip.\n- **CSS**: does not execute code, but can be abused for data exfiltration or UI redressing.\n- **BBCode**: parsing risk, not code execution by default.\n- **XSLT**: can execute code and access resources depending on processor configuration.\n\nSo Markdown is not a common injection vector unless its misconfigured, CSS execution is such a low risk with modern browsers that GitHub allow unsafe-inline, BBCode is not an injection risk, and XSLT which an injection risk is legacy tech.\n\nI would just politely suggest using more modern examples.",
+      "createdAt": "2026-02-23T15:31:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3945469759",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7r32xs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, you're right that these technologies have very different risk profiles\n\nI think the issue is that the framing around \"malicious code execution\" is too narrow. What these technologies actually have in common is the potential for **unwanted dynamic behaviour**,  whether that's raw HTML rendering from Markdown, data exfiltration via CSS `url()`, arbitrary code execution from XSLT, or HTML injection from a poorly-implemented BBCode parser.\n\nSo how about reframing the requirement around that concept instead:\n\n\"_Verify that the application has protection against unwanted dynamic behavior when using scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode. Where no built-in functionality for preventing this is available or usable, user-supplied input should be sanitized._\"\n\nThis addresses your concern about conflating injection types. Instead we're saying: these formats can all exhibit dynamic behaviour that needs to be controlled, and the built-in protections I listed above (safe-by-default parsers, XSLT security prefs, BBCode allowlists, CSP for CSS) are the primary defence, with sanitization as the fallback.\n\nAs for the examples being \"legacy\",  I'd argue XSLT is still common enough in enterprise and document processing contexts to warrant inclusion. But I'm open to adding more modern examples alongside the current ones if you have specific suggestions?",
+      "createdAt": "2026-02-25T07:11:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3957288044",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7sDKB2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm with you Josh. Go for it. :) ",
+      "createdAt": "2026-02-25T15:51:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3960250486",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tZk9Q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang should I open a PR?",
+      "createdAt": "2026-03-02T08:30:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3982905168",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tiS8v",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> should I open a PR?\n\nSome things to re-think and/or finetune:\n\n> unwanted dynamic behavior\n\nDoes it make it a negative requirement?\n\n> Where no built-in functionality for preventing this is available ...\n\nDo we care, is it built in or not?\n\n\n> user-supplied input should be sanitized\n\nshould vs must?",
+      "createdAt": "2026-03-02T15:46:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3985190703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uKd0F",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > should I open a PR?\n> \n> Some things to re-think and/or finetune:\n> \n> > unwanted dynamic behavior\n> \n> Does it make it a negative requirement?\n\nNah, the positive requirement is to implement the protection\n\n> > Where no built-in functionality for preventing this is available ...\n> \n> Do we care, is it built in or not?\n\nYeah I think the implication is that they don't have to build it themselves\n\n> > user-supplied input should be sanitized\n> \n> should vs must?\n\nGood point, updated requirement:\n\n\"_Verify that the application has protection against unwanted dynamic behavior when using scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode. Where no built-in functionality for preventing this is available or usable, user-supplied input must be sanitized._\"",
+      "createdAt": "2026-03-04T07:09:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3995720965",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uKnJF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we can put it in, for me it is a non-breaking change (just a different wording with the same meaning).\n\n> Yeah I think the implication is that they don't have to build it themselves\n\nIn general and by principle - ASVS should also not disallow it - the only thing that matters is following security requirements- whether it was it built in or \"custom made\", does not matter here.",
+      "createdAt": "2026-03-04T07:20:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3235#issuecomment-3995759173",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-08-08T02:48:25Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAACYnQLAA",
+      "name": "requires change control",
+      "description": "",
+      "color": "aaaaaa"
+    }
+  ],
+  "number": 3235,
+  "state": "OPEN",
+  "title": "Clarification: 1.3.5 \"disable\"",
+  "url": "https://github.com/OWASP/ASVS/issues/3235"
+}

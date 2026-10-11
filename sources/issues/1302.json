@@ -1,0 +1,105 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "This requirement is currently as follows. (My emphasis). I had a question come up on this during a training course.\r\n\r\n[3.3.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v33-session-termination)\r\n\r\n> Verify that logout and expiration invalidate the session token, such that the back button or a downstream relying party does not resume an authenticated session, **including across relying parties**.\r\n\r\n(The earliest version of the requirement I can find was added [here as 3.3.4](https://github.com/OWASP/ASVS/commit/64194cfc4e4b3229acb20e03812f626bc247ed43).)\r\n\r\nMy understanding of this requirement includes a few things. For the purposes of this point let's assume AzureAD is the identity provider (IdP) and Salesforce and ServiceNow are relying parties (RPs) where they use the user's AzureAD identity rather than managing authentication separately.\r\n\r\nUnderstanding of the requirement:\r\n* Logout from AzureAD invalidates the session identifier with AzureAD and the user will not be able to use AzureAD until they authenticate again.\r\n* Pressing the back button will not result in seeing sensitive data from AzureAD or being able to resurrect the session with AzureAD.\r\n* Browsing to Salesforce or ServiceNow should not resurrect the session with AzureAD.\r\n* In fact, the last 4 words of the requirement (\"_including across relying parties_\") indicate that the user's session with Salesforce or ServiceNow should also be invalidated when the IdP session has been invalidated. After logging out in the IdP, the user should not be able to access these RPs without first reauthenticating to the IdP.\r\n* However, if the user logs out from their specific session with one of the RPs (e.g. Salesforce), this requirement **does not** expect or require that this will also log the user out of other RPs or the IdP.\r\n\r\n@vanderaj (or anyone else), do you understand this requirement differently to me?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5GIQVa",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good analysis Josh. I suggest we simplify this to drop the last phrase since we already mention \"Downstream relying party\"\r\n\r\nSo perhaps:\r\n\r\n_Verify that logout and expiration invalidate the session token, such that the back button or a downstream relying party does not resume an authenticated session._",
+      "createdAt": "2022-07-06T19:00:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1302#issuecomment-1176569178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5HZYWV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "That makes sense although do you think saying \"cannot\" instead of \"does not\" is clearer @jmanico ?\r\n\r\n\r\n_Verify that logout and expiration invalidate the session token, such that the back button or a downstream relying party **cannot** resume an authenticated session._",
+      "createdAt": "2022-07-28T08:34:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1302#issuecomment-1197835669",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IXlpC",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, that makes more sense. I encounter this in applications most often that the cookie is cleared at the client, but not invalidated on the server. The back button won't work in that case, but anyone with posession of the session token can still resume the session. We want that person to be unable to do that, so \"cannot\" makes more sense. However, is that person an \"downstream relying party\"?",
+      "createdAt": "2022-08-13T11:38:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1302#issuecomment-1214143042",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5JEmeU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The app is the downstream relying party. I am going to open a PR.",
+      "createdAt": "2022-08-24T16:15:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1302#issuecomment-1225942932",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5JEm-m",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico please can you review #1351",
+      "createdAt": "2022-08-24T16:17:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1302#issuecomment-1225944998",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-06-23T05:58:10Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 1302,
+  "state": "CLOSED",
+  "title": "v3.3.1 - Clarification as to meaning,",
+  "url": "https://github.com/OWASP/ASVS/issues/1302"
+}

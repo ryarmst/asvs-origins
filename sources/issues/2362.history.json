@@ -1,0 +1,62 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2362#issuecomment-2472591809",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "We could do that to provide more JWT detailes, perhaps like this \r\n\r\n> Verify that all key material is from a trusted source for each token issuer. For JWTs this is typically achieved by having a preconfigured JWKS URI for the given issuer **and assert that the claims 'jku' and 'jwk' are only accepted if they are validated against an allow list and that no cookies are sent in any GET requests to those URLs.**\r\n\r\nBut I think this might be too much and the first suggestion is enough?",
+          "recorded_at": "2024-11-13T06:44:17Z"
+        },
+        {
+          "body": "We could do that to provide more JWT detailes, perhaps like this \r\n\r\n> Verify that all key material is from a trusted source for each token issuer. For JWTs this is typically achieved by having a preconfigured JWKS URI for the given issuer ** and assert that the claims 'jku' and 'jwk' are only accepted if they are validated against an allow list and that no cookies are sent in any GET requests to those URLs.**\r\n\r\nBut I think this might be too much and the first suggestion is enough?",
+          "recorded_at": "2024-11-13T06:43:47Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2362#issuecomment-2474250629",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "The \"cookie part\" is from https://www.rfc-editor.org/rfc/rfc8725.html#name-do-not-trust-received-claim. The attacks to mitigate are SSRF and the risk of getting key material from an untrusted source, see e g https://portswigger.net/web-security/jwt/lab-jwt-authentication-bypass-via-jku-header-injection.\r\n\r\nAttacks using the 'kid' claim are also mentioned, and maybe we should add that as a separate issue? But that might be covered in some of the validation requirements in V5? ",
+          "recorded_at": "2024-11-13T17:14:43Z"
+        },
+        {
+          "body": "The \"cookie part\" is from https://www.rfc-editor.org/rfc/rfc8725.html#name-do-not-trust-received-claim. The attack to mitigate is SSRF and the risk of getting key material from an untrusted source, see e g https://portswigger.net/web-security/jwt/lab-jwt-authentication-bypass-via-jku-header-injection.\r\n\r\nAttacks using the 'kid' claim are also mentioned, and maybe we should add that as a separate issue? But that might be covered in some of the validation requirements in V5? ",
+          "recorded_at": "2024-11-13T17:14:21Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2362#issuecomment-2474383038",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> The cookie part is still meh for me. In the same line are described server-side request forgery and cookies. It is not understandable for me, what kind of cookies are described here? Server sends cookies?\r\n\r\nSome JWTs might be verified client/browser-side (for example ID tokens even if this does not make so much sense in my opinion). Bu I agree that the \"don't send cookies\" restriction seems quite useless to me. You can do that (using `fetch` with `\"credentials\":\"omit\"`) but I don't see the point. I would skip the cookie part until someone can find a real attack scenario for this.\r\n\r\nAt the same time they are talking about SSRF attacks so this is quite weird.",
+          "recorded_at": "2024-11-13T18:13:18Z"
+        },
+        {
+          "body": "> The cookie part is still meh for me. In the same line are described server-side request forgery and cookies. It is not understandable for me, what kind of cookies are described here? Server sends cookies?\r\n\r\nSome JWTs might be verified client/browser-side (for example ID tokens even if this does not make so much sense in my opinion). Bu I agree that the \"don't send cookies\" restriction seems quite useless to me. You can do that (using `fetch` with `\"credentials\":\"omit\"`) but I don't see the point. I would skip the cookie part until someone can find a real attack scenario for this.",
+          "recorded_at": "2024-11-13T18:12:03Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2362#issuecomment-2474887791",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "Two notes:\r\n\r\n* `jku` and `x5u` are JWS *headers* not JWT *claims*.\r\n* `jwk` should probably listed here as well (i.e. you must not blindly trust the public key listed in the JWT).\r\n\r\nI therefore propose the following:\r\n\r\n> Verify that only trusted key material and key sources for each token issuer are used to validate cryptographically secured tokens, preventing attackers from specifying untrusted sources and keys. For JWTs, headers such as `jku`, `x5u` and `jwk` must be validated against an allow-list of trusted sources.\r\n\r\n((Nitpick: this is technically applicable to any *JWS*, not only JWTs but I'm not sure using \"JWS\" instead of \"JWT\" in the requirement would be very clear.))",
+          "recorded_at": "2024-11-13T23:15:58Z"
+        },
+        {
+          "body": "Two notes:\r\n\r\n* `jku` and `x5u` are JWS *headers* not JWT *claims*.\r\n* `jwk` should probably listed here as well (i.e. you must not blindly trust the public key listed in the JWT).\r\n\r\nI therefore propose the following:\r\n\r\n> Verify that only trusted key material and key sources for each token issuer are used to validate cryptographically secured tokens, preventing attackers from specifying untrusted sources and keys. For JWTs, headers such as `jku`, `x5u` and `jwk` must be validated against an allow-list of trusted sources.\r\n\r\nNitpick: this is technically applicable to any *JWS*, not only JWTs but I'm not sure using \"JWS\" instead of \"JWT\" in the requirement would be very clear.",
+          "recorded_at": "2024-11-13T21:48:17Z"
+        }
+      ]
+    }
+  ]
+}

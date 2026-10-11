@@ -1,0 +1,76 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458634530",
+      "author": "ImanSharaf",
+      "previous_versions": [
+        {
+          "body": "There is a difference between loop bound injection and #934. In JavaScript (NodeJS), the `length` property of an array is mutable, which means that an attacker can modify it without actually inserting that many items in the array. This is often how loop bound injection attacks are carried out in JavaScript applications.\r\n\r\nFor example, consider the following code:\r\n```\r\nvar arr = [1, 2, 3];\r\nfor (var i = 0; i < arr.length; i++) {\r\n    console.log(arr[i]);\r\n}\r\n```\r\nIn this code, the loop iterates over the items in the `arr` array, and the loop condition is based on the value of `arr.length`. An attacker can modify the `length` property of the array without actually changing the contents of the array itself, by using the `Object.defineProperty()` function. Here's an example:\r\n```\r\nvar arr = [1, 2, 3];\r\nObject.defineProperty(arr, 'length', {value: 1000000});\r\nfor (var i = 0; i < arr.length; i++) {\r\n    console.log(arr[i]);\r\n}\r\n```\r\nIn this modified code, the attacker has set the length property of the `arr` array to a very large value using `Object.defineProperty()`. This causes the loop to iterate many times, potentially causing a denial-of-service attack or other security issue.\r\n\r\nTo prevent this type of attack, input validation should be performed on the value of `arr.length` before using it in a loop condition. This can help to ensure that the loop does not consume excessive resources or cause other security issues.\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+          "recorded_at": "2023-03-07T18:28:35Z"
+        },
+        {
+          "body": "There is a difference between loop bound injection and #934. In JavaScript, the `length` property of an array is mutable, which means that an attacker can modify it without actually inserting that many items in the array. This is often how loop bound injection attacks are carried out in JavaScript applications.\r\n\r\nFor example, consider the following code:\r\n```\r\nvar arr = [1, 2, 3];\r\nfor (var i = 0; i < arr.length; i++) {\r\n    console.log(arr[i]);\r\n}\r\n```\r\nIn this code, the loop iterates over the items in the `arr` array, and the loop condition is based on the value of `arr.length`. An attacker can modify the `length` property of the array without actually changing the contents of the array itself, by using the `Object.defineProperty()` function. Here's an example:\r\n```\r\nvar arr = [1, 2, 3];\r\nObject.defineProperty(arr, 'length', {value: 1000000});\r\nfor (var i = 0; i < arr.length; i++) {\r\n    console.log(arr[i]);\r\n}\r\n```\r\nIn this modified code, the attacker has set the length property of the `arr` array to a very large value using `Object.defineProperty()`. This causes the loop to iterate many times, potentially causing a denial-of-service attack or other security issue.\r\n\r\nTo prevent this type of attack, input validation should be performed on the value of `arr.length` before using it in a loop condition. This can help to ensure that the loop does not consume excessive resources or cause other security issues.\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+          "recorded_at": "2023-03-07T18:27:47Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1462303538",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Actually you do •not• need encoding, injection or sanitization for the most severe form of injection. You need query parameterization to stop SQL injection.This is why injection is a lot more difficult to fix than most people think because each individual type of injection has a very different formula for how it needs to be fixed.",
+          "recorded_at": "2024-09-02T18:27:32Z"
+        },
+        {
+          "body": "Actually you do •not• need encoding, injection or sanitization for the most severe form of injection. You need query parameterization to stop SQL injection.This is why injection is a lot more difficult to fix than most people think because each individual type of injection has a very different formula for how it needs to be fixed.On Mar 9, 2023, at 12:21 AM, Elar Lang ***@***.***> wrote:﻿\n\nAlso, there are many ASVS items that can be grouped into one ASVS item under the name of input validation (all injection related attaks) but we have not done that (which is good).\n\nA bit offtopic, but - against injection attack you need mostly encoding, then sanitization, then input validation.\n\nThe point here is to make the tester aware of this attack vector.\n\nYes, awareness is good. The question - is ASVS the correct project to achieve it (if the reason is only awareness)?\nAnd back to the beginning: can you provide an example - how loop bound injection can happen if input validation (including JSON schema validation) is done correctly?\nWhere I want to reach is - if it's not a separate and independent problem, then I'm not sure it's worth separate and independent requirement. Note: I'm not sure does not mean I'm against that.\n\n—Reply to this email directly, view it on GitHub, or unsubscribe.You are receiving this because you are subscribed to this thread.Message ID: ***@***.***>",
+          "recorded_at": "2023-03-09T15:54:26Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2308717100",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Ok so following further discussion with @elarlang, I think maybe we need to include this as a business expectation which input validation is checking for so my thought is to try and include it in 5.1.3. I therefore propose the following:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.3** | [MODIFIED] Verify that all input is validated using positive validation, against an allowed list of values, patterns or ranges to enforce business or functional expectations for that input. | ✓ | ✓ | ✓ | 20 |\r\n\r\n@ImanSharaf do you think this is sufficient?\r\n\r\n@elarlang any further thoughts?",
+          "recorded_at": "2024-08-25T07:41:30Z"
+        },
+        {
+          "body": "Ok so following further discussion with @elarlang, I think maybe we need to include this as a business expectation which input validation is checking for so my thought is to try and include it in 5.1.3. I therefore propose the following:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.3** | [MODIFIED] Verify that all input is validated using positive validation, against an allowed list of values, patterns or ranges to enforce business or functional expectations for that input. | ✓ | ✓ | ✓ | 20 |\r\n\r\n@ImanSharaf do you think this is sufficient.\r\n\r\n@elarlang any further thoughts",
+          "recorded_at": "2024-08-25T07:41:21Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2308721956",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "I would also suggest adding a clarification to the surrounding text. (This will be tracked via #2027 and updated separately)",
+          "recorded_at": "2024-08-25T08:02:39Z"
+        },
+        {
+          "body": "I would also suggest adding a clarification to the surrounding text.",
+          "recorded_at": "2024-08-25T07:59:41Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2323195497",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Opened #2050\r\n\r\nStill need to do the surrounding text update ",
+          "recorded_at": "2024-09-08T18:03:36Z"
+        },
+        {
+          "body": "Opened #1570\r\n\r\nStill need to do the surrounding text update ",
+          "recorded_at": "2024-09-01T06:42:16Z"
+        }
+      ]
+    }
+  ]
+}

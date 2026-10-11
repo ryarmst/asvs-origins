@@ -1,0 +1,90 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1603#issuecomment-1495177277",
+      "author": "securitydave",
+      "previous_versions": [
+        {
+          "body": "No, I'm talking about links within the pages of the application which are http: to external sites when the linked-to URL could have been https:. Even though you require TLS to access your own site's pages, you are needlessly exposing your users by having them click an http: link.",
+          "recorded_at": "2023-04-05T14:36:54Z"
+        },
+        {
+          "body": "No, I'm talking about links within the pages of the application which are http: to external sites when the linked-to URL could have been https:. Even though you require TLS to access your own site's pages, you are needlessly exposing your uses by having them click an http: link.",
+          "recorded_at": "2023-04-04T00:36:19Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1603#issuecomment-1495337262",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "This case is covered by \r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.5** | Verify that URL redirects and forwards only allow destinations which appear on an allow list, or **show a warning when redirecting to potentially untrusted content**. | ✓ | ✓ | ✓ | 601 |\r\n\r\nI don't support the solution that the application goes and checks is URL available via HTTPS as it open SSRF vector.",
+          "recorded_at": "2023-04-04T04:51:10Z"
+        },
+        {
+          "body": "This case is covered by \r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.5** | Verify that URL redirects and forwards only allow destinations which appear on an allow list, or show a warning when redirecting to potentially untrusted content. | ✓ | ✓ | ✓ | 601 |\r\n\r\nI don't support the solution that the application goes and checks is URL available via HTTPS as it open SSRF vector.",
+          "recorded_at": "2023-04-04T04:44:43Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1603#issuecomment-1497625275",
+      "author": "securitydave",
+      "previous_versions": [
+        {
+          "body": "Elar, thank you for your great care! The ASVS is so great because of people like you.\r\n> I don't support the solution that the application goes and checks is URL available via HTTPS as it open SSRF vector.\r\n\r\nI agree. Not automated check by the app.\r\n\r\nMy thought is that when testing a web app, we would document a finding for any occurrence of a link to http: if that page supports https: thus avoiding the user experiencing redirect to https:. A code change would be needed to fix.\r\n\r\n5.1.5 is similar, but is related to user input. My concern here is regarding links coded into the page. In a real-world case, this occurred in marketing-like links in footer of page template.",
+          "recorded_at": "2023-04-05T14:52:41Z"
+        },
+        {
+          "body": "Elar, thank you for your great care! The ASVS is so great because of people like you.\r\n> I don't support the solution that the application goes and checks is URL available via HTTPS as it open SSRF vector.\r\nI agree. Not automated check by the app.\r\n\r\nMy thought is that when testing a web app, we would document a finding for any occurrence of a link to http: if that page supports https: thus avoiding the user experiencing redirect to https:. A code change would be needed to fix.\r\n\r\n5.1.5 is similar, but is related to user input. My concern here is regarding links coded into the page. In a real-world case, this occurred in marketing-like links in footer of page template.",
+          "recorded_at": "2023-04-05T14:52:10Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1603#issuecomment-1775040440",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "> > @elarlang do you not think that is covered by 9.1.1?\r\n> \r\n> No, 9.1.1 covers that only https can be used when you come to the application.\r\n> \r\n> Pointed out issue describing, that https should be used (when available), when you navigate or application navigates you away to another application.\r\n\r\nSo then I think we need to clarify 9.1.1 rather than creating a new requirement.",
+          "recorded_at": "2023-10-23T12:02:24Z"
+        },
+        {
+          "body": "> > @elarlang do you not think that is covered by 9.1.1?\r\n> \r\n> No, 9.1.1 covers that only https can be used when you come to the application.\r\n> \r\n> Pointed out issue describing, that https should be used (when available), when you navigate or application navigates you away to another application.\r\n\r\nSo then I think we need to clarify 9.1.1 rather than creating a new issue",
+          "recorded_at": "2023-10-23T12:02:17Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1603#issuecomment-1962891615",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Requirements to cover:\r\n\r\n## requirement 1 - original issue - use https instaed of http scheme for links, if https is available\r\n\r\nOriginal issue - link to an external page must use the `https:` protocol (instead of the `http:`), if it is available\r\n\r\nIt is not and can not be covered by 9.1.1, see https://github.com/OWASP/ASVS/issues/1603#issuecomment-1775036949\r\n\r\nThe idea here should be:\r\n\r\n> Verify that, if the application content, which is not end-user input, provides a URL or link, then it uses https schema instead of http schema if the https schema is available for the URL.\r\n\r\nMy concern here is - that developers may build \"auto-validation\" for validating the URL or \"check if there https available for the URL\" and it creates an SSRF vulnerability.\r\n\r\n\r\n## split current 5.1.5\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.5** | Verify that URL redirects and forwards only allow destinations which appear on an allow list, or show a warning when redirecting to potentially untrusted content. | ✓ | ✓ | ✓ | 601 |\r\n\r\n\r\n### requirement 2 - redirect to allow-listed URL's\r\n\r\nCurrent 5.1.5:\r\n\r\n> _Verify that URL redirects and forwards only allow destinations which appear on an allow list_\r\n\r\nCurrent proposal: https://github.com/OWASP/ASVS/issues/1603#issuecomment-1724909988\r\n\r\n> _Verify that the application will only redirect the user to a different URL directly from an application URL where the destination appears on an allow list._\r\n\r\nThe context here is \"auto-redirect\". Appears in \"allow-list\" sounds like a fixed list of URLs, but we can also validate against patterns.\r\n\r\nRequires more finetuning, but the direction:\r\n\r\nProposal: _Verify that the application can auto-redirect the user only to validated allow-listed destinations._\r\n\r\n\r\n### requirement 3 - Show warning when navigating away\r\n\r\nCurrent 5.1.5\r\n\r\n> Verify that URL redirects and forwards /../ show a warning when redirecting to potentially untrusted content.\r\n\r\nCurrent proposal: https://github.com/OWASP/ASVS/issues/1603#issuecomment-1724909988\r\n\r\n> Verify that the application shows a warning when redirecting to URL destinations which are not within the control of the application, even if this is a result of manually clicking on a link to that URL.\r\n\r\nIs it reasonable to require it from EVERY link or URL? Or how to define the reason to warn the user, is it:\r\n\r\n  * hey, you are going to **navitate away** from the application, do you want to continue?\r\n  * hey, you are going to \"non-trusted\" content, do you want to continue?\r\n\r\nFor example, the content of Google is not under the application control, but should we show warning for navigating to Google? What risk we mitigate when we warn user before navitaging to Google?\r\n\r\nI think it requires some clarification, why exactly we need to warn users.\r\n\r\n\r\n",
+          "recorded_at": "2024-03-13T09:36:08Z"
+        },
+        {
+          "body": "Requirements to cover:\r\n\r\n## original issue - use https instaed of http scheme for links, if https is available\r\n\r\nOriginal issue - link to an external page must use the `https:` protocol (instead of the `http:`), if it is available\r\n\r\nIt is not and can not be covered by 9.1.1, see https://github.com/OWASP/ASVS/issues/1603#issuecomment-1775036949\r\n\r\nThe idea here should be:\r\n\r\n> Verify that, if the application content, which is not end-user input, provides a URL or link, then it uses https schema instead of http schema if the https schema is available for the URL.\r\n\r\nMy concern here is - that developers may build \"auto-validation\" for validating the URL or \"check if there https available for the URL\" and it creates an SSRF vulnerability.\r\n\r\n\r\n## split current 5.1.5\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.5** | Verify that URL redirects and forwards only allow destinations which appear on an allow list, or show a warning when redirecting to potentially untrusted content. | ✓ | ✓ | ✓ | 601 |\r\n\r\n\r\n### redirect to allow-listed URL's\r\n\r\nCurrent 5.1.5:\r\n\r\n> _Verify that URL redirects and forwards only allow destinations which appear on an allow list_\r\n\r\nCurrent proposal: https://github.com/OWASP/ASVS/issues/1603#issuecomment-1724909988\r\n\r\n> _Verify that the application will only redirect the user to a different URL directly from an application URL where the destination appears on an allow list._\r\n\r\nThe context here is \"auto-redirect\". Appears in \"allow-list\" sounds like a fixed list of URLs, but we can also validate against patterns.\r\n\r\nRequires more finetuning, but the direction:\r\n\r\nProposal: _Verify that the application can auto-redirect the user only to validated allow-listed destinations._\r\n\r\n\r\n### Show warning when navigating away\r\n\r\nCurrent 5.1.5\r\n\r\n> Verify that URL redirects and forwards /../ show a warning when redirecting to potentially untrusted content.\r\n\r\nCurrent proposal: https://github.com/OWASP/ASVS/issues/1603#issuecomment-1724909988\r\n\r\n> Verify that the application shows a warning when redirecting to URL destinations which are not within the control of the application, even if this is a result of manually clicking on a link to that URL.\r\n\r\nIs it reasonable to require it from EVERY link or URL? Or how to define the reason to warn the user, is it:\r\n\r\n  * hey, you are going to **navitate away** from the application, do you want to continue?\r\n  * hey, you are going to \"non-trusted\" content, do you want to continue?\r\n\r\nFor example, the content of Google is not under the application control, but should we show warning for navigating to Google? What risk we mitigate when we warn user before navitaging to Google?\r\n\r\nI think it requires some clarification, why exactly we need to warn users.\r\n\r\n\r\n",
+          "recorded_at": "2024-02-25T10:48:24Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1603#issuecomment-1993988871",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Ok, it was a bit non-intuitive to follow the comment. So, in total, we are covering 3 requirements here. I modified my comment above (https://github.com/OWASP/ASVS/issues/1603#issuecomment-1962891615) to point out clearly \"requirement 1\", \"requirement 2\", \"requirement 3\".\r\n\r\n... or should I split to 3 different issues...\r\n\r\n### requirement 1:\r\n\r\nLatest proposal:\r\n> Verify that, if the application content, which is not end-user input, provides a URL or link, then it uses https schema instead of http schema if the https schema is available for the URL.\r\n\r\nThere were no comments for this one.\r\n\r\n### requirement 2:\r\n\r\nPrevious proposal:\r\n> Verify that the application will only auto-redirect the user to URL destinations outside of the application's control which are validated and on an allow-list.\r\n\r\nProposal from Josh:\r\n> Verify that the application will only redirect the user to a different URL directly from an application URL where the destination appears on an allow list.\r\n\r\nI think the auto-redirect is important message here - you can redirect user to wherever, but then you need to show the warning. Without the auto-redirect, we can merge it to requirement 3.\r\n\r\n\r\n### requirement 3:\r\n\r\nPrevious proposal:\r\n> Verify that the application shows a warning when redirecting to URL destinations which are not within the control of the application, even if this is a result of manually clicking on a link to that URL.\r\n\r\nProposal from Josh:\r\n> Verify that the application shows a warning when manually redirecting to URL destinations outside of the application's control, even if this is a result of manually clicking on a link to that URL.\r\n\r\n\"manually redirecting\" is confusing here for me.\r\n\r\nNot the proposal for the requirement, but just an attempt to cover some points:\r\n> Verify, that if the application provides a functionality that navigates user away from the application control to not previously allow listed URL (Origin), then it show warning to to user with options to navigate away or not.",
+          "recorded_at": "2024-03-13T09:55:40Z"
+        },
+        {
+          "body": "Ok, it as a bit non-untuitive to follow comment. So, in total we are covering 3 requirements here. I modified my comment above (https://github.com/OWASP/ASVS/issues/1603#issuecomment-1962891615) to point out clearly \"requirement 1\", \"requirement 2\", \"requirement 3\".\r\n\r\n... or should I split to 3 different issues...\r\n\r\n### requirement 1:\r\n\r\nLatest proposal:\r\n> Verify that, if the application content, which is not end-user input, provides a URL or link, then it uses https schema instead of http schema if the https schema is available for the URL.\r\n\r\nThere were no comments for this one.\r\n\r\n### requirement 2:\r\n\r\nPrevious proposal:\r\n> Verify that the application will only auto-redirect the user to URL destinations outside of the application's control which are validated and on an allow-list.\r\n\r\nProposal from Josh:\r\n> Verify that the application will only redirect the user to a different URL directly from an application URL where the destination appears on an allow list.\r\n\r\nI think the auto-redirect is important message here - you can redirect user to wherever, but then you need to show the warning. Without the auto-redirect, we can merge it to requirement 3.\r\n\r\n\r\n### requirement 3:\r\n\r\nPrevious proposal:\r\n> Verify that the application shows a warning when redirecting to URL destinations which are not within the control of the application, even if this is a result of manually clicking on a link to that URL.\r\n\r\nProposal from Josh:\r\n> Verify that the application shows a warning when manually redirecting to URL destinations outside of the application's control, even if this is a result of manually clicking on a link to that URL.\r\n\r\n\"manually redirecting\" is confusing here for me.\r\n\r\nNot the proposal for the requirement, but just an attempt to cover some points:\r\n> Verify, that if the application provides a functionality that navigates user away from the application control to not previously allow listed URL (Origin), then it show warning to to user with options to navigate away or not.",
+          "recorded_at": "2024-03-13T09:54:56Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,201 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.3.2** | [MODIFIED, SPLIT TO 8.3.9] Verify that users have a method to remove their data on demand. | ✓ | ✓ | ✓ | 212 |\r\n| **8.3.3** | Verify that users are provided clear language regarding collection and use of supplied personal information and that users have provided opt-in consent for the use of that data before it is used in any way. | ✓ | ✓ | ✓ | |\r\n| **8.3.9** | [ADDED, SPLIT FROM 8.3.2] Verify that users have a method to export their data on demand. | | ✓ | ✓ | |\r\n\r\nCan we say for each requirement, what is the risk to solve? Is it worth a requirement in the ASVS or those are here because they are just from GDPR or similar?\r\n\r\nIf we want to keep them:\r\n\r\n  * should we require level 1? 8.3.2 level 1 vs 8.3.9 level 2 do not match well.\r\n  * maybe we should have separate policy related/oriented section\r\n  \r\n  edit: cwe 212 is kind of related, but not correct",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM54sufw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I wonder if all of these should be L2 because they are more like regulatory/legal risks and also like defense in depth rather than primary defense.\r\n\r\nI think these sort of requirements which are common to data protection legislation, e.g. GDPR or CCPA are worth keeping but with that change in level.\r\n\r\nI think we could separate chapter 8 into things which are actually security risks and things which are regulatory/legal risks but I don't think it is critical.",
+      "createdAt": "2024-03-28T11:46:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2024990704",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM540weI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "No clear proposals, just some thoughts for further discussion.\r\n\r\ntldr: I think we should stay away from legal requirements.\r\n\r\n\r\n## 8.3.2, 8.3.9\r\n\r\n* V8.3.2 Verify that users have a method to remove their data on demand.\r\n* V8.3.9 Verify that users have a method to export their data on demand.\r\n\r\nWell, those functionalities are quite a juicy target for attackers. I can understand the abstract meaning and reasoning, but it opens up a new level of impact for attacks.\r\n\r\nMaybe it's worth special mention for this in the 3.7.1?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.7.1** | [MODIFIED] Verify that the application requires re-authentication or secondary verification before allowing highly sensitive transactions or modifications to account profile or authentication settings. | ✓ | ✓ | ✓ | 306 | |\r\n\r\n\r\nAre those requirements realistic - let's take some bank or gov system, you just can not ask it. \r\n\r\n\r\n## 8.3.3\r\n\r\n* V8.3.3 Verify that users are provided clear language regarding collection and use of supplied personal information and that users have provided opt-in consent for the use of that data before it is used in any way.\r\n\r\nIs it actually 2 requirements?\r\n\r\n> Verify that users are provided clear language regarding collection\r\n\r\nIs this part testable (what is a \"clear language\")? Is it a bit too much just a policy?\r\n\r\nThe abstract goal here can be, that the application must not collect (sensitive) data that it does not need, and it should be analyzed via:\r\n\r\n* V1.8.1 Verify that all sensitive data created and processed by the application has been identified and classified into protection levels, and ensure that a policy is in place on how to deal with sensitive data.\r\n* V1.8.2 Verify that all protection levels have an associated set of protection requirements and that these are applied in the architecture. This should include (but not be limited to) requirements related to encryption, integrity verification, retention, privacy and privacy-enhancing technologies to be used, and other confidentiality requirements.\r\n\r\n\r\n> Verify that users have provided opt-in consent for the use of that data before it is used in any way.\r\n\r\nHow we are going to test it? It is written somewhere in a big condition document and it's verified?\r\n\r\nping  @tghosth ",
+      "createdAt": "2024-03-29T11:17:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2027095944",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55YDsV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> tldr: I think we should stay away from legal requirements.\r\n\r\nI don't see a problem with some high-level requirements as long as they are implementable/testable.\r\n\r\n> Well, those functionalities are quite a juicy target for attackers. I can understand the abstract meaning and reasoning, but it opens up a new level of impact for attacks.\r\n>\r\n> Maybe it's worth special mention for this in the 3.7.1?\r\n\r\nI think it could already be considered to be covered in 3.7.1. We don't enumerate every possibility there.\r\n\r\n> Are those requirements realistic - let's take some bank or gov system, you just can not ask it.\r\n\r\nReauthentication? Definitely realistic. My bank makes me enter in an SMS code every time I want to do some sort of money transfer.\r\n\r\n> Is it actually 2 requirements?\r\n\r\nI think it is one requirement because they are opting in to whatever is described in the wording it talks about.\r\n\r\n> Is this part testable (what is a \"clear language\")? Is it a bit too much just a policy?\r\n\r\nI agree that is subjective and unhelpful and would recommend removing.\r\n\r\n> How we are going to test it? It is written somewhere in a big condition document and it's verified?\r\n\r\nFor testing opt in, you just have to make sure that users have to explicitly agree to it, should be pretty easy.",
+      "createdAt": "2024-04-04T07:04:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2036349717",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM55YaAN",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Reauthentication? Definitely realistic. My bank makes me enter in an SMS code every time I want to do some sort of money transfer.\r\n\r\nNo. The topic is:\r\n\r\n* V8.3.2 Verify that users have a method to remove their data on demand.\r\n* V8.3.9 Verify that users have a method to export their data on demand.\r\n\r\nIs it _always_ realistic to ask removing your data and export all your data. I don't think so.\r\n\r\nIf it is available as functionality, it is so critical piece, that it is worth special mentioning in 3.7.1.",
+      "createdAt": "2024-04-04T07:52:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2036441101",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55rFcm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Reauthentication? Definitely realistic. My bank makes me enter in an SMS code every time I want to do some sort of money transfer.\r\n> \r\n> No. The topic is:\r\n> \r\n>     * V8.3.2 Verify that users have a method to remove their data on demand.\r\n> \r\n>     * V8.3.9 Verify that users have a method to export their data on demand.\r\n> \r\n> \r\n> Is it _always_ realistic to ask removing your data and export all your data. I don't think so.\r\n> \r\n> If it is available as functionality, it is so critical piece, that it is worth special mentioning in 3.7.1.\r\n\r\nAh ok, I understand better what you mean now. I think that privacy legislation still applies to government bodies except in certain circumstances, for example:\r\n\r\n* https://www.compliancejunction.com/who-is-exempt-from-gdpr-requirements/\r\n\r\nIt definitely applies for financial institutions.\r\n\r\nAs such I think it is almost always valid to expect that.",
+      "createdAt": "2024-04-07T06:39:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2041337638",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM56bQwd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "## option 1 - cleanup\r\n\r\nBack to the beginning:\r\n\r\n> Can we say for each requirement, what is the risk to solve?\r\n\r\nIf there is no clear answer, we should remove it.\r\n\r\nAlso, we have an agreement\r\n\r\n* do not have requirements just because they belong to some policy\r\n* to reduce the amount of requirements\r\n\r\nI'm really not convinced we need those requirements in ASVS.\r\n\r\n\r\n## option 2 - update\r\n\r\nIf you are still sure you want to keep them:\r\n\r\n* need for re-auth for data export is worth special mention in 3.7.1\r\n* 8.3.3 needs improvement, remove the \"clear language\" part\r\n* level 2 for 8.3.2\r\n* I don't think CWE-212 is suitable for 8.3.2\r\n* considerations to have separate policy-oriented requirements - but it is already against the logic to not have them at all\r\n\r\nping @tghosth ",
+      "createdAt": "2024-04-14T08:36:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2053966877",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM563Hv0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Following discussion with @elarlang, reduce to Level 3 since this is not a protective control as such but rather a risk reduction mechanism.",
+      "createdAt": "2024-04-17T13:31:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2061270004",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM563Iar",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder 10 mins josh to look at",
+      "createdAt": "2024-04-17T13:32:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2061272747",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM563Icz",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nWednesday, April 17, 2024 3:42 PM (GMT+02:00)\r\n> josh to look at",
+      "createdAt": "2024-04-17T13:32:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2061272883",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM563N6V",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1918#issuecomment-2061272747) @tghosth\n> josh to look at",
+      "createdAt": "2024-04-17T13:43:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2061295253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM569_-2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1931\r\n\r\nChanges:\r\n\r\n* I made them level 3\r\n* I cleaned up 8.3.3\r\n* I removed CWE 212\r\n* I added some guidance to 3.7.1\r\n",
+      "createdAt": "2024-04-18T06:09:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1918#issuecomment-2063073206",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-03-26T12:00:04Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    }
+  ],
+  "number": 1918,
+  "state": "CLOSED",
+  "title": "V8.3 security and policy",
+  "url": "https://github.com/OWASP/ASVS/issues/1918"
+}

@@ -1,0 +1,255 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I believe the current version of ASVS does not include an item that addresses the vulnerability of web cache deception attacks. These attacks have been successfully carried out against many online services, including PayPal ([$3k bounty was paid to the researcher](http://omergil.blogspot.com/2017/02/web-cache-deception-attack.html)) and others. Also, I believe 8.2.1 check doesn't fully cover this, as the main issue is that the web app serves a dynamic page as a static page that doesn't exist.\r\nWeb cache deception attacks are a type of attack where a server caches pages with personal data in a way that makes them available to unauthenticated users. An attacker can trick a user into accessing a link pointing to a non-existent resource, and the server will then create a cache for the URL section up until the non-existent resource. This cached page can include user details, such as account balance, transaction data, email address, and the last four digits of the user's debit/credit card, among others.\r\n\r\nThe impact of such an attack could be severe, as it allows attackers to gain access to personal data without any authentication or authorization. A potential check could be like this: Verify the application doesn't serve a non-existent resource.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5WLq6i",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Also, I believe 8.2.1 check doesn't fully cover this, as the main issue is that the web app serves a dynamic page as a static page that doesn't exist.\r\n\r\n8.2 is client-side cache\r\n\r\nI think the issue is covered by 8.1.1\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.1.1** | [MODIFIED, MERGED FROM 8.1.2] Verify that the application prevents sensitive data from being cached in server components such as load balancers and application caches or ensures that the data is securely purged after use. | | ✓ | ✓ | 524 |\r\n",
+      "createdAt": "2023-02-27T08:24:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1445899938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5WO9d7",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I believe if testers look at this item they might miss the cache deception attack vector and they only check load balancers [settings] and app caches for any sensitive data that is cached and we need to explicitly mention the cache deception attack in this item.",
+      "createdAt": "2023-02-27T17:40:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1446762363",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Xm9N9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @ImanSharaf, what specific mechanisms, requirements should we be adding to prevent this? We need to provide guidance that a developer can use to ensure that the attack is not possible in the application",
+      "createdAt": "2023-03-15T11:25:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1469830013",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X40h4",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @tghosth, I believe we should validate requested resources: `Ensure that the application only serves resources that actually exist and are intended to be served.` for the reference please check [this](https://book.hacktricks.xyz/pentesting-web/cache-deception#cache-deception) one.",
+      "createdAt": "2023-03-17T23:32:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1474513016",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X6kyK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In dynamic world \"existing resource\" is dynamic thing.\r\n\r\nThe problem is not what is served from the server, but what is cached in cache server. In those cases, cache server makes assumption based on request file extension, but should be based on content-type from the application server.",
+      "createdAt": "2023-03-18T19:55:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1474972810",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5YIN7x",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK, let's call in the big guns.\r\n\r\nHey @omer-cider, any thoughts how we can best include a defence against web cache deception in ASVS 5.0? :)",
+      "createdAt": "2023-03-21T20:38:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1478549233",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmc4-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Found this in @omer-cider's original whitepaper: \r\n\r\n> **MITIGATIONS**\r\n> 1. Configure the cache mechanism to cache files only if their HTTP caching headers allow.\r\n> 2. Store all static files in a designated directory and cache only that directory.\r\n> 3. If the cache component provides the option, configure it to cache files by their content type.\r\n> 4. Configure the web server so that for pages such as http://www.example.com/home.php/nonexistent.css, the web server does not return the content of home.php with the triggering URL; instead, the server should return a 404 or 302 response.\r\n\r\nI am thinking of two requirements. @ImanSharaf @elarlang what do you think:\r\n\r\n1:\r\n> Verify that caching mechanisms are configured to only cache static files and only those which have the correct content type to prevent Web Cache Deception attacks. \r\n\r\n2:\r\n> Verify that the web server returns a 404 or 302 response when an non-existent file is accessed rather than returning a different, valid file to prevent Web Cache Deception attacks.",
+      "createdAt": "2023-05-31T14:35:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1570360894",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dnCmQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that caching mechanisms are configured to only cache static files\r\n\r\nThis one sends wrong signal. It's allowed to cache dynamic content as well with checking the modification.\r\n\r\n> Verify that the web server returns a 404 or 302 response when an non-existent ...\r\n\r\nThe problem with `/some.php/other.css` is that part after last `/` can be translated to \"query string\" which means it actually does not cause 404 or any other error, but load balancer still may see \"css file\" there and caches it.\r\n\r\nLike I wrote here https://github.com/OWASP/ASVS/issues/1560#issuecomment-1474972810:\r\n\r\n> The problem is not what is served from the server, but what is cached in cache server. In those cases, cache server makes assumption based on request file extension, but should be based on content-type from the application server.\r\n\r\nMaybe this direction: Verify that caching decisions (todo: where?) are following caching headers from the application and decision are made based on content-type (not based on file extension) to prevent Web Cache Deception attacks.\r\n\r\nBy concept it can be part of 8.1.1, but it may get too long.",
+      "createdAt": "2023-05-31T16:05:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1570515344",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e7QNU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Verify that caching mechanisms are configured to only cache static files\r\n> \r\n> This one sends wrong signal. It's allowed to cache dynamic content as well with checking the modification.\r\n\r\nSo how about:\r\n\r\n**_Verify that caching mechanisms are configured to only cache files which have the correct content type and which do not contain sensitive, dynamic content to prevent Web Cache Deception attacks._**\r\n \r\n> > Verify that the web server returns a 404 or 302 response when an non-existent ...\r\n> \r\n> The problem with `/some.php/other.css` is that part after last `/` can be translated to \"query string\" which means it actually does not cause 404 or any other error, but load balancer still may see \"css file\" there and caches it.\r\n> \r\n> Like I wrote here [#1560 (comment)](https://github.com/OWASP/ASVS/issues/1560#issuecomment-1474972810):\r\n\r\n> > The problem is not what is served from the server, but what is cached in cache server. In those cases, cache server makes assumption based on request file extension, but should be based on content-type from the application server.\r\n\r\n\r\nSo Cider's 4th recommendation is:\r\n\r\n> 4. Configure the web server so that for pages such as http://www.example.com/home.php/nonexistent.css, the web server does not return the content of home.php with the triggering URL; instead, the server should return a 404 or 302 response.\r\n\r\nMy understanding is that this behaviour leads to a situation where the server is returning content with a content type and extension which looks to the caching server to be something it should be caching. As such, this is specifically a web server configuration and not a caching server configuration.",
+      "createdAt": "2023-06-15T08:23:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1592591188",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e8QUO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would change \"files\" to \"responses\"\r\n\r\n_Verify that caching mechanisms are configured to only cache **responses** which have the correct content type and which do not contain sensitive, dynamic content to prevent Web Cache Deception attacks._\r\n\r\n\"responses\" can be more precise as well, like \"HTTP responses from the application\"",
+      "createdAt": "2023-06-15T11:16:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1592853774",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hBLhm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so I think that makes sense @elarlang.\r\n\r\nAs such, I would propose the following additions:\r\n\r\n\r\n## V14.7 Web Server Configuration\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.7.1** | [ADDED] Verify that caching mechanisms are configured to only cache responses which have the correct content type and which do not contain sensitive, dynamic content to prevent Web Cache Deception attacks. | | ✓ | ✓ | 444 |\r\n| **14.7.2** | [ADDED] Verify that the web server returns a 404 or 302 response when an non-existent file is accessed rather than returning a different, valid file to prevent Web Cache Deception attacks. | | ✓ | ✓ | 444 |\r\n\r\n",
+      "createdAt": "2023-07-09T12:17:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1627699302",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hnSAK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "* I think proposed 14.7.2 can be part of 14.7.1 as an exclusion\r\n* \"web server configuration\" as category for separate cache server is confusing, I think proposed requirement(s) should be in the same category with current requirement 8.1.1 (it can be moved)",
+      "createdAt": "2023-07-17T09:32:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1637687306",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5jWWGK",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK so @elarlang how about:\r\n\r\n## V8.1 General Data Protection\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.1.7** | Verify that caching mechanisms are configured to only cache responses which have the correct content type and do not contain sensitive, dynamic content. The web server should return a 404 or 302 response when an non-existent file is accessed rather than returning a different, valid file. This should prevent Web Cache Deception attacks.. | | ✓ | ✓ | 444 |",
+      "createdAt": "2023-08-06T10:10:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1666802058",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5jZb7H",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's go with that. We can finetune it always later if needed.",
+      "createdAt": "2023-08-07T10:35:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1667612359",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ja1JT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this as well, nice work everyone.",
+      "createdAt": "2023-08-07T14:33:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1560#issuecomment-1667977811",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-02-23T03:10:05Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1560,
+  "state": "CLOSED",
+  "title": "Add Web Cache Deception Attack Verification to ASVS",
+  "url": "https://github.com/OWASP/ASVS/issues/1560"
+}

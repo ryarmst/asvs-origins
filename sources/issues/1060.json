@@ -1,0 +1,121 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEyMzcyOTY3",
+    "is_bot": false,
+    "login": "maizuka",
+    "name": "IZUKA Masahiro"
+  },
+  "body": "The requirement [2.2.4](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v22-general-authenticator-security) enforces MFA only to L3.\r\n\r\n> Verify impersonation resistance against phishing, such as the use of multi-factor authentication, cryptographic devices with intent (such as connected keys with a push to authenticate), or at higher AAL levels, client-side certificates.\r\n\r\nI list up the problems here:\r\n\r\n1. The \"Permitted authenticator types\" requirement in NIST 800-63B [Table 4-1](https://pages.nist.gov/800-63-3/sp800-63b.html#63bSec4-Table1) and [Section 4.2.1, 4.3.1](https://pages.nist.gov/800-63-3/sp800-63b.html#sec4) explains that AAL2 needs multi-factor authentications and AAL3 needs further limited methods. Because L2 and L3 are tied to AAL2 and AAL3 for each (according to [V2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#selecting-an-appropriate-nist-aal-level)), the level of 2.2.4 should match the AAL level.\r\n2. MFA is not generally effective against phishing although is resistant against steal of one factor.\r\n3. There are no higher level than L3 (AAL3) and client-side certificate is not the only method with impersonation resistance for AAL3. And it is no more than protocol for authenticators, not an authenticator itself.\r\n\r\nSo my suggestion is here:\r\n\r\n> | **2.2.4** | [MODIFIED] Verify that a hardware-based authenticator and an authenticator that provides verifier impersonation resistance against phishing attacks are used, such as a multi-factor cryptographic hardware (such as a connected key to be unlocked with a password or a biometric), or combination of a single-factor cryptographic hardware and an OTP device. Authenticators with manual entry such as OTP are not sufficient. | | | ✓ | 308 | 5.2.5 |\r\n> | **2.2.x** | [ADDED] Verify that multi-factor authentication is required, such as using password and out-of-band authenticator, or OTP devices or cryptographic devices to be activated with a password or a biometric. | | ✓ | ✓ | 308 | 4.2.1 |\r\n\r\nI copied the words \"a hardware-based ... resistance\" from the NIST.\r\n\r\nParticularly AAL3 requirement is complicated for me. For example, I couldn't find why multi-factor cryptographic software only is not allowed while the hardware only is allowed. I would appreciate it for suggestion or notice of misunderstanding.\r\n\r\nReferences:\r\n\r\n- The level is changed at the commit 6298456976626a1853f296f5c892f78c3b5379ec (the number changed 2.1.4 -> 2.2.5).\r\n- The discussion in #1046 includes that AAL2 needs MFA.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM43icSl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Thank you for your submission. Absolutely MFA is introduced at AAL-2. Let's make the new MFA requirement 2.2.9 .\r\n\r\n_| 2.2.9 | [ADDED] Verify that multi-factor authentication is required, such as using password and out-of-band authenticator, or OTP devices or cryptographic devices to be activated with a password or a biometric. | | ✓ | ✓ | 308_ |\r\n\r\nThis phrasing seems a bit awkward: _such as using password and out-of-band authenticator, or OTP devices or cryptographic devices to be activated with a password or a biometric_ Can we somehow simplify this requirement? Table 5-2 in 80063b says \"two different factors through a secure authentication protocol\" or something at that level of clarity?\r\n\r\n_| 2.2.4 | [MODIFIED] Verify that a hardware-based authenticator and an authenticator that provides verifier impersonation resistance against phishing attacks are used, such as a multi-factor cryptographic hardware (such as a connected key to be unlocked with a password or a biometric), or combination of a single-factor cryptographic hardware and an OTP device. Authenticators with manual entry such as OTP are not sufficient. | | | ✓ | 308 | 5.2.5 |_\r\n\r\nSame with your edits to 2.2.4, can we trim that up, perhaps dropping the last sentence fragment? AAl3 on diagram 5-2 says (paraphrasing) \"proof of possession of a key through a cryptographic protocol similar to other forms of MFA except a 'hard' token is required\".\r\n\r\nCan we aim for that level of clarity?",
+      "createdAt": "2021-09-30T23:24:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1060#issuecomment-931775653",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43kqtB",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you for your comment. I've made a simpler suggestion. The phrase of 2.2.9 comes from 800-63b [Sec4.2.1](https://pages.nist.gov/800-63-3/sp800-63b.html#sec4). We also should confirm the associated NIST section of 2.2.9 should be 4.2.1.\r\n\r\n```\r\n| 2.2.9 | [ADDED] Verify that multi-factor authentication is required, that is, the application uses either a multi-factor authenticator or a combination of single-factor authenticators. | | ✓ | ✓ | 308 | 4.2.1 |\r\n\r\n| 2.2.4 | [MODIFIED] Verify that a hardware-based authenticator and an authenticator that provides verifier impersonation resistance against phishing attacks are used, such as a multi-factor cryptographic hardware, or a combination of a single-factor cryptographic hardware and an OTP device. | | | ✓ | 308 | 5.2.5 |\r\n```\r\n\r\nDetailed requirements for authenticators are omitted here, which the readers should check in the references (in 800-63b).\r\n\r\nBy the way, I cannot find Table or Diagram 5-2 and I wonder if looking at a different document. Could you give me a way to the place?",
+      "createdAt": "2021-10-01T16:05:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1060#issuecomment-932358977",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43kyom",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "These are fantastic clarifications. Let’s go PR!\n\nTable 5-2 is here:\n\nhttps://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63-3.pdf Page 19",
+      "createdAt": "2021-10-01T16:53:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1060#issuecomment-932391462",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43k5Rf",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I've made PR.\r\n\r\nThank for the guide. I didn't know the PDF has differences from the web page.",
+      "createdAt": "2021-10-01T17:22:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1060#issuecomment-932418655",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43k6ZI",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is just the first overview doc, there are 4 docs in the series:\n\n800-63-3 (overview)\n800-63a Identity Proofing (IAL)\n800-63b Authentication (AAL)\n800-63c Federation (FAL)\n",
+      "createdAt": "2021-10-01T17:29:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1060#issuecomment-932423240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43lw-3",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This work has been merged. Well done, @maizuka and thank you!",
+      "createdAt": "2021-10-02T00:32:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1060#issuecomment-932646839",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-09-24T15:43:34Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 1060,
+  "state": "CLOSED",
+  "title": "MFA requirement in 2.2.4",
+  "url": "https://github.com/OWASP/ASVS/issues/1060"
+}

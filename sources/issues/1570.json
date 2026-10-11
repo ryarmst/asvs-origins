@@ -1,0 +1,403 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "The current version of the Application Security Verification Standard (ASVS) does not include a specific verification item for preventing loop bound injection attacks, which is a security vulnerability that can occur in code that uses loops to iterate over data and can cause a DoS. Therefore, it is recommended to add a new verification item to help ensure that developers take appropriate steps to prevent this type of vulnerability.\r\nPlease check this [reference](https://codeql.github.com/codeql-query-help/javascript/js-loop-bound-injection/) to see sample vulnerable codes (the attacker can modify the length property without inserting any items into the object).\r\n\r\nA sample check could be this one:\r\n_Verify that input validation is performed for all loop conditions to prevent loop bound injection attacks._",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5W8D9J",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The name \"loop bound injection\" is confusing for me.\r\n\r\nThe actual context is basically just input validation, and if it's not done, then as an impact in some context it may cause \"running out of resources\". \"Loop\" means it actually never ends, but based on description, it's not the case here.\r\n\r\nNow there is question, do we want to have separate requirement to say - Verify that your input validation rules are matching with available resources.\r\n\r\nSimilar requirements already exists in business logic and file handling area:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **11.1.3** | Verify the application has appropriate limits for specific business actions or transactions which are correctly enforced on a per user basis. | ✓ | ✓ | ✓ | 770 |\r\n| **11.1.5** | Verify the application has business logic limits or validation to protect against likely business risks or threats, identified using threat modeling or similar methodologies. | ✓ | ✓ | ✓ | 841 |\r\n| **12.1.1** | [MODIFIED] Verify that the application will only accept files of a size which it can process without causing a loss of performance or denial of service attack. | ✓ | ✓ | ✓ | 400 |\r\n| **12.1.3** | Verify that a file size quota and maximum number of files per user is enforced to ensure that a single user cannot fill up the storage with too many files, or excessively large files. | | ✓ | ✓ | 770 |\r\n",
+      "createdAt": "2023-03-07T17:49:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458585417",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W8F7p",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In a way related: https://github.com/OWASP/ASVS/issues/934\r\n(if someone can ask too many rows/too big response to the output, that server can not produce it - running out of memory)",
+      "createdAt": "2023-03-07T17:55:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458593513",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W8P8i",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There is a difference between loop bound injection and #934. In JavaScript (NodeJS), the `length` property of an array is mutable, which means that an attacker can modify it without actually inserting that many items in the array. This is often how loop bound injection attacks are carried out in JavaScript applications.\r\n\r\nFor example, consider the following code:\r\n```\r\nvar arr = [1, 2, 3];\r\nfor (var i = 0; i < arr.length; i++) {\r\n    console.log(arr[i]);\r\n}\r\n```\r\nIn this code, the loop iterates over the items in the `arr` array, and the loop condition is based on the value of `arr.length`. An attacker can modify the `length` property of the array without actually changing the contents of the array itself, by using the `Object.defineProperty()` function. Here's an example:\r\n```\r\nvar arr = [1, 2, 3];\r\nObject.defineProperty(arr, 'length', {value: 1000000});\r\nfor (var i = 0; i < arr.length; i++) {\r\n    console.log(arr[i]);\r\n}\r\n```\r\nIn this modified code, the attacker has set the length property of the `arr` array to a very large value using `Object.defineProperty()`. This causes the loop to iterate many times, potentially causing a denial-of-service attack or other security issue.\r\n\r\nTo prevent this type of attack, input validation should be performed on the value of `arr.length` before using it in a loop condition. This can help to ensure that the loop does not consume excessive resources or cause other security issues.\r\n\r\n\r\n\r\n\r\n\r\n\r\n",
+      "createdAt": "2023-03-07T18:27:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458634530",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W8YaV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, \"attacker can modify\" .. how? What is the precondition that an attacker can do that?",
+      "createdAt": "2023-03-07T18:56:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458669205",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W8a6W",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please check the following [code](https://codeql.github.com/codeql-query-help/javascript/js-loop-bound-injection/). The server listens for POST requests to the `/foo` endpoint and expects to receive a JSON object in the request body. Here, the attacker can modify the `length` property.\r\n```\r\nvar express = require('express');\r\nvar app = express();\r\n\r\napp.post(\"/foo\", (req, res) => {\r\n    var obj = req.body;\r\n\r\n    var ret = [];\r\n\r\n    // Potential DoS if obj.length is large.\r\n    for (var i = 0; i < obj.length; i++) {\r\n        ret.push(obj[i]);\r\n    }\r\n});\r\n```",
+      "createdAt": "2023-03-07T19:04:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458679446",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W8crS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I checked it before I wrote my first comment. I still think it's input validation question with different potential outcome as impact.\r\n\r\nFor JSON and for this example we need to meet the requirement 13.2.2 first:\r\n_13.2.2 | Verify that JSON schema validation is in place and verified before accepting input._\r\n\r\nAt same time I'm opened to point-of-views, how it is not (only) an input validation question.",
+      "createdAt": "2023-03-07T19:11:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458686674",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W8knS",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I believe JSON schema validation alone may not be sufficient to prevent loop bound injection attacks. Also, there are many ASVS items that can be grouped into one ASVS item under the name of input validation (all injection related attaks) but we have not done that (which is good). The point here is to make the tester aware of this attack vector.",
+      "createdAt": "2023-03-07T19:37:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1458719186",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XHWKs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Also, there are many ASVS items that can be grouped into one ASVS item under the name of input validation (all injection related attaks) but we have not done that (which is good).\r\n\r\nA bit offtopic, but - against injection attack you need mostly encoding, then sanitization, then input validation.\r\n\r\n> The point here is to make the tester aware of this attack vector.\r\n\r\nYes, awareness is good. The question - is ASVS the correct project to achieve it (if the reason is only awareness)?\r\n\r\nAnd back to the beginning: can you provide an example - how _loop bound injection_ can happen if input validation (including JSON schema validation) is done correctly?\r\n\r\nWhere I want to reach is - if it's not a separate and independent problem, then I'm not sure it's worth separate and independent requirement. Note: I'm not sure does not mean I'm against that.",
+      "createdAt": "2023-03-09T08:21:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1461543596",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XKPsy",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Actually you do •not• need encoding, injection or sanitization for the most severe form of injection. You need query parameterization to stop SQL injection.This is why injection is a lot more difficult to fix than most people think because each individual type of injection has a very different formula for how it needs to be fixed.",
+      "createdAt": "2023-03-09T15:54:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1462303538",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X4ziI",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If the developer uses maxItems in the JSON Schema to set a bound we can prevent this attack, should we rephrase the ASVS item to mention this too?",
+      "createdAt": "2023-03-17T23:25:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1474508936",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZFZaT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this is like a context specific input validation. I mean that it is not sufficient to check that the data is the right type, size or format for the target type but that it is a valid value for this particular case. So this could potentially be a general requirement about context specific input validation.\r\n\r\nOn the other hand, maybe we need to specifically mandate context specific input validation where input is affecting control flow.\r\n- @ImanSharaf @elarlang What do you think?\r\n- @elarlang do we have a catch-all label for input validation re-write yet? If not, do you think we need one?",
+      "createdAt": "2023-04-03T16:00:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-1494587027",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IGVFn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the control flow thing here is the key point. I would propose an addition to V5.1 Input Validation:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.7** | [ADDED] Verify that untrusted input which can affect control flow (such as the number of iterations in a loop) is carefully validated against expectations. | | ✓ | ✓ | |",
+      "createdAt": "2024-08-12T08:17:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2283360615",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IGVKI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ImanSharaf @elarlang comments?",
+      "createdAt": "2024-08-12T08:18:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2283360904",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IGZrM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you clarify, what is the risk or attack vector to solve with this?",
+      "createdAt": "2024-08-12T08:27:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2283379404",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IJf54",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is the attack vector which concerns me:\r\nhttps://github.com/OWASP/ASVS/issues/1570#issuecomment-1458679446 @elarlang ",
+      "createdAt": "2024-08-12T14:48:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2284191352",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ij1ZU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder 7 days @tghosth Is this different to input validation? The size of the loop should be a business expectation kind of, no?",
+      "createdAt": "2024-08-15T11:17:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2291095124",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ij1aF",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nThursday, August 22, 2024 12:00 AM (GMT+02:00)\r\n> @tghosth Is this different to input validation? The size of the loop should be a business expectation kind of, no?",
+      "createdAt": "2024-08-15T11:17:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2291095173",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JRjsz",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1570#issuecomment-2291095124) @tghosth\n> @tghosth Is this different to input validation? The size of the loop should be a business expectation kind of, no?",
+      "createdAt": "2024-08-21T22:00:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2303081267",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JnDos",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so following further discussion with @elarlang, I think maybe we need to include this as a business expectation which input validation is checking for so my thought is to try and include it in 5.1.3. I therefore propose the following:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.3** | [MODIFIED] Verify that all input is validated using positive validation, against an allowed list of values, patterns or ranges to enforce business or functional expectations for that input. | ✓ | ✓ | ✓ | 20 |\r\n\r\n@ImanSharaf do you think this is sufficient?\r\n\r\n@elarlang any further thoughts?",
+      "createdAt": "2024-08-25T07:41:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2308717100",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JnE0k",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would also suggest adding a clarification to the surrounding text. (This will be tracked via #2027 and updated separately)",
+      "createdAt": "2024-08-25T07:59:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2308721956",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KHu7b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang was ok with this.\r\n\r\n@ImanSharaf any final requests before I do a PR?",
+      "createdAt": "2024-08-29T10:36:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2317283035",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KMjEA",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am good.",
+      "createdAt": "2024-08-29T18:13:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2318545152",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KeSZp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2050\r\n\r\nStill need to do the surrounding text update ",
+      "createdAt": "2024-09-01T06:42:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2323195497",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KfM9O",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Surrounding text updated in #2026",
+      "createdAt": "2024-09-01T17:32:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1570#issuecomment-2323435342",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-03-07T17:32:58Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABmzyuzA",
+      "name": "7) PR in non-master branch",
+      "description": "",
+      "color": "BB14B6"
+    }
+  ],
+  "number": 1570,
+  "state": "CLOSED",
+  "title": "Missing ASVS verification item for preventing loop bound injection attacks",
+  "url": "https://github.com/OWASP/ASVS/issues/1570"
+}

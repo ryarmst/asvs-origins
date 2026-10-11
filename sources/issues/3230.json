@@ -1,0 +1,75 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "<!---\nBEFORE YOU OPEN AN ISSUE:\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\n- Please search the issues in case your question has been discussed before.\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\n- When you reference requirements, please include them as a link, similarly to this:\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\n\nOTHER NOTES:\n- Please do not open a pull request without first opening an associated issue.\n- Please carry out all discussion in the associated issue only.\n-->\n\n> 1.2.10 Verify that the application is protected against CSV and Formula Injection.\nThe application must follow the escaping rules defined in RFC 4180 sections\n2.6 and 2.7 when exporting CSV content. Additionally, when exporting to CSV\nor other spreadsheet formats (such as XLS, XLSX, or ODF), special characters\n(including ‘=’, ‘+’, ‘‑’, ‘@’, ‘\\t’(tab), and ‘\\0’(null character)) must be escaped\nwith a single quote if they appear as the first character in a field value.\n\n\n* Relying only on RFC 4180 and the “leading character” rule may not protect against all injection scenarios, because different applications can interpret CSV data in different ways.\n* Escaping with a single quote at the start isn’t always the best or only defense, especially for more complex formats that have their own structures and formula parsing rules.\n* As far as I know RFC 4180 describes how CSV files are structured,it doesn’t address security measures like escaping for formula injection or other spreadsheet-specific risks.\n* A single quote escape is not a universal solution.\n* The requirement also doesn’t clearly define its scope. This mitigation is only necessary when user-provided data is included in CSV/XLS output. If all the content is system-generated and trusted, this escaping may not be needed.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM69wZkU",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Excellent feedback! This requirement is really only for CSV and Formula Injection from user input or other untrusted data. Even when data comes from a trusted source, escaping causes no harm. Classes and other libraries that build CSV should escape regardless, I'd dare say.\n\nAnyhow, your other comments are spot on. How about:\n\n_Verify that all untrusted values exported to CSV/XLSX/ODS are forced to render as text. In CSV, prefix a single quote before RFC 4180 quoting when the first non-whitespace character is =, +, -, or @ and in XLSX/ODS, set the cell type to string and avoid placing untrusted data in formula cells. Sanitize control characters <0x20, and exclude untrusted data from macros or external connections._\n\n",
+      "createdAt": "2025-08-13T12:09:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3230#issuecomment-3183581460",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-K4W5",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> This requirement is really only for CSV and Formula Injection from user input or other untrusted data. Even when data comes from a trusted source, escaping causes no harm. Classes and other libraries that build CSV should escape regardless, I'd dare say.\n\nI wrote the statement “If all the content is system-generated and trusted, this escaping may not be needed” for two reasons:\n\n* To indirectly highlight the team that the real focus should be on **untrusted input**, which is missing from the requirement. 🙂\n\n* Because without that clarity, people may interpret it differently: one architect might think escaping is always required and considered as a best practice, even for trusted data, while another might see it as unnecessary technical debt. (This statement is just based on my personal experience. )\n\n\n> Verify that all untrusted values exported to CSV/XLSX/ODS are forced to render as text. In CSV, prefix a single quote before RFC 4180 quoting when the first non-whitespace character is =, +, -, or @ and in XLSX/ODS, set the cell type to string and avoid placing untrusted data in formula cells. Sanitize control characters <0x20, and exclude untrusted data from macros or external connections.\n\nit's good add \"**spreadsheet APIs**\" term that explicitly set cell type as string\n",
+      "createdAt": "2025-08-15T03:46:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3230#issuecomment-3190523321",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DN-Ny",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> * Relying only on RFC 4180 and the “leading character” rule may not protect against all injection scenarios, because different applications can interpret CSV data in different ways.\n\nSo I think there are two key risks here:\n\n1. Formula injection which is only relevant for Spreadsheet applications rather than general CSV processors.\n2. CSV structure injection/manipulation\n\nThe current requirement should handle both cases.\n\n> * Escaping with a single quote at the start isn’t always the best or only defense, especially for more complex formats that have their own structures and formula parsing rules.\n> * A single quote escape is not a universal solution.\n\nI don't know of another Spreadsheet platform that has a different formula escaping mechanism other than single quote. Do you have examples?\n\n> * As far as I know RFC 4180 describes how CSV files are structured,it doesn’t address security measures like escaping for formula injection or other spreadsheet-specific risks.\n\nRespectfully, it absolutely does talk about CSV escaping when quote or comma characters are in text being exported to CSV.\n\n> * The requirement also doesn’t clearly define its scope. This mitigation is only necessary when user-provided data is included in CSV/XLS output. If all the content is system-generated and trusted, this escaping may not be needed.\n\nDo you have a suggestion for clarifying that based on what I wrote above?",
+      "createdAt": "2025-09-10T14:23:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3230#issuecomment-3275219826",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-08-08T02:29:18Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3230,
+  "state": "OPEN",
+  "title": "Clarification: 1.2.10 \"single quote\"",
+  "url": "https://github.com/OWASP/ASVS/issues/3230"
+}

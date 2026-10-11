@@ -1,0 +1,141 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "The section **V4.2 HTTP Message Structure Validation** contains requirement, that do not fit into the section after the changes via https://github.com/OWASP/ASVS/issues/1154#issuecomment-2817103032\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **4.2.2** | Verify that any HTTP header field used by the application and defined by intermediary devices like load balancers or proxies, such as X-Real-IP and X-Forwarded-*, cannot be overridden by the end-user. | 2 | v5.0.be-13.6.3 |\n| **4.2.3** | Verify that only HTTP methods that are explicitly supported by the application or its API (including OPTIONS during preflight requests) can be used and that unused methods are blocked. | 3 | v5.0.be-13.6.1 |\n\nAs I wrote in https://github.com/OWASP/ASVS/issues/1154#issuecomment-2818862341, I think those 2 requirements should be moved away.\n\nAt the moment just stated the problem to solve, have not analyzed the structure for proposals yet.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6otLa8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "4.2.2 also applies for BFF pattern - if BFF adds some HTTP header field into the request that is forwarded to next component (API), then it should not allow or forward blindly the header field that comes from an end-user.\n\nSo this requirement can be updated to cover that. That moves it a bit away from pure configuration requirement and feels like it belongs to correct chapter but not to the correct section....",
+      "createdAt": "2025-04-25T13:19:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3023#issuecomment-2830415548",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pLwqy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "---\n\nProposal for 4.2.2:\n\n\"_Verify that any HTTP header field used by the application and set by an intermediary layer such as a load balancer, a web proxy or a 'backend-for-frontend' service, cannot be overridden by the end-user. Example headers might include X-Real-IP, X-Forwarded-* or X-User-ID._\"\n\n---\n\nRegarding 4.2.3, we discussed this previously and @elarlang [said](https://github.com/OWASP/ASVS/issues/2632#issue-2865605807):\n\n> \"the application only responds\" - it is important to not execute funtionality if the used HTTP method is not meant for that action\n\nIs the app less secure if there is no protection against this? It feels like there should be other things in place to prevent this so not sure it is essential. I would support deletion.\n\n---",
+      "createdAt": "2025-04-29T11:16:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3023#issuecomment-2838432434",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQW7d",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "These both seem like very good requirements. Either version of 4.2.2 seems reasonable.\n\n4.2.3 also seems very sensible as a REST type requirement. If I do not need to support a certain verb, blocking it seem best. In know we cover this elsewhere (like disabling functionality not being used) but this is a nice specific requirement for API dev's.\n\nNow supporting 4.2.3 can lead to attacks like verb tunneling in certain frameworks. Leaving TRACE on is an old school vulnerability. There are a lot of other reasons to close verbs at the webserver level that you are not using in the app.",
+      "createdAt": "2025-04-29T17:14:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3023#issuecomment-2839637725",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pWUV4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang are we now done with this?",
+      "createdAt": "2025-04-30T08:23:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3023#issuecomment-2841199992",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pWWpX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "No, those requirements are still in wrong section, just one requirement got wording improvement.",
+      "createdAt": "2025-04-30T08:26:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3023#issuecomment-2841209431",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pXE9d",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do you have a section proposal?",
+      "createdAt": "2025-04-30T09:39:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3023#issuecomment-2841399133",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pX22Z",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussed with Elar that moving to 4.1 is one possibility. 4.2.3 fits well there, 4.2.2 is not a great fit but we see no other place where it would be a great fit.",
+      "createdAt": "2025-04-30T10:58:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3023#issuecomment-2841603481",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-22T16:38:34Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 3023,
+  "state": "CLOSED",
+  "title": "Move non-http-structure-validation requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/3023"
+}

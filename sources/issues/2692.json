@@ -1,0 +1,192 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "The parent issue with description is #2690 \n\nProposed level changes for requirement in chapter \"V3 Session Management\"\n\nFull list of requirements for the chapter is listed here: https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **1.3.1** | [ADDED] Verify that the user's session inactivity period and maximum session lifetime before reauthentication are documented, appropriate in combination with other controls, and that documentation includes justification for any deviations from NIST SP 800-63B reauthentication requirements. | 1 > 2 |\n| **1.3.2** | [ADDED] Verify that the documentation defines how many concurrent (parallel) sessions are allowed for one account as well as the intended behaviours and actions to be taken when the maximum number of active sessions is reached. | 1 > 2 |\n| **1.3.3** | [ADDED] Verify that all systems that create and manage user sessions as part of a federated identity management ecosystem (such as SSO systems) are documented along with controls to coordinate session lifetimes, termination, and any other condition that should require re-authentication. | 1 > 2 |\n| **3.3.2** | [MODIFIED, SPLIT TO 3.3.5] Verify that there is an absolute maximum session lifetime such that re-authentication is enforced according to risk analysis and documented security decisions. | 1 > 2 |\n| **3.3.5** | [ADDED, SPLIT FROM 3.3.2] Verify that there is an inactivity timeout such that re-authentication is enforced according to risk analysis and documented security decisions. | 1 > 2 |\n| **3.6.1** | [MODIFIED, MERGED FROM 3.6.2] Verify that session lifetime and termination between Relying Parties (RPs) and Identity Providers (IdPs) behave as documented, requiring re-authentication as necessary such as when the maximum time between IdP authentication events is reached. | 3 > 2 |\n| **3.8.2** | [MODIFIED, MOVED FROM 3.3.3, LEVEL L2 > L1] Verify that the application gives the option to terminate all other active sessions after a successful change or removal of any authentication factor (including password change via reset or recovery and, if present, an MFA settings update). | 1 > 2 |\n| **3.8.5** | [ADDED] Verify that application administrators are able to terminate active sessions for an individual user or for all users. | 1 > 2 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6iewlH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "3.3.5 is trivial for developers to implement and is a fairly critical control. I suggest L1.\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **3.3.5** | [ADDED, SPLIT FROM 3.3.2] Verify that there is an inactivity timeout such that re-authentication is enforced according to risk analysis and documented security decisions. | 1 > 2 |\n\n3.8.2 is typically hard to implement. I suggest L3.\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **3.8.2** | [MODIFIED, MOVED FROM 3.3.3, LEVEL L2 > L1] Verify that the application gives the option to terminate all other active sessions after a successful change or removal of any authentication factor (including password change via reset or recovery and, if present, an MFA settings update). | 1 > 2 |",
+      "createdAt": "2025-03-14T23:02:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2725972295",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igXb2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "3.3.5 - is a second layer of defense for the situation if there is a vector to take over a session. You can stay logged in for widespread web-based applications forever, we should be aligned with the reality.\n\n3.8.2 is more debatable, but it must be aligned with other related requirements like:\n* V3.8.4 Verify that the application terminates all active sessions when a user account is disabled or deleted (such as an employee leaving the company).\n* V3.8.5\tVerify that application administrators are able to terminate active sessions for an individual user or for all users.\n\nNote that 3.8.4 is currently L1 requirement, so from the argument \"3.8.2 is typically hard to implement\" point of view, the functionality for session management must be implemented for L2 (L1 for \"destroy all\") anyway.",
+      "createdAt": "2025-03-15T09:35:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2726393590",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igxE1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "All of your comments above are fair, Elar. I see where you are coming from.\n\nMy thinking is that if you implement 3.3.5 (Idle timeout) and keep it at L1, then the need for 3.8.2 and 3.3.2 (which are much harder to implement) is reduced.\n\nI agree most social media apps keep you logged in long term, but high risk software like banking software and similar almost always support idle timeout.",
+      "createdAt": "2025-03-15T12:43:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2726498613",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ihF9z",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I agree most social media apps keep you logged in long term, but high risk software like banking software and similar almost always support idle timeout.\n\nIf we talk about \"we should do because in banking it is important\", we talk about L3, not L1.",
+      "createdAt": "2025-03-15T14:16:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2726584179",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ihvRu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the impact of idle-timeout is overvalued and originates from the shared-device era. It just limits the time-window for session takeover to happen, so it is just decreasing the likelihood a bit.\n\nIn a way more important in this situation is maximum lifetime for a session that defines, in case session takeover has happened, how long time an attacker can (mis)use it. It is easy to \"bypass\" idle-timeout to just keep the session alive. So, session max-lifetime decreases the impact.\n\nIn practice - however short both times are, those are just making the situation just a bit better. Those are not clear L1 candidates for me.\n\nThis all describes also, why overview of active sessions is important.",
+      "createdAt": "2025-03-15T15:58:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2726753390",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iiz8O",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is a very well thought out argument.\n\nI can get behind the new levels you're suggesting.\n\nBut I would also suggest that absolute timeout is not super important in many sites. It does not take an attacker long to abuse a stolen session for most sites.\n\nThe control I think we want to depend upon to mitigate session theft is re-authentication/step-up-authorization.\n\nAnyhow, good talk. I appreciate your arguments here.",
+      "createdAt": "2025-03-15T22:31:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2727034638",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ijpJp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> But I would also suggest that absolute timeout is not super important in many sites. It does not take an attacker long to abuse a stolen session for most sites.\n\nThat is why this one is also L2.\n\nTo conclude that - based on current feedback and discussion I don't see the need to make changes to initial proposal.",
+      "createdAt": "2025-03-16T08:05:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2727252585",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ikcJ9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I can see why Jim raised the point about 3.3.5 but I think the important points are those that he made above:\n\n> But I would also suggest that absolute timeout is not super important in many sites. It does not take an attacker long to abuse a stolen session for most sites.\n> The control I think we want to depend upon to mitigate session theft is re-authentication/step-up-authorization.\n\nI am going to open a PR to get these changes in.",
+      "createdAt": "2025-03-16T14:10:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2727461501",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ikc1L",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2720",
+      "createdAt": "2025-03-16T14:16:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2692#issuecomment-2727464267",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-03-14T16:19:45Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB1p1gwg",
+      "name": "levels",
+      "description": "",
+      "color": "44DF16"
+    }
+  ],
+  "number": 2692,
+  "state": "CLOSED",
+  "title": "Level changes for V3",
+  "url": "https://github.com/OWASP/ASVS/issues/2692"
+}

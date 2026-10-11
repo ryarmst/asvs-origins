@@ -1,0 +1,426 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEyNDQwMDU=",
+    "is_bot": false,
+    "login": "sydseter",
+    "name": "Uncle Joe"
+  },
+  "body": "\nUnder NIST [sp800-63b, 4.3](https://pages.nist.gov/800-63-4/sp800-63b/events/#loss-theft-damage-and-compromise) you find the following paragraph:\n\n\"CSPs MAY support the temporary suspension of authenticators that are suspected of possible compromise. If suspension is supported, it SHOULD be reversed after the subscriber successfully authenticates to the CSP using a valid (i.e., not suspended) authenticator and requests reactivation of the suspended authenticator. The CSP MAY set a time limit after which a suspended authenticator can no longer be reactivated.\"\n\nCurrently we have:\n\n6.4.4 | Verify that if a multi-factor authentication factor is lost, evidence of identity proofing is performed at the same level as during enrollment. | 2\n-- | -- | --\n\nWhat I believe is missing is the suspension and reversal of the suspension that currently isn't mentioned in ASVS.\n\nPlease also note the passage in [4.2.2.3](https://pages.nist.gov/800-63-4/sp800-63b/events/#recovery-at-aal3): \"If an account that can authenticate at AAL3 has been identity-proofed at IAL1 or IAL2, the requirements are the same as those for recovery at AAL2\" and so on.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7ZVGXw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Long discussion on the topic was also done in Slack channel: https://owasp.slack.com/archives/C06MNF14M/p1765523196077819",
+      "createdAt": "2025-12-12T11:56:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3646186992",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ifP22",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I believe activation of out-of-bound authenticators like devices or cards are refered to in \"4.1.2.2: Binding Across Endpoints\": https://pages.nist.gov/800-63-4/sp800-63b/events/#binding-across-endpoints\nIn NIST terms, authenticator activation is called \"binding\".\nThere are use cases in which devices such as FIDO keys or cards are physically handed to users. In those cases, they are not bound to the user's accounts before the user receives them. In those cases, activation codes may be necessary. Therefore, I propose the following:\n\nOn suspicion of compromise, an authenticator, such as a device or card (e.g credit card), may be temporarily suspended. If so, the following should apply (ref: [NIST 4.3](https://pages.nist.gov/800-63-4/sp800-63b/events/#loss-theft-damage-and-compromise)):\n\n6.3.9 |  Verify that an administrator or user can suspend, invalidate, or destroy a user's authenticator when discovered to be compromised. | 2\n-- | -- | --\n\nTo facilitate secure reporting, there is a need to establish an additional authenticator or backup (ref: [NIST 4.3](https://pages.nist.gov/800-63-4/sp800-63b/events/#loss-theft-damage-and-compromise)):\n\n6.4.7 |  Verify that the user can securely report the authenticator as compromised or stolen using a backup or alternate single-factor authenticator in the case of compromise. | 2\n-- | -- | --\n\nIt could, of course, be that the authenticator is only temporarily misplaced; if so, the service provider may support suspending the authenticator, and so reactivation should be allowed, but only after authentication (ref: [NIST 4.3](https://pages.nist.gov/800-63-4/sp800-63b/events/#loss-theft-damage-and-compromise)):\n\n6.4.8 |  Verify that, in the case suspension of an authenticator is supported, it can be reactivated after the user has successfully authenticated using a non-suspended authenticator | 3\n-- | -- | --\n\nFinally, there are certain requirements regarding the binding itself (ref: https://pages.nist.gov/800-63-4/sp800-63b/events/#binding-across-endpoints):\n\n6.4.9 |  Verify that, in the case the new authenticator cannot be bound to the account automatically, the authenticator must be activated either by using the new authenticator to request activation and submitting proof of possession (activation code or crypographic proof ) via an authenticated channel, or request activation through an authenticated channel, providing the proof of possession and the new authenticator to complete activation.  | 3\n-- | -- | --\n",
+      "createdAt": "2026-01-26T14:18:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3799842230",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ifw3I",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "There is also the issue of recovery of accounts that require MFA. (ref: [NIST 4.2.2](https://pages.nist.gov/800-63-4/sp800-63b/events/#recovery-requirements-by-ialaal))\n\n6.4.10 |  Verify that, in the case multi-factor authentication is required, account recovery shall require the user to successfully provide two recovery codes from different sources, or provide one recovery code in addition to authenticating with a bound single-factor authenticator. | 3\n-- | -- | --\n\nStill, this is arguably covered by this:\n\n6.4.4 | Verify that if a multi-factor authentication factor is lost, evidence of identity proofing is performed at the same level as during enrollment. | 2\n-- | -- | --\n\nI guess what I feel is missing in that sentence is perhaps more on the \"enrollment\" or binding phase. E.g: How does \"binding\" requirements uphold recovery requirements? If the binding requirements are not upheld, it's impossible to uphold recovery requirements, which means you quickly get into a situation where recovery becomes a way of bypassing MFA authentication. So, if MFA is required, there needs to be a strong policy requiring users to create backup measures.\n\n6.4.10 |  Verify that the user is encouraged to maintain at least two separate means of authentication during the initial enrollment phase so that, in the case one is lost, authentication during recovery can be performed using multi-factor authentication. | 3\n-- | -- | --",
+      "createdAt": "2026-01-26T14:48:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3799977416",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7nbOSY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "### Problem\n\nASVS 6.4.4 requires identity proofing at the same level as enrollment when a multi-factor authentication (MFA) factor is lost. However, it does not explicitly require:\n\n- Suspension or invalidation of the lost authenticator  \n- Re-establishing and successfully using MFA before restoring full access  \n\nThis gap can lead to implementations where, after identity proofing, users are granted access (e.g., via a “magic link”) without first re-binding and using a new MFA factor. This risks weakening authentication strength during recovery and effectively creating an MFA bypass.\n\n### Proposed Improvement\n\nClarify or extend existing requirements to mandate that:\n\n1. A lost or suspected-compromised authenticator is suspended or invalidated.  \n2. After identity proofing, MFA must be securely re-established (bound) to the account.  \n3. The newly bound MFA factor must be successfully used to authenticate before full access is restored.  \n\nThis ensures that account recovery does not reduce the required authentication strength and that recovery pathways uphold the same MFA guarantees as normal authentication.\n\n\n@sydseter @elarlang is this a correct summary?",
+      "createdAt": "2026-02-11T06:49:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3882673304",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7nbsnq",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, that sums it up, but there is this question regarding binding when the activation can’t be immediately done as well, but it can be treated as a separate issue. Although it is an edge case it’s important to note that the binding and activation may be done separately. Especially concerning credit cards and identification. It’s often something that is missed and is closely related to the same issue you have with identity proofing after suspension.",
+      "createdAt": "2026-02-11T07:28:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3882797546",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ndtgO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So do you think these should be new issues or added to existing issues?",
+      "createdAt": "2026-02-11T09:43:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3883325454",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7nefUV",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth I think these are new. ASVS doesn't address suspension or activation. These are topics that ASVS hasn't addressed. \nFor Level 3, at least, there should be some guidance on this. How best to approach it, I am not sure. I was hoping you would know.",
+      "createdAt": "2026-02-11T10:24:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3883529493",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7p9Pmk",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you suggest some rough wording for what is needed here?",
+      "createdAt": "2026-02-19T07:28:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3925146020",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7p_ukD",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth I'll give it a go. We probably need to figure out where to place it later.",
+      "createdAt": "2026-02-19T09:12:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3925797123",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7p_xCK",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I will do some research first just to make sure it's in line with what is best practice.",
+      "createdAt": "2026-02-19T09:15:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3925807242",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qAILG",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Under V6.4 we will need something like this:\n\nIn the event of loss, theft, damage, or compromise, a mechanism to revoke or suspend the authenticator immediately upon user notification is required. In the case suspension and reactivation is supported, the channel for notification and the process for reactivation must be implemented in such a way that account recovery does not reduce the required authentication strength and that recovery pathways uphold the same MFA guarantees as normal authentication without creating a mechanism for denial-of-service attacks.\n\nSee: [NIST 800-63-3: B.5.2](https://pages.nist.gov/800-63-3-Implementation-Resources/63B/Lifecycle/#s-b-5-2) and [NIST 800-63-3: 5.2.1](https://pages.nist.gov/800-63-3/sp800-63b.html#521-physical-authenticators)\n\nExactly how and where this should be added is up to you. It's just a suggestion.\n\n",
+      "createdAt": "2026-02-19T09:34:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3925902022",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qAPBZ",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Maybe part of the text could fit somewhere in the Appendix as well and then you could just say:\n\nIn the event of loss, theft, damage, or compromise, a mechanism to revoke or suspend the authenticator immediately upon user notification is required. Please see ... for guidence on the implementation and ASVS ... for how the implementation should be verified.",
+      "createdAt": "2026-02-19T09:38:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3925930073",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qAmB8",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth I'll wait for you to decide where to add it. I can try to formulate a text for the appendix if you like, but we should agree on where to place the text before continuing.",
+      "createdAt": "2026-02-19T09:50:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3926024316",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qBdJB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it is a mandatory requirement then it needs to be in requirements and not in index. That then raises the question of whether it should be a separate requirement or merged into an existing requirement.",
+      "createdAt": "2026-02-19T10:23:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3926250049",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qJmij",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth I need to think a bit about that. ",
+      "createdAt": "2026-02-19T16:32:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3928385699",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7sZyB0",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth, I believe this is a new requirement. Could it be merged into an existing requirement? No, I don't think so. The \"Authentication Factor Lifecycle and Recovery\" chapter only talks about recovery, but suspension and activation are phases that are missing. \nThere are several options. One could expand with new requirements. The other is to rewrite 6.4.\nWhich one to choose from depends on how you think it's best. \nA rewrite would mean that this would go into an ASVS 6.0 release. I see from the labeling that someone has already considered this an option.\nThe other is to extend 6.4 with several new requirements. That would make it possible to add these to an ASVS 5.1 release. \nAgain, I think it's up to you to decide what to do with this. It sort of depends on what you want to do next.\nCorrection: I think I might have mistaken the purpose of the labeling, but yes. Adding requirements related to activation and suspension migth mean that you have to rewrite 6.4.",
+      "createdAt": "2026-02-26T12:01:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3966181492",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7taaHd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Without fine tuning the text, could you suggest the extra requirements you would propose?",
+      "createdAt": "2026-03-02T09:18:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3983122909",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ta42A",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth I have proposed several. \n\nWith regards to the last one:\n\nIn the event of loss, theft, damage, or compromise, a mechanism to revoke or suspend the authenticator immediately upon user notification is required. In the case suspension and reactivation is supported, the channel for notification and the process for reactivation must be implemented in such a way that account recovery does not reduce the required authentication strength and that recovery pathways uphold the same MFA guarantees as normal authentication without creating a mechanism for denial-of-service attacks.\n\nIt could perhaps be made shorter to be more to the point. E.g:\n\nCompromised or lost authenticators must be revoked or suspended immediately upon notice. If supported, notification and reactivation must occur via secure channels that uphold the same security (identity proofing) guarantees as during normal authentication.",
+      "createdAt": "2026-03-02T09:42:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3983248768",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tbiU7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [@tghosth](https://github.com/tghosth) I have proposed several.\n> \n> With regards to the last one:\n> \n> In the event of loss, theft, damage, or compromise, a mechanism to revoke or suspend the authenticator immediately upon user notification is required. In the case suspension and reactivation is supported, the channel for notification and the process for reactivation must be implemented in such a way that account recovery does not reduce the required authentication strength and that recovery pathways uphold the same MFA guarantees as normal authentication without creating a mechanism for denial-of-service attacks.\n> \n> It could perhaps be made shorter to be more to the point. E.g:\n> \n> Compromised or lost authenticators must be revoked or suspended immediately upon notice. If supported, notification and reactivation must occur via secure channels that uphold the same security (identity proofing) guarantees as during normal authentication.\n\nI mean specifically what goes in each requirement. Ideally requirements should be self-contained and solve a specific problem. I'm looking for a slightly more structured answer",
+      "createdAt": "2026-03-02T10:13:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3983418683",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tfVge",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I think we have been talking past each other. Sorry about not being clear.\n\nYes, I mentioned this requirement earlier with regard to activation that doesn't happen immediately upon onboarding.\n\n### Problem\n\nASVS 6.4.4 requires identity proofing at the same level as enrollment when a multi-factor authentication (MFA) factor is lost. However, it does not cover cases where:\n\n- An authenticator is a physical device that must be activated later, after the user has received it, e.g., key cards, identity cards, bank cards, etc.\n\nThis gap can lead to implementations where stolen authenticators can be used to gain unauthorized access to an application before the user receives them.\n\n### Proposed Improvement\n\nClarify or extend existing requirements to mandate that:\n\n- In the case that the authenticator can not be activated immediately, a process is in place to ensure the secure activation of the authenticator when the user receives it.\n\nE.g:\n\n6.4.9 | Verify that, in the case the new authenticator cannot be bound to the account automatically, the authenticator must be activated either by using the new authenticator to request activation and submitting proof of possession (activation code or crypographic proof ) via an authenticated channel, or request activation through an authenticated channel, providing the proof of possession and the new authenticator to complete activation. | 3\n-- | -- | --\n\nThis together with your problem statement: https://github.com/OWASP/ASVS/issues/3314#issuecomment-3882673304\n\nShould cover both activation, suspension, and recovery in the case the authenticator is suspended, but not revoked.",
+      "createdAt": "2026-03-02T13:31:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3984414750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uKe5W",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@sydseter thanks for the continued input on this.\n\nI want to make sure I have a clear picture of everything you are proposing. Looking back through the thread, I believe these are the requirements you have suggested across your various comments. Can you confirm whether this is the complete set, and whether the wording still reflects what you want, or if any need updating?\n\nFrom your [Jan 26 comment](https://github.com/OWASP/ASVS/issues/3314#issuecomment-3799842230):\n\n**6.3.9 (L2):** \"_Verify that an administrator or user can suspend, invalidate, or destroy a user's authenticator when discovered to be compromised._\"\n\n**6.4.7 (L2):** \"_Verify that the user can securely report the authenticator as compromised or stolen using a backup or alternate single-factor authenticator in the case of compromise._\"\n\n**6.4.8 (L3):** \"_Verify that, in the case suspension of an authenticator is supported, it can be reactivated after the user has successfully authenticated using a non-suspended authenticator._\"\n\nFrom your [Mar 2 comment](https://github.com/OWASP/ASVS/issues/3314#issuecomment-3984414750):\n\n**6.4.9 (L3):** \"_Verify that, in the case the new authenticator cannot be bound to the account automatically, the authenticator must be activated either by using the new authenticator to request activation and submitting proof of possession (activation code or cryptographic proof) via an authenticated channel, or request activation through an authenticated channel, providing the proof of possession and the new authenticator to complete activation._\"\n\nFrom your [Jan 26 follow-up](https://github.com/OWASP/ASVS/issues/3314#issuecomment-3799977416):\n\n**6.4.10 (L3):** \"_Verify that the user is encouraged to maintain at least two separate means of authentication during the initial enrollment phase so that, in the case one is lost, authentication during recovery can be performed using multi-factor authentication._\"\n\nIs this the complete list, or are there additional requirements you would propose? In particular, do you think anything is needed to explicitly cover the point from [my problem statement](https://github.com/OWASP/ASVS/issues/3314#issuecomment-3882673304) about requiring the newly bound MFA factor to be successfully used before full access is restored?",
+      "createdAt": "2026-03-04T07:10:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3995725398",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uNPd9",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, almost there. I believe we were also discussing this point: \"Re-establishing and successfully using MFA before restoring full access.\"\n\n6.4.11 (L3): Verify that an inactive or suspended authenticator can only grant the user access after being reactivated.",
+      "createdAt": "2026-03-04T09:55:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3996448637",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uOMBL",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I am also thinking that we could simplify the following sentence:\n\n6.4.9 (L3): \"Verify that, in the case the new authenticator cannot be bound to the account automatically, the authenticator must be activated either by using the new authenticator to request activation and submitting proof of possession (activation code or cryptographic proof) via an authenticated channel, or request activation through an authenticated channel, providing the proof of possession and the new authenticator to complete activation.\"\n\nInstead, we could say:\n\n6.4.9 (L3): Verify that if an authenticator is not bound automatically, it must be activated via an authenticated session by exchanging a binding code; either by entering it into the new authenticator, or by submitting a code from the new authenticator via an authenticated channel.\n",
+      "createdAt": "2026-03-04T10:41:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3996696651",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uRlhq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks @sydseter, that's helpful. Let me update the full summary to incorporate your additions and the simplified wording for 6.4.9.\n\nHere is the consolidated set of proposed requirements:\n\n**6.3.9 (L2):** \"_Verify that an administrator or user can suspend, invalidate, or destroy a user's authenticator when discovered to be compromised._\"\n\n**6.4.7 (L2):** \"_Verify that the user can securely report the authenticator as compromised or stolen using a backup or alternate single-factor authenticator in the case of compromise._\"\n\n**6.4.8 (L3):** \"_Verify that, in the case suspension of an authenticator is supported, it can be reactivated after the user has successfully authenticated using a non-suspended authenticator._\"\n\n**6.4.9 (L3):** \"_Verify that if an authenticator is not bound automatically, it must be activated via an authenticated session by exchanging a binding code; either by entering it into the new authenticator, or by submitting a code from the new authenticator via an authenticated channel._\"\n\n**6.4.10 (L3):** \"_Verify that the user is encouraged to maintain at least two separate means of authentication during the initial enrollment phase so that, in the case one is lost, authentication during recovery can be performed using multi-factor authentication._\"\n\n**6.4.11 (L3):** \"_Verify that an inactive or suspended authenticator can only grant the user access after being reactivated._\"\n\nCan you confirm this is now the complete and updated set so that we can consider them together?",
+      "createdAt": "2026-03-04T13:33:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3997587562",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uRozU",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "That sounds perfect, thank you for the rewriting.",
+      "createdAt": "2026-03-04T13:35:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3314#issuecomment-3997600980",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-12-12T11:51:12Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 3314,
+  "state": "OPEN",
+  "title": "Loss, Theft, Damage, and Compromise with regards to authenticators",
+  "url": "https://github.com/OWASP/ASVS/issues/3314"
+}

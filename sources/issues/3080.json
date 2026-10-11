@@ -1,0 +1,378 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "Currently there are no requirements for OIDC logout security concerns and the suggestion is to add two new requirements to address this (in the OAuth/OIDC chapter).\n\nThe first one concerns denial of service through forced logout and JWT confusion for the RP when the back-channel  logout flow is used (see https://openid.net/specs/openid-connect-backchannel-1_0.html#Security). The suggestion is to add something like this:\n\n> Verify that, when using OIDC back-channel logout, the client (as the relying party) mitigates denial of service through forced logout and cross-JWT confusion in the logout flow. The client must verify that the logout token is correctly typed with a value of logout+jwt, contains the 'event' claim with the correct member name and does not contain a 'nonce' claims. Note that it is also recommended to have short expiration (e. g. 2 minutes).\n\nThe second one is for the OpenID Provider:\n\n> Verify that the OpenID Provider mitigates denial of service through forced logout. In example by validating the id-token from from the id_token_hint in the logout request (initiated by the client) or by obtaining explicit confirmation from the End-User.\n\nOther more generic security concerns regarding logout and session management are covered by e. g. section V7.4 and requirement 10.4.1.\n\nNote that if requirements for logout are added we need to include the specs for RP-initiated (https://openid.net/specs/openid-connect-rpinitiated-1_0.html) and Back-channel logout (https://openid.net/specs/openid-connect-backchannel-1_0.html) in the reference list. \n\nThe suggestion is to not include OIDC front-channel or OIDC session management security concerns since the recommendation is to not rely on them due to browser third party restrictions (see e. g. https://openid.net/specs/openid-connect-frontchannel-1_0.html#ThirdPartyContent and https://openid.net/specs/openid-connect-session-1_0.html#ThirdPartyContent). Using front-channel logout for single-logout or as notification of the logout event to the client is likely to result in a broken logout flow,  not meeting 7.4.1.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6pyfvD",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that, when using OIDC back-channel logout, the *client* (as the relying party) mitigates denial of service through forced logout and cross-JWT confusion in the logout flow. The client must verify that the logout token is correctly typed with a value of logout+jwt, contains the 'event' claim with the correct member name and does not contain a 'nonce' claims. Note that it is also recommended to have short expiration (e. g. 2 minutes).\n\nNote that in back-chanel logout, the client/RP is acting as a server and the AS is serving as client 😄. The \"client\" here is somewhat ambiguous. Can we simply say \"the relying party\"?\n\nNitpick: \"and does not contain a 'nonce' claims\" → \"and does not contain a 'nonce' claim\".\n\n> Verify that the OpenID Provider mitigates denial of service through forced logout. In example by validating the id-token from from the id_token_hint in the logout request (initiated by the client) or by obtaining explicit confirmation from the End-User.\n\n\"In the RP-initiated logout request\"?\n\n\"initiated by the client\": I would say \"initiated by the RP\"",
+      "createdAt": "2025-05-03T11:47:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848586691",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pyuXA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @TobiasAhnoff I see a lot of folks using OIDC based idP's just for authentication. Once a client/RP gets an identity token from an idP, they verify it, and drop the idP/OIDC identity token in favor of a new session or token that the client/RP creates for their own infrastructure. \n\nWould you use backchannel logout in this case? Is it also ok to just not worry about logout interactions with the OIDC idP and just worry about the new session or token logout mechanism that the client/RP created?\n\n",
+      "createdAt": "2025-05-03T14:16:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848646592",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pyuc5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For this backchannel topic, there is a \"backchannel\" background as well - the topic was raised by @silviavali, and with @TobiasAhnoff and @randomstuff we discussed it further before it reached here as an issue.",
+      "createdAt": "2025-05-03T14:17:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848646969",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pyumB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Would you use backchannel logout in this case? Is it also ok to just not worry about logout interactions with the OIDC idP and just worry about the new session or token logout mechanism that the client/RP created?\n\nIf you don't use central session management, you don't need it. For many instances, a Single Sign On means that you log in once to have an active session for many services, and in this case, you may need it.",
+      "createdAt": "2025-05-03T14:19:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848647553",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pyyLi",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > Would you use backchannel logout in this case? Is it also ok to just not worry about logout interactions with the OIDC idP and just worry about the new session or token logout mechanism that the client/RP created?\n> \n> If you don't use central session management, you don't need it. For many instances, a Single Sign On means that you log in once to have an active session for many services, and in this case, you may need it.\n\nThat makes total sense. So if you are not doing single sign on and just use an idP as as login provider, the the RP can handle their own logout. But if you're doing full on single sign on, you need to support some kind of federated logout. Is that right? ",
+      "createdAt": "2025-05-03T14:58:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848662242",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6py9fQ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> > > Would you use backchannel logout in this case? Is it also ok to just not worry about logout interactions with the OIDC idP and just worry about the new session or token logout mechanism that the client/RP created?\n> > \n> > \n> > If you don't use central session management, you don't need it. For many instances, a Single Sign On means that you log in once to have an active session for many services, and in this case, you may need it.\n> \n> That makes total sense. So if you are not doing single sign on and just use an idP as as login provider, the the RP can handle their own logout. But if you're doing full on single sign on, you need to support some kind of federated logout. Is that right?\n\nWell, basically yes...but with many \"IdPs\" you get a \"single sign on cookie\" whether you like it or not...so if you just do a local logout in the RP (terminating the RP session, this must the RP always do), the IdP (single sign on) session will still be there and (might) sign you in if you go back to the RP application after logout (automatically creating a new RP session), a common bug/security issue to find...with OIDC, sign in is easy, sign out is hard 😄\n\nSo, in my experience, it is fair to say that even if you do not use back-channel (or front-channel) for federated/single logout flows, it is still important to do RP-initiated logout to terminate both the RP and the IdP session. But it depends on implementation and IdP if this is a problem or not...\n\nRegarding the purposed OP requirement that one is always valid, the OP should always do that. While the RP requirement is for the back-channel flow (when logout tokens are sent to the RP).\n\n@jmanico  I hope this was a good answer, making it clearer, not confusing 😄\n\n   ",
+      "createdAt": "2025-05-03T16:49:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848708560",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6py90z",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> > Verify that, when using OIDC back-channel logout, the _client_ (as the relying party) mitigates denial of service through forced logout and cross-JWT confusion in the logout flow. The client must verify that the logout token is correctly typed with a value of logout+jwt, contains the 'event' claim with the correct member name and does not contain a 'nonce' claims. Note that it is also recommended to have short expiration (e. g. 2 minutes).\n> \n> Note that in back-chanel logout, the client/RP is acting as a server and the AS is serving as client 😄. The \"client\" here is somewhat ambiguous. Can we simply say \"the relying party\"?\n> \n> Nitpick: \"and does not contain a 'nonce' claims\" → \"and does not contain a 'nonce' claim\".\n> \n> > Verify that the OpenID Provider mitigates denial of service through forced logout. In example by validating the id-token from from the id_token_hint in the logout request (initiated by the client) or by obtaining explicit confirmation from the End-User.\n> \n> \"In the RP-initiated logout request\"?\n> \n> \"initiated by the client\": I would say \"initiated by the RP\"\n\n@randomstuff good points! How about this?\n\n> Verify that, when using OIDC back-channel logout, the relying party mitigates denial of service through forced logout and cross-JWT confusion in the logout flow. The client must verify that the logout token is correctly typed with a value of logout+jwt, contains the 'event' claim with the correct member name and does not contain a 'nonce' claim. Note that it is also recommended to have short expiration (e. g. 2 minutes).\n\n> Verify that the OpenID Provider mitigates denial of service through forced logout. In example by validating the id-token from from the id_token_hint in the logout request (initiated by the relying party) or by obtaining explicit confirmation from the End-User.\n\n",
+      "createdAt": "2025-05-03T16:52:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848709939",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pzIV-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@TobiasAhnoff that was a very helpful explanation of the nuances involved. Thank you! 🤙🏽 ",
+      "createdAt": "2025-05-03T18:39:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2848753022",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0Q26",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@TobiasAhnoff @randomstuff - we need to propose also level and section.\n\nFor section we also need to validate, can we make those requirements non-OIDC specific and have them as general rule.\n\nFor against forced logout, one option can be that the application (RP) limits the logout endpoint to be accessible only to OP?",
+      "createdAt": "2025-05-04T07:06:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849050042",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0b9H",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the OpenID Provider mitigates denial of service through forced logout. In example by validating the id-token from from the id_token_hint in the logout request (initiated by the relying party) or by obtaining explicit confirmation from the End-User.\n\nFWIW, I think it would be better to obtain explicit confirmation (especially if the RP is not trusted by the OP). That being said, it would probably be better to avoid including an ID token (which might unnecessarily expose the ID token to the end user). This does not have to go into the requirement but this could be included by noting a preference for \"explicit confirmation\" over \"id_token_hint\".\n\n---\n\n> For section we also need to validate, can we make those requirements non-OIDC specific and have them as general rule.\n\nAs it is they are quite OIDC-specific. A generic forced-logout/logout-CSRF might be useful (I'm not finding one at the moment).\n\nRelated: Do we have something about force-login/login-CSRF? About CSRF in general? For CSRF in general, I'm finding 3.3.2 (which is about SameSite cookies), 3.5.1 (about CORS) and 10.2.1 (which is about protection of the OIDC token endpoint against forced-login by verfification of the state parameter).\n\n---\n\n> For against forced logout, one option can be that the application (RP) limits the logout endpoint to be accessible only to OP?\n\nYou are thinking about some form of authentication? Yes, that would work but is not standard OIDC.",
+      "createdAt": "2025-05-04T09:03:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849095495",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0cD-",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> we need to propose also level and section.\n\nI would say L2. This is consistent with 10.2.1, for example.\n",
+      "createdAt": "2025-05-04T09:04:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849095934",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0cQu",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For the section, I would say 10.5 and 10.6 respectively.",
+      "createdAt": "2025-05-04T09:05:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849096750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0dUe",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Related: Do we have something about force-login/login-CSRF? About CSRF in general? For CSRF in general, I'm finding 3.3.2 (which is about SameSite cookies), 3.5.1 (about CORS) and 10.2.1 (which is about protection of the OIDC token endpoint against forced-login by verfification of the state parameter).\n\n3.5.1 is not about CORS, it is for CORS-safelisted requests (== not CORS) and covers login and logout requests.",
+      "createdAt": "2025-05-04T09:15:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849101086",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p01Vd",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree on section 10.5 and 10.6 and level L2. \n\n> noting a preference for \"explicit confirmation\" over \"id_token_hint\"\n\nYes, like this?\n\n> Verify that the OpenID Provider mitigates denial of service through forced logout. By obtaining explicit confirmation from the End-User or, if present, validating parameters in the logout request (initiated by the relying party) such as the id_token_hint.\n\n\n ",
+      "createdAt": "2025-05-04T12:45:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849199453",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p01ib",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> > Related: Do we have something about force-login/login-CSRF? About CSRF in general? For CSRF in general, I'm finding 3.3.2 (which is about SameSite cookies), 3.5.1 (about CORS) and 10.2.1 (which is about protection of the OIDC token endpoint against forced-login by verfification of the state parameter).\n> \n> 3.5.1 is not about CORS, it is for CORS-safelisted requests (== not CORS) and covers login and logout requests.\n\nI think both suggested requirements are OIDC specific and for more generic requirements we have 7.4.1, 7.6.1 and 7.6.2, which I think covers terminate both sessions on logout (if there is a \"federated session\"). \n\nBut when I look for CSRF in general it feels like chapter 3 might be missing a generic requirement on mitigating CSRF. Based on https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html and https://portswigger.net/web-security/csrf/preventing I would suggest to add a requirement on using some kind of  \"CSRF token\" solution as a primary mitigation for CSRF. Maybe a new issue for that? ",
+      "createdAt": "2025-05-04T12:46:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849200283",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p08FK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "CSRF is covered with 3.5.1 and it is so-called \"generic\" or \"old-school, it requires the token as well. If it is not clear, it requires to re-open previous related issue or open a new one.",
+      "createdAt": "2025-05-04T13:42:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2849227082",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p5IRk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To conclude latest proposals:\n\nRequirement to 10.5, Level 2:\n\n> Verify that, when using OIDC back-channel logout, the relying party mitigates denial of service through forced logout and cross-JWT confusion in the logout flow. The client must verify that the logout token is correctly typed with a value of 'logout+jwt', contains the 'event' claim with the correct member name, and does not contain a 'nonce' claim. Note that it is also recommended to have a short expiration (e.g., 2 minutes).\n\n---\n\nRequirement to 10.6, Level 2\n\n> Verify that the OpenID Provider mitigates denial of service through forced logout. By obtaining explicit confirmation from the end-user or, if present, validating parameters in the logout request (initiated by the relying party), such as the 'id_token_hint'.\n\nping @TobiasAhnoff @randomstuff - check that all your concerns and questions are addressed.",
+      "createdAt": "2025-05-05T08:50:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2850325604",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p8991",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Looks good,  but since type-check might not be supported (recommended in the spec) maybe change to this?\n\n> Verify that, when using OIDC back-channel logout, the relying party mitigates denial of service through forced logout and cross-JWT confusion in the logout flow. The client must verify that the logout token contains the 'event' claim with the correct member name, does not contain a 'nonce' claim and, if supported, is correctly typed with a value of 'logout+jwt'. Note that it is also recommended to have a short expiration (e.g. 2 minutes).",
+      "createdAt": "2025-05-05T15:14:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2851331957",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p9OIX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To help other with diff: \"correctly typed with a value of 'logout+jwt'\" > \"if supported, is correctly typed with a value of 'logout+jwt'\"\n\nBut some kind of type must be defined anyway?",
+      "createdAt": "2025-05-05T15:37:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2851398167",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p92bs",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "No it must not, but it is common, the spec (https://openid.net/specs/openid-connect-backchannel-1_0.html#CrossJWT) states this\n\n> Including an explicit type in issued Logout Tokens is a best practice. Note however, that requiring explicitly typed Logout Tokens will break most existing deployments, as existing OPs and RPs are already commonly using untyped Logout Tokens. However, requiring explicit typing would be a good idea for new deployment profiles where compatibility with existing deployments is not a consideration. \n\nOr maybe we could keep it as it was (without the \"if\") with argument that verifying type is \"best practice\" and common today..after all  the spec is from 2023 😄",
+      "createdAt": "2025-05-05T16:31:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3080#issuecomment-2851563244",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-05-03T10:41:01Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 3080,
+  "state": "CLOSED",
+  "title": "Add requirements for OIDC logout",
+  "url": "https://github.com/OWASP/ASVS/issues/3080"
+}

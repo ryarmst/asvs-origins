@@ -1,0 +1,159 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "2.10.1, 2.10.2, 2.10.3, 2.10.4 all reference NIST section 5.1.1.1. NIST section 5.1.1.1 is titled \"Memorized Secret Authenticators\":\r\n\r\n> Memorized secrets SHALL be at least 8 characters in length if chosen by the subscriber. Memorized secrets chosen randomly by the CSP or verifier SHALL be at least 6 characters in length and MAY be entirely numeric. If the CSP or verifier disallows a chosen memorized secret based on its appearance on a blacklist of compromised values, the subscriber SHALL be required to choose a different memorized secret. No other complexity requirements for memorized secrets SHOULD be imposed. A rationale for this is presented in Appendix A Strength of Memorized Secrets.\r\n\r\nThis is not applicable to API keys. It says nothing about unchanging credentials, default credentials, or password storage.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg2MzA5Mzc0Mw==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "See also #397. I could not find applicable NIST sections.",
+      "createdAt": "2021-06-17T09:42:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-863093743",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NkT-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Pardon @jimfenton do any of these have better NIST references? We think the 5.1.1.1 reference is off. We would be grateful for your eyeballs on this. :)\r\n\r\n```\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---:| :---: | :---: | :---: |\r\n| **2.10.1** | Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 | 5.1.1.1 |\r\n| **2.10.2** | Verify that if passwords are required for service authentication, the service account used is not a default credential. (e.g. root/root or admin/admin are default in some services during installation). | | ✓ | ✓ | 255 | 5.1.1.1 |\r\n| **2.10.3** | Verify that passwords are stored with sufficient protection to prevent offline recovery attacks, including local system access. | | ✓ | ✓ | 522 | 5.1.1.1 |\r\n| **2.10.4** | Verify passwords, integrations with databases and third-party systems, seeds and internal secrets, and API keys are managed securely and not included in the source code or stored within source code repositories. Such storage SHOULD resist offline attacks. The use of a secure software key store (L1), hardware TPM, or an HSM (L3) is recommended for password storage. | | ✓ | ✓ | 798 | |\r\n```",
+      "createdAt": "2021-09-24T02:54:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-926303486",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Nvrd",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "2.10.1: I'm not sure I understand this one: what is an \"unchanging credential\"? Does this mean that the credential (authentication secret) can't be changed, or that it isn't routinely changed? SP 800-63 deals with authentication of users, not APIs, but I don't see what should be used instead of a static API key (with enough entropy, of course).\r\n\r\n2.10.2: This is covered in SP 800-53 rev 5. Check control IA-5 there.\r\n\r\n2.10.3: See 800-63B Section 5.1.1.2, last 4 paragraphs.\r\n\r\n2.10.4: Again more of an SP 800-53 issue, probably closest to IA-5 but I haven't found anything that maps closely to this requirement (although it is a good one).",
+      "createdAt": "2021-09-24T05:06:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-926350045",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43N_F4",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> 2.10.1: I'm not sure I understand this one\r\n\r\nMe neither. See also #1032.\r\n\r\n> 2.10.3: See 800-63B Section 5.1.1.2, last 4 paragraphs.\r\n\r\nSection 2.10 is about services authenticating to each other, e.g. a web server authenticating to a database server. In that case, the credential is more of a secret key than a \"memorized secret\". Also, the plaintext credential is required, so hashing it with PBKDF2 is not an option.\r\n",
+      "createdAt": "2021-09-24T07:36:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-926413176",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-h5tG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @Sjord, do you have a proposed update based on this discussion?",
+      "createdAt": "2022-02-23T18:18:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-1049074502",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-h_Wl",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, API keys have different requirements from memorized secrets. SP 800-63B deals with the authentication of (human) subjects and not particularly with authentication of APIs, so there isn't a direct correlation to a section in 800-63B.\r\n\r\n800-63B does, however, deal with keys in several places (seeds for OTP authenticators, for example: section 5.1.4.1). It generally requires a key to have the minimum security strength specified in SP 800-131A, which is currently 112 bits. My personal recommendation would be that an API key be randomly chosen, have at least 112 bits of entropy, and that the verifier should be a hash of that key. Salting should not be necessary because the risk of collisions and brute force attacks is negligible at that key size.",
+      "createdAt": "2022-02-23T18:45:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-1049097637",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-6qIH",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I propose to remove the references and the column. The column currently only allows referencing sections in SP800-63B. It is possible that other NIST guidelines provide better recommendations for keys, but we currently don't have a good way to reference those. so I propose to remove the column, until we come up with a more structural approach in [ASVS v5.0 - mappings to other standards · Issue #1167 · OWASP/ASVS](https://github.com/OWASP/ASVS/issues/1167).",
+      "createdAt": "2022-03-01T15:27:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-1055564295",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5A_gMN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord please open a PR for removing the reference although we will not remove the whole column for now\r\n",
+      "createdAt": "2022-04-06T15:13:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-1090388749",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BqEVq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "PR merged",
+      "createdAt": "2022-04-18T16:31:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1025#issuecomment-1101546858",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-06-16T12:38:52Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    }
+  ],
+  "number": 1025,
+  "state": "CLOSED",
+  "title": "2.10.* has incorrect NIST section",
+  "url": "https://github.com/OWASP/ASVS/issues/1025"
+}

@@ -1,0 +1,669 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMDIzOTQ1",
+    "is_bot": false,
+    "login": "sohsatoh",
+    "name": "Soh Satoh"
+  },
+  "body": "In 2.1.2, it is specified that the maximum password length should not exceed 128 characters.\r\n\r\nAlthough this requirement is specified here to prevent long password denial of service, \"128 characters\" does not seem to be based on any theoretical basis as we discussed in https://github.com/OWASP/CheatSheetSeries/issues/1376\r\n\r\nTherefore, it seems to me that this requirement should be `Verify that passwords of at least 64 characters are permitted.` and then add something like `Verify that DoS does not caused due to long passwords` to 2.1.x.\r\n\r\n(To be clear, I am not of the opinion that 128 characters is too few, but rather that the standard requirement should be specified based on some criteria.)",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM56bOW9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi, @sohsatoh ,\r\n\r\nwe had a long discussion over it here: https://github.com/OWASP/ASVS/issues/1772\r\n\r\nWhat to keep in mind - from the ASVS requirement structure point of view:\r\n* The requirement should be independent and \"usable out of context\" - no references to other requirements\r\n* The requirement must be positive (what must be done) not negative (what must not be done)\r\n\r\nI agree that we should abstract the precise limit out with the actual goal - to provide defense against Denial of Service attack. Also, as I pointed out in #1772, the requirement 2.1.2 contains 2 parts - one is for password length for end-user and another is for storage. The storage part is section 2.4:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.1** | [MODIFIED] Verify that one of the following password hashing functions is used when storing the user's password for the application: argon2id, scrypt, bcrypt or PBKDF2. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.3** | [MODIFIED] Verify that if PBKDF2 is used, the iteration count should be a minimum of 1,300,000 iterations with PBKDF2-HMAC-SHA1, a minimum of 600,000 iterations using PBKDF2-HMAC-SHA256, or with a minimum of 210,000 iterations with PBKDF2-HMAC-SHA512. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.4** | [MODIFIED] Verify that if bcrypt is used, the work factor is a minimum of 10 and password size is limited to 72-bytes due to bcrypt's input limit. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.6** | [ADDED] Verify that if argon2id is used, there should be a minimum configuration of 19 MiB of memory, an iteration count of 2, and 1 degree of parallelism. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.7** | [ADDED] Verify that if scrypt is used, the configuration should be a minimum work factor of (2^17), a minimum block size of 8 (1024 bytes), and a parallelization parameter of 1. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nInstead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message (not a wording proposal!) \"Verify that accepted method is used, it is used and configured according to the latest spec or recommendations, such as to have enough iterations and limitation to max input length against denial of service attacks\". Then it is more future-proof as well. We should modify the current 2.4.1 for that.\r\n\r\nOne option is also to provide those limits in the chapter text: \"When releasing the ASVS version v5.0, accepted limits per used function were ...\" + links to resources, from where to get the latest ones.\r\n\r\nping @tghosth @jmanico ",
+      "createdAt": "2024-04-14T08:09:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2053957053",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56dgkt",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar, this comment from the OP concerns password length and is related but separate from 2.4.x. Can you please separate your password storage comments into a separate issues, please?",
+      "createdAt": "2024-04-15T02:54:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2054555949",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56dlAc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @sohsatoh I agree NIST does not demand that passwords not exceed a 128 character max. But I still would like to add it in as a suggestion.\r\n\r\nHow about:\r\n\r\nVerify that passwords of at least 64 characters are permitted, and that passwords above a certain max length (such as 128 or more characters) are denied. ",
+      "createdAt": "2024-04-15T02:58:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2054574108",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56g5aq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Elar, this comment from the OP concerns password length and is related but separate from 2.4.x. Can you please separate your password storage comments into a separate issues, please?\r\n\r\nI'll do it when this issue is solved without solving 2.4. (my recommendation to solve this issue was to cover it in 2.4, so it is related).",
+      "createdAt": "2024-04-15T05:58:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2055444138",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56r2oT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @sohsatoh, thanks for the input and working to keep OWASP projects consistent :)\r\n\r\n> Instead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message...\r\n\r\nI agree with this concept @elarlang and I think we will need to trim 2.4 to make ASVS more usable.\r\n\r\nHowever, I think that the denial of service risk will apply to all cases and password length is also a strong candidate for staying as a separate requirement (but I am open to discussing that separately).\r\n\r\nAs such, for now I would agree with Jim's suggestion.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | [MODIFIED] Verify that passwords of at least 64 characters are permitted, and that passwords above a certain max length (such as 128 or more characters) are denied. | ✓ | ✓ | ✓ | 521 | 5.1.1.2 |\r\n\r\n@elarlang @sohsatoh further thoughts?",
+      "createdAt": "2024-04-16T06:21:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2058316307",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM56r-Om",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it is not against the hashing method and denial of service attack, what risk do you mitigate with limiting \"too long\" passwords? (it may make sense to re-read #1772)",
+      "createdAt": "2024-04-16T06:41:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2058347430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56sNlw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe I didn't explain myself clearly. I think all the approved hashing methods are necessarily slow and are therefore exposed to a DoS risk which is why this applies in all cases and why I think we should still mention it. ",
+      "createdAt": "2024-04-16T07:23:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2058410352",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM56scNK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The underlying reason to have max length for password is not to make the user-chosen password more secure and it's not a defense against user-impersonation vector as the entire section \"V2.1 Password Security\" is.\r\n\r\n> Maybe I didn't explain myself clearly. I think all the approved hashing methods are necessarily slow and are therefore exposed to a DoS risk which is why this applies in all cases and why I think we should still mention it.\r\n\r\nAnd as you agree, the problem to solve is \"the safe usage of hashing methods\" and that is why I proposed (https://github.com/OWASP/ASVS/issues/1923#issuecomment-2053957053) to cover the problem in section 2.4.\r\n",
+      "createdAt": "2024-04-16T07:57:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2058470218",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM560Q7G",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would rather see this requirement here with the other password rules. I do not think the password storage section is the right place add a max-length password rule.",
+      "createdAt": "2024-04-17T07:01:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060521158",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM560Yf-",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I wrote something about the DoS risk: [Long passwords don't cause denial of service when using proper hash functions](https://www.sjoerdlangkemper.nl/2021/07/02/long-password-denial-of-service/).\r\n\r\nThe first step a password-hashing algorithm does is hashing the password and then processing that hash further. So only the first hashing step depends on the length of the password, and subsequent operations are performed on a fixed-length hash. The length of the password does not severely influence the execution time. As such, I think a password length upper limit is not needed.\r\n\r\n> \"128 characters\" does not seem to be based on any theoretical basis\r\n\r\nI agree, this is just some number someone picked, and that doesn't make for a strong requirement. One possible solution is to adopt the limit of some other system, such as bcrypt (72 bytes) or WordPress (4096 bytes).",
+      "createdAt": "2024-04-17T07:19:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060552190",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM560mqI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would rather see this requirement here with the other password rules. I do not think the password storage section is the right place add a max-length password rule.\r\n\r\nI try to be patient... but well, I'm not.\r\n\r\n@jmanico , please, FACTS and arguments!\r\n\r\nFirst, why do we need this (max length for user-chosen passwords) requirement at all, and what risk it mitigates? Do we need this requirement? And if we need to, then we going to choose the correct section for that, based on the area which is impacted (password hashing functionality in this case).\r\n\r\nNote: I'm ok to keep the requirement itself as part of the current requirement, the main priority is to clarify the need for that based on facts. At the moment it seems to be too random.",
+      "createdAt": "2024-04-17T07:48:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060610184",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM560_YD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, having read back through the most recent comments, I agree that '_\"128 characters\" does not seem to be based on any theoretical basis_'. I also read back through #756 for a little more context.\r\n\r\nI think the aim here was to provide a simple requirement. There is no reason in the world to allow a regular password of longer than 128 chars and maybe we could even shorten that. That isn't science it is just common sense. Maybe it would be even more sensible to restrict to 70 max to avoid the bcrypt issue. Again, not science, just trying to avoid footguns.\r\n\r\nThe alternative is that we reframe this requirement:\r\n\r\n> Verify that the application is protected against a denial of service attack caused by processing an overly long password.\r\n\r\nThoughts @Sjord @ThunderSon @jmanico @elarlang @sohsatoh ",
+      "createdAt": "2024-04-17T08:36:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060711427",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM561Cen",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> There is no reason in the world to allow a regular password of longer than 128\r\n\r\nIt is not a reason to have a requirement in the ASVS.\r\n\r\n.. and we reach close to my proposal:\r\n> Instead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message (not a wording proposal!) \"Verify that accepted method is used, it is used and configured according to the latest spec or recommendations, such as to have enough iterations and limitation to max input length against denial of service attacks\". \r\n\r\nDenial of Service attack is just one thing to address with max-length, with bcrypt the issue is truncation.",
+      "createdAt": "2024-04-17T08:43:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060724135",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM561FU5",
+      "author": {
+        "login": "sohsatoh"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Ensure that your application is protected against denial of service attacks caused by processing too long passwords.\r\n\r\nI agree with removing the \"128 character\" limit and implementing this in itself.\r\n\r\n>  There is no reason in the world to allow a regular password of longer than 128 chars and maybe we could even shorten that. That isn't science it is just common sense. Maybe it would be even more sensible to restrict to 70 max to avoid the bcrypt issue. Again, not science, just trying to avoid footguns.\r\n\r\nI think you are right, as long as the password has sufficient entropy.\r\nAs for bcrypt, I don't see the need to apply this across the board, since it is a restriction of the bcrypt hashing algorithm itself. (I think we can all agree on this)",
+      "createdAt": "2024-04-17T08:49:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060735801",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM561KBL",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I still think we should mention the denial of service issue separately as it applies to all algorithms. Algorithm specific details like bcrypt 72 bytes we should leave for the cheatsheet.",
+      "createdAt": "2024-04-17T08:59:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060755019",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5629Dl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note that the denial of service from long password is not even mentioned in the password storage cheat sheet.",
+      "createdAt": "2024-04-17T13:09:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2061226213",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM562_P0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Following discussion with Elar\r\n\r\n* Split 2.1.2 so that the \"long password\" requirement is in 2.4.\r\n  * This requirement should be like: \"_Verify that the application is protected against a denial of service attack caused by processing an overly long password._\"\r\n  * This requirement should be level 2\r\n* Collapse 2.4.1-2.4.7 down to a single requirement talking in general about approved storage algorithms.\r\n* Make sure the note at the start of 2.4 is up to date.",
+      "createdAt": "2024-04-17T13:14:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2061235188",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5636G_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note that I also fixed the missing tags on 2.4.2 and 2.4.5 as I think that practically speaking these requirements were not correct because the correct response would be to use the right algorithms and the provisions which they provided.\r\n",
+      "createdAt": "2024-04-17T15:00:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2061476287",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM56375V",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1930",
+      "createdAt": "2024-04-17T15:03:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2061483605",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM564KZN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "https://www.sjoerdlangkemper.nl/2021/07/02/long-password-denial-of-service/ is a solid argument. I am ok with dropping this requirement.",
+      "createdAt": "2024-04-17T15:26:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2061542989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UV8g7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "![zombie-hand](https://github.com/user-attachments/assets/e974120b-f41a-4bf7-9804-4e734c3a227c)\r\n",
+      "createdAt": "2024-11-20T14:47:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488780859",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UV-aF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Elar pointed out that section 2.4 is now empty aside from the requirement created in this issue and that the requirement doesn't really fit anyway.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **[2.4.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v24-credential-storage)** | [ADDED, SPLIT FROM 2.1.2] Verify that the application is protected against a denial of service attack caused by processing an overly long password. | | ✓ | ✓ | |\r\n\r\nThe background is that previously we mandated a maximum password length but didn't really explain why and in reality the reason is very algorithmic specific.\r\n\r\nGiven that the rest of this section has disappeared, I would recommend that we merge this back into the original requirement but in a clearer way as follows:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | [MODIFIED] Verify that passwords of at least 64 characters are permitted but that the application is protected against a denial of service attack caused by processing an overly long password. | ✓ | ✓ | ✓ | 521 |\r\n\r\nWhat do people think?",
+      "createdAt": "2024-11-20T14:50:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488788613",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UV-pN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang @jmanico @Sjord @sohsatoh ",
+      "createdAt": "2024-11-20T14:50:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488789581",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UV_yj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't like this idea. The problem to solve is not \"force users to choose strong passwords\", but incorrect or not safe usage of hashing functions. It must be part of safe hashing function usage.",
+      "createdAt": "2024-11-20T14:52:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488794275",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UWBL6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You prefer V6?",
+      "createdAt": "2024-11-20T14:54:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488799994",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UWGHu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> You prefer V6?\r\n\r\nYes, something to V6.6, because the defense relies in configuration of hashing functions. We need to make the requirement more abstract, and not to be password storage specific (which is wrong anyway).\r\n\r\nCurrent 2.4.5:\r\n> Verify that the application is protected against a denial of service attack caused by processing an overly long password.\r\n\r\nPoint of view for V6.6 (not a wording proposal):\r\n> Verify that the application is protected against a denial of service attack caused by processing an overly long input for hashing functions (such as passwords), by limiting the input length via input validation for maximum length.\r\n\r\n... or using configuration, or using configuration that takes it into account, or what are the other options to mitigate it\r\n\r\nAt the same time I would say, the merge to 6.6.2 should be (at least partially) reverted.",
+      "createdAt": "2024-11-20T15:02:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488820206",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UWHQW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I also think V6 would make sense as it fits well into 6.6.\r\n\r\nI think we could then have a reference in V2.1 Password Security to this section and hopefully that would allay your concerns about 6.6.2:\r\n\r\n> V6.6.2 \"passwords\" > \"end-user passwords\" - for service password there is need to use key-vault solution. Maybe it is worth keeping it in a password storage section in V2?\r\n> ....\r\n> with 6.6.2 (password hashing) it is a bit the same situation like it was with 2.10.4, at the end it does not feel like pure crypto issue\r\n> ....\r\n> the point is - do not store password plain text, the solution - crypto\r\n> ....\r\n> it is not wrong to put it to V6, but I would like to find the requirement from V2",
+      "createdAt": "2024-11-20T15:04:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488824854",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UWJio",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V6.6.2 merge/split is a separate issue maybe, I mentioned it because it may happen, that something gets back to current V2.4 section.",
+      "createdAt": "2024-11-20T15:08:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488834216",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UwHQd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Perhaps a small change to 6.6.2?\r\n\r\n6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force **and denial-of-service** attacks more challenging. |   | ✓ | ✓\r\n",
+      "createdAt": "2024-11-23T20:08:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2495640605",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UxxXw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Perhaps a small change to 6.6.2?\r\n> \r\n> 6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force **and denial-of-service** attacks more challenging. |   | ✓ | ✓\r\n\r\nIt would be nice to integrate it into a single requirement but I don't love the idea because I think that the parameter settings are a little different to the DoS problem which is more about how the hashing function is used.\r\n\r\nI would suggest instead a modification of @elarlang's suggestion:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **6.6.5** | [ADDED, SPLIT FROM 2.1.2] Verify that, where computationally intensive hashing functions are used (such as with passwords), the application is protected against overly long input leading to a denial of service condition. This could be done by limiting input length or by performing an initial hash using a fast algorithm to reduce the size of the input to a standard length before it is passed to the computationally intensive function. | | ✓ | ✓ | |",
+      "createdAt": "2024-11-24T15:44:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2496075248",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VfrAi",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think pre-hashing should never be necessary if you use a modern password hashing algorithm. And from the recent research I have read, even very very long passwords do not cause a performance problem, that only shows up on \"legacy\" password cracking algorithms or bad implementations. \r\n\r\nThe main case study we see is the PBKDF2 issue from Django for performance. But that was really a implementation problem of the algorithm, not a developer problem.\r\n\r\nSo I suggest we just say, use a modern password hashing algorithm, suggest Argon2id in the notes somewhere, and call it a day.\r\n",
+      "createdAt": "2024-11-29T16:21:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2508107810",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VqmMM",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that the application is protected against a denial of service attack caused by processing an overly long input for hashing functions (such as passwords), by limiting the input length via input validation for maximum length.\r\n\r\nHashing functions are not special in a way that they are a particular risk for denial of service. Hashing functions are normally very fast, and the resources they take scale linearly with the input size. This makes it hard to abuse it for a denial of service: to increase the resources the server uses, the attacker must linearly increase their resources spent in the attack.\r\n\r\nI think the general case would make a better requirement:\r\n\r\n> Verify that the application is protected against a denial of service attack caused by processing an overly long input by limiting the input length via input validation for maximum length.\r\n\r\nHowever, that is already required in 5.1.4 and similar requirements.",
+      "createdAt": "2024-12-02T09:14:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2510971660",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Vq39x",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If the DoS vector against hashing function is not widespread enough to have a separate requirement for highlighting it, we can also delete the current requirement with arguments - it is a problem for legacy solutions (be up to date).\r\n\r\nIn theory, there is also validation possible, but in the password context, it also means limiting the password max length. We require at least 64 64-character long password to be supported, I think it is good enough. One should not rely only on authentication for username and password (without MFA) anyway.",
+      "createdAt": "2024-12-02T09:46:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2511044465",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VsPMJ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "+1 Elar. This is where my research led me on this issue too. I think dropping the password hashing DOS vector is ok.",
+      "createdAt": "2024-12-02T12:26:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2511401737",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VsYaH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I just did some experimentation and using the cheat sheet recommendations for parameters, a million character password on my laptop takes less than 100ms.\r\n\r\nI would also be inclined to drop this.",
+      "createdAt": "2024-12-02T12:41:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2511439495",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WYyGg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2438 to finally resolve this hopefully",
+      "createdAt": "2024-12-06T12:08:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2523079072",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WiQ2f",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "[In a thread on infosec.exchange](https://infosec.exchange/@tychotithonus/113595947312420794), someone pointed me towards this article:\r\n\r\nhttps://web.archive.org/web/20210430181111/https://pthree.org/2018/05/23/do-not-use-sha256crypt-sha512crypt-theyre-dangerous/\r\n\r\nLong story short, Argon2, scrypt, bcrypt or PBKDF2 are ok, other stuff isn't.",
+      "createdAt": "2024-12-08T09:47:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2525564319",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlSNu",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good article Josh. This is 100% inline with the [OWASP Password Storage cheetsheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html). It was also influenced by @Sc00bzT who helped author the cheatsheet and earlier more detailed ASVS password storage requirements.",
+      "createdAt": "2024-12-08T20:00:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2526356334",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-04-13T21:51:06Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1923,
+  "state": "CLOSED",
+  "title": "2.1.2 Passwords of more than 128 characters are denied (make entire 2.4 more abstract)",
+  "url": "https://github.com/OWASP/ASVS/issues/1923"
+}

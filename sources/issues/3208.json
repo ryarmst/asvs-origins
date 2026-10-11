@@ -1,0 +1,351 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "<!---\nBEFORE YOU OPEN AN ISSUE:\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\n- Please search the issues in case your question has been discussed before.\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\n- When you reference requirements, please include them as a link, similarly to this:\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\n\nOTHER NOTES:\n- Please do not open a pull request without first opening an associated issue.\n- Please carry out all discussion in the associated issue only.\n-->\nRegarding V1.3.9: '**Verify that the application sanitizes content before it is sent to memcache to prevent injection attacks.**\"\nit's good to give some clarification on the precise intent and scope of requirement:\n* What type of injection attacks considered here?\n* What specific type of \"sanitization\" is anticipated?\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM61RbTc",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Still waiting for the response, here I am sharing my prespective on the requirement, please correct me if something is incorrect\n\nThis requirement is ambiguous and uses inaccurate terminology, leading to potential misinterpretation and ineffective implementation.\n\n### “Sanitize”\nThis is misleading or meaningless, the requirement should be talking about safe cache design and access control, not just scrubbing strings.\n\n### “Content”\nThe statement does not clarify what \"**content**\" means (e.g., keys, values, or both).\n\n### “Injection Attacks”\nMemcached is not vulnerable to **traditional injection attacks**, as it’s a data layer, not an interpreter. Risks arise from how data is stored (e.g., key collisions, cache poisoning) and how retrieved data is used later (e.g., XSS or deserialization vulnerabilities).\n",
+      "createdAt": "2025-07-06T09:28:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3041244380",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67dp6p",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @ajayojha, did you review the previous issue about this topic? Does that provide any clarity?",
+      "createdAt": "2025-08-01T16:22:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3145113257",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67jgQ5",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Hi [@ajayojha](https://github.com/ajayojha), did you review the previous issue about this topic? Does that provide any clarity?\n\nYes, I have referred the pull request discussion and the pull request focuses on the attack vectors uniqueness or redundancy rather than the terminologys suitability or the need for safe cache design/access control.",
+      "createdAt": "2025-08-02T18:04:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3146646585",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM68uKVT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so do you have a suggested modification wording for the requirement?",
+      "createdAt": "2025-08-08T00:31:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3166217555",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69bF8I",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Here is the requirement suggestion:\n\n**Verify that untrusted data is never stored in caches (e.g., Memcached, Redis, in-memory caches) in its raw or insecure form. All untrusted input including user-provided or external data, used as a cache keys must be validated against strict patterns and cache values must be  strictly validated, sanitized, and normalized to a safe, well-defined format before being stored.**",
+      "createdAt": "2025-08-12T07:12:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3177996040",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DIe2M",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I think the purpose of the requirement was specifically to prevent injection, most likely into memcache keys.\nhttps://www.sonarsource.com/blog/zimbra-mail-stealing-clear-text-credentials-via-memcache-injection/\n\nAs such, I think we can be more specific about the risk but I think your suggestion is a little too general.\n\nI would therefore suggest:\n\n\"_Verify that the application sanitizes or encodes content to a safe format before it is used as a memcache key or in a memcache query to prevent injection attacks._\"",
+      "createdAt": "2025-09-10T07:57:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3273780620",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DywzQ",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I think “**Sanitizes or encodes content**” is not the correct primary control. The right control is to validate or reject illegal bytes when keys are set dynamically. The term “**content**” is ambiguous, in my earlier comment, I considered the case of values only. Also, “**Memcached query**” is not a standard term.",
+      "createdAt": "2025-09-12T11:16:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3284864208",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7HTf_j",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think “Sanitizes or encodes content” is not the correct primary control. The right control is to validate or reject illegal bytes when keys are set dynamically.\n\nSanitize means removing the illegal characters which I think is sufficient here. Encoding could work although it is not clear.\n\n> The term “content” is ambiguous, in my earlier comment, I considered the case of values only. \n\nI think it is clear enough in the context that it is going into memcached messages.\n\n> Also, “Memcached query” is not a standard term.\n\nRereading the article, I think memcached messages would probably be better.",
+      "createdAt": "2025-09-28T15:39:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3343777763",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qBj-Q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to propose a final modification:\n\n\"_Verify that the application sanitizes or encodes content to a safe format before it is used as a memcache key or in a memcache message to prevent injection attacks._\"\n\nThis will need to wait for change control to be established.",
+      "createdAt": "2026-02-19T10:27:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3926278032",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qCeMC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The term \"safe format\" can be questioned here.\n\nThe goal is to say that there must be defense against memcache injection attacks. So one option is to change the \"build-up\" to \"Verify that the application defends against X by doing for Y\" or \"Verify that the application defends against X. It can be achieved by doing for Y or Z.\"\n\n\"Injection attack\" itself can be written more explained way like we have it in other requirements, such as in 1.2.1 \"to avoid changing the message or document structure.\"",
+      "createdAt": "2026-02-19T11:04:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3926516482",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7q46Wj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you propose an alternative wording to help understand the direction?",
+      "createdAt": "2026-02-22T11:54:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3940787619",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7rKbSS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "To stop the specific risk Josh linked to above, I would suggest keeping it simple but specific to routing injection attacks. This is not about general injection defense. \n\n_The application MUST ensure that untrusted input is never directly embedded into backend service protocols (for example, cache keys, message queues, or internal RPC requests). All such values MUST be strictly validated to prevent routing injection attacks._",
+      "createdAt": "2026-02-23T15:19:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3945378962",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7r3W79",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we should probably keep this focused on the original memcache issue. @elarlang when you get a moment can you propose some alternative wording please.",
+      "createdAt": "2026-02-25T06:33:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3957157629",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7r39wI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just the wording proposal based on https://github.com/OWASP/ASVS/issues/3208#issuecomment-3926278032\n\n> Verify that the application defends against memcache injection by sanitizing or encoding the content that is used as a memcache key or in a memcache message to avoid changing the message or document structure.\n\nThe encoding part here may need examples. At the moment it feels like there is a special memcache-specific encoding available but it is not the case.\n\nThe last part (_to avoid changing the message or document structure_) duplicates a bit the first part in my proposal, but I think it is important to make the intent clear.",
+      "createdAt": "2026-02-25T07:18:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3957316616",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7sDd87",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think we should probably keep this focused on the original memcache issue. [@elarlang](https://github.com/elarlang) when you get a moment can you propose some alternative wording please.\n\nI politely disagree. This is a wider problem with cache technology.  Here is a detailed requirement that explains it.\n\n_Verify that the application prevents backend service protocol injection by ensuring untrusted input cannot alter the structure of requests sent to backend services (e.g., caches such as memcache). This must be achieved by using safe client APIs and/or strict validation/encoding of any untrusted data used in protocol fields (such as cache keys), rather than constructing requests via string concatenation._\n\n",
+      "createdAt": "2026-02-25T16:05:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3960332091",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7taN0y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico I think you're right to consider whether this should be broader, but having looked into it, I think memcache-specific is actually the right scope here.\n\n### Why broadening to \"caches\" generally doesn't help\n\nThe memcache injection risk exists specifically because Memcached uses a text-based, CRLF-delimited ASCII protocol. When untrusted input is concatenated into cache keys or commands, `\\r\\n` characters can terminate one command and inject another. Other major cache technologies don't share this weakness.\n\n<details>\n<summary>Background: Memcached vs other cache protocols</summary>\n\n**Memcached** has well-documented, real-world application-level injection exploits:\n- [Zimbra credential theft via memcache injection](https://www.sonarsource.com/blog/zimbra-mail-stealing-clear-text-credentials-via-memcache-injection/)\n- [pylibmc/Flask-Session RCE](https://btlfry.gitlab.io/notes/posts/memcached-command-injections-at-pylibmc/) (CVE-2021-33026)\n- [Ivan Novikov's Black Hat 2014 research on memcache injections](https://blackhat.com/docs/us-14/materials/us-14-Novikov-The-New-Page-Of-Injections-Book-Memcached-Injections-WP.pdf)\n\n**Redis** does not have the same vulnerability. Modern Redis client libraries use the binary-safe [RESP protocol](https://redis.io/docs/latest/develop/reference/protocol-spec/) with length-prefixed strings, which [inherently prevents CRLF injection](https://redis.io/docs/latest/operate/oss_and_stack/management/security/) through normal usage. The real-world Redis CRLF examples (e.g., [GitLab SSRF+CRLF](https://hackerone.com/reports/441090)) are all SSRF-based attacks where the attacker bypasses the client library entirely and talks to Redis over raw TCP; that is a different class of vulnerability.\n\n**Other cache systems** (Hazelcast, Aerospike, Couchbase) use binary protocols or typed client APIs and don't have documented protocol injection vulnerabilities.\n\n</details>\n\nSo broadening to generic \"cache injection\" would make the requirement vaguer without covering a real additional risk. Memcached's text protocol is the specific, well-understood problem here.\n\n### Why \"backend service protocol injection\" is too broad\n\nGoing further to generic \"backend service protocol injection\" would overlap significantly with existing protocol-specific requirements.\n\n<details>\n<summary>Existing ASVS requirements that cover backend service protocol injection</summary>\n\nWe already have individual requirements for each major backend protocol injection risk:\n\n- **V1.2.4**: SQL/database injection\n- **V1.2.5**: OS command injection\n- **V1.2.6**: LDAP injection\n- **V1.3.8**: JNDI injection\n- **V1.3.11**: SMTP/IMAP injection\n\nThese are all \"backend service protocols\" where untrusted input shouldn't alter request structure, so the broader wording would be a superset of all of them.\n\nWe also have **V1.3.3** (\"_Verify that data being passed to a potentially dangerous context is sanitized beforehand to enforce safety measures_\") as the catch-all for injection scenarios not covered by the specific requirements.\n\n</details>\n\nA memcache-specific requirement fits naturally into this existing pattern of protocol-specific injection requirements. I'd prefer to stick with @elarlang's focused proposal:\n\n\"_Verify that the application defends against memcache injection by sanitizing or encoding the content that is used as a memcache key or in a memcache message to avoid changing the message or document structure._\"",
+      "createdAt": "2026-03-02T09:08:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3983072562",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tdF44",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Seems reasonable to me Josh. Thanks for doing the research on this.\n\nBut again, we're using the word sanitize incorrectly here. I'd suggest:\n\n\"Verify that the application defends against memcache injection by **validating** or encoding the content that is used as a memcache key or in a memcache message to avoid changing the message or document structure.\"",
+      "createdAt": "2026-03-02T11:34:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3983826488",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tewjn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico see my comment on how we need to define sanitization here: https://github.com/OWASP/ASVS/issues/3335#issuecomment-3984248767",
+      "createdAt": "2026-03-02T13:01:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3984263399",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7tmjIv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "For memcached keys specifically, replacement of dangerous characters tends to create ambiguity and cache-key collisions, so rejection is usually safer than “sanitize and continue.” So I really do feel that the proper defense in the case is not to sanitize or clean dangerous characters, but to flat out reject that input and not try to clean up.\n\nThere are many situations where validation is the proper security layer, and to only consider validation a business logic issue - paints us into a corner that does not map to all modern defenses, IMO. Sometimes validation **_is_** the right defense.\n ",
+      "createdAt": "2026-03-02T19:08:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3986305583",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uRXyL",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico this is a good point and I have mentioned it here: https://github.com/OWASP/ASVS/issues/3335#issuecomment-3997527630\n\nI am going to pause this issue until that gets resolved.",
+      "createdAt": "2026-03-04T13:24:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3208#issuecomment-3997531275",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-06-28T03:48:54Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjtAg",
+      "name": "4a) Waiting for another",
+      "description": "This issue is waiting for another issue to be resolved",
+      "color": "7EDA08"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3208,
+  "state": "OPEN",
+  "title": "Clarification: V1.3.9 \"Sanitization for Memcache Injection Attacks\"",
+  "url": "https://github.com/OWASP/ASVS/issues/3208"
+}

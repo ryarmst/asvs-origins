@@ -1,0 +1,250 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\n**Classical solution**: There is an SSO, and if a user has a session in the SSO, then the user does not need to authenticate to each related application separately.\r\n\r\nOften the application redirects non-authenticated users automatically to SSO and if the user has an SSO session, the user will be redirected back to the application and the user now has the valid session in the application.\r\n\r\n**Problem to solve**: valid session in the application is a pre-condition for many attacks and it should not be possible to force the victim browser to create a valid session to the application without user interaction. For creating a valid session is enough to redirect user browser to the application.\r\n\r\n**Update a session vs createing a session** - a widespread OAuth solution (for SPA) is for the browser to send `access_token` as the `Bearer` value in the 'Authorization' request header (field). When the (short-lived) `access_token` expires, the user/browser must renew or update this token. In this case, it's an update from a previous session and it is not creating a new one - the application should be able to tell the difference.\r\n\r\n**Proposal** - disallow user auto-login to an application using SSO session, require user-interaction - one click is enough to take down the \"auto-creating\" scenario.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5vhqzX",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What do we think about:\r\n\r\n**_Verify that logging in to the application is protected against a CSRF-style attack where the user is forced to login._**",
+      "createdAt": "2023-12-28T11:55:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-1871097047",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vhzRv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, with this wording it feels too much duplicate of 50.3.1 (previously 4.2.2) and we should merge it there. I think the \"CSRF requirement\" needs some update anyway.",
+      "createdAt": "2023-12-28T12:42:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-1871131759",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vieJ4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that this is an unusual case because you would not necessarily expect this functionality to be sensitive (might even be a GET based redirect) but actually it is",
+      "createdAt": "2023-12-28T16:08:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-1871307384",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM52V17j",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hey @elarlang, is this scenario only dealing with SSO specifically? If yes, then how about, \r\n\r\n`Verify that SSO auto-logins are disabled for extended periods of user session and forces the user to interact with the SSO to continue the authenticated session`? \r\n\r\nI now this is a bit wordy, but may need some wordsmithing if it fits what we need to solve the problem. In this way we are forcing the user to do that one-click interaction as you mentioned. What do you think? ",
+      "createdAt": "2024-03-08T10:25:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-1985437411",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5409wW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Something like this for finetuning:\r\n\r\n_Verify that creating a session for the application requires the user's consent and that the application is protected against a CSRF-style attack to create a new session for the application using an active session from SSO without user action._\r\n\r\nping @tghosth ",
+      "createdAt": "2024-03-29T11:54:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2027150358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM546Zl3",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, I like the last one you have, just wondering if requiring the user's consent or was it an action like clicking a button that we want a user to do? ",
+      "createdAt": "2024-03-31T06:35:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2028575095",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM546mCK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To achieve the consent, you need user interaction (click). If we just ask for a click, we can \"solve it with clickjacking\" :)",
+      "createdAt": "2024-03-31T10:12:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2028626058",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56bSpa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, I would like to get the requirement (https://github.com/OWASP/ASVS/issues/1815#issuecomment-2027150358) to be suitable for the section \"V3.2 Session Binding\"",
+      "createdAt": "2024-04-14T09:03:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2053974618",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56r0Rf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Potential examples of this:\r\nhttp://homakov.blogspot.com/2012/07/saferweb-most-common-oauth2.html\r\nhttps://dev.clever.com/docs/il-security\r\n\r\nMy suggested wording:\r\n\r\n> Verify that creating a session for the application requires the user's consent and that the application is protected against a CSRF style attack where a new application session for the user is created via SSO without user interaction.\r\n\r\nWDYT @elarlang ?",
+      "createdAt": "2024-04-16T06:13:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2058306655",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM56r33R",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's get it in. If we have some better ideas, we can improve it later.",
+      "createdAt": "2024-04-16T06:25:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2058321361",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56r4eb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal:\r\n* Requirement: Verify that creating a session for the application requires the user's consent and that the application is protected against a CSRF style attack where a new application session for the user is created via SSO without user interaction.\r\n* Section: V3.2 Session Binding\r\n* Level: 1 (or 2?)\r\n* CWE - none",
+      "createdAt": "2024-04-16T06:27:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2058323867",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56sOvw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Level 2 I think, everything else is in: #1929",
+      "createdAt": "2024-04-16T07:26:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2058415088",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NwvLC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction. I think a risk based approach is prudent. For low risk apps, a click may be enough. For high risk apps, I'd suggest a multi-factor challenge. Either way, I like this direction and discussion.",
+      "createdAt": "2024-09-27T04:10:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1815#issuecomment-2378363586",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-12-21T08:16:31Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABeP8AAA",
+      "name": "WG wanted",
+      "description": "We are looking for input from leaders/WG",
+      "color": "24F784"
+    }
+  ],
+  "number": 1815,
+  "state": "CLOSED",
+  "title": "discussion/proposal: disallow user-autologin to an application using SSO sessions",
+  "url": "https://github.com/OWASP/ASVS/issues/1815"
+}

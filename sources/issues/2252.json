@@ -1,0 +1,222 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4ODI2MjE=",
+    "is_bot": false,
+    "login": "danielcuthbert",
+    "name": "Daniel Cuthbert"
+  },
+  "body": "<img width=\"930\" alt=\"Screenshot 2024-11-05 at 14 20 33\" src=\"https://github.com/user-attachments/assets/b27d642e-3cb1-43d2-84e5-8050fe0c459d\">\r\n\r\n\r\nScheme | Domain Parameters\r\n-- | --\r\nRSA | k >= 2048\r\nDiffie-Hellman (DH) | (L, N) parameters: L >= 2048 & N >= 224\r\nElliptic Curve Diffie-Hellman (ECDH) | f >= 224\r\n\r\n</markdown-accessiblity-table>\r\n<p dir=\"auto\"></p>",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6SkRuf",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "An interesting comment, thank you. Firstly I guess we need context here. Both RSA and DHE do support PFS and we need transient key pairs (temp keys) in order to encrypt $stuff$ for that conversation. \r\n\r\nWe have specified that both RSA and DHE need k >= 2048, which is the minimum amount required to suppport PFS (same goes for DH). So yes, they do support it in the above\r\n\r\nHowever, there is a computational impact say on TLS of using PFS, and there is the issue of backwards compatability with older clients. \r\n\r\nIm closing this for now but by all means open a new issue if this isn't clear",
+      "createdAt": "2024-11-06T08:26:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2458983327",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SrPxn",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> We have specified that both RSA and DHE need k >= 2048, which is the minimum amount required to suppport PFS (same goes for DH). So yes, they do support it in the above\r\n\r\nI believe we are talking about the RSA transport scheme here (i.e. sending a shared secret to the peer encrypted using the peer's RSA public key) which *do not* provide forward secrecy with respect to the peer's RSA private key, right?",
+      "createdAt": "2024-11-06T21:22:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2460810343",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6THxNg",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "It's really unclear which kind of forward secrecy you're referring to. PFS uses negotiated long term keys followed by per-message session keys derived sequentially from messages that have been sent so far (hence the 'forward secrecy' name). This makes sense when you talk about TLS or Signal protocol, but not generally for KEX. If you can elaborate your argument, @randomstuff, this would make it easier to answer. M.",
+      "createdAt": "2024-11-11T14:17:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468287328",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TIwEh",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "AFAIU, forward secrecy means that if the long term secrets used in the key exchange protocol are disclosed, previous sessions are not compromised (previous session/transient keys cannot be recovered).\r\n\r\nI understand that the RSA KEX discussed here is the \"RSA transport\" scheme where peer A uses RSA to send an some encrypted session key material to the peer B (using peer B's public key).  Is this what we are talking about here?\r\n\r\nIf this is what we are talking about, do we agree that this scheme does not provide forward secrecy (because if B's public key is disclosed the session key material can be decrypted)? If so, are there any reasons for recommending it (outside of compatibility)?\r\n",
+      "createdAt": "2024-11-11T16:15:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468544801",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TJna7",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Can you do me a favour and name a scheme that does support PFS so I can\r\nbetter understand where you are coming from? Many thanks! M\r\n\r\nOn Mon, 11 Nov 2024, 16:15 Gabriel Corona, ***@***.***> wrote:\r\n\r\n> AFAIU, forward secrecy means that if the long term secrets used in the key\r\n> exchange protocol are disclosed, previous sessions are not compromised\r\n> (previous session/transient keys cannot be recovered).\r\n>\r\n> I understand that the RSA KEX discussed here is the \"RSA transport\" scheme\r\n> where peer A uses RSA to send an some encrypted session key material to the\r\n> peer B (using peer B's public key). Is this what we are talking about here?\r\n>\r\n> If this is what we are talking about, do we agree that this scheme does\r\n> not provide forward secrecy (because if B's public key is disclosed the\r\n> session key material can be decrypted)? If so, are there any reasons for\r\n> recommending it (outside of compatibility)?\r\n>\r\n> —\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468544801>, or\r\n> unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/ADHBXOXY5GS5YDENPNAR6432ADJ2ZAVCNFSM6AAAAABRGXH62OVHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZDINRYGU2DIOBQGE>\r\n> .\r\n> You are receiving this because you commented.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2024-11-11T18:15:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468771515",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TJrTg",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ephemeral Diffie-Hellman?",
+      "createdAt": "2024-11-11T18:25:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468787424",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TJwSr",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Ah so you are referring to TLS ciphersuites. Theoretically, you can do PFS\r\nwith RSA, it just isn't done because it is very computationally expensive.\r\nIt is restricted from TLS for this reason. This looks like you think we\r\nshould put some ideal TLS advice in the appendix. If so, we have a whole\r\nload of work we have already done that we can utilise, along with notes for\r\ncommon pitfalls (such as Mozilla always ordering AES128 even in TLSv1.3\r\nciphersuites, etc.). Let me know if this would be useful. :) M.\r\n\r\nOn Mon, 11 Nov 2024, 18:25 Gabriel Corona, ***@***.***> wrote:\r\n\r\n> Ephemeral Diffie-Hellman?\r\n>\r\n> —\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468787424>, or\r\n> unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/ADHBXOV5RNPXQ3NPKTZYRKD2ADZBTAVCNFSM6AAAAABRGXH62OVHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZDINRYG44DONBSGQ>\r\n> .\r\n> You are receiving this because you commented.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2024-11-11T18:37:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468807851",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TKCxN",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I did not intent my question to be about TLS ciphersuites.\r\n\r\nI agree that you can build some key exchange scheme on top of RSA which features forward secrecy. From a theoretical standpoint, my argument is therefore moot. However, is such a scheme ever used anywhere in practice?\r\n\r\nIn practice, with the text as it is, isn't there t a risk that we may encourage using a non-forward-secure scheme where a we send a session secret encrypted with a static RSA key?",
+      "createdAt": "2024-11-11T19:28:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468883533",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TKIEv",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "\"Key Exchange\" is not synonymous with \"uses PFS\". As I mentioned, there are\r\nprotocols that use it, but it is a recommendation to use PFS where it is an\r\noptional feature, rather than a requirement to be placed on KEX. I suggest\r\nwe put it there. M.\r\n\r\nOn Mon, 11 Nov 2024, 19:28 Gabriel Corona, ***@***.***> wrote:\r\n\r\n> I did not intent my question to be about TLS ciphersuites.\r\n>\r\n> I agree that you can build some key exchange scheme on top of RSA which\r\n> features forward secrecy. From a theoretical standpoint, my argument is\r\n> therefore moot. However, is such a scheme ever used anywhere in practice?\r\n>\r\n> In practice, with the text as it is, isn't there t a risk that we may\r\n> encourage using a non-forward-secure scheme where a we send a session\r\n> secret encrypted with a static RSA key?\r\n>\r\n> —\r\n> Reply to this email directly, view it on GitHub\r\n> <https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468883533>, or\r\n> unsubscribe\r\n> <https://github.com/notifications/unsubscribe-auth/ADHBXOXG5S7OGG3C2VBP5UL2AEAPVAVCNFSM6AAAAABRGXH62OVHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZDINRYHA4DGNJTGM>\r\n> .\r\n> You are receiving this because you commented.Message ID:\r\n> ***@***.***>\r\n>\r\n",
+      "createdAt": "2024-11-11T19:43:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2468905263",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6URyV4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff is there any further action here?",
+      "createdAt": "2024-11-20T07:15:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2487690616",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UYxXU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can close this as duplicate of #2215.",
+      "createdAt": "2024-11-20T20:52:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2252#issuecomment-2489521620",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-05T14:49:24Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    }
+  ],
+  "number": 2252,
+  "state": "CLOSED",
+  "title": "V6 Cryptography - Perfect Forward Secrecy",
+  "url": "https://github.com/OWASP/ASVS/issues/2252"
+}

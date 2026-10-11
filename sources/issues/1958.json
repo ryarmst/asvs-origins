@@ -1,0 +1,260 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Spin-off from #1311\r\n\r\nWe have 3 Content-Security-Policy related topics to discuss:\r\n\r\n  * discussion 1 - default level-1 requirement to say, that browsers should only communicate with and load content from trusted parties\r\n  * discussion 2 - requirement for document structure integrity\r\n  * discussion 3 - allow-list vs nonces, stays in issue #1311\r\n\r\nNote, that we also have CSP related requirement 50.2.5 (v4.0.3-14.4.7):\r\n> Verify that the content of a web application cannot be embedded in a third-party site by default and that embedding of the exact resources is only allowed where necessary by using suitable Content-Security-Policy: frame-ancestors. Note that the X-Frame-Options solution is obsoleted.\r\n\r\nAs it is a separate attack vector (ui redress), then it can stay separately. Also, it is 1st layer of defense, most of the CSP has the goal to be 2nd layer of defense against the so-called XSS. So it can stay separately.\r\n\r\n\r\n# Discussion 1\r\n\r\nhttps://github.com/OWASP/ASVS/issues/1311#issuecomment-2107564410\r\n\r\n> Verify that the Content-Security-Policy header defines fetch, document, and navigation directives based on application needs, without allowing the browser to communicate any other resource and deny everything by default.\r\n\r\nEntire discussion is in the #1311, TLDR is - we can not say technically directives and values, which are suitable for every application, but we need to describe the principle - the application must communicate with only trusted parties.\r\n\r\n\r\n# Discussion 2\r\n\r\nhttps://github.com/OWASP/ASVS/issues/1311#issuecomment-2109941439\r\n\r\nInstead of saying \"Do not use 'unsafe-inline'\" we should try to explain the goal of the restriction.\r\n\r\nIn case there is an HTML injection vulnerability, disallowing using inline scripts should make the attacker's life more interesting.\r\n\r\nIn case there is a JavaScript injection in an inline script (between `<script> .. </script>` tags in an HTML document), an attacker can do a successful attack without communicating with any external party. Note, that also the `nonce` for the `<script>` tag does not help in this case.\r\n\r\nFirst I though to go for recommendation direction:\r\n\r\n> To be able to get benefits from the Content-Security-Policy header fetch directive for script and style for disallowing using inline tags and eval for an attacker, the application should not use inline tags for script and style and should not allow 'unsafe-inline' and 'unsafe-eval' for script and style.\r\n\r\nIf to go for the requirement direction (instead of recommendation), it should carry ideas:\r\n\r\nVerify that\r\n\r\n  * the application does not use inline scripts and styles in HTML documents and has not allowed using those in the Content-Security-Policy header\r\n  * OR all inline styles and scripts integrity are covered by checksum hashes in the Content-Security-Policy header\r\n\r\n.. now, how to make it twice shorter :)\r\n\r\nFeels like a level 3 requirement... or recommendation?\r\n\r\nFor the chapter, maybe this requirement should be together with \"SRI\" requirement and the current \"V50.6 External Resource Integrity\" to be renamed to \"V50.6 Resource Integrity\".\r\n\r\nping @Sjord @tw2as @tghosth - your ideas?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM591Y1X",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I politely disagree with this proposal. I do not want to focus on what NOT to do, but instead I would suggest we focus on what TO do. In this vein, I would like to build requirements for strict-csp as highlighted here https://github.com/OWASP/ASVS/issues/1311\r\n",
+      "createdAt": "2024-05-14T21:09:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2111147351",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM591Z88",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Positive requirement is up to wording fine-tuning, at the moment is important to validate the idea.\r\n\r\nFor strict-csp, please keep the discussion in \"I opened the issue\" #1311.",
+      "createdAt": "2024-05-14T21:13:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2111151932",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-WUjT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We had some proposals that I liked in #1311, I want to see where those go first. I want the CSP requirement to be as simple as possible and fall back on the CSP cheatsheet wherever possible.",
+      "createdAt": "2024-05-20T06:44:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2119780563",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-XI1-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As mentioned issue #1311 is full of noise and childish downvotes to my comments, I keep my comments in this issue.\r\n\r\nI politely and with all respect make it clear here, please do not comment before reading the entire comment or issue. If needed, I'm going to delete \"noise-comments\" to keep the issue clean and followable.\r\n\r\n---\r\n\r\nTo the topic now.\r\n\r\nThere are so many options to make things (in)correctly and I think we should concentrate on addressing different attack vectors to mitigate, instead of **only** pointing to certain techniques the Content-Security-Policy header provides.\r\n\r\nThe focus - at the moment, everyone seems to only talk about JavaScript execution vectors. It is the most critical one, but it is not the only one.\r\n\r\nFor example, defense against UI Redress / ClickJacking requires one certain directive (`frame-ancestors`) and it is in a separate requirement.\r\n\r\nThe question now is - what are all the attack vectors we address with the `Content-Security-Policy` header. We need to list the vectors and then see for each vector, is using the `Content-Security-Policy` header with certain directives is the only option to solve it. With requirements, we need to eliminate or mitigate the attack vectors, not just setting directives.\r\n\r\nProblems to avoid - we should not write hidden requirements with the `Content-Security-Policy` directives, e. g. asking to not use `unsafe-inline` means that using inline `<script> .. </script>` inside the HTML document is not allowed (without nonces and hashes).\r\n\r\nWe should not waste time discussing levels before requirement texts are set. As the `Content-Security-Policy` reporting requirement got in as a level 3 requirement (not as a recommendation), I think other related things should be aligned with that.\r\n\r\n---\r\n\r\nAttack vectors\r\n\r\n  * Information leakage\r\n    * When loading any external resource, it can be already considered as information leakage - who, when, using which browser, from what IP using the application.\r\n    * Referrer leakage - if there is HTML injection, then it is possible to leak out referrer wihtout JavaScript execution and when in the HTTP response header `Referrer-Policy` is set to `no-referrer`\r\n  * JavaScript execution\r\n  * Embedding by 3rd party sites\r\n    * Not limited to ClickJacking only\r\n    * Already addressed by a separate requirement, so we don't need to cover this\r\n\r\nAnything else?\r\n\r\n---\r\n\r\n**Information leakage** - for this we need to use allow-lists. Some may be allergic to that, but using allow-lists is not the opposite of using nonces or hashes, those can be used together. With allow-lists, we need to be sure, that nothing can be loaded from untrusted sources, not only scripts and styles.\r\n\r\n**Allow-lists** - The main issue with allow-list is, that allowed-endpoints must allow only own-controlled and/or trusted end-points. With all related research with a \"too-close-to-100%\" bypass ratio the problem is on an allow-listed hostname are JSONP endpoints, shared scripts or gadgets etc.\r\n\r\nThis includes widespread problem - when end-users can upload files to allow-listed sphere, e. g. `script-src: 'self'` but users can upload files that are served from the same hostname. If there is no `X-Content-Type-Options: nosniff` set, it can be whatever content-type when serving the \"javascript\" file.\r\n\r\nSo, what to take into account is that you need to allow images from user-uploaded files, but can not allow script files. In this context, if the application validated images to be in the expected format and size, we can call it \"trusted\", e.g. an end-user can not create content with WYSIWYG or use HTML injection vulnerability to point thousands of images to external files with Gigabytes in size.\r\n\r\n**Mixing content and functionality** - the main reason for JavaScript injection is mixing (untrusted) content and functionality\r\n\r\nThe pre-condition for using hashes - the content must be static.\r\n\r\nThe pre-condition for using nonces - the content must be trusted. If there is a JavaScript injection in inline `<script>`, then an attacker gets JavaScript execution from a \"trusted zone\".\r\n\r\n---\r\n\r\n**Requirements**\r\n\r\nIt takes some more time to reach the requirement text proposals. Extra arguments and edge-cases are more then welcome.\r\n\r\nPersonally I feel there is a need for 2 requirements (a already was proposed https://github.com/OWASP/ASVS/issues/1311#issuecomment-2107564410 and https://github.com/OWASP/ASVS/issues/1311#issuecomment-2109941439, but were lost in a noise a bit, although used as a base for the recommendations there):\r\n\r\n  * One requirement for allow-listing sources to come and communication to go only to trusted sources and data, can be level 1 requirement. If someone is going to post anything about Google research and close to 100% bypass ratio, it means, this person did not read the issue.\r\n    * Note that there are no pre-conditions to implement this\r\n  * One requirement for keeping dynamic data and functionality separately and other structuring the output functionality to be able to use the benefits CSP provides\r\n    * Note that this requirement is not directly CSP-oriented. This requirement is a pre-condition that one can use CSP-provided features.\r\n\r\nping @Sjord @ryarmst (as I have seen valuable fact-based feedback from you on the topic)",
+      "createdAt": "2024-05-20T08:57:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2119994750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-pQ2y",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I agree and I think it makes the most sense to approach by vector. As far as Attack Vectors, I would just expand \"JavaScript execution\" to a more general \"malicious content execution or rendering\" as there are directives preventing more than script execution.",
+      "createdAt": "2024-05-22T13:02:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2124746162",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-pVdT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would just expand \"JavaScript execution\" to a more general \"malicious content execution or rendering\" as there are directives preventing more than script execution.\r\n\r\nI think it is quite JavaScript execution-driven. Do you any other examples? Mid-way could be \"malicious scripts\"?\r\n\r\nWhat makes it false for me is that if there is an HTML injection, you can manipulate an HTML document visually and functionality and there is little to no help from Content-Security-Policy to stop that, but HTML syntax is malicious content in this context.",
+      "createdAt": "2024-05-22T13:11:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2124765011",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-ppgk",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good point. There is no CSP feature to prevent modification of HTML content, but it can prevent actions like the submission of forms to untrusted origins via HTML form hijacking. It can also block loading of various non-script resources, so there can be restrictions in the content that can be used to manipulate a document, though I think many of these are not particularly useful for mitigating real attacks.\r\n\r\nThere is also the `sandbox` directive which - in addition to limiting what resources can load/do - also isolates the origin. This would also fall under the vector category of \"malicious scripts\" but I think it would be more appropriate in specific contexts (like uploaded content/files rather than an injection issue). \r\n\r\n",
+      "createdAt": "2024-05-22T13:48:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2124847140",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-puFW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Good point. There is no CSP feature to prevent modification of HTML content, but it can prevent actions like the submission of forms to untrusted origins via HTML form hijacking. It can also block loading of various non-script resources, so there can be restrictions in the content that can be used to manipulate a document, though I think many of these are not particularly useful for mitigating real attacks.\r\n\r\nThat is addressed/addressable with the first proposed requirement - to allow loading resources and communication only with trusted parties, it includes things like `form-action` and `base-uri`.\r\n\r\n> There is also the sandbox directive which - in addition to limiting what resources can load/do - also isolates the origin. This would also fall under the vector category of \"malicious scripts\" but I think it would be more appropriate in specific contexts (like uploaded content/files rather than an injection issue).\r\n\r\nNote, that for sandbox (which is again just one option to solve the vector), there is already requirement \"V50.5 Unintended Content Interpretation\"\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.5.3** | [ADDED, DEPRECATES 14.4.2] Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API or other resource is loaded directly). Possible controls could include: not serving the content unless headers indicate it is the correct context, Content-Security-Policy: sandbox, Content-Disposition: attachment, etc. | ✓ | ✓ | ✓ | |\r\n",
+      "createdAt": "2024-05-22T13:56:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2124865878",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_H6T2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "There are so many other ways to steal/exfiltrate data from an injected page that the CSP defenses to stop data leakage are mostly not important. The standard stopped trying to plug those holes. I suggest we just focus on XSS defense and not worry about trying to set standards that prevent data from being stolen once the injection occurs.\r\n\r\n> Good point. There is no CSP feature to prevent modification of HTML content, but it can prevent actions like the submission of forms to untrusted origins via HTML form hijacking. It can also block loading of various non-script resources, so there can be restrictions in the content that can be used to manipulate a document, though I think many of these are not particularly useful for mitigating real attacks.\r\n> \r\n> There is also the `sandbox` directive which - in addition to limiting what resources can load/do - also isolates the origin. This would also fall under the vector category of \"malicious scripts\" but I think it would be more appropriate in specific contexts (like uploaded content/files rather than an injection issue).\r\n\r\n",
+      "createdAt": "2024-05-27T07:01:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2132780278",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_1PPE",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Note, that for sandbox (which is again just one option to solve the vector), there is already requirement \"V50.5 Unintended Content Interpretation\"\r\n\r\nSandbox is also meant to protect against malicious payloads in someone elses data. E.g. when you allow users to upload their own files, or otherwise serve third-party content, using sandbox makes it possible to do serve less-trusted content without granting it access to execute JavaScript.",
+      "createdAt": "2024-06-03T09:00:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2144662468",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_6Enq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Note, that for sandbox (which is again just one option to solve the vector), there is already requirement \"V50.5 Unintended Content Interpretation\"\r\n> \r\n> Sandbox is also meant to protect against malicious payloads in someone elses data. E.g. when you allow users to upload their own files, or otherwise serve third-party content, using sandbox makes it possible to do serve less-trusted content without granting it access to execute JavaScript.\r\n\r\n@Sjord  - but this all covered with the mentioned requirement (50.5.3). If not, what else there should be covered?",
+      "createdAt": "2024-06-03T19:08:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2145929706",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Av-gX",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang there is a lot going on here but it sounds like your suggested approach is to focus on the problems we are trying to solve with CSP and then use the outcome of #1311 to decide how this should be achieved? ",
+      "createdAt": "2024-06-11T08:04:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2160060439",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BEKzc",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang to try and draft some ideas for this",
+      "createdAt": "2024-06-13T11:15:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2165353692",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sxzof",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "closed via #2337",
+      "createdAt": "2024-11-07T15:29:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1958#issuecomment-2462530079",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-05-14T20:12:33Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 1958,
+  "state": "CLOSED",
+  "title": "update 50.2.1 (v4.0.3-14.4.3) and/or split requirement for content-security-policy",
+  "url": "https://github.com/OWASP/ASVS/issues/1958"
+}

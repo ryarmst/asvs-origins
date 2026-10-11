@@ -1,0 +1,328 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "\r\n| # | Description |\r\n| :---: | :--- |\r\n| [13.1.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x21-V13-API.md#v131-generic-web-service-security) | Verify that authorization decisions are made at both the URI, enforced by programmatic or declarative security at the controller or router, and at the resource level, enforced by model-based permissions. |\r\n\r\nThis requirement feels like it is a duplication of what we talk about in the access control chapter and the relevant architecture section.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5IXjGv",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Well, 4.1.3 basically says \"users should only be able to access what they are allowed to access\". That's true, but too wide. I think it would have value to split this up into function-level and object-level access control. 4.2.1 says you have to protect against insecure direct object references, which implies object-level access control, but is worded really in the sense of an attack instead of how to implement authorization.\r\n\r\nHowever, all this is not specific to APIs, so chapter 13 is not the correct place for this.",
+      "createdAt": "2022-08-13T10:16:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1214132655",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5I7oR5",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I would argue that 13.1.4 is not a duplicate.  The language \"enforce access control rules at a trusted service layer\" from 4.1.1 is too wide from an API at L2 perspective.  13.1.4 adds additional information that authorization is required \"at the controller or router, and the resource level.\"\r\n\r\nWe often hear the argument that access control only should be put in front of an API (in a gateway, sidecar, declarative routing level using web framework policies, etc.)  This pattern is problematic due to security misconfiguration and is susceptible to IDOR.\r\n\r\nI find that 13.1.4 captures a strong pattern and is a favorite part of ASVS.",
+      "createdAt": "2022-08-23T06:07:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1223591033",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KQREp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Interesting, @TobiasAhnoff  do you think other parts of ASVS could be clarified to avoid the appearance of duplication?",
+      "createdAt": "2022-09-13T18:09:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1245778217",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KhICZ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Hard question to answer and to keep it short…hope this will be good input!\r\n\r\nIn general, I think ASVS is well organized and a great resource when building secure applications, but for authorization there might be a risk that readers expect V4 to contain all verifications. The second time I wanted to read 13.1.4 I started looking in V4…so there might be some room for improvement...\r\n\r\nI think V1.4, V4, 13.4.2 and 13.3.4 all capture important principles and are not overlapping.\r\n\r\nTo me, 13.4.2 and 13.3.4 captures parts of the Defense in depth and Zero trust principles, which the other verifications does not include. But they are a little hidden in the more specific sections for Web Service and GraphQL.\r\n\r\nMaybe by making these more general and adding a new verification in V4.3 (at L2 or maybe L3), would make it clearer? I am thinking something like this:\r\n\r\n_4.3.x Verify that authorization is correct using a mandatory pattern at the business logic layer, not assuming other layers or services have done or will do authorization (apply the principle of Zero trust for authorization at the application level.)_\r\n\r\nIn example, if a gateway/firewall is removed/misconfigured, or the application layer is refactored (to a new web framework), or the data layer changes from SQL (with support for tenant authorization) to NoSQL (with no tenant authorization support), then authorization should still be correct. The business layer should always perform correct/complete authorization, Zero Trust in both application security and infrastructure security.\r\n\r\nTo also address Defense in depth we could start by making 13.4.2 and 13.3.4 more general, and modify them like this:\r\n\r\n_13.3.4 Verify that authorization decisions are made at both the application layer, enforced by programmatic or declarative security supported by the application framework, and at the business logic layer, enforced by model-based permissions (apply the Defense in depth principle for authorization at the application level.)_\r\n\r\n_13.4.2 Verify that data layer authorization logic is implemented at the business logic layer as well._\r\n\r\nAnd move them to 4.3 (close to 4.3.x and 4.3.3 or maybe 4.1.1), but then I think 13.4.2 would be a duplicate of the new 4.3.x and could be removed (or be kept as is in GraphQL, even if it is an duplicate, if it is especially important for GraphQL).\r\n\r\nThe \"new 13.3.4”, as well as the current one, are not overlapped by 4.3.x, since 13.3.4 address Defense in depth.\r\n\r\nIn this way (add 4.3.X, remove 13.4.2, make a more general 13.3.4 and move it to 4.3) all authorization related verifications are found in V1.4 and V4, and from my perspective it is clear that each are important (not duplicates).\r\n\r\nAnd, in addition to Least Privilege, V4 would also include Zero trust and Defense in depth for authorization at the application level, which I feel is a little bit hidden (or missing) in ASVS 4 and I think something like this would add value. \r\n\r\nBut I fully understands that authorization can be implemented in many ways and this could of course be expressed and organized in other ways, and I also want to point out that I like ASVS and 13.3.4 as is, but I hope this is good input for a discussion on possible improvements!\r\n",
+      "createdAt": "2022-09-18T05:46:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1250197657",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KhLpn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you Tobias, quite a lot of input here.\r\n\r\nAs I'm working with Authorization topic, I have opened separate \"parent\" issue for giving an overview https://github.com/OWASP/ASVS/issues/1352\r\n\r\nPlease take a look at it. I feel that solving problems listed in the parent issue is a bit pre-condition to work on with this issue - as some of the problems may get solved already.",
+      "createdAt": "2022-09-18T07:42:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1250212455",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Kihr_",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, authorization is a challenging and interesting topic!\r\n\r\nI will look at #1352 more during this week, thanks for reading!  ",
+      "createdAt": "2022-09-19T04:44:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1250564863",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Tjl5b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirement history \r\n\r\n| # | Description |\r\n| :---: | :--- |\r\n| [13.1.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x21-V13-API.md#v131-generic-web-service-security) | Verify that authorization decisions are made at both the URI, enforced by programmatic or declarative security at the controller or router, and at the resource level, enforced by model-based permissions. |\r\n| [18.9](https://github.com/OWASP/ASVS/blob/7d1a0c7dd377734cbbd223d9f0e9019b9644084e/4.0/en/0x23-V18-API.md#security-verification-requirements) | Verify that authorization decisions are made at both the URI and resource level, not just at the resource level. |\r\n| [18.12](https://github.com/OWASP/ASVS/blame/6f46ac051fbbde52b9fc8d1590a8cbd5639ecd55/4.0/en/0x23-V18-API.md) | Verify that authorization decisions should be at both the URI and resource level, not just at the resource level. |\r\n\r\nThis requirement was basically created in https://github.com/OWASP/ASVS/commit/e9b0f941f87af124fc88aaef7237b5f413c27fb5 based on a request from @ossie-git in #285 and then refined in #586.\r\n\r\n@ossie-git, any comments you have to add would be great :)\r\n\r\nHi @TobiasAhnoff,\r\n\r\nRevisiting this issue. I can see you are a fan of 13.1.4 which is great 😀 so I am trying to understand better how it is interpreted and then we can consider what to do with it.\r\n\r\nWhen I read this, it appears to be mandating the need for both vertical access control (i.e. what functions can the user access) and horizontal access control (i.e. what objects/entities is the user allowed to perform functions on). I would not consider that to be defence in depth but rather a key aspect of AuthZ.\r\n\r\nIn addition to that, I would be a little nervous to mandating multiple locations to verify authorization unless we are clear what is being checked in each one.\r\n\r\nWhat do you think?\r\n",
+      "createdAt": "2023-01-24T12:13:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1401839195",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TnBGB",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I believe maybe it can be both defence in depth and a key aspect of authorization. \r\nAn example of how 13.1.4 can be interpreted to code can be found here https://github.com/Omegapoint/defence-in-depth\r\n\r\nWhere authorization at the routing level would be implemented using e g .NET Authorize attributes or Java Spring Security PreAuthorize tags.\r\nNote that the authorization at this point typically is only be based on e g JWT scope claims.\r\nThe important thing is that this layer provides us with a fast way (without consuming system resources or do complex domain logic) to deny requests that do not have access to the operation (route).\r\nhttps://github.com/Omegapoint/defence-in-depth/blob/main/rest-api/9-complete-with-all-defence-layers/Controllers/ProductsController.cs#L22 \r\n\r\nThen, to have an application core or business domain layer that always will enforce proper authorization, the ProductService in this example should not assume that other layers has don authorization like access to the operation. And it must also verify access to the data (horizontal access control). \r\nhttps://github.com/Omegapoint/defence-in-depth/blob/main/rest-api/9-complete-with-all-defence-layers/Domain/Services/ProductService.cs#L31\r\n\r\nIn this way we have a \"defence in depth\" solution, where we always verify access to the operation and access to the data at the resource level, even if our service is consumed from e g a service bus handler (not a API controller where the authz attributes are). And at the same time we will also deny unauthorized API requests early, and make sure it takes two developer mistakes to miss verifying access to the operation.\r\n\r\nWe could also do basic authorization based on token claims in a gateway or sidecar component to make sure that we always do token validation and basic parts of authorization even if developers makes mistakes in the API or service implementation. \r\n\r\nAnd in my opinion 13.1.4 could be interpreted to captures most parts of all this, and help limit the risk of exposing services without proper authorization. That´s why I´m happy to have 13.1.4 in ASVS, but it could of course be expressed in other ways or organized differently. To me the important thing is the _AND_. \r\n\r\nWhen it comes to performance, that might depend on context, but in my experience validating a JWT twice and make authorization decisions based on simple token claims like scopes twice has not been an issue. And the same reasoning applies to input validation, where you might have a WAF providing basic input validation, but your service/domain layer should not assume this and always do proper and deeper validation (according to domain rules a WAF probably should not be aware of.)\r\nBut it is of course important to consider performance and availability aspects as well.\r\n\r\nMy colleagues and I have also written an article about it here  https://securityblog.omegapoint.se/en/secure-apis-by-design\r\n\r\nHope this is good input!",
+      "createdAt": "2023-01-24T21:50:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1402737025",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5To4R8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My interpretation/takeaways here: double-check (routing/WAF + application/API level) gives you:\r\n* better performance as clear incorrect requests are not reaching to the API/application and does not waste resources\r\n* 2nd (extra) layer of defense in case one of the authorization check does not work correctly\r\n\r\nBut. I would say it is not required to have this extra layer, and you have implemented authorization correctly and only in one place.\r\n\r\nWhat do you think about that, @TobiasAhnoff ?",
+      "createdAt": "2023-01-25T07:59:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1403225212",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TurK9",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree, and I think it is important to emphasize that the \"correctly and one place\" should be _in the API/application_, not only in the gateway (WAF).\r\n\r\nMaybe having an extra layer (WAF) could be a separate L2 requirement?\r\n",
+      "createdAt": "2023-01-26T09:30:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1404744381",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qkej5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Re-read it all. My current understanding is, that even the requirement 13.1.4 gives some extra layer, it's hard to require it - if the access control is done correctly, it can be recommended, but not required.\r\n\r\nIn big picture we need to recheck the issue after V4 reorg is sorted out: https://github.com/OWASP/ASVS/issues/1352",
+      "createdAt": "2023-10-31T19:58:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1787947257",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53Klcf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In the same way that 13.4.2 provides a GraphQL specific implementation requirement for authorisation, I think we could structure 13.1.4 so that it provides an API specific implementation requirement for authorization.\r\n\r\nI would suggest something like:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **13.1.4** | [MODIFIED] Verify that APIs enforce authorization controls at both the URI level, (using programmatic or declarative security at the controller or router) but also at the resource level, enforced by model-based permissions within the API's code. | | ✓ | ✓ | 285 |\r\n\r\nOpinions @elarlang @TobiasAhnoff ",
+      "createdAt": "2024-03-15T09:30:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1999263519",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM53KwDn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My take on this is that different frameworks treat URIs differently. In some framework a single URL can actually actually map to dozens of different features based on the payload of that request.\n\nSo to some degree, I think this kind of access control requirement is a little dated. The only needed access controls in my world is at the feature level and then at the data specific level. I also prefer to see user specific things, like a user profile, verify who the current user is from the session as opposed to a parameter and for me those three things cover everything.",
+      "createdAt": "2024-03-15T09:54:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-1999306983",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53WTdX",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am not convinced I would describe it as dated as it is something I am seeing a lot of however I think that given that it is specific to a particular way of designing an API, I do question whether it is a little too specific...\r\n\r\nI think maybe this is another one that I would be happy to see removed, assuming we do mention the different types of authorization such as [horizontal and vertical](https://owasp.org/www-project-web-security-testing-guide/stable/4-Web_Application_Security_Testing/05-Authorization_Testing/02-Testing_for_Bypassing_Authorization_Schema) somewhere else in the standard.",
+      "createdAt": "2024-03-17T06:56:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-2002335575",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM57A2cB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to remove it here as I think it is covered in [4.2.1](https://appsecg.host/4.2) but I have opened #1934 to make sure that it is clear enough.",
+      "createdAt": "2024-04-18T13:03:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-2063820545",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM57QduF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Closed by #1935",
+      "createdAt": "2024-04-21T05:36:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1312#issuecomment-2067913605",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-07-03T07:07:06Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjtAg",
+      "name": "4a) Waiting for another",
+      "description": "This issue is waiting for another issue to be resolved",
+      "color": "7EDA08"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABKu5vbw",
+      "name": "V8 (prev V4)",
+      "description": "Temporary label for grouping authorization related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    }
+  ],
+  "number": 1312,
+  "state": "CLOSED",
+  "title": "Is 13.1.4 a duplicate with Access Control?",
+  "url": "https://github.com/OWASP/ASVS/issues/1312"
+}

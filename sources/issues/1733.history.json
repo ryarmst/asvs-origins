@@ -1,0 +1,224 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1736616821",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "DOM clobbering does require some defense. (from ChatGPT)\n\nDefensive Measures\n1. Isolate and Scope\nThe first line of defense is to isolate and properly scope your variables. Use JavaScript modules or closures to limit the scope of variables, making it harder for attackers to clobber them.\n\n(function() {\n  var username = \"Jim\";\n  // Your code here\n})();\n2. Use const and let\nUsing const and let instead of var can also help because they are block-scoped and not function-scoped, providing a tighter scope.\n\n{\n  const username = \"Jim\";\n}\n3. Object Freezing\nYou can use Object.freeze() to make an object immutable, preventing new properties from being added to it and making existing properties non-configurable.\n\nconst secureObject = Object.freeze({ username: \"Jim\" });\n4. Explicit Property Access\nInstead of directly accessing properties, use methods that explicitly check the type of the accessed property. For example, use document.getElementById() instead of directly accessing document.username when you want to manipulate DOM elements.",
+          "recorded_at": "2025-04-20T03:30:49Z"
+        },
+        {
+          "body": "DOM clobbering does require some defense. (from ChatGPT)\r\n\r\nDefensive Measures\r\n1. Isolate and Scope\r\nThe first line of defense is to isolate and properly scope your variables. Use JavaScript modules or closures to limit the scope of variables, making it harder for attackers to clobber them.\r\n\r\njavascript\r\nCopy code\r\n(function() {\r\n  var username = \"Jim\";\r\n  // Your code here\r\n})();\r\n2. Use const and let\r\nUsing const and let instead of var can also help because they are block-scoped and not function-scoped, providing a tighter scope.\r\n\r\njavascript\r\nCopy code\r\n{\r\n  const username = \"Jim\";\r\n}\r\n3. Object Freezing\r\nYou can use Object.freeze() to make an object immutable, preventing new properties from being added to it and making existing properties non-configurable.\r\n\r\njavascript\r\nCopy code\r\nconst secureObject = Object.freeze({ username: \"Jim\" });\r\n4. Explicit Property Access\r\nInstead of directly accessing properties, use methods that explicitly check the type of the accessed property. For example, use document.getElementById() instead of directly accessing document.username when you want to manipulate DOM elements.",
+          "recorded_at": "2023-09-27T03:28:42Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1737742697",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "> Even when an application is fortified with robust cross-site scripting (XSS) filters and a well-defined Content Security Policy (CSP), it may still remain susceptible to DOM Clobbering attacks.\r\n\r\nI agree with your call on CSP, HTML injection can evade CSP.\r\n\r\nBut HTML injection (the non-Javascript XSS-like content injection \r\npossibility) does not evade good output encoding and HTML sanitization \r\npractices.\r\n\r\n",
+          "recorded_at": "2023-09-28T07:30:53Z"
+        },
+        {
+          "body": "> Even when an application is fortified with robust cross-site \r\nscripting (XSS) filters and a well-defined Content Security Policy \r\n(CSP), it may still remain susceptible to DOM Clobbering attacks.\r\n\r\nI agree with your call on CSP, HTML injection can evade CSP.\r\n\r\nBut HTML injection (the non-Javascript XSS-like content injection \r\npossibility) does not evade good output encoding and HTML sanitization \r\npractices.\r\n\r\n",
+          "recorded_at": "2023-09-28T07:30:45Z"
+        },
+        {
+          "body": " > Even when an application is fortified with robust cross-site \nscripting (XSS) filters and a well-defined Content Security Policy \n(CSP), it may still remain susceptible to DOM Clobbering attacks.\n\nI agree with your call on CSP, HTML injection can evade CSP.\n\nBut HTML injection (the non-Javascript XSS-like content injection \npossibility) does not evade good output encoding and HTML sanitization \npractices.\n\n",
+          "recorded_at": "2023-09-27T16:40:38Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1737770559",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Here comes the place to point out - XSS is BS as a term, it does not say anything ([think about this and pay attention to published date](https://blog.jeremiahgrossman.com/2006/07/origins-of-cross-site-scripting-xss.html)). Let's talk about syntax + problem there - is it injection, is it execution, in HTML or in JavaScript.\r\n\r\nIn this case, out of curiosity, what is the expected defense? What would be the requirement (additionally HTML injection (covered by current 5.3.1)?",
+          "recorded_at": "2023-09-27T19:10:29Z"
+        },
+        {
+          "body": "Here comes the place to point out - XSS is BS as a term, it does not say anything. Let's talk about syntax + problem there - is it injection, is it execution, in HTML or in JavaScript.\r\n\r\nIn this case, out of curiosity, what is the expected defense? What would be the requirement (additionally HTML injection (covered by current 5.3.1)?",
+          "recorded_at": "2023-09-27T17:00:46Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1738769700",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "As I understood, the problem is in JavaScript code, how it calls some objects based on name and id's (anything else?) and the requirement should say, how to write JavaScript code correctly to avoid that.\r\n\r\nIf DOM clobbering mostly or only work on `id` and `name` HTML attributes, then as 2nd layer of defense it is possible to use filtering them out via DOMPurify. The question - is there realistic need to have id and name attributes for elements for content, which gets cleaned up by DOMPurify?",
+          "recorded_at": "2023-09-28T09:14:03Z"
+        },
+        {
+          "body": "As I understood, the problem is in JavaScript code, how it calls some objects based on name and id's (anything else?) and the requirement should say, how to write JavaScript code correctly to avoid that.\r\n\r\nIf DOM clobbering mostly or only work on `id` and `name` attributes, then as 2nd layer of defense it is possible to use filtering them out via DOMPurify. The question - is there realistic need to have id and name attributes for elements for content, which gets cleaned up by DOMPurify?",
+          "recorded_at": "2023-09-28T09:13:35Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1738804411",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "yeah I am pretty sure `id` and `name` HTML attributes are generic and can't just be removed as a normal thing",
+          "recorded_at": "2023-09-28T09:31:10Z"
+        },
+        {
+          "body": "yeah I am pretty sure `id` and `name` HTML attributes are pretty generic.",
+          "recorded_at": "2023-09-28T09:30:58Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740008950",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Also, DomPURIFY does not resolve the `&quot;` as you can see here:\r\n![Screenshot 2023-09-28 at 2 08 33 PM](https://github.com/OWASP/ASVS/assets/531465/113939da-1b0c-45b8-a4a7-278e38e877af)\r\n",
+          "recorded_at": "2023-09-28T21:09:27Z"
+        },
+        {
+          "body": "Also, DomPURIFY does not resolve the &quot; as you can see here:\r\n![Screenshot 2023-09-28 at 2 08 33 PM](https://github.com/OWASP/ASVS/assets/531465/113939da-1b0c-45b8-a4a7-278e38e877af)\r\n",
+          "recorded_at": "2023-09-28T21:09:07Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740437109",
+      "author": "hackvertor",
+      "previous_versions": [
+        {
+          "body": "I think this can be fixed at the filtering level too by prefixing the name and id attributes. For example:\n\nInput: \n```html\n<img id=x name=y>\n```\nOutput:\n```html\n<img id=myApp-x name=myApp-y>\n```\n\nUsing hyphen ensures existing variable names won't be clobbered. By defining a prefix in DOM purify (currently doesn't support this) an application can be secure against most clobbering attacks. You'd probably want to protect against class clobbering too by prefixing CSS class names.",
+          "recorded_at": "2023-09-29T07:33:30Z"
+        },
+        {
+          "body": "I think this can be fixed at the filtering level too by prefixing the name and id attributes. For example:\n\nInput: \n<img id=x name=y>\n\nOutput:\n<img id=myApp-x name=myApp-y>\n\nUsing hyphen ensures existing variable names won't be clobbered. By defining a prefix in DOM purify (currently doesn't support this) an application can be secure against most clobbering attacks. You'd probably want to protect against class clobbering too by prefixing CSS class names.",
+          "recorded_at": "2023-09-29T07:32:27Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1795824521",
+      "author": "ImanSharaf",
+      "previous_versions": [
+        {
+          "body": " > **Verify that the application** mitigates DOM clobbering **in JavaScript** by employing explicit variable declarations, performing strict type checking, **avoiding storing global variables on the document object**, and implementing namespace isolation.\r\n\r\nI believe this is a good one.",
+          "recorded_at": "2023-11-06T18:21:59Z"
+        },
+        {
+          "body": "\r\n > **Verify that the application** mitigates DOM clobbering **in JavaScript** by employing explicit variable declarations, performing strict type checking, **avoiding storing global variables on the document object**, and implementing namespace isolation.\r\n\r\nI believe this works.",
+          "recorded_at": "2023-11-06T18:21:18Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801828240",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": " > Verify that the application **avoids** DOM clobbering **when using client-side JavaScript** by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation.\r\n\r\n@elarlang, better?",
+          "recorded_at": "2023-11-08T12:49:00Z"
+        },
+        {
+          "body": " > Verify that the application **avoids** DOM clobbering **when using client-side JavaScript** by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation.",
+          "recorded_at": "2023-11-08T12:48:50Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801831324",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Yes, good for me.\r\n\r\nOther pieces:\r\n* category: \"client-side\" I guess\r\n* cwe - does not contain \"globbering\", so cwe-79 as abstract match\r\n* level 2",
+          "recorded_at": "2023-11-08T12:55:23Z"
+        },
+        {
+          "body": "Yes, good for me.",
+          "recorded_at": "2023-11-08T12:50:50Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2817413030",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I politely disagree. I think 15.3.6 and 15.3.8 are getting lost in a mass of other unrelated requirements.\n\n- _15.3.6\tVerify that JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals._\t\n- _15.3.8\tVerify that the application avoids DOM clobbering when using client-side JavaScript by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation._\t\n\nI'd like to merge them in with 3.2, currently called \"Unintended Content Interpretation\" and includes only 2 requirements:\n\n\n- _3.2.1 Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields (such as Sec-Fetch-*) indicate it is the correct context, using the sandbox directive of the Content-Security-Policy header field or using the attachment disposition type in the Content-Disposition header field._\n- _3.2.2 Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of content such as HTML or JavaScript._\n\nThese four checks all deal with protecting the browser’s handling of content and its DOM from unintended execution or tampering. In other words, they’re all about ensuring that what gets rendered in the page - and the JavaScript environment around it - can’t be hijacked or polluted by malicious inputs.\n\nI suggest that we move them into 3.2 and rename it to \"Safe Browser Rendering\" or \"Safe Browser Rendering & DOM Integrity Protections\"\n\n",
+          "recorded_at": "2025-04-21T00:28:47Z"
+        },
+        {
+          "body": "I politely disagree. I think 15.3.6 and 15.3.8 are getting lost in a mass of other unrelated requirements.\n\n- _15.3.6\tVerify that JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals._\t\n- _15.3.8\tVerify that the application avoids DOM clobbering when using client-side JavaScript by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation._\t\n\nI'd like to merge them in with 3.2, currently called \"Unintended Content Interpretation\" and includes only 2 requirements:\n\n\n- _3.2.1 Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields (such as Sec-Fetch-*) indicate it is the correct context, using the sandbox directive of the Content-Security-Policy header field or using the attachment disposition type in the Content-Disposition header field.\n- 3.2.2 Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of content such as HTML or JavaScript._\n\nThese four checks all deal with protecting the browser’s handling of content and its DOM from unintended execution or tampering. In other words, they’re all about ensuring that what gets rendered in the page - and the JavaScript environment around it - can’t be hijacked or polluted by malicious inputs.\n\nI suggest that we move them into 3.2 and rename it to \"Safe Browser Rendering\" or \"Safe Browser Rendering & DOM Integrity Protections\"\n\n",
+          "recorded_at": "2025-04-21T00:28:26Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2818051501",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "> merge topic\n\nI am pretty sure Jim means merging the requirements into that section, not merging the requirements into themselves\n\n> Problem to create: it is separate from other similar requirements, and then we create 2 places from which you need to look at them.\n\nI would have thought developers need to look in both places anyway, no? I don't see a scenario where this means they need to look at 2 sections instead of 1.",
+          "recorded_at": "2025-04-21T09:41:17Z"
+        },
+        {
+          "body": "> merge topic\n\nI am pretty sure Jim's means merging the requirements into that section, not merging the requirements into themselves\n\n> Problem to create: it is separate from other similar requirements, and then we create 2 places from which you need to look at them.\n\nI would have thought developers need to look in both places anyway, no? I don't see a scenario where this means they need to look at 2 sections instead of 1.",
+          "recorded_at": "2025-04-21T09:41:08Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2822067660",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Ok, misinterpreted the merge proposal.\n\nAs I said, I don't care too much where the requirement 15.3.8 is located, it fits to both places. It can be moved to V3.2 if there is desire and agreement to do so.\n\nBut I can not see the fit for 15.3.6 to be in that section.\n\n> I suggest that we move them into 3.2 and rename it to \"Safe Browser Rendering\" or \"Safe Browser Rendering & DOM Integrity Protections\"\n\nI'm quite confused from the section title proposal. If we move only 15.3.8, then I prefer we keep the title as it is.\n\n",
+          "recorded_at": "2025-04-23T10:24:26Z"
+        },
+        {
+          "body": "Ok, misinterpreted the merge proposal.\n\nAs I said, I don't care too much where the requirement 15.3.8 is located, it fits to both places. It can be moved to V3.2 if there is desire and agreement to do so.\n\nBut I can not see the fit for 15.3.6 to be in that section.\n\n> I suggest that we move them into 3.2 and rename it to \"Safe Browser Rendering\" or \"Safe Browser Rendering & DOM Integrity Protections\"\n\nI'm quite confused from the proposed section title proposal. If we move only 15.3.8, then I prefer we keep the title as it is.\n\n",
+          "recorded_at": "2025-04-22T17:54:54Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2822104153",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "My preference it to move 15.3.6 and 15.3.6 into 3.2.\n\n_15.3.6 Verify that JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals.\n3.2.2 Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or te_xtContent) to prevent unintended execution of content such as HTML or JavaScript.\n\nThese two are very related. They both address _unintended interpretation or execution of content_. Here is a breakdown of the details.\n\n| Aspect           | `15.3.6` – Prototype Pollution                            | `3.2.2` – Safe Text Rendering                                        |\n|------------------|-----------------------------------------------------------|----------------------------------------------------------------------|\n| **Theme**         | Structural tampering                                      | Visual/content injection                                             |\n| **Goal**          | Prevent unintended side-effects via JS inheritance        | Prevent unintended rendering or execution                           |\n| **Root Cause**    | Unsafe use of objects for dynamic properties              | Unsafe rendering methods                                             |\n| **Risk**          | Silent logic manipulation                                 | Visible/exploitable XSS                                              |\n| **Layer**         | JavaScript runtime logic, object structure                | Browser DOM rendering and HTML parsing                              |\n| **Outcome**       | Application behavior is altered globally via prototype    | Malicious content is executed rather than displayed                 |\n| **Common Thread** | Untrusted input being interpreted in ways it shouldn’t    | Untrusted input being interpreted in ways it shouldn’t              |\n\nBoth of these relate to unintended interpretation and attack-triggered behavior outside of intended scopes - I think it helps organize ASVS better.",
+          "recorded_at": "2025-04-22T18:12:59Z"
+        },
+        {
+          "body": "My preference it to move 15.3.6 and 15.3.6 into 3.2.\n\n_15.3.6 Verify that JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals.\n3.2.2 Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or te_xtContent) to prevent unintended execution of content such as HTML or JavaScript.\n\nThese two are very related. They both address _unintended interpretation or execution of content_. Here is a breakdown of the details.\n\n| Aspect           | `15.3.6` – Prototype Pollution                            | `3.2.2` – Safe Text Rendering                                        |\n|------------------|-----------------------------------------------------------|----------------------------------------------------------------------|\n| **Theme**         | Structural tampering                                      | Visual/content injection                                             |\n| **Goal**          | Prevent unintended side-effects via JS inheritance        | Prevent unintended rendering or execution                           |\n| **Root Cause**    | Unsafe use of objects for dynamic properties              | Unsafe rendering methods                                             |\n| **Risk**          | Silent logic manipulation                                 | Visible/exploitable XSS                                              |\n| **Layer**         | JavaScript runtime logic, object structure                | Browser DOM rendering and HTML parsing                              |\n| **Outcome**       | Application behavior is altered globally via prototype    | Malicious content is executed rather than displayed                 |\n| **Common Thread** | Untrusted input being interpreted in ways it shouldn’t    | Untrusted input being interpreted in ways it shouldn’t              |\n",
+          "recorded_at": "2025-04-22T18:11:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2825866250",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I did some research and I do see that server side prototype pollution is a big thing. I'm ok with this.\n\nBut small note before we close this out, many of these requirements in v3 are both server and client side.\n\n* V3.1.1 – Web Frontend Security Documentation\nWhy both? The server must emit correct headers and behavior, but the browser (client) must support and enforce them. Documentation also spans both perspectives.\n\n* V3.2.1 – Prevent Content in Wrong Context\nWhy both? Server must detect misuse (e.g., bad Sec-Fetch-* headers) and respond defensively, but browser behavior (rendering) is the ultimate execution surface.\n\n* V3.3.x – Cookie Setup\nWhy both? The server sets cookie attributes (Secure, HttpOnly, SameSite, etc.), but the browser enforces them.  This is always server side code that addresses this control.\n\n* V3.4.x – Browser Security Mechanism Headers\nWhy both? Headers like:\nContent-Security-Policy\nReferrer-Policy\nStrict-Transport-Security\nX-Content-Type-Options ...are emitted by the server but enforced by the browser.\n\n* 3.7.2 - Redirect\nThis is often enforced both server and client side\n\n",
+          "recorded_at": "2025-04-24T15:22:25Z"
+        },
+        {
+          "body": "I did some research and I do see that server side prototype pollution is a big thing. I'm ok with this.\n\nBut small note before we close this out, many of these requirements in v3 are both server and client side.\n\n* V3.1.1 – Web Frontend Security Documentation\nWhy both? The server must emit correct headers and behavior, but the browser (client) must support and enforce them. Documentation also spans both perspectives.\n\n* V3.2.1 – Prevent Content in Wrong Context\nWhy both? Server must detect misuse (e.g., bad Sec-Fetch-* headers) and respond defensively, but browser behavior (rendering) is the ultimate execution surface.\n\n* V3.3.x – Cookie Setup\nWhy both? The server sets cookie attributes (Secure, HttpOnly, SameSite, etc.), but the browser enforces them.  This is always server side code that addresses this control.\n\n* V3.4.x – Browser Security Mechanism Headers\nWhy both? Headers like:\nContent-Security-Policy\nReferrer-Policy\nStrict-Transport-Security\nX-Content-Type-Options ...are emitted by the server but enforced by the browser.\n\n* 3.7.2 - Redirect\nThis is often enforced both server and client side\n\nAny more.",
+          "recorded_at": "2025-04-24T00:46:10Z"
+        },
+        {
+          "body": "I did some research and I do see that server side prototype pollution is a big thing. I'm ok with this.\n\nBut small note before we close this out, many of these requirements in v3 are both server and client side.\n\n* V3.1.1 – Web Frontend Security Documentation\nWhy both? The server must emit correct headers and behavior, but the browser (client) must support and enforce them. Documentation also spans both perspectives.\n\n* V3.2.1 – Prevent Content in Wrong Context\nWhy both? Server must detect misuse (e.g., bad Sec-Fetch-* headers) and respond defensively, but browser behavior (rendering) is the ultimate execution surface.\n\n* V3.3.x – Cookie Setup\nWhy both? The server sets cookie attributes (Secure, HttpOnly, SameSite, etc.), but the browser enforces them.  This is always server side code that addresses this control.\n\n* V3.4.x – Browser Security Mechanism Headers\nWhy both? Headers like:\nContent-Security-Policy\nReferrer-Policy\nStrict-Transport-Security\nX-Content-Type-Options ...are emitted by the server but enforced by the browser.\n\n* 3.7.2** - Redirect\nThis is often enforced both server and client side\n\nAny more.",
+          "recorded_at": "2025-04-24T00:46:01Z"
+        }
+      ]
+    }
+  ]
+}

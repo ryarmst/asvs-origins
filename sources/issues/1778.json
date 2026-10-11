@@ -1,0 +1,752 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "update: to skip long discussion, jump here: https://github.com/OWASP/ASVS/issues/1778#issuecomment-2466683457\r\n\r\n---\r\n\r\nVia https://github.com/OWASP/ASVS/pull/1777 we have proposed new category with 2 requirements:\r\n\r\n`## V12.7 Application Resources`\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.7.1** | [ADDED] Verify that the application is designed in a way that a failure to access external resources does not result in the entire application failing, for example using the circuit breaker pattern. | | ✓ | ✓ | |\r\n| **12.7.2** | [ADDED] Verify that the application proactively releases system resources, such as database connections, open files, threads, etc, when it finishes using them to prevent resource exhaustion. | | ✓ | ✓ | 404 |\r\n\r\nFor 12.7.1 there is issue #1748 and for 12.7.2 there is issue #1620.\r\n\r\nAt the moment it seems we need one more requirement which addresses timeout for connections:\r\n\r\n* 12.7.1 is for (fail safe) \"when you can not connect at all\"\r\n* 12.7.2 is for \"when everything worked well, but you did not release the resources\"\r\n\r\nThe point for proposed requirement - \"when you are able to connect, but you can not get answer with expected time\". Personally I think the likelihood for this scenario is much higher than for the proposed 12.7.1 and 12.7.2.\r\n\r\nFrom denial of service point of view - it matters when it is not done for synchronous flow, such as calling some external connection / resource when building response for HTTP request.\r\n\r\nIt can be problematic for cron-jobs as well, but there it does not increase the likelihood for DoS that much.\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5rZfzx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this should be added to 12.7.1:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.7.1** | [ADDED] Verify that the application is designed in a way that a failure to access external resources **or a delay in response** does not result in the entire application failing, for example using the circuit breaker pattern. | | ✓ | ✓ | |",
+      "createdAt": "2023-11-08T12:59:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1801846001",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rZlMq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "12.7.1 - the focus is - when connection fails, then application should still give at least some answer - so the situation must be handled via error handling\r\n\r\nthe focus for proposed one is connectionpool lockup - every connection must have (relatively short) timeout, maybe also connection pool+queue and when it's full - it already gives response that service is not available, not putting another request to the queue and cause denial of service\r\n\r\nIdea is to address things like:\r\n* [CWE-410](https://cwe.mitre.org/data/definitions/410.html): Insufficient Resource Pool\r\n* [CWE-1088](https://cwe.mitre.org/data/definitions/1088.html): Synchronous Access of Remote Resource without Timeout\r\n\r\nHere also extra logging requirement that all connection fails and timeouts must be logged.",
+      "createdAt": "2023-11-08T13:13:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1801868074",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rfq59",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 12.7.1 - the focus is - when connection fails, then application should still give at least some answer - so the situation must be handled via error handling\r\n\r\nI don't agree. The focus on making sure the application still operates correctly that could be providing a sensible error message but also carrying on other operations as well.\r\n\r\nPlease can you suggest a requirement text, I am still not seeing the difference you are proposing.",
+      "createdAt": "2023-11-09T09:28:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1803464317",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rsndu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe there are even 2 requirements.\r\n\r\nConnection pool:\r\n* Problem to solve: if by default the connection pool to resource is really small, it will be bottle-neck for peak demand, all the connection pool is locked and the application can not provide availability (denial of service attack).\r\n* Requirement: Verify that the application has reasonable connection pool for every internal and external connection to handle peak demand.\r\n* CWE: CWE-410\r\n\r\nTimeout:\r\n* Problem to solve: if there is problem on the external resource side or there is connection issue or there is really slow query (impact by attacker activity, mistake in program code, heavy demand, performance issues) then there is no connection pool lockout.\r\n* Requirement: Verify that the application has set reasonable timeout for every synchronous call to external service (to avoid connection pool lockout when there is connection or performane problem)\r\n* CWE: CWE-1088\r\n",
+      "createdAt": "2023-11-11T16:26:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1806858094",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5r62Q8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "### Time out / CWE-1088\r\n\r\nWe currently have:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.7.1** | [ADDED] Verify that the application is designed in a way that a failure to access external resources does not result in the entire application failing, for example using the circuit breaker pattern. | | ✓ | ✓ | |\r\n\r\nThe whole point of circuit breaker pattern is to prevent this sort of lockout/lockup when relying on external resources. I think maybe we should just add CWE 1088 to this requirement. Your text seems like an example of the situation covered by this requirement.\r\n\r\n### Connection pool / CWE-410\r\n\r\nWe currently have:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.7.2** | [ADDED] Verify that the application proactively releases system resources, such as database connections, open files, threads, etc, when it finishes using them to prevent resource exhaustion. | | ✓ | ✓ | 404 |\r\n\r\nI think your connection pool is similar case to this. but maybe we can add it more explicitly like this:\r\n\r\n> Verify that the application proactively releases system resources, such as database connections, open files, threads, etc, when it finishes using them **or alternatively uses an appropriately sized resource pool to ensure resource reuse and** to prevent resource exhaustion. \r\n\r\nWhat do you think @elarlang ?",
+      "createdAt": "2023-11-14T16:16:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1810588732",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5r7TRZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you have circuit braking handled (application does not die from program code logic perspective / the error is handled) - it does not eliminate the need to have timeouts set (and vice versa). Those are separate problems.\r\n\r\nWith second example for me it also combined two different problems to one requirement.\r\n\r\nIn a bit bigger picture - we created new separate section for those requirements, modern applications use external services a lot and those things getting more and more important. Shorter, one problem per requirement, requirements are better in my opinion.",
+      "createdAt": "2023-11-14T17:05:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1810707545",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5r8k2b",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I personally this this is not necessary and see it more as a functionality vs security problem. Suggest we drop it.",
+      "createdAt": "2023-11-14T19:19:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1811041691",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5r8udE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I personally this this is not necessary and see it more as a functionality vs security problem. Suggest we drop it.\r\n\r\nIf we talk about timeouts here - I have proved in pen-test cases it is clearly security issue. If there is some time consuming call to external service, you find the really slow response response build, hammer it, take all resources in use because they don't have reasonable timeout and it's service down. Clear availability issue.",
+      "createdAt": "2023-11-14T19:42:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1811081028",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5r82g8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "App level DoS is serious thing. Especially, when there is high SLA and availability requirement and/or it provides service to another applications. For me this vector is underestimated in general and also maybe under-covered in ASVS.\r\n\r\nEveryone talk about DDoS like just sending huge amount of packets towards application. This is just stupid way to do it. Mostly it's doable with pushing some resource demanding and/or time-consuming service and you can take the service busy. From big picture network level you can not even notice it.",
+      "createdAt": "2023-11-14T19:49:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1811114044",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5r9GBb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I try to conclude the situation here:\r\n* 12.7.1 - circuit braking - application must still give reasonable response, if there is issue with connection (it suits also to category 7.4)\r\n* 12.7.2 - release resources after finishing using them\r\n* +1 - have timeouts set for avoiding app level dos or collection dying connection to resource pool lockout\r\n* +1 - have reasonable connection pool set that you can not occupy all connection with dos or it just won't happen with peak visiting\r\n\r\nThose are all separate problems. If you just fix 3 of them, the 4th one is still an issue (for me personally 12.7.2 is the less problematic here, but it's separate topic)",
+      "createdAt": "2023-11-14T20:16:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1811177563",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sJKVJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think I could get on board with the connection pool requirement. \r\n\r\nMaybe:\r\n\r\n\r\n> Verify that the application uses appropriately sized resource pools or can dynamically resize them to ensure that a volumetric Denial of Service or peak-time load will not lead to the application becoming unavailable.\r\n\r\nOn the other hand, I think the circuit breaker pattern comes to specifically address the timeout problem to the extent that after a while it stops trying altogether\r\n\r\nWe could modify to:\r\n\r\n> Verify that the application is designed in a way that a failure to access external resources **within pre-defined timeouts** does not result in the entire application failing, for example using the circuit breaker pattern.",
+      "createdAt": "2023-11-16T12:23:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1814340937",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sLCsi",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application uses appropriately sized resource pools or can dynamically resize them to ensure that a volumetric Denial of Service or peak-time load will not lead to the application becoming unavailable.\r\n\r\nFor dynamic size there should be also max-limit. If you have \"auto-scale\" cloud environment and attacker takes resource pool in use, then this constant auto-scale you have later written to the bill as well.\r\n\r\nLike I wrote before, then circuit braking must only handle the fact that application can give response, if there is whatever connection issue.",
+      "createdAt": "2023-11-16T16:47:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1814833954",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5swLkl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Like I wrote before, then circuit braking must only handle the fact that application can give response, if there is whatever connection issue.\r\n\r\nFollowing discussion with Elar, the current \"circuit breaker\" requirement is: \r\n\r\n> Verify that the application is designed in a way that a failure to access external resources within pre-defined timeouts does not result in the entire application failing, for example using the circuit breaker pattern.\r\n\r\nThis is a slightly reactive mechanism that is basically telling the application to fail gracefully without completely becoming unavailable.\r\n\r\nElar's point is that there should be proactive use of timeouts to ensure that a large/complicated query will not run for longer than the timeout and afterwards the resource will be freed.\r\n\r\nA caveat is that even if timeouts are implemented in the application, the database may still be processing the query and therefore tied up executing it.\r\n",
+      "createdAt": "2023-11-23T14:55:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1824569637",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5uxjAL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just for linking update - 12.7.2 in the issue definition is now 12.7.1, and previous 12.7.1 is now 7.4.4 (see https://github.com/OWASP/ASVS/pull/1806/commits/e5c4a4b7d7500fbad7e982679d2915b4bea1f348).\r\n\r\nAt the moment it stands like this:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.4.4** | [ADDED] Verify that the application is designed in a way that a failure to access external resources does not result in the entire application failing, for example using the circuit breaker pattern. | | ✓ | ✓ | |\r\n| **12.7.1** | [ADDED] Verify that the application proactively releases system resources, such as database connections, open files, threads, etc, when it finishes using them to prevent resource exhaustion. | | ✓ | ✓ | 404 |",
+      "createdAt": "2023-12-15T21:01:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1858482187",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vheX3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So did you still want to add another requirement here?",
+      "createdAt": "2023-12-28T10:43:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1871046135",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xtiJS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang is this on your todo list?\r\n",
+      "createdAt": "2024-01-24T09:41:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1907761746",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xtlD4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang is this on your todo list?\r\n\r\nyes. I keep labels (at least those that are related to me) up-to-date, so if labels are saying so, it is so.",
+      "createdAt": "2024-01-24T09:48:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-1907773688",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Gc7bc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like the idea of moving 7.4.4 to 12.7.2\r\n\r\nSo far we have\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n12.7.1 | [ADDED] Verify that the application proactively releases system resources, such as database connections, open files, threads, etc, when it finishes using them to prevent resource exhaustion. |   | ✓ | ✓ | 404\r\n\r\nThen moving 7.4.4 we have\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n12.7.1 | [ADDED] Verify that the application proactively releases system resources, such as database connections, open files, threads, etc, when it finishes using them to prevent resource exhaustion. |   | ✓ | ✓ | 404\r\n12.7.2 | [MOVED from 7.4.4] Verify that the application is designed in a way that a failure to access external resources does not result in the entire application failing, for example using the circuit breaker pattern. |   | ✓ | ✓\r\n\r\n\r\n\r\n\r\n",
+      "createdAt": "2024-07-29T11:53:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2255730396",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K2BsN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think 12.7.1 is more of an API issue and does not belong in 12.x. I suggest this is moved to 13.x. Timeouts are rarely a problem with file upload services or file download and I think it confuses the intent of this section.",
+      "createdAt": "2024-09-04T15:46:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2329418509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K3qYD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Comment for last Jim's comments:\r\n* note that 7.4.4 was moved away from this 12.* section and is not proposed as an idea to move it back (it is about error situation handling in the program code)\r\n* V12 title is \"File and Resources\" and V12.7 title is \"Application Resources\". If there is proposal to move 12.7 to somewhere else, it is a separate issue to discuss.\r\n\r\nI need to work through my previous ideas to provide proposals.",
+      "createdAt": "2024-09-04T19:47:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2329847299",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K8EF_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like the idea of dropping 12.7.1 and all of section 12.7 from v12. Let's do it! v12 is close to being \"done\" at some level.",
+      "createdAt": "2024-09-05T09:08:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2331001215",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LSF32",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "hi @elarlang, can you confirm what the currently proposed action here is?",
+      "createdAt": "2024-09-08T18:11:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2336775670",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ScMdI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Waiting for feedback from @elarlang ",
+      "createdAt": "2024-11-05T10:59:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2456864584",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SwFW4",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'd be open to moving/modifying the current 12.7.1 into the proposed text of #2281. The circuit breaker pattern is a fantastic retry strategy, and coupled with the backoff + jitter proposed in #2281, it can help protect against DoSing external applications.",
+      "createdAt": "2024-11-07T12:10:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2462078392",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TBppB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Awakening the monster here...\r\n\r\nI reworked comments from the issue and made a summary with some new point of views, we can say that this comment is a new starting point without the need to go through the previous comments here.\r\n\r\nFirst:\r\n\r\n  * \"circuit breaker\" fail-safe  is covered by 7.4.4\r\n  * release resources after (successful) usage is covered by 12.7.1\r\n  \r\nWe also have requirement for anti-automation that is closely related and maybe also covering some problems:\r\n> V11.2.2 Verify that anti-automation controls are in place to protect against excessive calls to application functions that could lead to data exfiltration, garbage data creation, quota exhaustion, rate limit breaches, denial of service, or overuse of costly resources.\r\n\r\nThe issue is, that connection-pool and resource-demanding or slow-responses you often run under the general \"anti-automation\" radar. Most likely we need to improve V11.2.2, avoid duplicates, check overlaps etc.\r\n\r\nProblems to solve/cover:\r\n\r\n  * Problem 1: The connection pool is too small\r\n      * Example: gets filled when attacker hammering some resource-heavy functionality\r\n      * Example: gets filled by peak-demand\r\n      * area/solution: general availability and performance testing area; configuration, and auto-scale question - auto-scale must be with limit, otherwise the bill also auto-scales. May require documented decision per connection/service used\r\n  * Problem 2: connection failure time-out is too long\r\n      * Example: service (to connect) is not available and the application waits for too long\r\n          * classical solution - waiting for timeout 1 minute, although it is clear, that if the connection is not successful in a few seconds, it is failed anyway\r\n          * attacker can fill connection pool fast\r\n          * for heavily used functionality connection pool gets filled without an attacker\r\n      * area/solution: for just connectivity, it fails fast. May require documented decision per connection/service used\r\n  * Problem 3: slow-response time-out is too long\r\n      * complicated area, as sometimes services are resource and time-demanding to produce a response\r\n      * Example: response from (an external) service takes too long but without reaching the timeout\r\n          * an attacker can hit the endpoint and keep the server busy and the connection pool full\r\n          * may not be only a connection pool problem, as resource-demanding responses may occupy other available resources, such as memory\r\n      * Example: response from (an external) service takes too long and front-end connection gets timeout - but backend still processing the request, although there is no one waiting for the response anymore\r\n          * classical example - slow database query, front-end gets timeout but database engine still processes the query, but no one waits for the answer\r\n          * easy-dos scenario for an attacker\r\n          * may happen under heavy usage\r\n      * area/solution:\r\n          * The fail-strategy must be analyzed per service used (can be different for different services using the same connection)\r\n          * general definition for slow-queries AND if building some response is resource demanding, it must happen asynchronously with parallel-process count limit\r\n          * Definition for slow-query per functionality/service call - to have alerting and monitoring capability. From \"a security event\" point of view is covered by V1.7+V7 requirements, but the problem or need can be highlighted in a documentation requirement.",
+      "createdAt": "2024-11-10T10:48:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2466683457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UHJzS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have read through all of this again and whilst I get what you are saying and I understand the risk, I think it is incredibly challenging to come up with very clear guidance on this because mitigation is going to be so specific to the system design.\r\n\r\nI think the only realistic option is a security decision/documentation requirement for V12 such as the following although I don't know if we can consider it practical:\r\n\r\n> Verify that application documentation defines functionality that could be susceptible to application level Denial of Service and how this risk will be mitigated. The mitigation is likely to be different in each situation and depend on the characteristics of the relevant service. Possible risks could include exhausting a connection pool, the use of failure timeout periods to tie up system resources, or exploiting inconsistent timeout periods where even if a front-end component times out, the back end component is still processing the request.\r\n\r\nOther than that, I don't see a way of addressing this in a requirement.\r\n\r\nWDYT @elarlang ?",
+      "createdAt": "2024-11-19T07:37:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2484903122",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UHc6X",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> WDYT @elarlang ?\r\n\r\nQuick answer is that I don't think it is good enough to solve the addressed problems.\r\n\r\nI consider listed problems way more meaningful with higher impact than current 12.7.1. It requires more work.",
+      "createdAt": "2024-11-19T08:08:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2484981399",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UH_CZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So unfortunately I am out of ideas here. I will assign back to you but mark as a non-blocker.",
+      "createdAt": "2024-11-19T09:14:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2485121177",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XUlq_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm sure those problems must be addressed, so I changed the label to \"prep\".",
+      "createdAt": "2024-12-12T12:21:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2538756799",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d37Vo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Attempt 2147483647 to get those requirements done.\n\nI start with proposing ideas and directions for documentation requirements.\n\n\"Problem 1\" - connection pool size\n* per connection\n* how the application handles it, when it is full\n\n> Verify that for each connection that the application uses, is documented connection pool max size and behavior what happens, if the connection pool is full.\n\n---\n\n\"Problem 2\" - connection time-out\n* per connection\n* fail fast\n* define retry strategy\n\n> Verify that for each connection that the application uses, there is a documented connection failure strategy - how fast the connection attempts timeouts and is there any retry strategy. To avoid connection pool lockouts, it is important for synchronous HTTP request-response scenarios that external connections fail fast without any retry.\n\n\n---\n\n\"Problem 3\" - slow-response, resource demanding and time-consuming functionality\n* per functionality\n  * define \"slow\" - from how long time asynchronous must be used\n    * risk that backend processing takes longer than frontend timeout is and there is no-one listening for the result anymore\n  * call behind CSRF\n  * asynchronous\n  * how many parallel processes is allowed per user or globally\n\n> Verify that time-consuming and resource-demanding functionalities are detected and documented with solutions how to prevent availability loss from misusing them and avoid situations when building a response takes longer than consumer timeout is. Defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application.",
+      "createdAt": "2025-02-10T17:01:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2648683880",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4J32",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest only two requirements on database connectivity resiliency here.\n\nI politely do not thing we need requirements on connection pool size and connection time-out. Maybe just one on resiliency. There are ways to handle database scale without connection pool configuration like using \"database in the cloud\" services.\n\nAnd then maybe a second requirement on slow-respons due to resource demanding and time-consuming functionality.\n\nI do not have a big charge here, I am happy for this to go any way you like folks. Just adding my 2 cents.",
+      "createdAt": "2025-02-10T17:25:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2648743414",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4PhF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The \"connection pool\" can be here too limiting and incorrect term then. If you use \"database in the cloud\" you also have some pool limit, it just auto-scales. In the same way your bill auto-scales for that and anyway, you need to have some limit there.\n\nFor sure we need to have something to point out time-out. This is the easy-way-to-dos corner-stone. If the application connects external service, and waits for connection timeout for one minute (often the default value), it is quite quickly killed by itself as running out of the connection pool.\n\nSo with that documentation requirement, I want to raise those problems. Most likely we can have a simple implementation requirement that \"checks that everything is according to documentation\".",
+      "createdAt": "2025-02-10T17:33:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2648766533",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4UwB",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yea I think a term other than connection pool is a good idea. \n\nI would rather see them merged into one as I stated above, but I don't have a big charge over this and gladly support the direction you want to go in.",
+      "createdAt": "2025-02-10T17:42:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2648787969",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eILH1",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What do you think about this:\n\nProblem 1:\n\n\"_Verify that where the application connects to separate services, the application's documentation indicates the maximum connections possible to the service and how the application responds when this maximum is reached, to avoid a denial of service condition_.\"\n\nProblem 2:\n\n\"_Verify that where the application connects to separate services, each has a documented connection failure strategy which includes how fast the connection times-out and whether there is a retry strategy. External connections in  synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections._\"\n\nProblem 3:\n\n\"_Verify that the application documentation identifies functionality which is time-consuming or resource-demanding. This should include how to prevent a loss of availability due to misusing this functionality and how to avoid a situation where building a response takes longer than the consumer's timeout. Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application._\"",
+      "createdAt": "2025-02-12T08:09:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2652942837",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIP87",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Problem 1 - \"maximum connections\" - some may interpret it as a counter instead of \"maximum parallel connections at the same time\". Maybe \"maximum parallel connections (connection pool)\"?\n\nProblem 3 - I used myself \"misusing this functionality\", now reading this I think it is a bit too vague. It should send the message \"calling it out too much\", or \"mass-using\". It may sound like rate-limiting, but the problem for such functionality is, that it takes so much resources that even a request after 2 sec is enough to cause a dos.",
+      "createdAt": "2025-02-12T08:20:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2652962619",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIUE9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Problem 1:\n\n\"_Verify that where the application connects to separate services, the application's documentation indicates the **maximum possible parallel connections (connection pool) to the service** and how the application responds when this maximum is reached, to avoid a denial of service condition_.\"\n\nProblem 2:\n\n\"_Verify that where the application connects to separate services, each has a documented connection failure strategy which includes how fast the connection times-out and whether there is a retry strategy. External connections in  synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections._\"\n\nProblem 3:\n\n\"_Verify that the application documentation identifies functionality which is time-consuming or resource-demanding. This should include how to prevent a loss of availability due to **overusing** this functionality and how to avoid a situation where building a response takes longer than the consumer's timeout. Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application._\"",
+      "createdAt": "2025-02-12T08:28:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2652979517",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eVEXo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Status: I'm preparing proposals for implementation requirements and then they all go in with one PR.\n\nNote for myself - to review requirement 12.7.1 together with new proposed ones.",
+      "createdAt": "2025-02-13T11:34:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2656323048",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ioJMu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I try to get this one moving again and propose at least something.\n\n\"Problem 1\" requirement\n> Verify that where the application connects to separate services, the application's documentation indicates the maximum possible parallel connections (connection pool) to the service and how the application responds when this maximum is reached, to avoid a denial of service condition.\n\nShould we have \"indicates the maximum possible parallel connections (connection pool) to **each** service\"? (the > each) (Or to use similar build-up to \"Problem 2\" requirement.\n\n---\n\nProposal for implementation requirement to cover \"Problem 1\" and \"Problem 2\"\n> Verify that where the application connects to separate services, it follows the documented configuration decisions and strategy for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and retry strategies.\n\n---\n\nProposal for implementation requirement for \"Problem 3\"\n> Verify that the application has implemented defence against availability loss through functionality which is time-consuming or resource-demanding according to documented security decisions and strategies.\n\nAt the moment the documentation requirement contains \"Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application.\" and the question is, should this phrase stay there or should we move it into implementation requirement.\n\n---\n\nLevels:\n* Problem 1 and Problem 2 - at the moment it feels like it is a L3 area. What to keep in mind, entire world moving to microservices and the topic comes more important every day\n* Problem 3 - based on criteria \"if you have only this vulnerability in your application you have a security hole\" it matches to L1 as low-hanging-fruit-for-dos, but L2 feels more correct\n\nping @tghosth (also please review the need for requirement 12.7.1)",
+      "createdAt": "2025-03-17T07:23:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2728432430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iu3ig",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "---\n\n> Should we have \"indicates the maximum possible parallel connections (connection pool) to each service\"? (the > each)\n\nYes\n\n---\n\n\n> Proposal for implementation requirement to cover \"Problem 1\" and \"Problem 2\"\n\nI would suggest:\n\n\"_Verify that where the application connects to separate services, it follows the documented configuration ~~decisions and strategy~~ for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and retry strategies._\"\n\n---\n\n> Proposal for implementation requirement for \"Problem 3\"\n\nI would suggest:\n\n\"_Verify that the application has implemented defences against **loss of** availability ~~loss through~~ **due to** functionality which is time-consuming or resource-demanding, ~~according to~~ **based on the** documented ~~security decisions and~~ strategies **for this**._\"\n\n---\n\n> At the moment the documentation requirement contains \"Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application.\" and the question is, should this phrase stay there or should we move it into implementation requirement.\n\nI don't think it is needed in both places.\n\n---\n\n> Problem 1 and Problem 2 - at the moment it feels like it is a L3 area. What to keep in mind, entire world moving to microservices and the topic comes more important every day\n\nI take your point about microservices but I think this is still L3 as it is DoS only and complex to address.\n\n---\n\n> Problem 3 - based on criteria \"if you have only this vulnerability in your application you have a security hole\" it matches to L1 as low-hanging-fruit-for-dos, but L2 feels more correct\n\nI agree with L2, it is not quite simple enough to be L1.\n\n---\n\n> also please review the need for requirement 12.7.1\n\nFrom a quick review, it seems like 12.7.1 is very similar to problem 2 above\n\n---\n",
+      "createdAt": "2025-03-17T16:42:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2730195104",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ivpYw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Buh, this issue is started so long time ago, that we had a bit different structure back then. Initially the requirements were discussed as those should belong to \"V12.7 Application Resources\", but I'm not sure it is the best fit.\n\nProblem 1 and problem 2 seems to fit better to the created section \"V14.7 Back-end Communication Configuration\"\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **1.14.?** | Verify that where the application connects to separate services, the application's documentation indicates the maximum possible parallel connections (connection pool) to each service and how the application responds when this maximum is reached, to avoid a denial of service condition. | 3 |\n| **1.14.?** | Verify that where the application connects to separate services, each has a documented connection failure strategy which includes how fast the connection times-out and whether there is a retry strategy. External connections in synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections. | 3 |\n\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **14.7.?** | Verify that where the application connects to separate services, it follows the documented configuration for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and retry strategies. | 3 |\n\n---\n\nBut the \"Problem 3\" is not a configuration problem as such.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **?.?.?** | Verify that the application documentation identifies functionality which is time-consuming or resource-demanding. This should include how to prevent a loss of availability due to overusing this functionality and how to avoid a situation where building a response takes longer than the consumer's timeout. Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application. | 2 |\n\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **?.?.?** | Verify that the application has implemented defences against loss of availability loss due to functionality which is time-consuming or resource-demanding, based on the documented security decisions and strategies for this. | 2 |\n\nIn a way it belongs to anti-automation, probably makes sense to remove tiny overlap from current 11.2.1:\n\n* V11.2.2 [MODIFIED, MOVED FROM 11.1.4, LEVEL L1 > L2] Verify that anti-automation controls are in place to protect against excessive calls to application functions that could lead to data exfiltration, garbage data creation, quota exhaustion, rate limit breaches, **denial of service, or overuse of costly resources**.\n\n",
+      "createdAt": "2025-03-17T17:54:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2730399280",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1dR4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Does problem 3 not belong with V12.7 Application Resources? \n\nDo we think we need 12.7.1 in addition to these new requirements?",
+      "createdAt": "2025-03-18T07:16:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2731922552",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1pwA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Does problem 3 not belong with V12.7 Application Resources?\n\nBy title, yes, but... I don't think V12.7 match with the rest of the content in V12 - so I would like to move it away from there anyway.\n\n> Do we think we need 12.7.1 in addition to these new requirements?\n\nI have questioned the need for the requirement all the time. If there are some aspects to cover, maybe to add those into proposed 1.14.* documentation requirements and those are already covered by proposed 14.7.* implementation requirement? Although, releasing resources after use may not be good match for \"configuration\" chapter.",
+      "createdAt": "2025-03-18T07:41:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2731973632",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i19Ep",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please can you write up an updated proposal based on what you wrote ",
+      "createdAt": "2025-03-18T08:13:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2732052777",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i_R82",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The starting point here is:\n* How section \"V12.7 Application Resources\" is different from \"V14.7 Back-end Communication Configuration\"\n* Is section \"V12.7 Application Resources\" good match to V12 chapter, as all other requirements are dealing with files\n* Is section \"V14.7 Back-end Communication Configuration\" a fully configuration section and is located in correct chapter\n\nMaybe I should just include new requirements in and then we can move them around, but... those requirements at the moment are going to 4 different sections (2 chapters, implementation + documentation sections), plus there is potential duplicate to merge (12.7.1) and potential overlap (11.2.2) to solve, I did not start with that.",
+      "createdAt": "2025-03-18T19:30:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2734497590",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jIeoZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "That is why I wanted to see an actual proposal, might be easier to see a PR and then iterate on it",
+      "createdAt": "2025-03-19T14:44:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2736908825",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jsTgG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirements are in, further discussion we can continue in https://github.com/OWASP/ASVS/issues/2762",
+      "createdAt": "2025-03-23T16:31:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1778#issuecomment-2746300422",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-11-08T07:31:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyfACQ",
+      "name": "Community needed",
+      "description": "This issue will not be progressed without community input. Will be closed if stale.",
+      "color": "fbca04"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSfggFQ",
+      "name": "V5 (prev V12)",
+      "description": "",
+      "color": "7412BF"
+    }
+  ],
+  "number": 1778,
+  "state": "CLOSED",
+  "title": "proposal: requirement for having reasonable timeouts for (external) services",
+  "url": "https://github.com/OWASP/ASVS/issues/1778"
+}

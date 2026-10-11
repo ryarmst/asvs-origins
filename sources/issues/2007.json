@@ -1,0 +1,168 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ1NzMxNDg=",
+    "is_bot": false,
+    "login": "mesutgungor",
+    "name": ""
+  },
+  "body": "In some application, mostly DLP , Data discovery, Data Classsification type applications, need to create logs for auditing and/or troubleshooting containing some part of the sensitive data in cleartext and remaining part in masked format.  I would propose the following addition to [7.1.1 ](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x15-V7-Error-Logging.md#v71-general-logging)\r\n## V7.1 General Logging\r\n\r\nCurrent :\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.1** | [MODIFIED, MERGED FROM 7.1.2] Verify that the application does not log credentials, payment details or any data defined as sensitive based on local privacy laws or relevant security policy. Session tokens should only be stored in logs in an irreversible, hashed form. | ✓ | ✓ | ✓ | 532 |\r\n\r\nProposal :\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.1** | [MODIFIED, MERGED FROM 7.1.2] Verify that the application does not log credentials, payment details or any data defined as sensitive based on local privacy laws or relevant security policy. Session tokens should only be stored in logs in an irreversible, hashed form. If logging sensitive data is unavoidable, ensure that only essential parts of the data are logged in clear text, with the remaining portions masked to protect sensitive information. To access this partial cleartext data additional measures should be implemented(ie. additional password, approval flow)| ✓ | ✓ | ✓ | 532 |\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6GblHt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi, as I reorganized the V7 chapter and logic between V1 (documentation) pre-condition requirements, I'll explain the logic behind the current situation.\r\n\r\nFirst - thank you for the clear issues - although I do not support the proposed changes (I will explain why), I can clearly understand, what and why was proposed.\r\n\r\n7.1.1 text can be improved, but I would not go to too descriptive or educative long texts. The goal is to keep requirements as short as possible and all educative parts should be the goal for the Cheat Sheet project.\r\n\r\nI watch proposals more as handling sensitive data. For each application and organization, the sensitive data or the way to handle it can be quite different, although there are many regulations in place to dictate how to handle them. The point is, here we can set abstract requirements and principles - document your needs and follow them.\r\n\r\nFor documenting the sensitive data we have requirements:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.8.1** | [MODIFIED, MERGED FROM 8.3.4, LEVEL L2 > L1] Verify that all sensitive data created and processed by the application has been identified and classified into protection levels, and ensure that a policy is in place on how to deal with sensitive data. | ✓ | ✓ | ✓ | 213 |\r\n| **1.8.2** | [MODIFIED] Verify that all protection levels have an associated set of protection requirements and that these are applied in the architecture. This should include (but not be limited to) requirements related to encryption, integrity verification, retention, privacy and privacy-enhancing technologies to be used, and other confidentiality requirements. | | ✓ | ✓ | |\r\n\r\nMaybe add note about logging into the V1.8.2?",
+      "createdAt": "2024-07-29T08:57:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2007#issuecomment-2255376877",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GctoW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "How about a new logging requirement similar to: \r\n\r\n_Verify that logging mechanisms are in place for all protection levels to document the application of protection requirements. This includes logging events for encryption, integrity verification, data retention, privacy, and other confidentiality measures, capturing specific protection requirements and any deviations for auditing and compliance purposes._",
+      "createdAt": "2024-07-29T11:23:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2007#issuecomment-2255673878",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IDkyU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So it feels like there are a few things going on here.\r\n\r\n### @mesutgungor's request\r\n\r\nMesut seems to be suggesting a requirement extension that where logging sensitive data is required, it should be partially masked and extra controls are required to access that logged data.\r\n\r\n### @elarlang's perspective\r\n\r\nElar sees this additional requirement as part of the \"protection requirements\" which are defined based on the \"protection level\" of an item of data. i.e. for data at a particular level of sensitivity, the following controls are required to protect that data. In this case, that would include how the data needs to be protected if it is logged.\r\n\r\n### @jmanico's requirement\r\n\r\nI think this is proposing that the use/application of the \"protection requirements\" (as noted in 1.8.2) should itself be logged.\r\n\r\n---\r\n\r\n### My thoughts (part 1)\r\n\r\nSo based on what Mesut and Elar said, I would propose the following:\r\n\r\nAdd logging to 1.8.2:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.8.2** | [MODIFIED] Verify that all protection levels have an associated set of protection requirements and that these are applied in the architecture. This should include (but not be limited to) requirements related to encryption, integrity verification, retention, **how the data should be logged, access controls around sensitive data in logs**, privacy and privacy-enhancing technologies to be used, and other confidentiality requirements. | | ✓ | ✓ | |\r\n\r\nClarify 7.1.1 to bring it in line with the protection level concept:\r\n\r\nCurrent :\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.1** | [MODIFIED, MERGED FROM 7.1.2] Verify that when logging sensitive data, the application considers the protection level of the data. For example, it may not be allowed to log certain data such as credentials or payment details. Other data such as session tokens may only be logged having been hashed or masked, either in full or partially. | ✓ | ✓ | ✓ | 532 |\r\n\r\n@mesutgungor @elarlang what do you think?\r\n\r\n### My thoughts (part 2)\r\n\r\n@jmanico do you think your proposed requirement significantly adds to the security logging requirements in [section 7.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x15-V7-Error-Logging.md#v72-security-events)?\r\n\r\n",
+      "createdAt": "2024-08-11T06:09:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2007#issuecomment-2282638484",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IJCGi",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @tghosth I think it does, but I'm not at 100% confidence that is is necessary. I just want a detailed audit-log of any data protection measures. I think its important, but i'm really ok if you want to drop it since this area is already rather beefy in ASVS.",
+      "createdAt": "2024-08-12T13:59:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2007#issuecomment-2284069282",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kc7IB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm ok with proposals for 1.8.2 and 7.1.1.\r\n\r\nIf we already going to touch 1.8.2, maybe we remove the implementation note (_and that these are applied in the architecture_), as it is documentation requirement.",
+      "createdAt": "2024-08-31T09:13:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2007#issuecomment-2322838017",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KdFlm",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is a good suggestion from @elarlang ",
+      "createdAt": "2024-08-31T12:19:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2007#issuecomment-2322880870",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KlElF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I split 1.8.2 to documentation and implementation and made the relevant changes to 1.8.2 and 7.1.1 in #2052 \r\n\r\n@elarlang review please :)",
+      "createdAt": "2024-09-02T15:19:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2007#issuecomment-2324973893",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-07-28T20:31:45Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABJFMusA",
+      "name": "V16 (prev V7)",
+      "description": "Temporary label for grouping logging related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    }
+  ],
+  "number": 2007,
+  "state": "CLOSED",
+  "title": "7.1 Proposal for Masked Data Logging Need ",
+  "url": "https://github.com/OWASP/ASVS/issues/2007"
+}

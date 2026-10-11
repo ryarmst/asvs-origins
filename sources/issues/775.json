@@ -1,0 +1,496 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQwMDI3NjU=",
+    "is_bot": false,
+    "login": "csfreak92",
+    "name": "Ralph Andalis"
+  },
+  "body": "ASVS 4.0 - 5.5.1 verification requirement is:\r\n\r\n`Verify that serialized objects use integrity checks or are encrypted to prevent hostile object creation or data tampering.`\r\n\r\nIs this control talking about link level encryption or object/payload level encryption? Is it protecting the application from a man-in the browser attack (link level encryption) or preventing a user from modifying his data (object/payload level encryption)? If those are the case, then I think clarifying the main point of this control would help developers know what to do to protect their application from such attacks and I would propose a clearer language in a pull request like: \r\n\r\n`Verify that serialized objects use integrity checks (object/payload level encryption) or are encrypted (link level encryption) to prevent hostile object creation or data tampering.`",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzMjMwNjU1MA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My understand of this control is that it is specifically refering to the serialized object. Either an integrity check (like a hash or signature) or encryption should be used to ensure it has not been tampered with.\r\n\r\nNot sure how else to clarify that. Any thoughts?",
+      "createdAt": "2020-05-21T19:45:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-632306550",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzMjM0NTkwMA==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Aren't hashes or signatures of input values coming from the client-side prone to tampering as well? If a serialized object (with constant values) are being round-tripped from the server to the client and back to the server, then hashes or signatures could work. But if the input is fresh from the client and to the server, then those won't work. Am I missing something? \r\n\r\nEncryption would be the best, although I think link level encryption could suffice for most applications, object level encryption would be a better recommendation for applications with higher risks. Should we mention this somewhere in the controls in ASVS? ",
+      "createdAt": "2020-05-21T21:06:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-632345900",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzMjM1MzU1Mw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A few notes,\n\nDigital signatures are NOT prone to tampering, they provide integrity, \nthe whole point of digital signatures in standards like JWT's is to \ndetect and avoid tampering.\n\nEncryption */does not always provide integrity/* (ie tamper resistance) \nunless it's a newer mode.\n\nEncryption does not stop deserialization attacks, traditionally. In Java \nyou would need to use the serialization filter API's and design your \nobjects in a special way per \nhttps://www.oracle.com/java/technologies/javase/seccodeguide.html . For \n.NET you need to address https://www.youtube.com/watch?v=oxlD8VWWHE8\n\nI have not seen crypto as a solution to the deserialization problem in \nconventional secure coding wisdom...\n\n- Jim\n\nOn 5/21/20 5:06 PM, csfreak92 wrote:\n>\n> Aren't hashes or signatures of input values coming from the \n> client-side prone to tampering as well? If a serialized object (with \n> constant values) are being round-tripped from the server to the client \n> and back to the server, then hashes or signatures could work. But if \n> the input is fresh from the client and to the server, then those won't \n> work. Am I missing something?\n>\n> Encryption would be the best, although I think link level encryption \n> could suffice for most applications, object level encryption would be \n> a better recommendation for applications with higher risks. Should we \n> mention this somewhere in the controls in ASVS?\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/775#issuecomment-632345900>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCM5KINHN6ZYZO536UTRSWJVHANCNFSM4NG6YWSA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-05-21T21:23:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-632353553",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzNzA5NTE0NA==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sorry, let me rephrase what I meant by my previous comment. I might have been confusing. \r\n\r\n> `Aren't hashes or signatures of input values coming from the client-side prone to tampering as well? If a serialized object (with constant values) are being round-tripped from the server to the client and back to the server, then hashes or signatures could work. But if the input is fresh from the client and to the server, then those won't work. Am I missing something?`\r\n>\r\nWhat I meant here was if we will generate signatures or hashes from the client-side every time new input is received, then that is prone to tampering and it could be circumvented. If the hashes or signatures are generated on client-side which would be a horrible implementation of it. However, if hashes or signatures are done on the server-side and the values are being passed around then it helps. But what about new inputs? I think that's the problematic part in serialization, receiving input that could end up causing deserialization issues, no? \r\n\r\n> `Encryption would be the best, although I think link level encryption could suffice for most applications, object level encryption would be a better recommendation for applications with higher risks. Should we mention this somewhere in the controls in ASVS?`\r\n> \r\nWhat I meant here was if we have link level encryption (communications encryption) then it could help but still be bypassed and I totally agree with you on that, so object/payload level encryption would be best. \r\n\r\n@jmanico, isn't encryption on a payload level providing tamper resistance? ",
+      "createdAt": "2020-06-01T20:51:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-637095144",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzNzE5MjIxNA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "No, symmetric encryption does not provide integrity. Only modern symmetric encryption modes that are combined with integrity checks do that; you don’t get it automatically get integrity when using symmetric encryption.\n\nhttp://en.wikipedia.org/wiki/Authenticated_encryption\n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On Jun 1, 2020, at 4:51 PM, csfreak92 <notifications@github.com> wrote:\n> \n> ﻿\n> Sorry, let me rephrase what I meant by my previous comment. I might have been confusing.\n> \n> Aren't hashes or signatures of input values coming from the client-side prone to tampering as well? If a serialized object (with constant values) are being round-tripped from the server to the client and back to the server, then hashes or signatures could work. But if the input is fresh from the client and to the server, then those won't work. Am I missing something?\n> \n> What I meant here was if we will generate signatures or hashes from the client-side every time new input is received, then that is prone to tampering and it could be circumvented. If the hashes or signatures are generated on client-side which would be a horrible implementation of it. However, if hashes or signatures are done on the server-side and the values are being passed around then it helps. But what about new inputs? I think that's the problematic part in serialization, receiving input that could end up causing deserialization issues, no?\n> \n> Encryption would be the best, although I think link level encryption could suffice for most applications, object level encryption would be a better recommendation for applications with higher risks. Should we mention this somewhere in the controls in ASVS?\n> \n> What I meant here was if we have link level encryption (communications encryption) then it could help but still be bypassed and I totally agree with you on that, so object/payload level encryption would be best.\n> \n> @jmanico, isn't encryption on a payload level providing tamper resistance?\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-06-02T00:13:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-637192214",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjE5OTQyMw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@csfreak92 - for \"new input\" there is another requirement:\r\n\r\n> V5.5.3 Verify that deserialization of untrusted data is avoided or is protected in both custom code and third-party libraries (such as JSON, XML and YAML parsers).\r\n\r\nBut V5.5.1 is not clear for me also. Isn't it duplicate for V5.5.3 \" or is protected in both custom code and third-party libraries (such as JSON, XML and YAML parsers)\"? What is this protection?\r\n\r\nDoes it makes it more clear?\r\n> V5.5.1 Verify that serialized objects use integrity checks **on/for/at unserialize** or are encrypted to prevent hostile object creation or data tampering.\r\n\r\nTo validate requirements - where to use \"PHP Object Injection\" - input is generated by applcation, sent to user, and userinput goes back directly to `unserialize` function.\r\n\r\nFrom V5.5.1 point of view - integrity check is missing.\r\nFrom V5.5.3 point of view - an applcation should not take user input to `unserialize` function at all.\r\n\r\nMy question/point, do V5.5.1 and V5.5.3 actually address the same problem and should me merged?",
+      "createdAt": "2020-06-10T19:03:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642199423",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjIxMTA2Mw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "For 5.5.3 don’t we have other standard requirements to keep libraries up to date?\nThis is likely a duplicate.\n\nTo stop deserialization you should filter incoming deserialIzation data with language features like JEP 290 in Java.\n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On Jun 10, 2020, at 3:04 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> @csfreak92 - for \"new input\" there is another requirement:\n> \n> V5.5.3 Verify that deserialization of untrusted data is avoided or is protected in both custom code and third-party libraries (such as JSON, XML and YAML parsers).\n> \n> But V5.5.1 is not clear for me also. Isn't it duplicate for V5.5.3 \" or is protected in both custom code and third-party libraries (such as JSON, XML and YAML parsers)\"? What is this protection?\n> \n> Does it makes it more clear?\n> \n> V5.5.1 Verify that serialized objects use integrity checks on/for/at unserialize or are encrypted to prevent hostile object creation or data tampering.\n> \n> To validate requirements - where to use \"PHP Object Injection\" - input is generated by applcation, sent to user, and userinput goes back directly to unserialize function.\n> \n> From V5.5.1 point of view - integrity check is missing.\n> From V5.5.3 point of view - an applcation should not take user input to unserialize function at all.\n> \n> My question/point, do V5.5.1 and V5.5.3 actually address the same problem and should me merged?\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-06-10T19:28:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642211063",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI0NjAxNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For \"up to date\" there is requirement:\r\n> V14.2.1 Verify that all components are up to date, preferably using a dependency checker during build or compile time.\r\n\r\nPersonally I don't see/feel relation between up-to-date requirement and current V5.3.3",
+      "createdAt": "2020-06-10T20:40:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642246017",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI0OTc4OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "They are the exact same requirement. 5.3.3 says to keep your JSON and \nXML parsers up to date which is a subset of the part of 14.2.1 before \nthe first comma.\n\n- Jim\n\nOn 6/10/20 4:40 PM, Elar Lang wrote:\n>\n> For \"up to date\" there is requirement:\n>\n>     V14.2.1 Verify that all components are up to date, preferably\n>     using a dependency checker during build or compile time.\n>\n> Personally I don't see/feel relation between up-to-date requirement \n> and current V5.3.3\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/775#issuecomment-642246017>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCNITNKKQE3MQ26MGGDRV7VVTANCNFSM4NG6YWSA>.\n>\n",
+      "createdAt": "2020-06-10T20:48:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642249788",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI1NDMwOQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> V5.5.3 Verify that deserialization of untrusted data is avoided or is protected in both custom code and third-party libraries (such as JSON, XML and YAML parsers).\r\n\r\n> V14.2.1 Verify that all components are up to date, preferably using a dependency checker during build or compile time.\r\n\r\nFrom:\r\n> V5.5.3 **Verify that deserialization of untrusted data** is avoided or **is protected in** both custom code and **third-party libraries (such as JSON, XML and YAML parsers)**.\r\n\r\nI interpret it as:\r\n> V5.5.3 Verify that deserialization of untrusted data is protected in third-party libraries (such as JSON, XML and YAML parsers).\r\n\r\n\"data is protected by third party libraries\" vs \"third party libraries are up to date\" - if they are the same thing, then it makes sense to remove second part of V5.3.3 and merge first part of V5.3.3 with V5.3.1.",
+      "createdAt": "2020-06-10T20:57:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642254309",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI1NzAxMQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "To be more clear, 5.5.3 is *in part* overlapping with the 14.x requirement.\n\nBut I still don't like 5.5.3. at all, its' not actionable over than the \n14x overlap and think it needs to go.\n\n- Jim\n\nOn 6/10/20 4:57 PM, Elar Lang wrote:\n>\n>     V5.5.3 Verify that deserialization of untrusted data is avoided or\n>     is protected in both custom code and third-party libraries (such\n>     as JSON, XML and YAML parsers).\n>\n>     V14.2.1 Verify that all components are up to date, preferably\n>     using a dependency checker during build or compile time.\n>\n> From:\n>\n>     V5.5.3 *Verify that deserialization of untrusted data* is avoided\n>     or *is protected in* both custom code and *third-party libraries\n>     (such as JSON, XML and YAML parsers)*.\n>\n> I interpret it as:\n>\n>     V5.5.3 Verify that deserialization of untrusted data is protected\n>     in third-party libraries (such as JSON, XML and YAML parsers).\n>\n> \"data is protected by third party libraries\" vs \"third party libraries \n> are up to date\" - if they are the same thing, then it makes sense to \n> remove second part of V5.3.3 and merge first part of V5.3.3 with V5.3.1.\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/775#issuecomment-642254309>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCOQ6JLDGYQTRLW5EYTRV7XVFANCNFSM4NG6YWSA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-06-10T21:01:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642257011",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI3MDI5Nw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I made separate issue for removing V5.5.3.\r\n\r\nBack to V5.5.1 - if V5.5.3 will be removed, V5.5.1 should also cover \"left-overs\" from V5.5.3.\r\n\r\nCurrent:\r\n> V5.5.1 Verify that serialized objects use integrity checks or are encrypted to prevent hostile object creation or data tampering.\r\n\r\nIt should cover now also:\r\n- \"deserialization of untrusted data is avoided\"\r\n\r\nwith my estonglish (estonian version of english) I don't even try to propose anything...",
+      "createdAt": "2020-06-10T21:12:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642270297",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI3MjQ3MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "5.5.1 makes no sense. Encryption and integrity checks are not (at all) \nthe right solution to address deserialization problems.\n\nFiltering incoming deserialization data (for Java see JEP 290) and \nproper object design are needed to safely deserialize untrusted binary data.\n\n- Jim\n\nOn 6/10/20 5:12 PM, Elar Lang wrote:\n>\n> I made separate issue for removing V5.5.3.\n>\n> Back to V5.5.1 - if V5.5.3 will be removed, V5.5.1 should also cover \n> \"left-overs\" from V5.5.3.\n>\n> Current:\n>\n>     V5.5.1 Verify that serialized objects use integrity checks or are\n>     encrypted to prevent hostile object creation or data tampering.\n>\n> It should cover now also:\n>\n>   * \"deserialization of untrusted data is avoided\"\n>\n> with my estonglish (estonian version of english) I don't even try to \n> propose anything...\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/775#issuecomment-642270297>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCIZHUS6IXIFTENRADDRV7ZM3ANCNFSM4NG6YWSA>.\n>\n",
+      "createdAt": "2020-06-10T21:17:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642272470",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI3NDc0Mg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you send (for some reason) serialized data from one service to another (or back to the same service), it makes sense for me to use hmac - if it does not match, no action.",
+      "createdAt": "2020-06-10T21:22:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642274742",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjI3OTQxOQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So you are saying that the initial binary data set data could not be \ntainted by user input? So it's all \"trusted\" data? Then why the HMAC? \nThat not likely, I likely can taint that binary blob with user input \nbefore you HMAC. The HMAC only provides transport integrity - which I \nget via TLS anyways. The only time to HMAC a payload in API security \nactually helps security is when you are throwing JWT's around and do not \nwhat them tainted - and JWT's contain zero user data.\n\nSo HMAC'ing intra-service calls is likely zero net benefit over well \nconfigured TLS.\n\nYou're confusing intra-service security with deserialization security. \nThis is not a good requirement or deserialization and confuses the issue \nand it should go away.\n\n- Jim\n\nOn 6/10/20 5:22 PM, Elar Lang wrote:\n>\n> If you send (for some reason) serialized data from one service to \n> another (or back to the same service), it makes sense for me to use \n> hmac - if it does not match, no action.\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/775#issuecomment-642274742>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCPRKDBKU22J3XKHZ7DRV72RNANCNFSM4NG6YWSA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-06-10T21:32:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642279419",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjQ3MzYyNQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If you send (for some reason) serialized data from one service to another (or back to the same service), it makes sense for me to use hmac - if it does not match, no action.\r\n\r\nhmac here is only for integrity check, I don't touch confidentiality here.",
+      "createdAt": "2020-06-11T07:45:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642473625",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjU4NTA2MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "You are using the wrong crypto primitive for intra-service \ncommunication.  TLS gives you integrity in transit. And if untrusted \ndata feeds your intra-service request (which is almost a definite) the \nattacker can taint the payload before you HMAC and send that data \nintra-service, defeating the benefit.\n\nThe only time I see message-level HMAC'ing as an actual useful security \ncontrol, is when the server hands the client a token or other data that \nthe client is not allowed to modify in any way. (ala JWT) but if your \nusers are submitting untrusted input that you use to build a payload \nthat you then HMAC (a common use case) then you're building a control \nthat does not provide any benefit.\n\nAnd if you are using JWT I suggest you avoid HMAC's and use pub/pri key \nfor integrity in a microsservice environment so you have less of a \nprivate key distribution burden.\n\n  -Jim\n\nOn 6/11/20 3:45 AM, Elar Lang wrote:\n>\n>     If you send (for some reason) serialized data from one service to\n>     another (or back to the same service), it makes sense for me to\n>     use hmac - if it does not match, no action.\n>\n> hmac here is only for integrity check, I don't touch confidentiality here.\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/775#issuecomment-642473625>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCNQEPZQFNXCFJUUYDDRWCDRBANCNFSM4NG6YWSA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-06-11T11:33:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642585060",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjY4ODU0OA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Any changes to the current requirement V5.5.1 for ASVS v4.0.2 or you want to re-create entire topic for ASVS v4.1 and issue #807 ?",
+      "createdAt": "2020-06-11T14:18:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642688548",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjY5MTQyNg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "5.5.1 is incorrect, I state with respect. I would like it to go away as \nsoon as possible.\n\nUntrusted data -> Webserver where untrusted data is added to binary data \n-> HMAC AND OR ENCRYPTION ON TOP OF TLS  AS PAYLOAD IS SENT TO API -> \nDeserialization happens with partial untrusted data -> KaBoom\n\n- Jim\n\nOn 6/11/20 10:19 AM, Elar Lang wrote:\n>\n> Any changes to the current requirement V5.5.1 for ASVS v4.0.2 or you \n> want to re-create entire topic for ASVS v4.1 and issue #807 \n> <https://github.com/OWASP/ASVS/issues/807> ?\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/775#issuecomment-642688548>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCIZD274FD72TVCRLOTRWDRVZANCNFSM4NG6YWSA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-06-11T14:22:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642691426",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjgwNjA2OQ==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, I agree with @jmanico with this. I think 5.1.1 is too problematic as a requirement. It seems that 5.1.3 covers deserialization issues anyway and having 5.1.1 just confuses a tester/developer. I believe our discussion about this was helpful in determining whether integrity checks really help in preventing hostile object tampering or creation. I vote to remove 5.1.1 as well unless there's something else we are missing to cover for integrity checks. ",
+      "createdAt": "2020-06-11T16:52:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642806069",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjgyNzczMQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, to conclude and be clear:\r\nremove current V5.5.1 from ASVS v4.1 (and no changes to ASVS v4.0.2)?",
+      "createdAt": "2020-06-11T17:33:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642827731",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjgzMDQzMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Remove from both please.\n\n--\nJim Manico\n@Manicode\n\n> On Jun 11, 2020, at 1:33 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> So, to conclude and be clear:\n> remove current V5.5.1 from ASVS v4.1 (and no changes to ASVS v4.0.2)?\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-06-11T17:38:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642830430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjkxMjQ4NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I understood that we will not have any removals for v4.0.2 (if not clear duplicate).\r\n\r\nhttps://github.com/OWASP/ASVS/issues/750#issuecomment-625255711",
+      "createdAt": "2020-06-11T20:29:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642912485",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MjkxNjU5Nw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Josh?\n\n--\nJim Manico\n@Manicode\n\n\n> On Jun 11, 2020, at 4:29 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> I understood that we will not have any removals for v4.0.2 (if not clear duplicate).\n> \n> #750 (comment)\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-06-11T20:38:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-642916597",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MzI1NTA0MA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks @elarlang, I agree that this sounds too major a change for 4.0.2 but should be changed for 4.1.",
+      "createdAt": "2020-06-12T12:54:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-643255040",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MzI1NTQwOQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To quote @vanderaj:\r\n> Branch 4.0.2 - bug fixes only. Will require some work to back port the\r\nfixes from master. The only thing I would countenance here is duplicate\r\nissue removal, spelling fixes, and clarifications.",
+      "createdAt": "2020-06-12T12:55:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-643255409",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0ODIzMjE3OA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I will review this issue carefully for 4.0.2, re-wording is okay, but additions, substantial changes of meaning, etc. need to be 4.1.",
+      "createdAt": "2020-06-23T15:19:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-648232178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY1Nzc5Mzc1MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Can we just drop 5.5.1 from 4.0.2? It's off base.",
+      "createdAt": "2020-07-13T21:06:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-657793751",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY1NzgyMTMwMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "requirement removed per https://github.com/OWASP/ASVS/commit/118069401d3616998943803aada2f114262cb280",
+      "createdAt": "2020-07-13T22:18:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-657821300",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RknzU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Reopen the issue for:\r\n* @tghosth rechecking related issues and changes\r\n* posting my label validation / mapping between versions just in case we need to revisit it\r\n\r\n## v4.0.3\r\n\r\nRelated requirements:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---:| :---: | :---: |\r\n| **1.5.2** | Verify that serialization is not used when communicating with untrusted clients. If this is not possible, ensure that adequate integrity controls (and possibly encryption if sensitive data is sent) are enforced to prevent deserialization attacks including object injection. | | ✓ | ✓ | 502 |\r\n| **5.5.1** | Verify that serialized objects use integrity checks or are encrypted to prevent hostile object creation or data tampering. ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 502 |\r\n| **5.5.3** | Verify that deserialization of untrusted data is avoided or is protected in both custom code and third-party libraries (such as JSON, XML and YAML parsers). | ✓ | ✓ | ✓ | 502 |\r\n\r\nRelated issues:\r\n* https://github.com/OWASP/ASVS/issues/772\r\n* https://github.com/OWASP/ASVS/issues/775\r\n* https://github.com/OWASP/ASVS/issues/807\r\n* https://github.com/OWASP/ASVS/issues/1084\r\n\r\n\r\n## v5.0 as it stands\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.5.2** | [DELETED, MERGED TO 5.5.3] | | | | |\r\n| **5.5.1** | [DELETED] | | | | |\r\n| **5.5.3** | [MODIFIED, MERGED FROM 1.5.2] Verify that deserialization is not used when communicating with untrusted clients. If this is not possible, ensure that deserialization is performed safely, for example, by only allowing a allow-list of object types or not allowing the client to define the object type to deserialize to, in order to prevent deserialization attacks. | ✓ | ✓ | ✓ | 502 |\r\n\r\nI try to get rid of just \"DELETED\" labels and the question is - the most suitable reason for 5.5.1 seems to be `DELETED, INCORRECT`. No need to reference to any requirement, like 5.5.3. In case we need, then it should be `MERGED TO 5.5.3` (which is not valid) or `DEPRECATED BY 5.5.3`",
+      "createdAt": "2023-01-01T22:40:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-1368554708",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RpRfU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would support DELETED, INCORRECT",
+      "createdAt": "2023-01-03T13:30:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/775#issuecomment-1369774036",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2020-05-21T16:14:15Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    }
+  ],
+  "number": 775,
+  "state": "CLOSED",
+  "title": "[Clarification/For Discussion] What does 5.5.1 control prevent?",
+  "url": "https://github.com/OWASP/ASVS/issues/775"
+}

@@ -1,0 +1,61 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2025-04-13T09:19:41Z",
+      "diff": "Current requirements:\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **15.4.1** | Verify that only thread-safe types are used in multi-threaded contexts, or that non-thread-safe types are synchronized to prevent race conditions. | 3 | v5.0.be-10.7.1 |\n| **15.4.2** | Verify that concurrent access to shared resources is controlled using synchronization primitives (e.g., locks, mutexes, semaphores) to prevent race conditions and ensure atomic operations on these resources. | 3 | v5.0.be-10.7.2 |\n| **15.4.3** | Verify that all access to shared resources is consistently checked and accessed in a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions, ensuring resource state consistency between check and use. | 3 | v5.0.be-10.7.3 |\n| **15.4.4** | Verify that resource acquisition uses a consistent locking strategy to avoid circular dependencies and ensure forward progress, preventing both deadlocks and livelock scenarios. | 3 | v5.0.be-10.7.4 |\n| **15.4.5** | Verify that resource allocation policies prevent thread starvation by ensuring fair access to resources, such as by leveraging thread pools, allowing lower-priority threads to proceed within a reasonable timeframe. | 3 | v5.0.be-10.7.5 |\n| **15.4.6** | Verify that locking primitives are only accessible to the owning class or module and are not publicly modifiable, ensuring that locks cannot be inadvertently or maliciously modified by external classes or code. | 3 | v5.0.be-10.7.6 |\n\nWe have 6 \"feels similar\" requirements that found it's way into the repo during Summit. Do we have any helpful background material or discussion on what the rationale is behind each requirement and how those are distinguished from each other?"
+    },
+    {
+      "editedAt": "2025-04-13T09:23:31Z",
+      "diff": "Current requirements:\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **15.4.1** | Verify that only thread-safe types are used in multi-threaded contexts, or that non-thread-safe types are synchronized to prevent race conditions. | 3 | v5.0.be-10.7.1 |\n| **15.4.2** | Verify that concurrent access to shared resources is controlled using synchronization primitives (e.g., locks, mutexes, semaphores) to prevent race conditions and ensure atomic operations on these resources. | 3 | v5.0.be-10.7.2 |\n| **15.4.3** | Verify that all access to shared resources is consistently checked and accessed in a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions, ensuring resource state consistency between check and use. | 3 | v5.0.be-10.7.3 |\n| **15.4.4** | Verify that resource acquisition uses a consistent locking strategy to avoid circular dependencies and ensure forward progress, preventing both deadlocks and livelock scenarios. | 3 | v5.0.be-10.7.4 |\n| **15.4.5** | Verify that resource allocation policies prevent thread starvation by ensuring fair access to resources, such as by leveraging thread pools, allowing lower-priority threads to proceed within a reasonable timeframe. | 3 | v5.0.be-10.7.5 |\n| **15.4.6** | Verify that locking primitives are only accessible to the owning class or module and are not publicly modifiable, ensuring that locks cannot be inadvertently or maliciously modified by external classes or code. | 3 | v5.0.be-10.7.6 |\n\nWe have 6 \"feels similar\" requirements that found it's way into the repo during Summit. Follow-up for issue #2231 to be sure that we can distinguish the requirements from each other and re-check potential overlap with other requirements."
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2817124691",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "paging @cronchie, do we think there is any way we could squeeze these down to fewer requirements? I think trying to go 6 requirements to 1 requirement would be hard but maybe we can at least go for fewer.",
+          "recorded_at": "2025-04-20T11:26:51Z"
+        },
+        {
+          "body": "paging @cronchie, do we think there is any way we could squeeze these down?",
+          "recorded_at": "2025-04-20T11:26:08Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2823447243",
+      "author": "cronchie",
+      "previous_versions": [
+        {
+          "body": "I'm open to merging these. While they're distinct problems with distinct solutions, I could see condensing 15.4.1.-2 into one requirement, as they both deal with race conditions:\n\n> Verify that shared resources in multi-threaded code are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nTOC/TOU is also a type of race condition, so we could merge that too, but I think it sounds cleaner in its own requirement so we don't end up with a run-on sentence. Here's the same requirement with the language tightened up:\n\n> Verify that checks on a resource’s state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions.\n\nSince 15.4..4-6 all deal with non-race concurrency issues, they could all fit together like so:\n\n> Verify that locks are used consistently to avoid threads getting stuck, whether by waiting on each other or retrying endlessly, and that locking logic stays within the code responsible for managing the resource.\n\nThoughts? This seems more concise (and in plainer English) while still covering the same amount of guidance.",
+          "recorded_at": "2025-04-23T08:16:49Z"
+        },
+        {
+          "body": "I'm open to merging these. While they're distinct problems with distinct solutions, I could see condensing 15.4.1.-2 into one requirement, as they both deal with race conditions:\n\n> Verify that shared resources in multi-threaded code are accessed safely by using thread-safe types or synchronization mechanisms like locks or semaphores.\n\nTOC/TOU is also a type of race condition, so we could merge that too, but I think it sounds cleaner in its own requirement so we don't end up with a run-on sentence. Here's the same requirement with the language tightened up:\n\n> Verify that checks on a resource’s state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions.\n\nSince 15.4..4-6 all deal with non-race concurrency issues, they could all fit together like so:\n\n> Verify that locks are used consistently to avoid threads getting stuck, whether by waiting on each other or retrying endlessly, and that locking logic stays within the code responsible for managing the resource.\n\nThoughts? This seems more concise (and in plainer English) while still covering the same amount of guidance.",
+          "recorded_at": "2025-04-23T08:15:43Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2823542848",
+      "author": "cronchie",
+      "previous_versions": [
+        {
+          "body": "Thanks; this is helpful. How about this for specificity:\n\n> Verify that shared objects in multi-threaded code—such as caches, files, or in-memory objects accessed by multiple threads—are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nIt sounds like we're aligned on TOC/TOU as its own requirement. How about this revised version with specific examples:\n\n> Verify that checks on a resource’s state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions—for example, checking if a file exists before opening it, or verifying a user’s access before granting it.",
+          "recorded_at": "2025-04-23T08:57:49Z"
+        },
+        {
+          "body": "Thanks; this is helpful. How about this for specificity:\n\n> Verify that shared objects in multi-threaded code—such as shared caches, files, or in-memory objects accessed by multiple threads—are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nIt sounds like we're aligned on TOC/TOU as its own requirement. How about this revised version with specific examples:\n\n> Verify that checks on a resource’s state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions—for example, checking if a file exists before opening it, or verifying a user’s access before granting it.",
+          "recorded_at": "2025-04-23T08:57:37Z"
+        },
+        {
+          "body": "Thanks; this is helpful. How about this for specificity:\n\n> Verify that shared resources in multi-threaded code—such as shared data structures, files, or in-memory objects accessed by multiple threads—are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nIt sounds like we're aligned on TOC/TOU as its own requirement. How about this revised version with specific examples:\n\n> Verify that checks on a resource’s state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions—for example, checking if a file exists before opening it, or verifying a user’s access before granting it.",
+          "recorded_at": "2025-04-23T08:51:30Z"
+        }
+      ]
+    }
+  ]
+}

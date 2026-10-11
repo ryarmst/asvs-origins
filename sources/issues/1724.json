@@ -1,0 +1,120 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "I think it makes sense to point more clearly out requirements, which are meant for machine-to-machine communication.\r\n\r\nWe can see many dimensions here:\r\n* inside machine vs via some service\r\n* internal network vs external network\r\n\r\nIs the application as \"client of the service\" or as \"service provider\"\r\n\r\nWith quick scroll-through, I picked requirements which in my opinion are machine-to-machine requirements. For sure, there are more - especially related requirements for those which are listed here.\r\n\r\nThe point or question - can we use some structure changes to combine them somehow or we need to find some other solution.\r\n\r\n\r\n# V1 Architecture, Design and Threat Modeling\r\n\r\n## V1.2 Authentication Architecture\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.2.2** | [MODIFIED] Verify that communications between application components, including APIs, middleware and data layers, are authenticated and use individual user accounts. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 306 |\r\n\r\n\r\n## V1.4 Access Control Architecture\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.4.6** | [ADDED] Verify that communications between application components, including APIs, middleware and data layers, are performed with the least necessary privileges. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 272 |\r\n\r\n## V1.9 Communications Architecture\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.9.1** | Verify the application encrypts communications between components, particularly when these components are in different containers, systems, sites, or cloud providers. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 319 |\r\n| **1.9.2** | Verify that application components verify the authenticity of each side in a communication link to prevent person-in-the-middle attacks. For example, application components should validate TLS certificates and chains. | | ✓ | ✓ | 295 |\r\n\r\nRelated issue: https://github.com/OWASP/ASVS/issues/1443\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.14.1** | Verify the segregation of components of differing trust levels through well-defined security controls, firewall rules, API gateways, reverse proxies, cloud-based security groups, or similar mechanisms. | | ✓ | ✓ | 923 |\r\n| **1.14.7** | [MOVED FROM 1.2.1] Verify the use of unique or special low-privilege operating system accounts for all application components, services, and servers. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 250 |\r\n\r\n\r\n# V2 Authentication\r\n\r\n## V2.10 Service Authentication\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.10.1** | Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 | |\r\n| **2.10.2** | [GRAMMAR] Verify that if passwords are required for service authentication, the service account used is not a default credential (e.g. root/root or admin/admin are default in some services during installation). | | ✓ | ✓ | 255 | |\r\n| **2.10.4** | [GRAMMAR] Verify passwords, integrations with databases and third-party systems, seeds and internal secrets, and API keys are managed securely and not included in the source code or stored within source code repositories. Such storage should resist offline attacks. The use of a secure software key store (L1), hardware TPM, or an HSM (L3) is recommended for password storage. | | ✓ | ✓ | 798 | |\r\n\r\nFor 2.10.1 there is opened issue: https://github.com/OWASP/ASVS/issues/1032\r\n\r\n\r\n# V3 Session Management\r\n\r\n## V3.5 Token-based Session Management\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.2** | [GRAMMAR] Verify that the application uses session tokens rather than static API secrets and keys, except with legacy implementations. | | ✓ | ✓ | 798 | |\r\n\r\nFor 3.5.2 - sounds like 2.10.1 and 2.10.4, use the same CWE as 2.10.4 and has issue opened: https://github.com/OWASP/ASVS/issues/1522\r\n\r\n\r\n# V6.4 Secret Management\r\n\r\n## V6.4 Secret Management\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **6.4.1** | [MODIFIED] Verify that a secrets management solution such as a key vault is used to securely create, store, control access to and destroy secrets such as service account or 3rd party application credentials. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 798 |\r\n| **6.4.2** | Verify that key material is not exposed to the application but instead uses an isolated security module like a vault for cryptographic operations. ([C8](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 320 |\r\n\r\n\r\n# V9 Communication Encryption\r\n\r\n\r\n## V9.2 General Service to Service Communication Security\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **9.2.2** | Verify that encrypted communications such as TLS is used for all inbound and outbound connections, including for management ports, monitoring, authentication, API, or web service calls, database, cloud, serverless, mainframe, external, and partner connections. The server must not fall back to insecure or unencrypted protocols. | | ✓ | ✓ | 319 |\r\n| **9.2.3** | Verify that all encrypted connections to external systems that involve sensitive information or functions are authenticated. | | ✓ | ✓ | 287 |\r\n\r\n\r\n## V9.3 HTTPS Communication between Internal Services\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **9.3.1** | [ADDED] Verify that TLS or another appropriate transport encryption mechanism used for all connectivity between internal, HTTP-based services, and does not fall back to insecure or unencrypted communications. | | ✓ | ✓ | 319 |\r\n| **9.3.2** | [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected. | | ✓ | ✓ | 295 |\r\n| **9.3.3** | [ADDED] Verify that mutual TLS (mTLS) is used by services communicating internally within a system or \"intra-service communications\" to ensure all the involved parties at each end of a network connection are who they claim to be. | | | ✓ | 295 |\r\n\r\n\r\n# V12 File and Resources\r\n\r\n## V12.6 SSRF Protection\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.6.1** | [GRAMMAR] Verify that the web or application server is configured with an allow list of resources or systems to which the server can send requests or load data or files from. | ✓ | ✓ | ✓ | 918 |\r\n\r\n12.6.1 - related issue https://github.com/OWASP/ASVS/issues/1324\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5nFx7R",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I disagree with combining them into a single chapter, I think we need to make them clearer and potentially have the relevant requirements in a chapter grouped into a particular section.",
+      "createdAt": "2023-09-21T13:17:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1724#issuecomment-1729568465",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nFzJg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that one of the primary things to be clarified should be whether the requirement is aimed at the developer of the service being provided or the developer of the process consuming a service.",
+      "createdAt": "2023-09-21T13:19:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1724#issuecomment-1729573472",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nLeWA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I disagree with combining them into a single chapter, I think we need to make them clearer and potentially have the relevant requirements in a chapter grouped into a particular section.\r\n\r\nIt was not my proposal to combine them to single chapter. There are not enough requirements for this.\r\n\r\n> I agree that one of the primary things to be clarified should be whether the requirement is aimed at the developer of the service being provided or the developer of the process consuming a service.\r\n\r\nBased on subcategory title, I can say, that \"machine-to-machine\" separation is done for subcategories:\r\n* V2.10 Service Authentication\r\n* V9.2 General Service to Service Communication Security\r\n* V9.3 HTTPS Communication between Internal Services\r\n\r\nWhich leaves us requirements:\r\n* 1.2.2\r\n* 1.4.6 (#1352 / Q5)\r\n* 1.9.1 and 1.9.2 (probably will be solved by #1443)\r\n* 1.14.1 (mentioned in #1227)\r\n* 1.14.7 (it's a bit too close to 1.4.6)\r\n* 6.4.1, 6.4.2\r\n\r\nedit: removed from list\r\n* 3.5.2 (moved to 3.1.3) (related issue #1522)\r\n* 12.6.1 (moved to 14.7.1) (related issue #1324)",
+      "createdAt": "2023-09-22T08:55:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1724#issuecomment-1731061120",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oelaJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Which leaves us requirements:\r\n> \r\n> * 1.2.2\r\n> * 1.4.6 ([Access Control requirements reorg #1352](https://github.com/OWASP/ASVS/issues/1352) / Q5)\r\n> * 1.9.1 and 1.9.2 (probably will be solved by [1.9.1, 1.9.2 - check duplicates and/or merge to V9 requirements #1443](https://github.com/OWASP/ASVS/issues/1443))\r\n> * 1.14.1 (mentioned in [1.1.2 Threat modeling should be rephrased to cover different levels #1227](https://github.com/OWASP/ASVS/issues/1227))\r\n> * 1.14.7 (it's a bit too close to 1.4.6)\r\n> * 6.4.1, 6.4.2\r\n\r\nSo @elarlang is the action here to reword these requirements to be clearer that we are talking about machine to machine?",
+      "createdAt": "2023-10-09T11:40:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1724#issuecomment-1752848009",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5of1Co",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So @elarlang is the action here to reword these requirements to be clearer that we are talking about machine to machine?\r\n\r\nYes. Reword or relocation, whatever makes sense.",
+      "createdAt": "2023-10-09T14:58:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1724#issuecomment-1753174184",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzSbj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do you think #1767 makes this clearer?",
+      "createdAt": "2023-10-23T12:09:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1724#issuecomment-1775052515",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-09-19T10:49:06Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1724,
+  "state": "CLOSED",
+  "title": "clear separation for machine-to-machine requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/1724"
+}

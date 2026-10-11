@@ -1,0 +1,964 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "[2.10.1](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v210-service-authentication):\r\n\r\n> Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access.\r\n\r\nWhat does this mean? How should you authenticate to other services? My application currently authenticates to the database server using username and password, and uses API keys to access several API's. Is that in violation of this requirement?\r\n\r\nWhat is the proper way to do manage intra-service secrets? Can we rephrase this to a positive requirement instead of a negative requirement?\r\n\r\nWhat does it mean for a secret to rely on credentials? When are credentials unchanging?\r\n\r\nWhat was the original purpose of this requirement?\r\n\r\nSee also https://github.com/OWASP/ASVS/issues/763.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3NjY1NjYyNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think the general suggestion here is that\n\nOAuth2 tokens + mTLS > mTLS alone > API Keys > Passwords for API access\n\nOr in short, API keys in general are weak API access methods. \n\nBut for sure this requirement as-is is over-reaching.\n",
+      "createdAt": "2021-07-08T18:34:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-876656627",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41B5vU",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I attempted to retrieve the history of this requirement, but it doesn't provide much more information:\r\n\r\n* 0e0ca929649c414ed535855499ff4c4560ed200b Verify that intra-service secrets do not rely on unchanging passwords, such as API keys or shared accounts with privileged access.\r\n* c0f9c295ea57ecfba848cfbdca850034825117f1 Integration secrets SHOULD NOT rely on unchanging memorized secrets, such as API keys or shared privileged accounts. If memorized secrets are required, the credential should not be a default account, and stored with sufficient protection to prevent offline recovery attacks, including local system access.\r\n* 81a5b36119d2345fe14fff890abb44f13c3a11b7 Integration memorized secrets SHOULD NOT rely on unchanging memorized secrets, such as API keys or shared privileged accounts. If memorized secrets are required, the credential should not be a default account, and stored with sufficient protection to prevent offline recovery attacks, including local system access.",
+      "createdAt": "2021-07-30T07:27:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-889691092",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IX5LI",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I propose to delete this requirement.",
+      "createdAt": "2022-08-13T21:10:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1214223048",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5MUrs1",
+      "author": {
+        "login": "wet-certitude"
+      },
+      "authorAssociation": "NONE",
+      "body": "@jmanico I would consider the private key of an mTLS connection \"unchanging\" as well. I see that the private key, unlike a password/token is not transmitted - at least that is one interpretation, but one that after much thought, I could not figure out based the current stipulation alone.\r\n\r\nSince it's been over a year since this was reported and no one was able to figure out what exactly this means, no one is going to miss this stipulation if we simply remove it?",
+      "createdAt": "2022-10-17T08:35:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1280490293",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5NYL6V",
+      "author": {
+        "login": "settantasette"
+      },
+      "authorAssociation": "NONE",
+      "body": "I do not think deleting this requirement is the right way to go, rather I would re-phrase it to bring in some clarity. I understand @jmanico's point, but at the moment the way control point is presented is very confusing. `Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access.`\r\nDoes it mean that secrets should not use passwords etc. whatsoever ? Or if for example passwords are rotated daily then its acceptable ? Since its not \"unchanging credential\" anymore. Then question comes what is acceptable rate of rotation of credentials ?",
+      "createdAt": "2022-11-01T08:05:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1298185877",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QQfVC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder 5 weeks @tghosth to look at it",
+      "createdAt": "2022-12-12T13:28:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1346499906",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QQfV8",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nMonday, January 16, 2023 12:00 AM (GMT+01:00)\r\n> @tghosth to look at it",
+      "createdAt": "2022-12-12T13:28:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1346499964",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Q7IjR",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree this requirement is unclear and it is not clear what it was based on to begin with.\r\n\r\nGiven the topic of this section, I would suggest simplifying to:\r\n\r\n> Verify that service authentication uses either mTLS or a credential which is unique to that service and rotatable. Where supported, temporary session tokens should be generated and used instead of sending the credential on each connection.\r\n\r\nThoughts/opinions?",
+      "createdAt": "2022-12-19T13:32:52Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1357678801",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Scx8c",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1032#issuecomment-1346499906) @tghosth\n> @tghosth to look at it",
+      "createdAt": "2023-01-15T23:01:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1383276316",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TVzaK",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that service authentication uses either ...\r\n\r\nI think we should have a requirement that requires authentication between services.\r\n\r\n> either mTLS or a credential\r\n\r\nI think other methods of authentication are also acceptable. Although \"a credential\" can of course mean a certificate or a JWT or anything.\r\n\r\n> which is unique to that service and rotatable\r\n\r\nThis should perhaps be moved to a more general requirement. All the secrets that the application uses itself should be unique, rotatable, non-default (2.10.2), etc.\r\n\r\n> Where supported\r\n\r\nThis is a pretty big escape hatch, if the developing party is developing both services that communicate with each other. They can choose to not support this.\r\n\r\n> temporary session tokens should be generated and used instead of sending the credential on each connection.\r\n\r\nI don't understand this. Why would this be better?",
+      "createdAt": "2023-01-20T11:01:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1398224522",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TXVl8",
+      "author": {
+        "login": "sseelmann"
+      },
+      "authorAssociation": "NONE",
+      "body": "Doesn't the current 2.10.1 contradict with 2.10.4 which defines how such \"internal secrets\" (if that's meant by \"intra-service secrets\") should be managed:\r\n\r\n2.10.4 | [GRAMMAR] Verify passwords, integrations with databases  and third-party systems, seeds and internal secrets, and API keys are  managed securely and not included in the source code or stored within  source code repositories. Such storage should resist offline attacks.  The use of a secure software key store (L1), hardware TPM, or an HSM  (L3) is recommended for password storage. |   | ✓ | ✓ | 798 |  \r\n-- | -- | -- | -- | -- | -- | --\r\n\r\n\r\n\r\nPS: and isn't 2.10.4 overlapping with 6.4.1? But that would be a separate issue to discuss.\r\n\r\n6.4.1 | [MODIFIED] Verify that a secrets management solution  such as a key vault is used to securely create, store, control access to  and destroy secrets such as service account or 3rd party application  credentials. (C8) |   | ✓ | ✓ | 798\r\n-- | -- | -- | -- | -- | --\r\n",
+      "createdAt": "2023-01-20T16:24:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1398626684",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c7X6b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Adding some additional context:\r\n\r\nHistory:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.10.1** | Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 | |\r\n| **[2.10.1](https://github.com/OWASP/ASVS/blame/90958ab0737f4a37e586d9fdc767ed47de107714/4.0/en/0x11-V2-Authentication.md)** | Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | OS assisted | HSM | 287 | 5.1.1.1 |\r\n| **[2.10.1](https://github.com/OWASP/ASVS/blame/57a0724d896408654e755f0a0d387e0d19ae3279/4.0/en/0x11-V2-Authentication.md)** | Verify that intra-service secrets do not rely on unchanging passwords, such as API keys or shared accounts with privileged access. |  | OS assisted | HSM | 287 | 5.1.1.1 |\r\n| **[2.10.1](https://github.com/OWASP/ASVS/blame/49d63c54537dc02c154a7ff99101cea2525c59b3/4.0/en/0x11-V2-Authentication.md)** | Verify that integration secrets do not rely on unchanging passwords, such as API keys or shared privileged accounts. |  | OS assisted | HSM | 287 | 5.1.1.1 |\r\n| **[2.11.1](https://github.com/OWASP/ASVS/blame/4bdb7500839b9ca88c2165c1cafa69a2ff7bf16d/4.0/en/0x11-V2-Authentication.md)** | Verify that integration secrets do not rely on unchanging passwords, such as API keys or shared privileged accounts. | Software | OS assisted | HSM | 5.1.1.1 |\r\n| **[2.11.1](https://github.com/OWASP/ASVS/blame/ff6ae74f7f411bfb43af5bc9c25e7929a1ea05dc/4.0/en/0x11-V2-Authentication.md)** | Integration secrets SHOULD NOT rely on unchanging passwords, such as API keys or shared privileged accounts. | Software | OS assisted | HSM | 5.1.1.1 |\r\n| **[2.11.1](https://github.com/OWASP/ASVS/blame/72640d48efacdb2902eba5494b9d50a3e733cac2/4.0/en/0x11-V2-Authentication.md)** | Integration secrets SHOULD NOT rely on unchanging passwords, such as API keys or shared privileged accounts. If passwords are required, the credential should not be a default account and stored with sufficient protection to prevent offline recovery attacks, including local system access. | Software | OS assisted | HSM | 5.1.1.1 |\r\n| **[2.21](https://github.com/OWASP/ASVS/blame/134fc631f173d0abd1da60ec9937fc1a866d1baa/4.0/en/0x11-V2-Authentication.md)** | Integration secrets SHOULD NOT rely on unchanging memorized secrets, such as API keys or shared privileged accounts. If memorized secrets are required, the credential should not be a default account, and stored with sufficient protection to prevent offline recovery attacks, including local system access. | Software | OS assisted | HSM | 5.1.1.1 |\r\n| **[2.21](https://github.com/OWASP/ASVS/blame/e5a2e56993c560c51a16d4c93b05d557530cab2b/4.0/en/0x11-V2-Authentication.md#L34)** | Integration memorized secrets SHOULD NOT rely on unchanging memorized secrets, such as API keys or shared privileged accounts. If memorized secrets are required, the credential should not be a default account, and stored with sufficient protection to prevent offline recovery attacks, including local system access. | Software | OS assisted | HSM | 4.0 | 5.1.1.1 |\r\n\r\nFrom [Andrew's deck](https://appsecg.host/asvsdeck#86): \r\n![image](https://github.com/OWASP/ASVS/assets/13623828/36d5d756-e160-4913-b1ce-a72640f38004)\r\n",
+      "createdAt": "2023-05-23T11:03:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1559068315",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c7Z4c",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> PS: and isn't 2.10.4 overlapping with 6.4.1? But that would be a separate issue to discuss.\r\n> \r\n> 6.4.1 | [MODIFIED] Verify that a secrets management solution  such as a key vault is used to securely create, store, control access > to  and destroy secrets such as service account or 3rd party application  credentials. (C8) |   | ✓ | ✓ | 798\r\n> -- | -- | -- | -- | -- | --\r\n\r\n@sseelmann please can you open a separate issue to discuss if one does not already exist",
+      "createdAt": "2023-05-23T11:07:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1559076380",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c7eh2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Verify that service authentication uses either ...\r\n> \r\n> I think we should have a requirement that requires authentication between services.\r\n> \r\n\r\nYou mean an extra requirement \"before\" this one that just requires intro-service authentication? \r\n\r\n> > either mTLS or a credential\r\n> \r\n> I think other methods of authentication are also acceptable. Although \"a credential\" can of course mean a certificate or a JWT or anything.\r\n> \r\n\r\nWhat other methods of authentication? \"Credential\" is pretty flexible wording...\r\n\r\n> > which is unique to that service and rotatable\r\n> \r\n> This should perhaps be moved to a more general requirement. All the secrets that the application uses itself should be unique, rotatable, non-default (2.10.2), etc.\r\n> \r\n\r\nYeah, I hear that... It's like a catch-all requirement\r\n\r\n> > Where supported\r\n> \r\n> This is a pretty big escape hatch, if the developing party is developing both services that communicate with each other. They can choose to not support this.\r\n> \r\n\r\nI think they would need to demonstrate why that cannot be supported...\r\n\r\n> > temporary session tokens should be generated and used instead of sending the credential on each connection.\r\n> \r\n> I don't understand this. Why would this be better?\r\n\r\nTemp session tokens are better than sending a credential each time. This is how OAuth2/OpenID service to service authentication is supposed to work.\r\n\r\n@Sjord do you think you could propose alternative wording.",
+      "createdAt": "2023-05-23T11:19:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1559095414",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mfBL4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Related, potential duplicate requirement: https://github.com/OWASP/ASVS/issues/1522",
+      "createdAt": "2023-09-14T13:00:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1719407352",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtCpE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "hi @Sjord, any thoughts on my comment here: https://github.com/OWASP/ASVS/issues/1032#issuecomment-1559095414",
+      "createdAt": "2023-09-18T09:50:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723083332",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtMmA",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "No, I don't really have anything to add other than what I already described above.",
+      "createdAt": "2023-09-18T10:19:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723124096",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muAg8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\r\nOk so @Sjord @elarlang what do you think about this:\r\n\r\n> Verify that service authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and rotatable. If a credential is being used, temporary session tokens should be generated and used instead of sending the credential on each connection.\r\n\r\n",
+      "createdAt": "2023-09-18T12:46:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723336764",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muD8-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Temp session tokens are better than sending a credential each time. This is how OAuth2/OpenID service to service authentication is supposed to work.\r\n\r\nIf an application uses authentication for every request does it make \"not valid\"? Maybe \"can be\" instead of \"should be\"?",
+      "createdAt": "2023-09-18T12:55:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723350846",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muLih",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe: \r\n\r\n> Verify that service authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and rotatable. If a credential is being used, temporary session tokens should be generated and used instead of sending the credential on each connection **unless there is a good reason why this is not possible**.\r\n",
+      "createdAt": "2023-09-18T13:11:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723381921",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muOK4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As a developer I want to ask - what is the good reason why I need to use sessions in this situation?\r\n\r\nI think we need to be clear with that.",
+      "createdAt": "2023-09-18T13:17:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723392696",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muSEA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So my preferred wording would be \r\n\r\n> Verify that service authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and rotatable. If a credential is being used, temporary session tokens should be generated and used instead of sending the credential on each connection **unless there is not supported by the 3rd party**.\r\n\r\nBut @Sjord was [worried this was too easy to get out of...](https://github.com/OWASP/ASVS/issues/1032#issuecomment-1398224522)\r\n",
+      "createdAt": "2023-09-18T13:27:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723408640",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mvXJU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I re-read entire communication here... and it did not help.\r\n\r\nI think we need to make clear wording - is the requirement for the application which providing the machine-to-machine service or the one who is using it.\r\n\r\nIf it is for using, then how much there is for the application to say, how the communication should be done - it just can use whatever way it is provided. Or should we have requirement to set some limitation here?\r\n\r\nI don't see the reason, why you need to have creating a session overhead for every situation. It makes sense when you have multiple requests to handle with the same client over short period of time. But if it's some data sync once per day and it's done with one request, do I really need to have this session overhead?",
+      "createdAt": "2023-09-18T15:19:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723691604",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nF3BQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I re-read entire communication here... and it did not help.\r\n> \r\n> I think we need to make clear wording - is the requirement for the application which providing the machine-to-machine service or the one who is using it.\r\n> \r\n> If it is for using, then how much there is for the application to say, how the communication should be done - it just can use whatever way it is provided. Or should we have requirement to set some limitation here?\r\n\r\nOK so I see your point about making this clearer. What do you think about the following reword/split?\r\n\r\n- Verify that **for a service designed to be consumed by other services**, authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and rotatable. If a credential is being used, temporary session tokens should be generated and used instead of the consumer sending the credential on each connection.\r\n- **Verify that consumers of a service are configured to use the most secure authentication option provided by the service being consumed.**\r\n\r\n\r\n> I don't see the reason, why you need to have creating a session overhead for every situation. It makes sense when you have multiple requests to handle with the same client over short period of time. But if it's some data sync once per day and it's done with one request, do I really need to have this session overhead?\r\n\r\nI see your point but I think that is leading practice for service to service authentication, e.g. using OIDC and we should mandate it in particular for service developers (rather than service consumers).",
+      "createdAt": "2023-09-21T13:28:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1729589328",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nLfyp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The wording is nice and clear to separate consuming and providing a service.\r\n\r\n> If a credential is being used, temporary session tokens should be generated and used instead of the consumer sending the credential on each connection.\r\n\r\nhow it increases the risk if it is not done that way?",
+      "createdAt": "2023-09-22T08:59:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1731067049",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nM5Pz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> The wording is nice and clear to separate consuming and providing a service.\r\n> \r\n> > If a credential is being used, temporary session tokens should be generated and used instead of the consumer sending the credential on each connection.\r\n> \r\n> how it increases the risk if it is not done that way?\r\n\r\nMore chance of credential exposure.",
+      "createdAt": "2023-09-22T13:36:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1731433459",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nM_Kb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do I missing something here?\r\n\r\nSolution a)\r\n\r\n1. A makes request to service B, request also contains credentials\r\n2. B validates credentials (authentication) and gives response\r\n\r\n\r\nSolution b)\r\n\r\n1. A makes authentication request to service B - sending credentials\r\n2. B validates credentials (authentication) and gives back session token\r\n3. A makes request to service B, request also contains session token\r\n4. B validates session token and gives back response\r\n\r\n\r\nHow solution a is worse and gives more opportunities to leak credentials?",
+      "createdAt": "2023-09-22T13:50:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1731457691",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ncUIA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You are correct if this is just one communication. However, if there will be multiple communications between A and B then this makes a difference.",
+      "createdAt": "2023-09-26T12:47:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1735475712",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ncWRU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> You are correct if this is just one communication. However, if there will be multiple communications between A and B then this makes a difference.\r\n\r\n... and this was exactly what I pointed out here: https://github.com/OWASP/ASVS/issues/1032#issuecomment-1723691604\r\n\r\n> I don't see the reason, why you need to have **creating a session overhead for every situation**. It makes sense when you have multiple requests to handle with the same client over short period of time. But if it's some data sync once per day and it's done with one request, do I really need to have this session overhead?",
+      "createdAt": "2023-09-26T12:52:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1735484500",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ndjIg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so we could do this but I am not sure it is ideal:\r\n\r\n> Verify that for a service designed to be consumed by other services, authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and rotatable. If a credential is being used **and interaction with the service involves more than one connection per session**, temporary session tokens should be generated and used instead of the consumer sending the credential on each connection.\r\n>\r\n> Verify that consumers of a service are configured to use the most secure authentication option provided by the service being consumed.\r\n\r\nThoughts @elarlang ?",
+      "createdAt": "2023-09-26T15:38:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1735799328",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5neLHE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Now the points are kind of covered but it makes the requirement text awful.\r\n\r\nBack to the point. The reason for the change is \"avoid leaking credentials\". Credentials are changed between parties anyway, now there is question - how often those are changed. In a bit longer time-window, if an attacker reach to accesses to steal machine-to-machine session tokens, an attacker can also steal credentials. So I can not see any huge benefits for it and my question is - is this finetuning actually level 2 material or it should be separate requirement for level 3?",
+      "createdAt": "2023-09-26T17:16:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1735963076",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nhcT5",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> You are correct if this is just one communication. However, if there will be multiple communications between A and B then this makes a difference.\r\n\r\nI disagree. This assumes that the chance that credentials are intercepted scales linearly with the number of times it is communicated. That there is some probability *per message* that it gets intercepted. I think this is incorrect. I think a TLS connection is almost perfectly secure. When it isn't secure, an attacker can probably decrypt all traffic and just wait around for credentials. They can probably distinguish the credentials exchange from other messages by size alone, and can choose to decrypt the correct message.",
+      "createdAt": "2023-09-27T07:03:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1736819961",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nheh-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agree with @Sjord - for three reasons:\r\n\r\n1) When you use credentials _per messsage_, you are using them frequently, and if stolen they have persistent attack value. If a token is stolen, it's only useful for the length of the token life, which is usually a LOT LESS than the credential lifetime.\r\n\r\n2) Tokens can be scoped to only provide the permissions necessary for the task at hand. Credentials, on the other hand, are all-or-nothing. If they're compromised, the attacker has the keys to the kingdom.\r\n\r\n3) Revocation: If a token is compromised, you can easily revoke it without affecting other services or users. With credentials, you'd have to change the password, update it everywhere it's used, and potentially force a password reset for all users.",
+      "createdAt": "2023-09-27T07:10:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1736829054",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5niomx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Back to the point. The reason for the change is \"avoid leaking credentials\". Credentials are changed between parties anyway, now there is question - how often those are changed. In a bit longer time-window, if an attacker reach to accesses to steal machine-to-machine session tokens, an attacker can also steal credentials. So I can not see any huge benefits for it and my question is - is this finetuning actually level 2 material or it should be separate requirement for level 3?\r\n\r\nI think that service to service credentials are always going to be a headache to change and so that should be avoided wherever possible. I also agree with the points from @jmanico and @Sjord.\r\n\r\nI accept that service to service is theoretically less exposed but we want to set out leading practice which in this case is to have a session mechanism.\r\n\r\nIn terms of the messy requirements, I guess we could do the following:\r\n\r\n> Verify that for a service designed to be consumed by other services, authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and rotatable\r\n> Verify that if a credential is being used for a service and interaction with the service involves more than one connection per session, temporary session tokens should be generated and used instead of the consumer sending the credential on each connection.\r\n> Verify that consumers of a service are configured to use the most secure authentication option provided by the service being consumed.\r\n",
+      "createdAt": "2023-09-27T10:29:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1737132465",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nipJr",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it when @tghosth agrees with me almost as much as I enjoy it when @elarlang disagrees with me!\r\n\r\n<3",
+      "createdAt": "2023-09-27T10:31:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "CONFUSED",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1737134699",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5npBu5",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I see your point but I think that is leading practice for service to service authentication, e.g. using OIDC and we should mandate it in particular for service developers (rather than service consumers).\r\n\r\n> I accept that service to service is theoretically less exposed but we want to set out leading practice which in this case is to have a session mechanism.\r\n\r\n@tghosth What do you mean by \"leading practice\"? Why is a session mechanism a leading practice?\r\n\r\nI think that each of us imagines a different kind of service, and that contributes to miscommunication. I think of a web application and its database server. Others seem to think of different web applications talking to each other, or even a public web API. Which kind of service you are thinking about is important for the ease of credential rotation, whether is supports sessions or OIDC, and the relative risk between session tokens and other credentials. I wouldn't want OIDC for my database server, changing the credentials is easy, and session tokens wouldn't improve security significantly if I sent the credentials anyway on each page load.",
+      "createdAt": "2023-09-28T09:33:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1738808249",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5npGHN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord I take your point but bear in mind that having short lived credentials for databases is in fact possible, see this example here:\r\nhttps://developer.hashicorp.com/vault/docs/secrets/databases\r\n\r\nYou could also use certificate auth with a database.\r\n\r\nSo whilst I accept that not all service to service connections are the same, I still think that expecting a more modern authentication mechanism is not unreasonable.\r\n",
+      "createdAt": "2023-09-28T09:45:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1738826189",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xuB-I",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So we have 3 proposed requirements intended to replace [2.10.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v210-service-authentication)\r\n\r\n> Verify that for a service designed to be consumed by other services, authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and rotatable.\r\n\r\nI think this is highly sensible and should be added.\r\n\r\n> Verify that if a credential is being used for a service and interaction with the service involves more than one connection per session, temporary session tokens should be generated and used instead of the consumer sending the credential on each connection.\r\n\r\nI am starting to feel like this is a little too complex...\r\n\r\n> Verify that consumers of a service are configured to use the most secure authentication option provided by the service being consumed.\r\n\r\nIf we skip the next one, maybe we can make do with this one instead.\r\n\r\n\r\nThoughts @Sjord @elarlang \r\n\r\nOtherwise my next step is to open a PR",
+      "createdAt": "2024-01-24T10:56:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1907892104",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xvMOx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "* how do you define and verify a \"rotatable\" password?\r\n* \"Should\" sounds like a recommendation, not a requirement\r\n* not actionable for me. What is the \"most secure option\"?",
+      "createdAt": "2024-01-24T14:08:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1908196273",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x1qio",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "---\r\n\r\n> > Verify that for a service designed to be consumed by other services, authentication uses either mTLS or a credential (such as an API key or password) which is unique to that service and for which a plan exists (ideally automated) to rotate the credential.\r\n\r\n> I think this is highly sensible and should be added.\r\n\r\n_how do you define and verify a \"rotatable\" password?_\r\n\r\nDo you think this is clearer?\r\n\r\n---\r\n\r\n> > Verify that if a credential is being used for a service and interaction with the service involves more than one connection per session, temporary session tokens are generated and used instead of the consumer sending the credential on each connection.\r\n\r\n> I am starting to feel like this is a little too complex...\r\n\r\n_\"Should\" sounds like a recommendation, not a requirement_\r\n\r\nTo be clear, I think maybe we should just not include this one at all. I got rid of \"should\" anyway.\r\n\r\n---\r\n\r\n> > Verify that consumers of a service are configured to use the most secure authentication option provided by the service being consumed.\r\n\r\n> If we skip the next one, maybe we can make do with this one instead.\r\n\r\n_not actionable for me. What is the \"most secure option\"?_\r\n\r\nThis is one of those situations where the app owner doesn't control the service but they control how they use the service. As such, I don't know what the most secure mechanism is in each case, it may be that the service only supports a static API key. We can't stop them using the service but if it supports an API key and alternatively mTLS, we can say use the more secure mechanism (mTLS).\r\n\r\nDo you think we should define a hierarchy of preference such as mTLS > ephermeral credential >credentials + session token > fixed credentials? @elarlang \r\n\r\n---\r\n\r\n",
+      "createdAt": "2024-01-25T10:43:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1909893288",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zRcI7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Updated wording for discussion:\r\n\r\nReq1:\r\n\r\n> Verify that for a service designed to be consumed by other services, authentication uses either mTLS or offers a session mechanism to avoid use of fixed credentials each time.\r\n\r\nReq2:\r\n\r\nGet in the bin\r\n\r\nReq3:\r\n\r\n> Verify that consumers of a service are configured to use an authentication option which is more secure than fixed credentials (such as mTLS, temporary or ephemeral credentials, or fixed credentials plus a session mechanism) where this option is provided by the service being consumed.\r\n\r\nMake it L3.",
+      "createdAt": "2024-02-08T11:50:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1933951547",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zRcM1",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang to review the updated wording.",
+      "createdAt": "2024-02-08T11:50:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1933951797",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zTKWU",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> which is more secure than fixed credentials (such as mTLS, temporary or ephemeral credentials, or fixed credentials plus a session mechanism)\r\n\r\nI think requiring something to be \"more secure than\" already requires security knowledge. It explains security in terms of itself.\r\n\r\nAlso, I know something about security and I still don't understand why a session mechanism is more secure than fixed credentials.",
+      "createdAt": "2024-02-08T15:44:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1934402964",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zTLn_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Also, I know something about security and I still don't understand why a session mechanism is more secure than fixed credentials.\r\n\r\nsession theft ends when that session goes idle or gets logged out of, and events that require re-authentication are a good blocked when I popped your session but dont have your creds.\r\n\r\ncredential theft is usually full account compromise forever\r\n\r\nBoth are nasty, but credential theft is way worse. Especially when no MFA is in play.",
+      "createdAt": "2024-02-08T15:46:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1934408191",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zTQPf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > which is more secure than fixed credentials (such as mTLS, temporary or ephemeral credentials, or fixed credentials plus a session mechanism)\r\n> \r\n> I think requiring something to be \"more secure than\" already requires security knowledge. It explains security in terms of itself.\r\n> \r\n> Also, I know something about security and I still don't understand why a session mechanism is more secure than fixed credentials.\r\n\r\nWhilst it is less concerning for service to service components, fixed credentials are still more exposed than a session mechanism.",
+      "createdAt": "2024-02-08T15:55:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1934427103",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zTRdo",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In #1858, @jmanico noted:\r\n\r\n\r\n> I suggest we change \"user accounts\" to \"service accounts\" based on the context of this requirement.\r\n> \r\n> | # | Description | L1 | L2 | L3 | CWE |\r\n> | :---: | :--- | :---: | :---: | :---: | :---: |\r\n> | **1.2.2** | [MODIFIED] Verify that communications between back-end application components, including APIs, middleware and data layers, are authenticated and use individual user accounts. ([C3](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 306 |\r\n\r\nAnd @elarlang noted:\r\n\r\n> As it is implementation requirement, it should be moved away from V1 category.\r\n> \r\n> But what exact attack scenario or weakness does the requirement address?\r\n> \r\n> Not all services require authentication.\r\n> \r\n> What is accepted authentication? Basic auth vs some application logic for auth vs certificate...\r\n\r\nPersonally, I think this feels like duplication with the modified requirements I drafted above https://github.com/OWASP/ASVS/issues/1032#issuecomment-1933951547 which are based on 2.10.1 so I would be tempted to remove it altogether.\r\n\r\nWhat do people think?",
+      "createdAt": "2024-02-08T15:58:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1934432104",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zTel8",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agree this is a duplicate",
+      "createdAt": "2024-02-08T16:24:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1934485884",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zu97Y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so current proposal is as my comment here: https://github.com/OWASP/ASVS/issues/1032#issuecomment-1933951547\r\n\r\nplus, remove requirement 1.2.2 https://github.com/OWASP/ASVS/issues/1032#issuecomment-1934432104",
+      "createdAt": "2024-02-13T14:53:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1941692120",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zvZ1J",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think fixed API keys are fine. GitHub, GitLab, and AWS apparently think API keys are fine. I asked several times why a session mechanism would be more secure than API keys. I received some responses to this, but I am still not convinced. Arguments against API keys given above feel pretty handwavy to me. The proposal of @tghosth assumes that it is very clear that some things are \"more secure than\" fixed credentials, but this is not clear to me.\r\n\r\nThis doesn't feel ready for a PR to me. My main problem is not that we disagree, but that I don't understand the motivation to disallow API keys. I think other users of the ASVS would have an even harder time understanding it.\r\n\r\n> when I popped your session but dont have your creds\r\n\r\nWhat is an attack scenario where an attacker can access the session token but not the credentials that started that session?\r\n\r\n\r\n",
+      "createdAt": "2024-02-13T15:36:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1941806409",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM50T1QK",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What is an attack scenario where an attacker can access the session token but not the credentials that started that session?\r\n\r\nFixed credentials are used on every single API request whereas with a session mechanism the credential on an individual request is shorter lived. If an attacker gets access to an individual request, (log files, fluke interception, etc) they don't get access to the fixed credentials.\r\n\r\nAPIs which support OIDC would support this requirement as the client will generally go through the OIDC process to authenticate and then use an access token.\r\n\r\nI do accept that this seems to be a less popular approach. It looks like AWS does this with [STS](https://docs.aws.amazon.com/STS/latest/APIReference/welcome.html). On the other hand, even Github seems to use some sort of fixed credentials for their API.\r\n\r\n\r\nWe currently have two proposed requirements to replace the existing one:\r\n\r\nAimed at service creators:\r\n\r\n> Verify that for a service designed to be consumed by other services, authentication uses either mTLS or offers a session mechanism to avoid use of fixed credentials each time.\r\n\r\nAimed at service consumers (L3 proposed):\r\n\r\n> Verify that consumers of a service are configured to use an authentication option which is more secure than fixed credentials (such as mTLS, temporary or ephemeral credentials, or fixed credentials plus a session mechanism) where this option is provided by the service being consumed.\r\n\r\n\r\nI think in both cases, they explain what is considered more secure so I guess the question is whether you have a problem with one or both and how we can bridge that gap @Sjord .",
+      "createdAt": "2024-02-18T15:18:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1951355914",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM50dwOr",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "You argue that the impact is lower if the attacker has access to a session token instead of an API key. Regardless as whether that is true or not, that is not the whole picture.\r\n\r\nWe don't control what data the attacker compromises. Using session tokens does not mean that the credentials are now necessarily more secure. An application can put credentials in a log file whether it uses a session mechanism or not.\r\n\r\nRisk does not only consist of impact but also of probability. The probability that either the session token or the credentials are exposed is very small. I don't think the probability of credentials being intercepted scales linearly with the number of times they are used. In my opinion, it does not make much sense to reduce the number of times credentials are used.\r\n\r\nThe cost of a session mechanism is non-zero, both in terms of performance as in security. It adds multiple round trips to set up and tear down the session. It also requires keeping state, or doing cryptography, to manage session tokens. This can introduce additional bugs.\r\n\r\nA world where an attacker has a session token may be preferable to a world where they have an API key. But that is not sufficient to say that session tokens are more secure than API keys.\r\n\r\n> If an attacker gets access to an individual request\r\n\r\nThis is not part of my threat model, and probably also not of ASVS threat model. We don't propose to do client-side password hashing, for example.\r\n\r\n> the question is whether you have a problem with one or both and how we can bridge that gap\r\n\r\nI have a problem with both. I think you need to have a good reason to disallow fixed API keys. The current motivation seems insufficient to me.\r\n\r\nWhat could possibly convince me are examples of attacks that would have been prevented by these requirements, or more arguments about the probability and attack scenarios and why the costs of a session mechanism way up against the risk.",
+      "createdAt": "2024-02-20T10:54:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-1953956779",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55NdZ_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> You argue that the impact is lower if the attacker has access to a session token instead of an API key. Regardless as whether that is true or not, that is not the whole picture.\r\n>\r\n> We don't control what data the attacker compromises. Using session tokens does not mean that the credentials are now necessarily more secure. An application can put credentials in a log file whether it uses a session mechanism or not.\r\n\r\nYes but it is a lot less likely if they are just using the credentials infrequently to generate the session as opposed to sending the credential on every request.\r\n\r\n> Risk does not only consist of impact but also of probability. The probability that either the session token or the credentials are exposed is very small. I don't think the probability of credentials being intercepted scales linearly with the number of times they are used. In my opinion, it does not make much sense to reduce the number of times credentials are used.\r\n\r\nThere are also options such as mTLS or locally generated in which the credentials are never transmitted so the probability of exposure in transit or in request leakage becomes zero.\r\n\r\n> The cost of a session mechanism is non-zero, both in terms of performance as in security. It adds multiple round trips to set up and tear down the session. It also requires keeping state, or doing cryptography, to manage session tokens. This can introduce additional bugs.\r\n\r\nThis depends on the implementation and certainly this is a well explored problem with minimal need to reinvent the wheel.\r\n\r\n> A world where an attacker has a session token may be preferable to a world where they have an API key. But that is not sufficient to say that session tokens are more secure than API keys.\r\n\r\nThey are certainly more secure in isolation. I think your point is more a question of does it justify the investment and what is the risk of other security vulnerabilities arising in the session mechanism. I think that having this as a L2 or L3 requirement reflects that trade off.\r\n\r\n>> If an attacker gets access to an individual request\r\n\r\n> This is not part of my threat model, and probably also not of ASVS threat model. We don't propose to do client-side password hashing, for example.\r\n\r\nI think I didn't explain myself clearly. My point is that with static keys, it is enough for an attacker to gain access to any individual request out of the 10s or 100s of requests which are sent to the API. If we are not using static keys then the attacker either has to gain access to the specific authentication request or there may be no authentication request to gain access to in the first place.\r\n\r\n> What could possibly convince me are examples of attacks that would have been prevented by these requirements, or more arguments about the probability and attack scenarios and why the costs of a session mechanism way up against the risk.\r\n\r\nLeakage of sensitive data into logs is endemic and often a hard problem to solve. With static keys this is potentially even more problematic because even if a request body is not being logged then the headers may well be (where the fixed key will almost certainly be transmitted in a header).\r\n\r\nFor static keys there is also no defined standard for where they should be sent.\r\n\r\nFor example, in [this GitLab documentation](https://docs.gitlab.com/ee/api/rest/) a static key can be sent in the following locations which logging sanitization of secrets would potentially have to take into account:\r\n\r\n* A `private_token` query parameter\r\n* A `PRIVATE-TOKEN:` header\r\n* A `Authorization: Bearer` header\r\n* A `job_token`  query parameter\r\n* A `JOB-TOKEN:` header\r\n\r\nGitHub seems to have less token types and be more consistent on the use of an `Authorization:` header.\r\n\r\nIn summary, static API or intra-service secrets are significantly more exposed than other solutions. I don't think it is unreasonable to have an L2 or L3 requirement on service creators for a more secure mechanism. I also don't think it is unreasonable to have a L3 on service consumers to use the most secure method available.\r\n",
+      "createdAt": "2024-04-03T05:38:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2033571455",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM55ODb8",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Yes but it is a lot less likely if they are just using the credentials infrequently\r\n\r\n> My point is that with static keys, it is enough for an attacker to gain access to any individual request out of the 10s or 100s of requests which are sent to the API. If we are not using static keys then the attacker either has to gain access to the specific authentication request\r\n\r\nYou seem to suggest that if you only send the credentials in 1% of the requests, the chance of compromise is reduced by ~100. Is that correct? This assumes that there is a non-zero per-message probability that it is compromised. I don't think that's true.\r\n\r\nI consider TLS connections perfectly secure. I don't think it's possible \"for an attacker to gain access to any individual request\". Even if TLS weren't secure, the connection would be compromised, not a single HTTP interaction. In practice, f there is some TLS bug or misconfigurations, probably all connections would be compromised.\r\n\r\nBoth session tokens and credentials are being logged. You can log credentials, whether you use sessions or not. I am not sure that using sessions reduces the chance of logging credentials. If a log is compromised, it probably contains both the setup and use of the session.\r\n\r\nI don't think it is as simple that using credentials less often directly reduces the risk that they are compromised.",
+      "createdAt": "2024-04-03T07:13:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2033727228",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55OiDU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Feels in the loop...\r\n\r\nI'm not convinced we need it as a requirement, it seems to be so edge-case and 2nd or 3rd layer of defense. From the ASVS side, the risk for me is - if we put this as a requirement to solve one certain problem for some edge-case scenario, we create a rule that is not suitable or is not really needed for other situations. But, maybe I missed something.\r\n\r\n* The likelihood - What an attacker must achieve first that this defense comes into play?\r\n* Is it reasonable - What risk does it solve vs what risk does it create to implement it?\r\n* Limitations - What are the situations and solutions it is suitable and what are situations and solutions where is it not suitable?",
+      "createdAt": "2024-04-03T08:09:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2033852628",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55P-oz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Likelihood\n\nFor this defense mechanism to be relevant, an attacker must have gained a level of access or visibility into the system that allows them to intercept or access static credentials. This could involve:Network sniffing or man-in-the-middle attacks to intercept credentials in transit. Accessing improperly secured storage where credentials are kept. Exploiting a vulnerability in one of the services that exposes sensitive information. The likelihood is tied to the assumption that the attacker is either within the network or has compromised a component of the system to a degree where they can attempt to access or intercept credentials. \n\nWhat risk does it solve vs. what risk does it create to implement it?\n\nSolves: Reduces the risk of credential compromise by ensuring that credentials are not static and are difficult to reuse even if they are intercepted. Limits the time window an attacker has to exploit stolen credentials. Increases the complexity of targeted attacks, as attackers must constantly gain access to the updated credentials.\n\nCreates: Implementation complexity, including the need for a secure and robust system to manage the rotation and distribution of credentials. Potential performance overhead due to more frequent authentication processes. The risk of system outages or service disruptions if the dynamic secret management system fails or if there are synchronization issues.\n\nSituations and solutions it is suitable for:\n\nHigh-security environments where the risk of internal or sophisticated external attacks is significant. Systems that are already employing layered security measures and where the infrastructure supports secure secret management solutions (e.g., services with built-in support for secret rotation and management like AWS Secrets Manager, HashiCorp Vault).\n\nSituations and solutions where it is not suitable:\n\nSmall-scale or low-risk environments where the implementation overhead does not justify the security benefits. Legacy systems that cannot support dynamic secrets management without significant refactoring. Environments where the operational complexity and cost of managing dynamic secrets outweigh the potential security benefits.\n\nIn essence, while rotating intra-service secrets can significantly enhance security, it requires a careful balance between security benefits and operational feasibility. The decision to implement such a measure should be based on a thorough risk assessment, considering the specific threats, security posture, and operational capabilities of the organization.",
+      "createdAt": "2024-04-03T10:48:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2034231859",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55QEF0",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thanks for sharing a very interesting discussion, I hope this will contribute! \r\n\r\nWhen my colleagues and I do security reviews and advise customers on service-to-service communication (without user interaction) we often highlight the risk of not rotating secrets.\r\n\r\nHaving a plan for rotating secrets (\"service credentials\", not personal user passwords) is important for secure service integrations over time and I believe it would be a good thing if ASVS included a requirement for that (perhaps L2 or L3).\r\n\r\nIf a secret is well-protected and there are additional layers of defense, like least privilege secret scope, proper network segmentation, end-to-end securely configured TLS, monitoring and alarms on secret usage, then you could argue that a particular secret could be rotated less frequently, compared to a powerful secret for a service accessible from public internet (without additional defenses.) \r\n\r\nBut (I my opinion) all secrets should have an expiration and rotation plan (at least for L3.) In example this is recommended/required for all secrets managed in services like Azure Key Vault\r\nhttps://learn.microsoft.com/en-us/azure/governance/policy/samples/cis-azure-1-1-0#ensure-that-the-expiration-date-is-set-on-all-secrets \r\n\r\nGiven this background and experiences, I have always interpreted that the key aspect of 2.10.1 is \"unchanging\", so a suggestion is to have a L2 or L3 requirement in ASVS that more clearly capture that, like this:\r\n\r\n\"Verify that for all secrets (except personal user account passwords) there is a plan to rotate the secret according to applicable threat models, policies and requirements. \" \r\n\r\nThis does not address the \"how often\" question, as it depends...and is hard to express in a good way, for some scenarios a reasonable plan might be once a year or when someone leaves the group having access to the key (as part of an off-boarding procedure)\r\n\r\nHope this was good input! ",
+      "createdAt": "2024-04-03T10:59:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2034254196",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55QMe-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Seems, that Jim's chatbot kind of agrees with my views.\r\n\r\n@tghosth - the discussion here is quite long and contains many different topics (sessions, rotating creds, etc). Just in case please repeat your latest proposals, to be sure that everyone is talking about and commenting on the same thing.",
+      "createdAt": "2024-04-03T11:13:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2034288574",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55YQSE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some comments from Twitter:\r\n\r\n---\r\n\r\n> Client Assertion Grant....can be used e2e without the issues we see with mTLS termination gaps\r\n> And get Vault to manage the short lived certs\r\n\r\nhttps://twitter.com/j_w_holland/status/1775519957964460360\r\n\r\n---\r\n\r\n> I think it is a relatively useless debate. Risk appropriate secrets management is the control. Static keys in code are bad. Static restricted per application keys pulled from a vault as needed are not the same thing.\r\n\r\nhttps://twitter.com/wimremes/status/1775419262934352068\r\n\r\n---\r\n\r\n> Asymmetrical signed JWT + JWKS, with auto key pair rotation monthly + a NONCE claim attribute (ideally).\r\n\r\nhttps://twitter.com/darraghduffy/status/1775633935365472590\r\n\r\n---",
+      "createdAt": "2024-04-04T07:31:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2036401284",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SvTt0",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to close this as it seems it has been resolved. @tghosth ",
+      "createdAt": "2024-11-07T10:32:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2461875060",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SveKg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The text is currently as follows. If there are still concerns, ping me here and I will reopen:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.7.1** | [MODIFIED, MOVED FROM 2.10.1, MERGED FROM 1.2.2] Verify that communications between back-end application components which don't support the application's standard user session mechanism, including APIs, middleware and data layers, are authenticated. Authentication should use individual service accounts, short-term tokens or certificate based authentication and not unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 |",
+      "createdAt": "2024-11-07T10:51:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1032#issuecomment-2461917856",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-07-08T13:35:04Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1032,
+  "state": "CLOSED",
+  "title": "2.10.1 Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys",
+  "url": "https://github.com/OWASP/ASVS/issues/1032"
+}

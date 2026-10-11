@@ -1,0 +1,183 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "The following verifications are suggested to be added for the client to the proposed new OIDC chapter (see #2037).\r\n\r\n\r\n## Client\r\n\r\nVerify that in addition to regular JWT validation, ID tokens are validated to have 'aud' equal to the client id and a short lifetime (e g 1 minute).\r\n\r\nVerify that if the 'id-token' grant is used then nonce validation must be performed on authorization respones.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6KfeAk",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "FWIW, Keycloak, for example, currently sends ID token which are valid for 5 minutes by default. 1 minute might be a little bit drastic. While I agree that ID tokens are expected to be short-lived, adding this verification might lead to broken OIDC communications.\r\n\r\nWhat is the intend of this verification *in the client*? If the goal is to avoid ID token reuse, would it be better to request a fresh enough OIDC in the client (using the `max_age` parameter) and checking that the ID token `auth_time` is consistent?\r\n",
+      "createdAt": "2024-09-01T21:34:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2323505188",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MFZ_3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that in addition to regular JWT validation, ID tokens are validated to have 'aud' equal to the client id and a short lifetime (e g 1 minute).\r\n\r\n* \"_in addition to regular JWT validation_\" - this part does not give anything extra\r\n* checking aud and life-time are different checks and have different goal, so I think it makes sense to have separate requirement for them\r\n\r\nWordsmithing needed, but the style and direction should be:\r\n> Verify that the ID-token is made for the Client by validating the aud claim value to be equal with the client id.\r\n\r\nThe requirement expects client id to be unique, so that also sets one general requirement as pre-conditon:\r\n> Verify that OAuth / OIDC Client is unique and used only by the application.\r\n\r\nDiscussion for this should be carried here: https://github.com/OWASP/ASVS/issues/2043#issuecomment-2350412145\r\n\r\n---\r\n\r\nWhat problem we need to solve with short id-token lifetime? From where comes proposal for 1minute (is it backed up somewhere in RFC or OIDC spec)\r\n\r\n---\r\n> Verify that if the 'id-token' grant is used then nonce validation must be performed on authorization respones.\r\n\r\nIn case it is meant to be against replay attacks, then maybe\r\n\r\n> Verify that the application is protected against ID-token replay attacks by validating the nonce claim.\r\n\r\nWe have duplicate discussion over this in https://github.com/OWASP/ASVS/issues/2002",
+      "createdAt": "2024-09-13T21:11:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2350227447",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MIhCd",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> FWIW, Keycloak, for example, currently sends ID token which are valid for 5 minutes by default. 1 minute might be a little bit drastic. While I agree that ID tokens are expected to be short-lived, adding this verification might lead to broken OIDC communications.\r\n\r\n@randomstuff I agree on 5 min (not 1) e g Duende and Curity Identity Server also has 5 min as default for ID tokens. ",
+      "createdAt": "2024-09-14T15:55:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2351042717",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MIjOc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For documenting things - can you clarify the risk here as well - why it is important to have a short-lived ID-token and what security problem it solves?",
+      "createdAt": "2024-09-14T16:28:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2351051676",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKGBy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"Check the aud\" is also covered in:\r\n> 3.5.6 [ADDED] Verify that other, security-sensitive attributes of a stateless token are being verified. For example, in a JWT this may include issuer, subject, and audience.\r\n\r\nThe requirement itself is under discussion in #1967",
+      "createdAt": "2024-09-15T08:13:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2351456370",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKmEA",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> For documenting things - can you clarify the risk here as well - why it is important to have a short-lived ID-token and what security problem it solves?\r\n\r\nThis is to encourage the intended purpose of the ID token, as discussed in #2005, a short-lived ID token (with aud equal to the client id)  is harder to reuse as an access token, and ID tokens in particular are more often than access-tokens exposed to the front-end, i e when using the OIDC id-token or hybrid flow.\r\n\r\n> Verify that in addition to regular JWT validation, ID tokens are validated to have 'aud' equal to the client id and a short lifetime (e g 5 minutes)\r\n\r\nThis could be considered to detailed and covered (duplicated) by #2005 \r\n\r\n>Verify that tokens (such as ID tokens, access tokens and refresh tokens) can only be used according to their intended purpose without allowing cross-usage between them. In example ID tokens cam only be used to prove user authentication for the client.    ",
+      "createdAt": "2024-09-15T13:12:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2351587584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MldHb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that in addition to regular JWT validation, ID tokens are validated to have 'aud' equal to the client id and a short lifetime (e g 1 minute).\r\n\r\nPreviously linked #2005 is now in the document, but I'm not sure it covers the idea for this requirement.\r\n\r\nWe also have other issues:\r\n* #1826\r\n* #2003\r\n\r\n> Verify that if the 'id-token' grant is used then nonce validation must be performed on authorization respones.\r\n\r\nI think it is duplicate of issue #2002\r\n\r\nIf you agree that those topic are covered linked issues, we can close this one.",
+      "createdAt": "2024-09-18T14:26:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2358628827",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mn33I",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, I think this one can be closed since it is covered by #2002 and #2005",
+      "createdAt": "2024-09-18T19:38:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2048#issuecomment-2359262664",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-31T15:27:49Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2048,
+  "state": "CLOSED",
+  "title": "V51 OAuth: Add new OIDC Client verifications",
+  "url": "https://github.com/OWASP/ASVS/issues/2048"
+}

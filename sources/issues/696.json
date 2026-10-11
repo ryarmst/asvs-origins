@@ -1,0 +1,391 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirement:\r\n> V3.1.1 Verify the application never reveals session tokens in URL parameters or error messages. \r\n\r\nProblem 1: **URL parameters**\r\nIt's kind of points to GET parameters. If session token is presented as \"folder\", it's still the same problem.\r\n\r\nRecommendation:\r\n\"part of URL\" ?\r\n\r\nProblem 2: **error messages**\r\nI can not understand the reason here (it should be more clear).\r\n- if it actually means \"logging session id in error messages to logs\" it's covered by V7.1.1\r\n- error messages with technical details should not be displayed to end-user anyway (V7.4.*)\r\n- if it does not mean logging and just showing it to output - then it should be more abstract like \"HTTP response\". But this discussion converts to \"should javascript be able to read session token or not\"\r\n\r\nShould this / or separate requirement cover also situation, if application sends session tokens to 3rd party program (like sama user-interaction trackers) as plain-text?",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2Mjk4MjQ3MQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So regarding problem 2, when I think of this requirement, I always think of: https://auth0.com/docs/security/bulletins/cve-2019-7644 :)\r\n\r\nRegarding 1, have you ever seen a session token in a URL path? Seems a little odd, no?",
+      "createdAt": "2019-12-08T19:15:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-562982471",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2MzAwMjYxMw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "1. No, I have not seen. Yes, it seems odd. As every pen-tester probably have seen \"interesting solutions\" we may expect, it exists somewhere even we have not seen it YET. So I still recommend to make wording correctly.\r\n\r\n2. I would use V7.4.* for your example. My question is still the same: why to limit it to error messages? Why not HTTP response in general?",
+      "createdAt": "2019-12-08T22:24:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-563002613",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2ODI5Nzg0MQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "1. OK, I would be open to a PR with a suggestion.\r\n\r\n2. Saying you should not return session token in HTTP response is a bit too general I think, can you think of a more specific way of wording?",
+      "createdAt": "2019-12-22T19:49:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-568297841",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2ODMwMTY0NQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is to avoid session url rewriting which in turn can lead to session fixation \n\nAnd in general never putting any kind of sensitive data in any url (even over https) is a good practice \n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On Dec 22, 2019, at 2:49 PM, Josh Grossman <notifications@github.com> wrote:\n> \n> ﻿\n> OK, I would be open to a PR with a suggestion.\n> \n> Saying you should not return session token in HTTP response is a bit too general I think, can you think of a more specific way of wording?\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2019-12-22T20:46:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-568301645",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMTI1Mzc2Nw==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "hey @elarlang do you have any thoughts for a PR for 1) and more specific wording for 2)",
+      "createdAt": "2020-04-29T14:38:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-621253767",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyNjIzMTkwNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\r\n1) For presenting session token in URL would be probably something like:\r\n\r\n> V3.1.1 Verify the application never reveals session tokens as part of URL\r\n\r\n- it covers\r\n  - session token is not leaked by default to logs, to browser history etc\r\n  - potential referrer problem (but it should be covered with Referrer-Policy requirement)\r\n\r\nbut this part is duplicate for V8.3.1 (if we just say clearly that session token IS sensitive piece of information)\r\n\r\n> V8.3.1 Verify that sensitive data is sent to the server in the HTTP message body or headers, and that query string parameters from any HTTP verb do not contain sensitive data.\r\n\r\n\r\n2) ... or error messages\r\n\r\nthis is not clear or understandable for me, why to limit it only to error messages. What attack vector it takes away?\r\n\r\n- if the point is - session token should not be presented in error messages, it's covered by V7.1.1\r\n- if the point is - session token should not be presented to the output at all, then limiting to \"error messages\" does not make sense\r\n  - for example, to just display it to the output is ok by this requirement\r\n\r\nSo, for me it's not clear, what is the goal for this sentence and that's why I can not propose any PR yet.\r\n\r\nIn general - if we remove this \"error message\" part, then the requirement is \"in the URL is not ok but in message body is ok\" which also not true.\r\n\r\nIn practice, maybe we need to reorganise the idea for this requirement with V3.2.3.\r\n\r\n> V3.2.3 Verify the application only stores session tokens in the browser using secure methods such as appropriately secured cookies (see section 3.4) or HTML 5 session storage.\r\n\r\nIt has the same problem - use correct settings for cookie or use HTML5 session storage. And we reach to one setting - is HttpOnly flag for cookie important or not. In other words - should session token be readable for JavaScript or not. Should we have this extra mitigation for \"XSS situations\" or not. If you have XSS on site... your active session is usable for attacker via your browser anyway.\r\n\r\nI think, we need to check separately \"Cookie-based\" and \"Token-based\" session management for those requirements.\r\n\r\nIf we have \"Cookie-based Session management\"\r\n\r\n- V3.1.1 should have meaning \"do not use session token anywhere else then httponly flagged cookie\"\r\n- V3.2.3 should not allow using session token in session storage in this case\r\n\r\n\r\nIf we have \"Token-based Session management\"\r\n\r\n- V3.1.1 should have meaning \"do not spread session token to URL\"\r\n  - but if the value used by JavaScript with extra header (like Authorization) for API it is anyway readable for JavaScript, do you display it to the output does not even matter in practice\r\n  - meaning is covered by V8.3.1\r\n- V3.2.3 basically says, store it in session storage. But here is another conflict - if we consider session token as sensitive data, then it does not match with V8.2.2\r\n\r\n> V8.2.2 Verify that data stored in client side storage (such as HTML5 local storage, session storage, IndexedDB, regular cookies or Flash cookies) does not contain sensitive data or PII.\r\n\r\n\r\nAnd then there are solutions, where Token is used in cookie... where we should have question, do you use token-based session management correctly.\r\n\r\n\r\nMy current conclusions/ideas:\r\n\r\n- I don't see point for current V3.1.1\r\n  - if needed, modify \"V8.3.1 Verify that sensitive data (including session token) ...\"\r\n- I don't see point for current V3.2.3\r\n  - Add new requirement to Cookie-based Session Management with meaning \"session token is allowed to send only with httponly cookies\" (but isn't it too strict?)\r\n  - If token-based session should be able to use cookies, move current V3.2.3 to Token-based requirement. If token-based session should not use cookie, use only \"session storage part\" from V3.2.3",
+      "createdAt": "2020-05-09T20:34:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyNjIzMjI1Mw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "How about...\n\n... as part of a URL in any HTTP verb ...\n\nEven sensitive data in the URL target of a post or put request is a bad idea.\n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On May 9, 2020, at 4:34 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> For presenting session token in URL would be probably something like:\n> V3.1.1 Verify the application never reveals session tokens as part of URL\n> \n> it covers\n> session token is not leaked by default to logs, to browser history etc\n> potential referrer problem (but it should be covered with Referrer-Policy requirement)\n> but this part is duplicate for V8.3.1 (if we just say clearly that session token IS sensitive piece of information)\n> \n> V8.3.1 Verify that sensitive data is sent to the server in the HTTP message body or headers, and that query string parameters from any HTTP verb do not contain sensitive data.\n> \n> ... or error messages\n> this is not clear or understandable for me, why to limit it only to error messages. What attack vector it takes away?\n> \n> if the point is - session token should not be presented in error messages, it's covered by V7.1.1\n> if the point is - session token should not be presented to the output at all, then limiting to \"error messages\" does not make sense\n> for example, to just display it to the output is ok by this requirement\n> So, for me it's not clear, what is the goal for this sentence and that's why I can not propose any PR yet.\n> \n> In general - if we remove this \"error message\" part, then the requirement is \"in the URL is not ok but in message body is ok\" which also not true.\n> \n> In practice, maybe we need to reorganise the idea for this requirement with V3.2.3.\n> \n> V3.2.3 Verify the application only stores session tokens in the browser using secure methods such as appropriately secured cookies (see section 3.4) or HTML 5 session storage.\n> \n> It has the same problem - use correct settings for cookie or use HTML5 session storage. And we reach to one setting - is HttpOnly flag for cookie important or not. In other words - should session token be readable for JavaScript or not. Should we have this extra mitigation for \"XSS situations\" or not. If you have XSS on site... your active session is usable for attacker via your browser anyway.\n> \n> I think, we need to check separately \"Cookie-based\" and \"Token-based\" session management for those requirements.\n> \n> If we have \"Cookie-based Session management\"\n> \n> V3.1.1 should have meaning \"do not use session token anywhere else then httponly flagged cookie\"\n> V3.2.3 should not allow using session token in session storage in this case\n> If we have \"Token-based Session management\"\n> \n> V3.1.1 should have meaning \"do not spread session token to URL\"\n> but if the value used by JavaScript with extra header (like Authorization) for API it is anyway readable for JavaScript, do you display it to the output does not even matter in practice\n> meaning is covered by V8.3.1\n> V3.2.3 basically says, store it in session storage. But here is another conflict - if we consider session token as sensitive data, then it does not match with V8.2.2\n> V8.2.2 Verify that data stored in client side storage (such as HTML5 local storage, session storage, IndexedDB, regular cookies or Flash cookies) does not contain sensitive data or PII.\n> \n> And then there are solutions, where Token is used in cookie... where we should have question, do you use token-based session management correctly.\n> \n> My current conclusions/ideas:\n> \n> I don't see point for current V3.1.1\n> if needed, modify \"V8.3.1 Verify that sensitive data (including session token) ...\"\n> I don't see point for current V3.2.3\n> Add new requirement to Cookie-based Session Management with meaning \"session token is allowed to send only with httponly cookies\" (but isn't it too strict?)\n> If token-based session should be able to use cookies, move current V3.2.3 to Token-based requirement. If token-based session should not use cookie, use only \"session storage part\" from V3.2.3\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-05-09T20:37:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-626232253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyNjIzMjcwMQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> How about... ... as part of a URL in any HTTP verb ... Even sensitive data in the URL target of a post or put request is a bad idea.\r\n\r\nThen it's clear duplicate for V8.3.1. And we still have 2nd part of the requirement.",
+      "createdAt": "2020-05-09T20:41:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-626232701",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MTg5ODIzOQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, please take your time to investigate arguments above and let's find some proposal/decision for this.\r\n\r\nAbout 2nd part of the requirement:\r\n\r\n> V3.1.1 **Verify the application never reveals session tokens** in URL parameters or **error messages**.\r\n\r\nFor example, if site displays somewhere session tokens (e.g. `phpinfo()` output, list of active sessions etc), then those outputs are readable in XSS situation for JavaScript - session token leakage, potential session hijacking.\r\n\r\nWhy to limit in the requirement, that session token can not leak only through error messages? It does not make sense for me. If session is cookie-based, it should have `httpOnly` flag set and never displayed to any part of HTTP response other than `Set-Cookie` header.",
+      "createdAt": "2020-06-10T10:04:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-641898239",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0MTk1NjE5OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Oh absolutely this requirement makes no sense and needs fixing. Good call, thank you.\n\n--\nJim Manico\n@Manicode\n\n\n> On Jun 10, 2020, at 6:04 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> @jmanico, please take your time to investigate arguments above and let's find some proposal/decision for this.\n> \n> About 2nd part of the requirement:\n> \n> V3.1.1 Verify the application never reveals session tokens in URL parameters or error messages.\n> \n> For example, if site displays somewhere somewhere session tokens (e.g. phpinfo() output, list of active sessions etc), then those outputs are readable in XSS situation for JavaScript - session token leakage, potential session hijacking.\n> \n> Why to limit in the requirement, that session token can not leak only through error messages? It does not make sense for me. If session is cookie-based, it should have httpOnly flag set and never displayed to any part of HTTP response other than Set-Cookie header.\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-06-10T12:00:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-641956199",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0ODIyOTkzOQ==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "As long as we reword, I can see this being in 4.0.2, rather than waiting for 4.1\r\n",
+      "createdAt": "2020-06-23T15:15:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-648229939",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY1NzgxODEyMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I want to make sure session fixation is addressed and that url rewriting is specifically not in play, so I simplified this requirement and am closing it out.\r\nhttps://github.com/OWASP/ASVS/commit/6d695842689db60f998f9d71956721cc6ef29d6a ",
+      "createdAt": "2020-07-13T22:09:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-657818120",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY1ODM5NjMxNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V3.1.1 got emergency fix, but I would like to keep this issue open for v4.1 to address ideas/proposals from https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907",
+      "createdAt": "2020-07-14T20:28:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-658396317",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY1ODQyMzk0OA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I will reopen but I think that comment needs to be a little clearer or at least highlight the conclusion if it is the tl;dr",
+      "createdAt": "2020-07-14T21:30:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-658423948",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc3NjkyMw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What needs to happen so we can close this out?",
+      "createdAt": "2021-03-12T21:52:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-797776923",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODk1Mzc3Ng==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "### Discussion 1 - V3.1.1 vs V8.3.1\r\n\r\nV3.1.1 is covered by V8.3.1, but maybe it's good to keep this as clear separate requirement for sessions.\r\n\r\n> V3.1.1 Verify the application never reveals session tokens in URL parameters.\r\n\r\n> V8.3.1 Verify that sensitive data is sent to the server in the HTTP message body or headers, and that query string parameters from any HTTP verb do not contain sensitive data.\r\n\r\n\r\n\r\n### Discussion 2 - cookie based session management\r\n\r\nCurrent V3.2.3 will be removed one way or another (by issue #843 or like I recommended already here https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907)\r\n\r\nIf cookie-based session management is used, should we have requirement (like I proposed in https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907):\r\n\r\n\"Verify that cookie-based session tokens are only transferred in Set-Cookie and Cookie headers\"\r\n(never sent to 3rd parties and never sent in response body)\r\n(and it's covers clearly current V3.1.1 when cookies are used)",
+      "createdAt": "2021-03-14T18:18:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-798953776",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTAyNTc3OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Thank you @elarlang for clearing up the complex issues we're discussing. You're on it.",
+      "createdAt": "2021-03-15T01:14:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-799025778",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTAyNjIzMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "531 looks the closest\r\n\r\nhttps://cwe.mitre.org/data/definitions/531.html\r\n\r\nOr maybe\r\n\r\nhttps://cwe.mitre.org/data/definitions/489.html\r\n\r\nNone look like an exact match",
+      "createdAt": "2021-03-15T01:15:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-799026230",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTgxMzM2MQ==",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "CWE-200 might be a good fit.\r\n\r\nhttps://cwe.mitre.org/data/definitions/200.html",
+      "createdAt": "2021-03-15T23:05:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-799813361",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjEwNDA1Nw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal:\r\n* Category: [V3.4 Cookie-based Session Management](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md#v34-cookie-based-session-management)\r\n* Id: 3.4.6\r\n* Label: `[ADDED]`\r\n* Requirement: \"Verify that cookie-based session tokens are only transferred in Set-Cookie and Cookie headers.\"\r\n* Levels: 1, 2, 3\r\n* [CWE-200](https://cwe.mitre.org/data/definitions/200.html)\r\n* NIST: -",
+      "createdAt": "2021-05-04T17:13:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-832104057",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjExMDg0Nw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This seems quite reasonable. Can we add \"and to specifically avoid sending session data via url?\" Thats the real worry.\r\n",
+      "createdAt": "2021-05-04T17:23:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-832110847",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjExNDkxOA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This seems quite reasonable. Can we add \"and to specifically avoid sending session data via url?\" Thats the real worry.\r\n\r\nNo :)\r\n\r\n* Requirement already says that, just in other words\r\n* It would be another duplicate for 3.1.1\r\n  * V3.1.1 Verify the application never reveals session tokens in URL parameters.\r\n* And it's covered by 8.3.1 as well:\r\n  * V8.3.1 Verify that sensitive data is sent to the server in the HTTP message body or headers, and that query string parameters from any HTTP verb do not contain sensitive data.\r\n",
+      "createdAt": "2021-05-04T17:29:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-832114918",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjExNTUzMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Booooo!",
+      "createdAt": "2021-05-04T17:30:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-832115530",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjQwMjE1OQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Few comments for \"future investigations\" and improvements:\r\n* from \"you should not be able to read token value with JavaScript\" point of view added 3.4.6 is duplicate to httpOnly requirement\r\n* from pen-test point of view, those are different things to check, so I prefer to keep them separately (it covers \"cookie-based session token should not leak anywhere, including 3rd parties\")\r\n\r\nAdded requirement:\r\n> Verify that cookie-based session tokens are only transferred in Set-Cookie and Cookie headers.\r\n\r\nIf there is `Set-Cookie` with `HttpOnly` flag in place, it's enough to say in requirement something like:\r\n> Verify that cookie-based session tokens are only transferred to the client only in Set-Cookie header.",
+      "createdAt": "2021-05-05T04:23:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-832402159",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-11-24T22:51:53Z",
+  "labels": [],
+  "number": 696,
+  "state": "CLOSED",
+  "title": "Clarification needed for V3.1.1 Verify the application never reveals session tokens in URL parameters or error messages.",
+  "url": "https://github.com/OWASP/ASVS/issues/696"
+}

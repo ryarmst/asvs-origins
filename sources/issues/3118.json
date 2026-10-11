@@ -1,0 +1,156 @@
+{
+  "author": {
+    "id": "U_kgDOBaS_lA",
+    "is_bot": false,
+    "login": "miro2ns",
+    "name": ""
+  },
+  "body": "| [13.4.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x22-V13-Config.md#v134-unintended-information-leakage) | Verify that the application does not expose detailed version information of backend components. | 3 | v5.0.be-14.3.3 |\n\nI'd like to reopen the discussion around this requirement and its assigned level. This issue was previously discussed in https://github.com/OWASP/ASVS/issues/2142 , where some argued for removing it, stating that \"It doesn't help security any.\". But I thing people may have overlooked one scenario.\n\nWhile I agree that removing version information won't stop or slow down a determined attacker, I still believe it can help to avoid attacks from script kiddies who rely on exposed version details to exploit known vulnerabilities. And yes, fingerprinting web servers is trivial, but fingerprinting all public-facing services isn't so simple. And if I’m not mistaken, services like Shodan can be used to search for targets based specifically on version headers like `Server: Apache/2.4.54 (Ubuntu)`. So removing a simple version information from response headers can help in some cases.\n\nI would like to see different requirements for different levels:\n\n- For L1, just removing the `Server: Apache/2.4.54 (Ubuntu)` from the response header could be enough\n- For L3, the requirement could be stricter to cover all server side components?\n\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6sDy2n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the L3 is justified, as stated in: https://github.com/OWASP/ASVS/issues/2142#issuecomment-2414407713\n\n> For L1, just removing the Server: Apache/2.4.54 (Ubuntu) from the response header could be enough\n\nL1 is meant for \"1st layer of defense only\" and this is clearly not the case here.\n\nHiding the version does not fix any vulnerability. Section text explains it:\n\n> Many of these issues are rarely rated as a significant risk, but they are chained together with other vulnerabilities. If these issues are not present by default, it raises the bar for attacking an application.\n\n> For example, hiding the version of server-side components does not fix the need to patch all components, and disabling the folder listing does not eliminate the need to use authorization controls or keep files away from the public folder, but it raises the bar.\n\nL3 suits well - just hiding version information does not prevent any real attack, it just does not advertise the used version and makes it a bit harder to map the software version usage and update timelines used, and suits the category \"extra steps to do\".",
+      "createdAt": "2025-05-16T13:07:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3118#issuecomment-2886675879",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sHotG",
+      "author": {
+        "login": "oleksiidov"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Colleagues, it slightly of topic here, but if it goes to real cases, such leakage is not only about version, but also names of components, OS, etc. So, shall we extend [13.4.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x22-V13-Config.md#v134-unintended-information-leakage) to such technical information also?\nFor example, put 13.4.6 in following way: \n\n> Verify that the application does not expose detailed **technical** and version information of backend components.",
+      "createdAt": "2025-05-16T21:10:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3118#issuecomment-2887682886",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sJWUH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@oleksiidov - we have requirements to cover different technical information leakage:\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **13.4.2** | Verify that debug modes are disabled for all components in production environments to prevent exposure of debugging features and information leakage. | 2 | v5.0.be-14.3.2 |\n| **13.4.4** | Verify that using the HTTP TRACE method is not supported in production environments, to avoid potential information leakage. | 2 | v5.0.be-14.3.6 |\n| **13.4.5** | Verify that documentation (such as for internal APIs) and monitoring endpoints are not exposed unless explicitly intended. | 2 | v5.0.be-14.1.6 |\n| **16.5.1** | Verify that a generic message is returned to the consumer when an unexpected or security-sensitive error occurs, ensuring no exposure of sensitive internal system data such as stack traces, queries, secret keys, and tokens. | 2 | v5.0.be-7.4.1 |\n\n@miro2ns - please note, that as those are providing more actionable information, they are level 2 requirements, instead of just leaking a version information.",
+      "createdAt": "2025-05-17T06:25:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3118#issuecomment-2888131847",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sLB3u",
+      "author": {
+        "login": "oleksiidov"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang, thank you for mentioning these information leakage related requirements. And I was also thinking about them when reading the discussion above...\nThis is totally great that they are specific and cover the most important leakage channels related to debug mode remain enabled, excessive error info, more then needed API docs exposed, TRACE method. \nBut it seems that 13.4.6 addresses another one important channel of information leakage: versions and names of backend components used: OS, Web server, frameworks used, etc. \nUsually during preparation for production it is aimed to minimize exposure of such data. E.g. in example above -- remove server info  like \"Server: Apache/2.4.54 (Ubuntu)\" at all (if it is possible and such information not needed by other components, including frontend). \nAlso, for example, such checks also included into [OWASP WSTG](https://owasp.org/www-project-web-security-testing-guide/stable/) (WSTG-INFO-08, WSTG-INFO-09). \n\nAnd what I am thinking about: why this L3 the requirement is **_only about versions_** of software used in backend components... \nBut it is also great point in requirements above that they are specific, and I see that suggested by me wording may be too general. \nIf we go with such clarification, it could be put it in more specific way:\n\n> Verify that the application does not expose detailed information on versions and names of backend components (e.g. operating systems, Web servers, frameworks).\n\nor\n\n> Verify that the application does not expose excessive fingerprints of backend components, such as detailed information on versions and names of operating systems, Web servers, frameworks.",
+      "createdAt": "2025-05-17T20:31:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3118#issuecomment-2888572398",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sL4eq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think it is really possible to hide the fact that a certain framework or web server is in use. Each technology has its own specific structure or behavioural specifics, and I think the requirement to hide those facts could just cause \"noise-reports\" that \"we detected that you have an apache web server in use and it is a violation of ASVS requirement 13.4.6\". This is for sure something I want to avoid happening here.\n\nFrom a \"using an old version of component\" point of view, all you need to do is be up-to-date with the components (15.2.1). Hiding that information is not an actual fix for this.\n\nIt is a low-impact requirement, which is why it is L3 as \"an extra step to do\", not as L1 \"1st layer defense\" or L2 \"basic security\".",
+      "createdAt": "2025-05-18T06:08:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3118#issuecomment-2888796074",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sMKaD",
+      "author": {
+        "login": "oleksiidov"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang, thank you for explanation! Got you idea. \nLet's go with this approach.  ",
+      "createdAt": "2025-05-18T09:01:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3118#issuecomment-2888869507",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sNH51",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The rationale for the level and the requirement text is discussed and explained, I think we can close this for now.",
+      "createdAt": "2025-05-18T17:49:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3118#issuecomment-2889121397",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-05-16T12:58:09Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    }
+  ],
+  "number": 3118,
+  "state": "CLOSED",
+  "title": "13.4.6 / v5.0.be-14.3.3 is L3 right level?",
+  "url": "https://github.com/OWASP/ASVS/issues/3118"
+}

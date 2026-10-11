@@ -1,0 +1,120 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Hi @ike,\r\n\r\nI was experimenting with running `make docker` and then `make all` separately.\r\n\r\nMy understanding is that `make docker` will just create the docker image and load it into the local docker image.\r\n\r\nLooking at the following code...\r\n\r\n```\r\n.PHONY: docker\r\ndocker:\r\n\tif ! docker image inspect asvs/documentbuilder:latest --format=\"checking docker image\" &> /dev/null; then \\\r\n\t\tdocker build --build-arg CERT_FILE=docker/cert --tag asvs/documentbuilder:latest --network host docker; \\\r\n\tfi;\r\n```\r\n\r\n...my understanding is that if I have already run `make docker` and then I run `make all`, then this if statement will get run again but since the image now exists, the `docker build` command should not get run.\r\n\r\nHowever, it looks to me like the `docker build` command does in fact get run regardless of the output of `docker image inspect`.\r\n\r\nAre you able to fix this?\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5gxULy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This should be fixed before #1638",
+      "createdAt": "2023-07-06T11:45:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1678#issuecomment-1623540466",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5gyDvX",
+      "author": {
+        "login": "ike"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth yes, I believe the appropriate solution is to put the image on a repository and only pull in the action, instead of building in the action at all.\n\nWe could potentially have an action that built and pushed the image if the `docker` dir changes.",
+      "createdAt": "2023-07-06T14:01:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1678#issuecomment-1623735255",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5gySYH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "happy for however you want to address it but it would be good to get it sorted",
+      "createdAt": "2023-07-06T14:35:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1678#issuecomment-1623795207",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5g6uv_",
+      "author": {
+        "login": "ike"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "#1680 removes the `docker` target from any of the other targets, so this issue should be resolved now. You can still build the docker image using `make docker`.",
+      "createdAt": "2023-07-07T20:07:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1678#issuecomment-1626008575",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hBJS0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so this should be resolved as part of issue #1638",
+      "createdAt": "2023-07-09T11:39:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1678#issuecomment-1627690164",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5iH1AG",
+      "author": {
+        "login": "ike"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Fixed with https://github.com/OWASP/ASVS/pull/1680",
+      "createdAt": "2023-07-21T20:44:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1678#issuecomment-1646219270",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-07-06T11:38:43Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMjk2MDM1NzY4",
+      "name": "MAKEFILE",
+      "description": "",
+      "color": "fef2c0"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    }
+  ],
+  "number": 1678,
+  "state": "CLOSED",
+  "title": "Issue with conditional in Makefile",
+  "url": "https://github.com/OWASP/ASVS/issues/1678"
+}

@@ -1,0 +1,429 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "We currently have an explanation of the thinking around L1 [which can be found here](https://appsecg.host/level1).\r\n\r\nThere are a few major areas where we have differing opinions about whether a particular type of control falls into the category of L1 for version 5.0.\r\n\r\nThis issue is to discuss cryptography requirements from the current [chapter 6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md).\r\n\r\nThe only requirements being considered for L1 are below (ignore the level marking below). It is agreed (between Josh and Elar for now) that the others in this chapter are not L1.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **6.3.1** | [GRAMMAR, LEVEL L2 > L1] Verify that all random numbers and strings which are intended to be non-guessable must be generated using a cryptographically-secure pseudo-random number generator (CSPRNG) and have at least 128 bits of entropy. Note that UUIDs do not respect this condition. | ✓ | ✓ | ✓ | 338 |\r\n| **6.5.1** | [ADDED, SPLIT FROM 6.2.5] Verify that insecure block modes (e.g., ECB) and weak padding schemes (e.g., PKCS#1 v1.5) are not used. | | ✓ | ✓ | 326 |\r\n| **6.5.2** | [ADDED, SPLIT FROM 6.2.5, LEVEL L2 > L1] Verify that insecure ciphers, including Triple-DES and Blowfish, are not used but secure ciphers and modes such as AES with GCM are. | ✓ | ✓ | ✓ | 326 |\r\n| **6.6.3** | [ADDED, SPLIT FROM 6.2.5] Verify that cryptographic systems avoid the use of disallowed hash functions, such as MD5, SHA-1, or any other insecure hash functions, for any cryptographic purpose. | ✓ | ✓ | ✓ | |\r\n\r\nI personally believe that these requirements **do** belong in L1 for the following reasons:\r\n\r\n- Many controls (session identifiers, unique file identifiers, one time passwords, etc) rely on random numbers if random numbers are not being created securely then that potentially makes these controls ineffective.\r\n- Similarly many controls (signed tokens, encrypted storage, file integrity checking) rely on cryptography for encryption, signatures and hash generation and use of insecure algorithms potentially makes these controls ineffective.\r\n- Bad cryptography is something that is very hard to fix after the fact. The effort to implement at an earlier stage will be far less than the effort to fix this at a later date.\r\n- Given the importance of cryptography in cyber security in general, the idea that not a single requirement from this chapter would be L1 does not seem reasonable.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6X5_72",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "6.3.1 - if it is not practically easily guessable in some time-frame, but if it is not CSPRNG?\r\n\r\nFor others, I would like to see a high likelihood and/or impact attack scenario that only relies on given requirements.\r\n\r\nIn another issue (#2476) you used arguments:\r\n> * In general, it violates the idea that L1 should have a low barrier to entry.\r\n> * If I am honest, I am not sure how exactly this would be verified anyway? Certainly it would be problematic to verify \"black box\" style.\r\n\r\nWhy not here?",
+      "createdAt": "2024-12-17T14:10:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2548563702",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X7e_I",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In general, it violates the idea that L1 should have a low barrier to entry.\r\n\r\nI don't believe that using good crypto algorithms has a high barrier to entry. This is a pretty low bar and these requirements involve using very standard and well supported algorithms.\r\n\r\n> If I am honest, I am not sure how exactly this would be verified anyway? Certainly it would be problematic to verify \"black box\" style.\r\n\r\nMakes up for it by being quite easy to verify white box (unlike input validation) and in many cases there will be ways of doing this black box as well, e.g. burp sequencer for insufficient random, https://hashes.com/en/tools/hash_identifier.",
+      "createdAt": "2024-12-17T16:28:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2548953032",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X8L9P",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One this is for sure, we have quite a different view on this. You have you beliefs but I have not seen arguments on attack scenarios.",
+      "createdAt": "2024-12-17T17:38:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2549137231",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X8duC",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would include these in L1 as well:\r\n\r\n> 6.2.2 Verify that industry proven or government approved cryptographic algorithms, modes, and libraries are used, instead of custom coded cryptography.\r\n>\r\n> 6.5.3 Verify that nonces, initialization vectors, and other single-use numbers are not used for more than one encryption key/data-element pair. The method of generation must be appropriate for the algorithm being used.\r\n\r\nReasons:\r\n\r\n* 6.2.2 → it's not that difficult to check that you are not including some custom coded cryptography;\r\n* 6.5.3 → reusing nonces can completely screw your encryption (especially with CTR and CFB) (and signatures as well).\r\n\r\nFor this requirements and some others, having an simple L1 application which complies with the requirement is not very difficult: don't use crypto in your application code, let the frameworks do the stuff for me and you should be fine. Using custom crypto code without make these verification might lead you to make dangerous design choices (when used with broken crypto) and you would better use a different design which avoids cryptography.\r\n\r\nTypical examples I have seen in the wild:\r\n\r\n* the usage of weak (unauthenticated) encryption (think static encryption key in application code with DES) to \"protect\" some HTTP request parameters and grant (non-revocable ever-lasting) access to some file (leading to arbitrary file read) where some simple user authorization would have been fine;\r\n* custom-coded encryption based on \"let's scramble those bits around\";\r\n* browser-side encryption of requests, presumably intended to prevent the user from messing up with the requests (probably because the backend lacks proper authorization).\r\n\r\nI would even claim that this type of pattern is probably prevalent in L1-level applications and that having these requirements might force the authors of L1 applications to remove dubious cryptography and implement a proper design (such as fixing the lack of correct authorization).\r\n",
+      "createdAt": "2024-12-17T18:00:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2549209986",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X8k6U",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's be clear - do we talk about 1st or 2nd layer of defense here?\r\n\r\nImportant - I don't say we don't need those requirements, I want to understand, are those worth the L1 spotlight. Is the likelihood/impact close to SQL injection, trivial authentication or authorization bypass?\r\n\r\n> 6.2.2 → it's not that difficult to check that you are not including some custom coded cryptography;\r\n\r\nThere are many things that are not difficult to check, (e.g. cookie attributes), but it does not make it L1. We move away from \"testability\".\r\n\r\n> 6.5.3 → reusing nonces can completely screw your encryption (especially with CTR and CFB) (and signatures as well).\r\n\r\nCan you provide me a \"L1 worth\" attack scenario using this?\r\n\r\nFirst example is more like authorization problem to solve? Is it better solution, when used some other crypto-algorithm instead of _where some simple user authorization would have been fine_?\r\n\r\nSecond example - to be not required in L1 does not mean you need to make your own crypto. If we could use that view, we  shoul put a lot of things into L1. The question here is, how critical is this problem to be solved **as a first things to do**.",
+      "createdAt": "2024-12-17T18:13:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2549239444",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YCF3e",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> First example is more like authorization problem to solve?  Is it better solution, when used some other crypto-algorithm instead of where some simple user authorization would have been fine?\r\n\r\nYes, I agree that these examples might be more a problem of something else is not quite right in the design of the application (such as the authorization should be fixed).\r\n\r\nSo there are two cases to consider for the broken/fake crypto usage:\r\n\r\n* broken/fake crypto is used as a misguided stop-gap measure to fix/hide another real problem in the implementation/design of the application and this problem should already be covered by another requirement anyway;\r\n* or there is a real reason for using crypto in the first place and reusing nonces could be very bad.\r\n\r\n> Can you provide me a \"L1 worth\" attack scenario using this?\r\n\r\nA simple case would be for digital signature (which not covered in the requirement but probably should). If the application is generating tokens using ECDSA and reuses nonces, the private key can be recovered and the token can be forged.\r\n\r\nI think we could come up with interesting attacks when some state is stored in encrypted token in cookies. I'll try to expand on this.\r\n\r\nIf 6.5.1 is L1, it would probably make sense to have 6.5.3 and probably 6.2.2 as well.",
+      "createdAt": "2024-12-18T08:34:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2550685150",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YetGm",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "+1 @randomstuff I back this general direction as well. Nice example, thank you.",
+      "createdAt": "2024-12-21T17:47:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2558185894",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b3kni",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Although kudos are given here, I'm not convinced. Maybe we need to wait the initial L1 requirements list from me and Josh to get alignment and feeling of L1 idea, but I can not see an L1 scenario here. It may come because of lack of knowledge on the crypto-field and that is why I ask those questions.\n\nAlso, (as an example) if there is one specific scenario, then this scenario must be addressed separately without dragging entire chapter to L1.",
+      "createdAt": "2025-01-27T07:43:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2615036386",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b5JaV",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm with @tghosth and feel what we are asking isn't rocket science, and we've ignored cryptograpy for far too long. This should be in L1. ",
+      "createdAt": "2025-01-27T11:03:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2615449237",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b5Tfm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Many of you say, that it is level 1, but I have not seen yet argumentation and facts to back it up. Without that it is just a religious attitude.\n\nI'm not against L1, I just want to see the argumentation to prove that and that it is aligned with the rest of L1 decisions.\n\nI want to see it as a independent and 1st-layer problem. No pre-conditions, no other mistakes in the application.",
+      "createdAt": "2025-01-27T11:22:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2615490534",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b5UIa",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Fully agree with @tghosth and @danielcuthbert here - using most libraries or TLS/SSH/IPSEC/etc. properly is reasonably straightforward to both do and check, so making it a L1 requirement promotes these best practices from the ground up. ",
+      "createdAt": "2025-01-27T11:23:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2615493146",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b8T5p",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang \"and facts to back it up\" what facts do you need? how can we convince you? ",
+      "createdAt": "2025-01-27T16:26:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2616278633",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b8XUO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As I just wrote:\n> I want to see it as a independent and 1st-layer problem. No pre-conditions, no other mistakes in the application.\n\nBut I think we need to wait updated definition of Level1 first, with requirements agreed to be in level 1 and then you can analyze your statements as well - is it aligned with the list or not. At the moment there is a chance that we may have quite a different understanding of level 1.",
+      "createdAt": "2025-01-27T16:30:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2616292622",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b8ZHy",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps these are some examples:\n* Appropriate configuration of `nginx.conf` (nginx)\n* Appropriate configuration of `sshd_config` (ssh server)\n* Appropriate configuration of `httpd.conf` (apache2)\n\nEDIT - expanding on why these three; TLS configurations are determined in no small part by the first and last, and the administration of an application, up to and including the provisioning and transfer of sensitive material (certificate keys, API keys, etc) is entirely determined by either the SSHd configuration or some equivalent administrative process.",
+      "createdAt": "2025-01-27T16:32:52Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2616300018",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b9f1_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think those are covered by [V9](https://asvs.dev/v5.0.draft/0x17-V9-Communications/).\n\n",
+      "createdAt": "2025-01-27T18:30:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2616589695",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cZ2wq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "### Intro\n\nSo encryption in transit is covered by V9, we have a couple of L1 requirement there.\n\nThis question is more about encryption at rest.\n\nI would remind everyone that we are aiming for L1 to have far fewer requirements and therefore we have to make hard choices. At the same time, we need to have good coverage of the different areas.\n\n### Proposed Requirements\n\nThe current requirements being proposed for L1 from V6 are as follows.\n\n| # | Description | L1 | L2 | L3 | CWE |\n| :---: | :--- | :---: | :---: | :---: | :---: |\n| **6.3.1** | [GRAMMAR, COVERS 6.3.2, LEVEL L2 > L1] Verify that all random numbers and strings which are intended to be non-guessable must be generated using a cryptographically-secure pseudo-random number generator (CSPRNG) and have at least 128 bits of entropy. Note that UUIDs do not respect this condition. | ✓ | ✓ | ✓ | 338 |\n| **6.5.1** | [ADDED, SPLIT FROM 6.2.5, COVERS 6.2.3] Verify that insecure block modes (e.g., ECB) and weak padding schemes (e.g., PKCS#1 v1.5) are not used. | | ✓ | ✓ | 326 |\n| **6.5.2** | [ADDED, SPLIT FROM 6.2.5, COVERS 6.2.3, LEVEL L2 > L1] Verify that only secure, authenticated ciphers and modes such as AES with GCM are used. | ✓ | ✓ | ✓ | 326 |\n| **6.6.1** | [ADDED, SPLIT FROM 6.2.5, COVERS 6.2.3] Verify that only approved hash functions are used for general cryptographic use cases, including digital signatures, HMAC, KDF, and random bit generation. Disallowed hash functions, such as MD5, must not be used for any cryptographic purpose. | | ✓ | ✓ | |\n\n### Arguments in favour\n\nMy key arguments in favour are as follows:\n\n- Many controls (session identifiers, unique file identifiers, one time passwords, etc) rely on random numbers if random numbers are not being created securely then that potentially makes these controls ineffective.\n- Similarly many controls (signed tokens, encrypted storage, file integrity checking) rely on cryptography for encryption, signatures and hash generation and use of insecure algorithms potentially makes these controls ineffective.\n- Bad cryptography is something that is very hard to fix after the fact. The effort to implement at an earlier stage will be far less than the effort to fix this at a later date.\n- Given the importance of cryptography in cyber security in general, the idea that not a single requirement from this chapter would be L1 does not seem reasonable.\n\n### Responses to counter arguments\n\nMy responses to counter arguments (which Elar produced based on things I have said elsewhere 😀):\n\n#### Low barrier to entry\n\n> In general, it violates the idea that L1 should have a low barrier to entry.\n\nUsing the correct crypto algorithms is simple when first starting, these are mature well supported algorithms.\n\nFor organizations which are already established, there will be more effort involved but there are also well defined paths to upgrading crypto algorithms such as: \n\n1) Start encrypting new data with better algorithm, using versioning/tagging to identify how data was encrypted\n2) Use tags to identify how to decrypt data when it is requested\n3) Gradually run an async process to rotate encryption of stored data.\n4) Once all data has been rotated, remove support for old algorithm.\n\nGive me that process over implementing a CSP any day 🤣🤣🤣\n\nHowever, we would also like to avoid companies having to go through that process which is why we want \"using correct algorithms\" to be one of the first things we do because it is simple to do up front and annoying to fix afterwards.\n\n#### Verifiability\n\n> If I am honest, I am not sure how exactly this would be verified anyway? Certainly it would be problematic to verify \"black box\" style.\n\nI said this about input validation. Verifying that would require being aware of all rules for all places and then checking that all rules had been implemented for all places. \n\nFor these crypto requirements, it is pretty straightforward to search code for encryption logic and bad algorithms, most SAST tools already do it.\n\nObviously black box is a problem but we are not explicitly mandating that L1 should be testable black box anyway.\n\n\n### Attack scenarios\n\nIn terms of attack scenarios:\n\n* Company rolls their own encrypted session tokens and uses a weak algorithm. Attacker predicts the token and gains arbitrary access to customer accounts.\n* Company relies on SHA-1 hashes as an identifier (looking at you git ;) ) but attacker uses collision to falsify.\n* Company relies on insecure signing to verify the authenticity of files uploaded into the application and attacker is able to spoof a file.\n\nWhilst these are not exactly \"point and click\" attacks, they are also well within the realms of possibility and the consequences of them are more catastrophic than many vulnerabilities because encryption is often used as a single layer of defence and bad encryption may lead to a compromise of the entire security \n\n",
+      "createdAt": "2025-01-30T09:57:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2624023594",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cZ3G0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "**tl;dr** we rely on crypto for loads of stuff in security plus is if we don't have anything about \"crypto at rest\" in L1 I think we will look unserious",
+      "createdAt": "2025-01-30T09:57:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2624025012",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6caBmP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that \"adding crypto later\" is complicated, but it is the same with many other things. I don't agree to define L1 via \"implementation order\".",
+      "createdAt": "2025-01-30T10:16:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2624067983",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6caZpI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One last attempt to explain my error with the L1 here.\n\nLet's take 6.3.1\n> Verify that all random numbers and strings which are intended to be non-guessable must be generated using a cryptographically-secure pseudo-random number generator (CSPRNG) and have at least 128 bits of entropy. Note that UUIDs do not respect this condition.\n\nIf \"non-guessable\" string or number is _easy_ to guess, it is a L1 problem. And that is the complicated part - what is \"easy\" and where to draw the line.\n\nThis requirement disallows UUID, but if the \"random number\" is done with the UUID(v4), then I think the risk is not worth L1.\n\n---\n\nIf we talk about L1 and the applications, that rely on crypto (at rest) to satisfy high data protection needs - I don't the starting point is L1 for this.\n\n---\n\n> if we don't have anything about \"crypto at rest\" in L1 I think we will look unserious\n\nYou may look unserious (or clown, as your wrote initially) if you have whatever other problem in the application that is marked for L2 at the moment but say \"but we have crypto so you need to take me seriously\"\n\n---\n\nIn general, this comment is valid https://github.com/OWASP/ASVS/issues/2477#issuecomment-2549239444\n\nTo point out more precisely:\n> Important - I don't say we don't need those requirements, I want to understand, are those worth the L1 spotlight. Is the likelihood/impact close to SQL injection, trivial authentication or authorization bypass?",
+      "createdAt": "2025-01-30T10:58:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2624166472",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cbT-O",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> This requirement disallows UUID, but if the \"random number\" is done with the UUID(v4), than I think the risk is not worth L1.\r\n\r\nI think this is a really astute/positive observation.\r\n\r\nLet me see if I understand what you are trying to say in my own words.\r\n\r\nUUIDv4 is not technically a secure 128 bit random generator but damn it is pretty solid and using it is not a serious violation of random number requirements. So maybe using UUIDv4 is not a l1 violation, but other much worse violations would be.\r\n\r\nI like the idea of seeing SQLi as l1 because of how critical and damaging it is.\r\n\r\nAm I close to understanding what you are trying to say?\r\n\r\nI’m a fan of this entire line of thought, Elar.",
+      "createdAt": "2025-01-30T12:42:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2624405390",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ccghd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Am I close to understanding what you are trying to say?\n\nProbably yes.\n\nBut update - we discussed it with Josh and we kind of lowered the really-really-must-have expectation for L1 and added more things into L1. So most of the requirements discussed here got in.\n\nWith 6.3.1 - the level really depend on context. For example, if it is short living random-token, the crypto requirement is not that important.\n\nFor L1 - it must not be guessable, but the problem with that is that it is not clear, what it means and how to measure/verify it (without declaring the expectation for crypto).\n\nFrom using the ASVS point of view, the risk is that application owners start having some findings in reports for in practice secure tokens, that \"you have huge vulnerability - not enough entropy\". But it really depends on context and usage.\n\n",
+      "createdAt": "2025-01-30T14:54:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2624718941",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cc4nO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The bottom line is that 6.3.1 won't be L1 but 6.5.1, 6.5.2 and 6.6.1 should be. The reason is that for 6.3.1, there is a spectrum of potential uses for random numbers plus we disallow UUIDs which is a big deal.\n\nThe others have more binary options, either you are using a bad algo or you are using a good algo, if you are doing encryption or signing you need to be using a good algo.\n\nStay tuned for more updates :)",
+      "createdAt": "2025-01-30T15:30:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2624817614",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cfdpU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The bottom line is that 6.3.1 won't be L1 but 6.5.1, 6.5.2 and 6.6.1 should be. The reason is that for 6.3.1, there is a spectrum of potential uses for random numbers plus we disallow UUIDs which is a big deal.\n\nDoesn't it mean that the bit threshold of 6.3.1 should be *relaxed* (but not entirely dropped) for L1?\n\n> With 6.3.1 - the level really depend on context. For example, if it is short living random-token, the crypto requirement is not that important.\n\nIf the short lived password reset token is actually generated as `hash(concat(current_time_in_seconds, user_id))`, it is quite  bad. People sometimes end of using {really broken solutions for this kind of things](https://blog.securityinnovation.com/attackers-love-your-password-reset-feature) :) (Agreed in these examples, the token is not random so it technically does not apply to 6.3.1)\n\nIf the token is a random token generated using a cryptographically secure source but is only 32 bit long, it might be quite bad as well. Even of the token is short lived.\n\n(I'm not really arguing against this but merely discussing …)",
+      "createdAt": "2025-01-30T20:19:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2477#issuecomment-2625493588",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-12-17T13:45:52Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABbnQP8g",
+      "name": "requirement level",
+      "description": "Issue related to requirement levels",
+      "color": "c2e0c6"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    }
+  ],
+  "number": 2477,
+  "state": "CLOSED",
+  "title": "Should Cryptography reqs be Level 1",
+  "url": "https://github.com/OWASP/ASVS/issues/2477"
+}

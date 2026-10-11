@@ -1,0 +1,334 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "These requirements are not really input validation but it is not clear where they should go.\r\n\r\n| # | Description | Level | Suggested action |\r\n| :---: | :--- | :---: | :--- |\r\n| **5.1.5** | [MODIFIED, SPLIT TO 50.8.1] Verify that the application will only automatically redirect the user to a different URL directly from an application URL where the destination appears on an allowlist. | L1 or L1>L2 | Leave here but open a separate issue to discuss location |\r\n| **5.1.6** | [ADDED] Verify that the application validates that user-controlled input in HTTP request header fields does not exceed the server's maximum header field size limit (usually 4kB or 8kB) to prevent client-based denial of service attacks. | L2 | Leave here but open a separate issue to discuss location |\r\n\r\n\r\nPrevious thoughts:\r\n\r\n@elarlang:\r\n\r\n> V5.1.5 is not just a technical input validation - it relies on logic and a defined list to define, what is a trusted and allowed destination.\r\n> \r\n> V5.1.6 it is a technical check, but during a building the header. It may involve more than one input or other logic - just that the combined length that is used in one header field value can not exceed defined limit. It is a question of program code logic and fits to defensive coding.\r\n\r\n(apologies in advance if I missed anything)\r\n\r\n@tghosth:\r\n\r\n> 5.1.5 sounds like classic \"accept or reject it\" validation so I think this should stay put.\r\n> \r\n> 5.1.6 is not language specific but rather a conceptual question of how you incorporate untrusted content into a header. I still think it is more about input than logic but I am not strongly opinionated.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Y_eOV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "5.1.5 looks like validation to me. It's typically called \"allow list validation\" and this kind of validation does in fact almost always provide a needed security benefit when protecting redirects. \r\n\r\n5.1.6 is just doing a size limit check, a form of validation.  Depending on the underlying framework, a programmer doing this manually may or may not provide a major security benefit. \r\n\r\nBut these both seem like security validation to me.",
+      "createdAt": "2025-01-01T00:39:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2566775701",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZKDUo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "5.1.6 can be also widened to building a request URL (to an API) - it may happen in the background without processing directly the request initiated by the user - so it is not direct user input validation. Probably we need to change the 5.1.6.",
+      "createdAt": "2025-01-03T17:04:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2569549096",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZKccP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Especially since 5.1.6 is something a developer rarely needs to deal with, I agree on moving it out of validation, Elar.",
+      "createdAt": "2025-01-03T18:32:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2569651983",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZR_Cu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For 5.1.5, I think the closest sections are either \"V5.2 Sanitization and Sandboxing\" because it fits into the theme of only using untrusted content after we are sure that it is safe.\r\n\r\nFor 5.1.6, I would welcome a suggestion from @elarlang on how to alter the requirement and where it should go.",
+      "createdAt": "2025-01-05T13:34:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2571628718",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bEnI-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal for 5.1.6 - update the text with the meaning (needs grammas/language/wording review/update) below and move it to V10.4 Defensive coding.\n> Verify that if the application builds an HTTP request it has validation, sanitization, or other situation handling in place not to create longer URI (e. g. API calls) or HTTP request header fields (e. g. Authorization, Cookie) than all components for the communication can accept. It includes values provided for the browser to avoid client-based denial of service attacks.\n\n",
+      "createdAt": "2025-01-20T08:00:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2601677374",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6badN8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What do you think about:\n\n\"_Verify that the application uses validation, sanitization, or other mechanisms to avoid creating URIs (such as for API calls) or HTTP request header fields (such as Authorization or Cookie), as part of an HTTP request, which are too long to be accepted by the receiving components. The application is otherwise exposed to client-based denial of service attacks._\"\n\nI didn't understand what you meant by \"It includes values provided for the browser\"",
+      "createdAt": "2025-01-22T14:31:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2607403900",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bbbhY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First part - I have an error reading the _as part of an HTTP request_ in this part of the sentence. Maybe it is just my problem :) Can it be in the beginning or at the end? Otherwise the first impression when reading it is \"avoid creating URIs  or HTTP request header fields as part of an HTTP request\".\n\n---\n\nSecond part\n\nInitial:\n> It includes values provided for the browser to avoid client-based denial of service attacks.\n\nUpdated:\n> The application is otherwise exposed to client-based denial of service attacks.\n\nUpdated version has different meaning - initial has the goal to highlight one possible impact, the updated version declares or defines this as one and only possible impact",
+      "createdAt": "2025-01-22T16:09:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2607659096",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0kCO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"_Verify that, within HTTP requests, the application uses validation, sanitization, or other mechanisms to avoid creating URIs (such as for API calls) or HTTP request header fields (such as Authorization or Cookie), which are too long to be accepted by the receiving component. This will help prevent attacks such as client-based denial of service._\"\n\n@elarlang better?",
+      "createdAt": "2025-01-26T07:05:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2614247566",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0uaD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First part is better.\n\nI'm concerned that the last part can be still interpreted as the requirements is valid and addressed _only_ for the \"client-based denial of service\". If we can not send it as a clear message, as this is just one option or outcome, is better to not send it at all.",
+      "createdAt": "2025-01-26T09:18:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2614290051",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0vPG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"Such as\" clearly sets this out as an example.\n\nWe need to explain the reason for this so if you don't want my proposal then maybe try and reword what you wrote before:  \"It includes values provided for the browser to avoid client-based denial of service attacks\"",
+      "createdAt": "2025-01-26T09:26:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2614293446",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6c9mJL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For the second part:\n> This is to prevent a situation when the server side or the browser builds and automatically sends a request that can not be accepted by the receiving component and may cause a denial of service, such as a client-based denial of service attack if the browser sends too long cookie header field and the server always responds with an error message.\n\nI feel like this is a bit too long and probably duplicating too much the first part of the requirement, but maybe you can shorten it with smart wording.",
+      "createdAt": "2025-02-04T09:50:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2633392715",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dG6ZW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have tried:\n\n\"_Verify that, if the application (back-end or front-end) builds and sends requests, it uses validation, sanitization, or other mechanisms to avoid creating URIs (such as for API calls) or HTTP request header fields (such as Authorization or Cookie), which are too long to be accepted by the receiving component. This could cause a denial of service, such as where sending an overly long request (e.g. a long cookie header) always results in the server returning an error message until cookies are manually cleared._\"\n",
+      "createdAt": "2025-02-05T06:50:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2635834966",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dHguy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, let's go with that.\n\n2 more changes:\n* changed \"cookie header\" > \"cookie header field\"\n* change \"results in the server returning an error message\" > \"results the server always responds with an error status such as 400 or 431\" \n* removed \"until cookies are manually cleared\" - how to get rid of them is not in the scope of this requirement. If the cookie is wihtout an expire time set (called a session cookie), it is removed when browser close->reopen. Technically you can also do cookie cleanup via `Clear-Site-Data` (see requirement 8.2.3).\n\n\n\n> Verify that, if the application (back-end or front-end) builds and sends requests, it uses validation, sanitization, or other mechanisms to avoid creating URIs (such as for API calls) or HTTP request header fields (such as Authorization or Cookie), which are too long to be accepted by the receiving component. This could cause a denial of service, such as where sending an overly long request (e.g. a long cookie header **field**) always **results the server always responds with an error status such as 400 or 431** ~~until cookies are manually cleared~~.\n\nand the proposal is to move this requirement to section \"V10.4 Defensive Coding\"",
+      "createdAt": "2025-02-05T07:53:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2635991986",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dIRbD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> changed \"cookie header\" > \"cookie header field\"\n\n👍 \n\n> removed \"until cookies are manually cleared\" - how to get rid of them is not in the scope of this requirement. If the cookie is wihtout an expire time set (called a session cookie), it is removed when browser close->reopen. Technically you can also do cookie cleanup via Clear-Site-Data (see requirement 8.2.3).\n\n👍\n\n> change \"results in the server returning an error message\" > \"results the server always responds with an error status such as 400 or 431\"\n\nDo we have to talk about specific codes? Can we just say  \"results in the server always responding with an error status\"\n\n\"_Verify that, if the application (back-end or front-end) builds and sends requests, it uses validation, sanitization, or other mechanisms to avoid creating URIs (such as for API calls) or HTTP request header fields (such as Authorization or Cookie), which are too long to be accepted by the receiving component. This could cause a denial of service, such as where sending an overly long request (e.g. a long cookie header field) **results in the server always responding with an error status**._\"",
+      "createdAt": "2025-02-05T09:29:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2636191427",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dJBOe",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Do we have to talk about specific codes? Can we just say \"results in the server always responding with an error status\"\n\nWe don't need to, but maybe it's more clear. I'm ok with both solutions.",
+      "createdAt": "2025-02-05T10:50:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2636387230",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dNfpQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ok, 5.1.6 discussion is now covered via PR #2571\n\nBack to 5.1.5",
+      "createdAt": "2025-02-05T17:21:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2637560400",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dUpTs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Reminder that 5.1.5 says:\n\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **5.1.5** | [MODIFIED, SPLIT TO 50.8.1] Verify that the application will only automatically redirect the user to a different URL directly from an application URL where the destination appears on an allowlist. | 1 | 601 |\n\nI previous said :\n\n> For 5.1.5, I think the closest sections are either \"V5.2 Sanitization and Sandboxing\" because it fits into the theme of only using untrusted content after we are sure that it is safe.\n\nIt would therefore become:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **5.1.5** | [SPLIT TO 5.2.14, 50.8.1] | | |\n| **5.2.14** | [ADDED, SPLIT FROM 5.1.5] Verify that the application will only automatically redirect the user to a different URL directly from an application URL where the destination appears on an allowlist. | 1 | 601 |\n\nI am open to an alternative suggestion though ",
+      "createdAt": "2025-02-06T10:32:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2639434988",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dV5WA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If the \"user\" is always the \"browser\", it fits to V50.8.\n\nThere is no sanitization involved in this requirement.",
+      "createdAt": "2025-02-06T12:59:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2639762816",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dWNnM",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yeah ok that is close enough, @elarlang to open a PR",
+      "createdAt": "2025-02-06T13:33:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2487#issuecomment-2639845836",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-12-26T14:49:14Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    }
+  ],
+  "number": 2487,
+  "state": "CLOSED",
+  "title": "Remaining reqs in section 5.1 seem like they don't belong.",
+  "url": "https://github.com/OWASP/ASVS/issues/2487"
+}

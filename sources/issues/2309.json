@@ -1,0 +1,312 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "I don't think there is a requirement which explicitly says that TLS certificates (and more generally any public-keys) are verified, not disabled.\r\n\r\nWe have these requirements on this topic:\r\n\r\n> 9.1.4 [ADDED] Verify that external facing services use publically trusted TLS certificates.\r\n>\r\n> 9.3.2 [MODIFIED, MOVED FROM 9.2.1] Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, the consuming service must be configured to only trust specific internal CAs and specific self-signed certificates. All others should be rejected.\r\n\r\nSomething like:\r\n\r\n> Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n>\r\n> Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nContext (and things I am trying to prevent here):\r\n\r\n* In my experience there is a saddeningly high prevalence of \"TLS validation fails? Let's just disable TLS validation in code (as recommended in some random StackOverflow answer\".\r\n* Another thing I've seen too many times is « ssl_verify_client optional_no_ca; » where the application just blindly trusts the client identity (issuer) found in the certificate. (This is NOT safe at all as you can just self-sign your own certificate to assume any identity you wish).\r\n\r\nSome additional considerations:\r\n\r\n* This could apply to other uses of certificates.\r\n* In some cases ([OAuth mTLS-bound access tokens](https://www.rfc-editor.org/rfc/rfc8705.html)), it is actually OK (and the intended usage) to use self-signed client certificates (but there is some additional mechanism which makes it possible to verify the binding of the certificate TLS public key in the intended usage context). The formulation of the requirements should allow this kind of usage.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Swt1y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Something like:\r\n> \r\n> > Verify that the TLS client validates that the server public key is valid for the target TLS server before finalizing the TLS handshake. TLS server certificate verification must not be disabled by code or by configuration unless some other verification mechanism is implemented.\r\n> >\r\n> > Verify that, when TLS client authentication is used, the application verifies that the public key is valid for the user identity. If this verification is disabled at the TLS termination point, the required information must be propagated to the application which must do the verification.\r\n\r\nI agree but I'd like to keep it very simple, something like:\r\n\r\n> Verify that TLS clients validate certificates received before communicating with a TLS server.\r\n\r\nWhat do you think @randomstuff ?\r\n\r\n",
+      "createdAt": "2024-11-07T13:28:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2462244210",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SwuMi",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you agree, open a PR @randomstuff ",
+      "createdAt": "2024-11-07T13:29:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2462245666",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SxYt5",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK will do.",
+      "createdAt": "2024-11-07T14:46:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2462419833",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S5L2l",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yoink. @tghosth @randomstuff please see #2357. Dropped in V9.2. Please confirm levels.",
+      "createdAt": "2024-11-08T11:22:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2464464293",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S5hxR",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good to me but I think we would need a second requirement for the other direction mTLS (but it should be slightly different). Something like:\r\n\r\n> Verify that TLS servers validate certificates received from TLS clients (mTLS) before relying of them for client authentication.\r\n",
+      "createdAt": "2024-11-08T11:56:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2464554065",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S5vv5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is there an existing requirement we could add this to?",
+      "createdAt": "2024-11-08T12:14:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2464611321",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S8Eea",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is the application responsible for cert validation when using mTLS?\r\n",
+      "createdAt": "2024-11-08T16:31:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2465220506",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S9vl1",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Is the application responsible for cert validation when using mTLS?\r\n\r\nWhen using mTLS, there are two typical approaches for validating the client certificate (other approaches could exist but these are the ones that I've seen in the wild):\r\n\r\n1. You configure a set of trusted root CA in the reverse proxy. Usually, the reverse proxy will reject the TLs handshake for untrusted client certificate in this case. The reverse proxy can then pass the client identity (subject) to the application.\r\n2. The reverse proxy does not verify the certificate but pass the whole certificate to the application (in a HTTP header). The application is then responsible for verifying the client certificate. In this case, the TLS handshake will complete for invalid certificates but the application will reject the request or ignore the associated identity.\r\n\r\nAs a consequence, if the configuration of the reverse proxy is not consistent with how the application behave, you might have an unsafe setup where:\r\n\r\n1. the reverse proxy is configured not to verify the client certificate;\r\n2. but the application does not verify the client certificate either.\r\n\r\nIn this case, any (possibly self-signed) certificate will be accepted.\r\n",
+      "createdAt": "2024-11-08T20:02:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2465659253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S91DE",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "… and this is one reason why the wording:\r\n\r\n > Verify that TLS servers validate certificates received before communicating with a TLS client.\r\n\r\nmay not always be completely accurate.\r\n\r\nIt is OK (and somewhat usual) for the TLS server to accept communicating with a client using an invalid TLS certificate if the server rejects the (application layer/) HTTP request (or possibly ignore the client identity when processing the HTTP request).\r\n\r\n***\r\n\r\nMoreover when using DPoP, it is OK for the authorization server or the resource server to accept any self-signed certificate but only use the associated public-key for:\r\n\r\n* binding the client public key to the issued access token (AS);\r\n* verifying the binding between the client public key and the received access token (RS).",
+      "createdAt": "2024-11-08T20:17:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2465681604",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TCLp-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So what is the proposal here @randomstuff ?",
+      "createdAt": "2024-11-10T17:43:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2466822782",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TCwdY",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What about:\r\n\r\n> Verify that TLS servers validate that mTLS client certificates are trusted before using the certificate identity for authentication or authorization.\r\n\r\nor maybe\r\n\r\n> Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authorization.",
+      "createdAt": "2024-11-10T22:51:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2466973528",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TCxlN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like the second",
+      "createdAt": "2024-11-10T23:05:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2466978125",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TJGfw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can we not just add a note about validation to 9.3.3 @randomstuff? ",
+      "createdAt": "2024-11-11T16:57:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2468636656",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TJl6D",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, 9.3.3 is about  services communicating internally within a system. This proposed requirement would apply to external services or even for authenticating end-users. I would think these are different in scope.",
+      "createdAt": "2024-11-11T18:11:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2468765315",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T9GBq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @tghosth, 9.3.3 is about services communicating internally within a system. This proposed requirement would apply to external services or even for authenticating end-users. I would think these are different in scope.\r\n\r\nOk I think that is a fair point, so how does this fit into V9? I am also open to suggestions for restructuring V9. @randomstuff \r\n",
+      "createdAt": "2024-11-18T08:31:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2482266218",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UEufE",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Validation of server certificate trust:\r\n\r\n> 9.2.6 [ADDED] Verify that TLS clients validate certificates received before communicating with a TLS server.\r\n\r\nis currently in 9.2  (General Service to Service Communication Security). This is probably OK. Would it make sense to move it into 9.4 (General TLS Security Guidance)?\r\n\r\n***\r\n\r\nValidation of client certificate trust:\r\n\r\n> Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authorization.\r\n\r\nThis could go into into 9.4 (General TLS Security Guidance)? It might go into V2 Authentication as well but this would be weird (it can apply to user authentication but is often going to be more about client/service authentication).\r\n\r\n***\r\n\r\n>  I am also open to suggestions for restructuring V9\r\n\r\nThis would probably be the topic of another issue but some considerations:\r\n\r\n* some requirement could be generalized to other secure protocols (eg. in my field SSH/SFTP is sometimes used for data transfer between systems) and the client/server identity validation apply equally there;\r\n* a \"general secure communication recommendations\" section, might be useful for discussing for example forward secrecy.\r\n",
+      "createdAt": "2024-11-18T22:28:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2484266948",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UID9O",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Validation of server certificate trust:\r\n> \r\n> > 9.2.6 [ADDED] Verify that TLS clients validate certificates received before communicating with a TLS server.\r\n> \r\n> is currently in 9.2 (General Service to Service Communication Security). This is probably OK. Would it make sense to move it into 9.4 (General TLS Security Guidance)?\r\n\r\nSure\r\n\r\n---\r\n\r\n> Validation of client certificate trust:\r\n> \r\n> > Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authorization.\r\n> \r\n> This could go into into 9.4 (General TLS Security Guidance)? It might go into V2 Authentication as well but this would be weird (it can apply to user authentication but is often going to be more about client/service authentication).\r\n\r\nI think this makes sense\r\n\r\n---\r\n\r\n> > I am also open to suggestions for restructuring V9\r\n> \r\n> This would probably be the topic of another issue but some considerations:\r\n> \r\n> * some requirement could be generalized to other secure protocols (eg. in my field SSH/SFTP is sometimes used for data transfer between systems) and the client/server identity validation apply equally there;\r\n> \r\n> * a \"general secure communication recommendations\" section, might be useful for discussing for example forward secrecy.\r\n\r\nIf you have some straightforward suggested moves then I am comfortable with that. Otherwise, please just open a PR with the simple changes discussed here.",
+      "createdAt": "2024-11-19T09:22:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2309#issuecomment-2485141326",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-11-06T20:45:52Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvdMg",
+      "name": "V12 (prev V9)",
+      "description": "",
+      "color": "BB73F6"
+    }
+  ],
+  "number": 2309,
+  "state": "CLOSED",
+  "title": "V6 Verify that (TLS) certificates are validated",
+  "url": "https://github.com/OWASP/ASVS/issues/2309"
+}

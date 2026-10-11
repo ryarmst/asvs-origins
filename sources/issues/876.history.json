@@ -1,0 +1,184 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-739891730",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Problems with current 14.5.3 I have described in: https://github.com/OWASP/ASVS/issues/686 (but closed it myself back then). It contains two requirements together the way that it's not understandable, what exactly you need to check:\r\n* validate `Origin` request header\r\n* have whitelist for `Access-Control-Allow-Origin` response header\r\n\r\nProposed 14.6.2 is something what ASVS miss at the moment, but:\r\n* if to split current 14.5.3 to validate `Origin` and build correct `Access-Control-Allow-Origin` - it can be part of the last one\r\n* it's quite different, do you have `Access-Control-Allow-Credentials: true` in the same response or not.\r\n\r\nCategory - do we consider CORS topic as part of Configuration (V14 subcategory) or part of Web Service (V13 subcategory)",
+          "recorded_at": "2020-12-07T15:00:18Z"
+        },
+        {
+          "body": "For more ideas/info, I had once issue opened on this topic: https://github.com/OWASP/ASVS/issues/686 (but closed it myself back then).",
+          "recorded_at": "2020-12-07T12:36:11Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-742265523",
+      "author": "jeremychoi",
+      "previous_versions": [
+        {
+          "body": "I agree with splitting the current 14.5.3 into two separate ones.  \r\n\r\nRe 14.6.2, I should have provided more details. \r\n\r\nIf  `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`,  the browsers will just make the request fail (https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials). So IMO we just don't need to care about it.\r\n\r\nThere are situations where a protection is made by IP addresses or firewall rules(e.g. communication allowed in the intranet), rather than by credentials. In this case, whether or not the `Access-Control-Allow-Credentials: true` header being returned does not matter, because it's not protected by credentials in the first place. Therefore the best is to have the strict white list in the  `Access-Control-Allow-Origin` header but if inevitably the header needs to be set to *, the sensitive information must not be contained.\r\n\r\nRe Jim's \"1) The origin header fires automatically for both preflight and simple requests; developers do not do this\", attackers can host scripts in their host, phish the victim and let the requests send from there. In that case, the Origin header can be manipulated. So we need to validate the `Origin` request.  (I recently added an example to the web security testing guide, https://github.com/OWASP/wstg/pull/657/commits/d8d10ff548b050326d8caeab82d4c344036def4b#diff-f9e5b91325a1ae6dc54f7b8fa67a5322757bfa19b5bdbfa2e4ebd3fb198e83c6R75)\r\n\r\nHow about this?\r\n\r\n14.6.1 Verify that the Cross-Origin Resource Sharing (CORS) `Access-Control-Allow-Origin` header uses a strict **white** list of trusted domains and subdomains. Where `Access-Control-Allow-Origin: *` needs to be inevitably returned, verify that the responses do not include any sensitive information.\r\n14.6.2 Verify that the `Origin` request header is validated to meet the CORS policy.",
+          "recorded_at": "2020-12-10T06:16:00Z"
+        },
+        {
+          "body": "I agree with splitting the current 14.5.3 into two separate ones.  \r\n\r\nRe 14.6.2, I should have provided more details. \r\n\r\nIf  `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`,  the browsers will just make the request fail (https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials). So IMO we just don't need to care about it.\r\n\r\nThere are situations where a protection is made by IP addresses or firewall rules(e.g. communication allowed in the intranet), rather than by credentials. In this case, whether or not the `Access-Control-Allow-Credentials: true` header being returned does not matter, because it's not protected by credentials in the first place. Therefore the best is to have the strict white list in the  `Access-Control-Allow-Origin` header but if inevitably the header needs to be set to *, the sensitive information must not be contained.\r\n\r\nRe Jim's \"1) The origin header fires automatically for both preflight and simple requests; developers do not do this\", attackers can host scripts in their host, phish the victim and let the requests send from there. In that case, the Origin header can be manipulated. So we need to validate the `Origin` request.  (I recently added an example to the web security testing guide, https://github.com/OWASP/wstg/pull/657/commits/d8d10ff548b050326d8caeab82d4c344036def4b#diff-f9e5b91325a1ae6dc54f7b8fa67a5322757bfa19b5bdbfa2e4ebd3fb198e83c6R75)\r\n\r\nHow about this?\r\n\r\n14.6.1 Verify that the Cross-Origin Resource Sharing (CORS) `Access-Control-Allow-Origin` header uses a strict **white** list of trusted domains and subdomains.\r\n14.6.2 Verify that the `Origin` request header is validated to meet the CORS policy.\r\n14.6.3 Where `Access-Control-Allow-Origin: *` needs to be inevitably returned, verify that the responses do not include any sensitive information.",
+          "recorded_at": "2020-12-10T06:11:13Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-742284193",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> If `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`, the browsers will just make the request fail. So IMO we just don't need to care about it.\r\n\r\nYou are mixing `Access-Control-Allow-Credentials: *` and `Access-Control-Allow-Origin: *` here, but ok, didn't have this in my mind that credentials are not allowed with `*` Origin.\r\n\r\nBut what it means in reality then - \"do not show sensitive information for not authorized user\" (because cookies are not in request). Is there any point to have this requirement, I'm not really sure. Authorization problems are covered with V4 category requirements. Without authorization problems it does not give anything extra.\r\n\r\nMaybe I miss same cases. Where it can cause problems? What is your reason or example, where it causes problems?\r\n",
+          "recorded_at": "2020-12-10T16:44:08Z"
+        },
+        {
+          "body": "> If `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`, the browsers will just make the request fail. So IMO we just don't need to care about it.\r\n\r\nYou are mixing `Access-Control-Allow-Credentials: *` and `Access-Control-Allow-Origin: *` here, but ok, didn't have this in my mind that credentials are not allowed with `*` Origin.\r\n\r\nBut what is means in reality then - \"do not show sensitive information for not authorized user\" (because cookies are not in request). Is there any point to have this requirement, I'm not really sure. Authorization problems are covered with V4 category requirements. Without authorization problems it does not give anything extra.\r\n\r\nMaybe I miss same cases. Where it can cause problems? What is your reason or example, where it causes problems?\r\n",
+          "recorded_at": "2020-12-10T07:16:18Z"
+        },
+        {
+          "body": "> If `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`, the browsers will just make the request fail. So IMO we just don't need to care about it.\r\n\r\nYou are mixing `Access-Control-Allow-Credentials: *` and `Access-Control-Allow-Origin: *` here, but ok, didn't have this in my mind that credentials are not allowed with `*` Origin.\r\n\r\nBut what is means in reality then - \"do not show sensitive information for not authorized user\" (because cookies are not in request). Is there any point to have this requirement, I'm not really sure. Maybe I miss same cases. Where it can cause problems? What is your reason or example, where it causes problems?\r\n",
+          "recorded_at": "2020-12-10T06:57:52Z"
+        },
+        {
+          "body": "> If `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`, the browsers will just make the request fail. So IMO we just don't need to care about it.\r\n\r\nYou are mixing `Access-Control-Allow-Credentials: *` and `Access-Control-Allow-Origin: *` here, but ok, didn't have this in my mind that it does credentials are not allowed with `*` Origin.\r\n\r\nBut what is means in reality then - \"do not show sensitive information for not authorized user\" (because cookies are not in request). Is there any point to have this requirement, I'm not really sure. Maybe I miss same cases. Where it can cause problems? What is your reason or example, where it causes problems?\r\n",
+          "recorded_at": "2020-12-10T06:57:02Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743236271",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> Otherwise, any other item that would cover this case?\r\n\r\nDescribed situation for me is clear problem with missing authentication and authorization controls. Do not use `Access-Control-Allow-Origin: *` there makes sense but to set this header does not solve original problem - missing authentication and authorization.\r\n\r\nAt the same time we can not say do not use `Access-Control-Allow-Origin: *`, because it is required when you want to share font files from your domain for example (for other sites).\r\n\r\n> 14.6.2 Verify that `Access-Control-Allow-Origin: null` is not used.\r\n\r\nIf previous requirement says \"use strict white list\", then what this one gives extra? Instead of _\"white list\"_ you may want to use _\"allow-list\"_ nowadays.\r\n\r\nYour proposal:\r\n\r\n> 14.6.3 Verify that the Origin request header is validated to meet the CORS policy.\r\n\r\nCurrent V14.5.2\r\n\r\n> V14.5.2 Verify that the supplied Origin header is not used for authentication or access control decisions, as the Origin header can easily be changed by an attacker. \r\n\r\nFor discussion - should those be merged to one requirement or there is point to keep them separately?",
+          "recorded_at": "2020-12-11T14:52:42Z"
+        },
+        {
+          "body": "> Otherwise, any other item that would cover this case?\r\n\r\nDescribed situation for me is clear problem with missing authentication and authorization controls. Do not use `Access-Control-Allow-Origin: *` there makes sense but to set this header does not solve original problem - missing authentication and authorization.\r\n\r\nAt the same time we can not say do not use `Access-Control-Allow-Origin: *`, because it is required when you want to share font files from your domain for example (for other sites).\r\n\r\n> 14.6.2 Verify that `Access-Control-Allow-Origin: null` is not used.\r\n\r\nIf previous requirement says \"use strict white list\", then what this one gives extra? Instead of white list you may want to use \"allow-list\" nowadays.\r\n\r\nYour proposal:\r\n\r\n> 14.6.3 Verify that the Origin request header is validated to meet the CORS policy.\r\n\r\nCurrent V14.5.2\r\n\r\n> V14.5.2 Verify that the supplied Origin header is not used for authentication or access control decisions, as the Origin header can easily be changed by an attacker. \r\n\r\nFor discussion - should those be merged to one requirement or there is point to keep them separately?",
+          "recorded_at": "2020-12-11T14:51:42Z"
+        },
+        {
+          "body": "> Otherwise, any other item that would cover this case?\r\n\r\nDescribed situation for me is clear problem with missing authentication and authorization controls. Do not use `Access-Control-Allow-Origin: *` there makes sense but to set this address does not solve original problem - missing authentication and authorization.\r\n\r\nAt the same time we can not say do not use `Access-Control-Allow-Origin: *`, because it is required when you want to share font files from your domain for example (for other sites).\r\n\r\n> 14.6.2 Verify that `Access-Control-Allow-Origin: null` is not used.\r\n\r\nIf previous requirement says \"use strict white list\", then what this one gives extra? Instead of white list you may want to use \"allow-list\" nowadays.\r\n\r\nYour proposal:\r\n\r\n> 14.6.3 Verify that the Origin request header is validated to meet the CORS policy.\r\n\r\nCurrent V14.5.2\r\n\r\n> V14.5.2 Verify that the supplied Origin header is not used for authentication or access control decisions, as the Origin header can easily be changed by an attacker. \r\n\r\nFor discussion - should those be merged to one requirement or there is point to keep them separately?",
+          "recorded_at": "2020-12-11T14:50:51Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743414304",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Just for pun - we are always on the same page when we are commenting same issue ;)\r\n\r\nIf someone is mixing attack vectors / defenses via victim browser and attack vectors / defenses directly to server, I just can not ignore that. That's why this curl comment and I stand for that.\r\n\r\nTakeaway for original issue/topic - category will stay V14 ;)",
+          "recorded_at": "2020-12-11T20:39:01Z"
+        },
+        {
+          "body": "Just for pun - we are always on the same page when we are commenting same issue ;)\r\n\r\nIf someone is mixing attack / defenses via victim browser and attacks vectors / defenses directly to server, I just can not ignore that. That's why this curl comment and I stand for that.\r\n\r\nTakeaway for original issue/topic - category will stay V14 ;)",
+          "recorded_at": "2020-12-11T20:36:36Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-746393487",
+      "author": "ThunderSon",
+      "previous_versions": [
+        {
+          "body": "I suggest `v14.6 HTTP Response Headers`, or something to the likes of that.\r\nCORS is there to relax SOP in the browser sandbox on server commands. It is not a \"security\" header, it's a security-relaxation header to be precise. Not part of 14.4.\r\n\r\nI am against discussing the Origin header in the request. It's just an anti-pattern when used _(oh it's that origin, let's trust it)_. It's like telling someone not to shoot themselves in the leg. I know some do it. People do a lot of things that will bring shame to everyone ... Haha.\r\n\r\n`ACAO: *` is all good if a server is meant to serve public requests.\r\nDynamic ACAO is bad when not properly implemented as it will allow the ACAC header to be served with it, unlike the `*` value.\r\n\r\nI don't mind reviewing this once a PR is opened as this follows closely to the WSTG contribution done by @jeremychoi \r\n\r\nEdit: After reviewing 14.4, it seems those are all response headers, so that's an alright point. If CORS needs a special section, CSP does too. CSP is a much harder one to tackle to be honest. The points for the CORS headers (since there are many headers) should be part of 14.4",
+          "recorded_at": "2020-12-16T17:23:47Z"
+        },
+        {
+          "body": "I suggest `v14.6 HTTP Response Headers`, or something to the likes of that.\r\nCORS is there to relax SOP in the browser sandbox on server commands. It is not a \"security\" header, it's a security-relaxation header to be precise. Not part of 14.4.\r\n\r\nI am against discussing the Origin header in the request. It's just an anti-pattern when used _(oh it's that origin, let's trust it)_. It's like telling someone not to shoot themselves in the leg. I know some do it. People do a lot of things that will bring shame to everyone ... Haha.\r\n\r\n`ACAO: *` is all good if a server is meant to serve public requests.\r\nDynamic ACAO is bad when not properly implemented as it will allow the ACAC header to be served with it, unlike the `*` value.\r\n\r\nI don't mind reviewing this once a PR is opened as this follows closely to the WSTG contribution done by @jeremychoi \r\n\r\nEdit: After reviewing 14.4, it seems those are all response headers, so that's an alright point. If CORS needs a special section, CSP does too. CSP is a much harder one to tackle to be honest.",
+          "recorded_at": "2020-12-16T17:23:20Z"
+        },
+        {
+          "body": "I suggest `v14.6 HTTP Response Headers`, or something to the likes of that.\r\nCORS is there to relax SOP in the browser sandbox on server commands. It is not a \"security\" header, it's a security-relaxation header to be precise. Not part of 14.4.\r\n\r\nI am against discussing the Origin header in the request. It's just an anti-pattern when used _(oh it's that origin, let's trust it)_. It's like telling someone not to shoot themselves in the leg. I know some do it. People do a lot of things that will bring shame to everyone ... Haha.\r\n\r\n`ACAO: *` is all good if a server is meant to serve public requests.\r\nDynamic ACAO is bad when not properly implemented as it will allow the ACAC header to be served with it, unlike the `*` value.\r\n\r\nI don't mind reviewing this once a PR is opened as this follows closely to the WSTG contribution done by @jeremychoi ",
+          "recorded_at": "2020-12-16T14:38:14Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-747460550",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "V14.4.8 - ACAO\r\n\r\n* \"_as much as possible_\" - not necessary\r\n*  `Access-Control-Allow-Origin: *` - styling/formatting question, so far we don't have \"code style\" in requirements\r\n\r\nV14.5.3 Origin\r\n\r\n* \"_is completely_\" - not necessary\r\n* maybe something like \"validated against defined list of allowed domains\" (with correct and nice wording)?\r\n* \"_when Access-Control-Allow-Origin header is dynamically configured with its value_\" - is this part necessary? I think we need to validate Origin header anyway, do we reflect it back to ACAO or not.  And if we already validate it, then this last part is not needed in requirement text",
+          "recorded_at": "2020-12-17T14:21:18Z"
+        },
+        {
+          "body": "V14.4.8 - ACAO\r\n\r\n* \"_as much as possible_\" - not necessary\r\n*  `Access-Control-Allow-Origin: *` - styling/formatting question, so far we don't have \"code style\" in requirements\r\n\r\nV14.5.3 Origin\r\n\r\n* \"_is completely_\" - not necessary\r\n* maybe something like \"validated against defined list of allowed domains\" (with correct and nice wording)?\r\n* \"_when Access-Control-Allow-Origin header is dynamically configured with its value_\" - is this part necessary? I think we need to validate Origin header anyway, do we reflect it back to ACAO or not and if we already validate it, then this last part is not needed in requirement text",
+          "recorded_at": "2020-12-17T14:09:52Z"
+        },
+        {
+          "body": "V14.4.8 - ACAO\r\n\r\n* \"_ as much as possible_\" - not necessary\r\n*  `Access-Control-Allow-Origin: *` - styling/formatting question, so far we don't have \"code style\" in requirements\r\n\r\nV14.5.3 Origin\r\n\r\n* \"_is completely_\" - not necessary\r\n* maybe something like \"validated against defined list of allowed domains\" (with correct and nice wording)?\r\n* \"_when Access-Control-Allow-Origin header is dynamically configured with its value_\" - is this part necessary? I think we need to validate Origin header anyway, do we reflect it back to ACAO or not and if we already validate it, then this last part is not needed in requirement text",
+          "recorded_at": "2020-12-17T14:09:30Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543925907",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Well, here is again terminology madness as Cross-**Origin** Request Forgery is called Cross-**Site** Request Forgery (CSRF).\r\n\r\nI can see an argument to merge it with the \"CSRF\" requirement, but I don't like the idea.\r\n\r\nI'm leaning more towards idea of bringing 13.2.5 to this section as well, as this, with a combination of validating the Origin header, is the defense to not bypass CORS pre-flight request criteria, and that is... defense against CSRF.. or CORF.\r\n\r\n> V13.2.5 Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json.\r\n\r\nI know that you did not like the idea, but the security point for this requirement is CORS-related and it belongs to V50.",
+          "recorded_at": "2024-12-15T15:53:21Z"
+        },
+        {
+          "body": "Well, here is again terminology madness as Cross-**Origin** Request Forgery is called Cross-**Site** Request Forgery (CSRF).\r\n\r\nI can see an argument to merge it with the \"CSRF\" requirement, but I don't like the idea.\r\n\r\nI'm leaning more towards idea of bringing 13.2.5 to this section as well, as this, with a combination of validating the Origin header, is the defense to not bypass CORS pre-flight request criteria, and that is... defense against CSRF.\r\n\r\n> V13.2.5 Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json.\r\n\r\nI know that you did not like the idea, but the security point for this requirement is CORS-related and it belongs to V50.",
+          "recorded_at": "2024-12-15T15:53:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2545150018",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> I disagree that this is CORS related. As I recall, certain content types will not trigger a pre-flight which will prevent CSRF. Also, its easier to trigger CSRF with formurlencode. Either way, it will still not allow a full CORS style attack because the response will still not be readable.\r\n\r\nTo have things in context - have you ever made one attack with that? Or ever implemented it?\r\n\r\nCORS-safelisted request (previously called \"simple request\") requires the request `Content-Type` field to be one of those:\r\n```\r\ntext/plain\r\napplication/x-www-form-urlencoded\r\nmultipart/form-data\r\n```\r\n\r\n> As such, I don't believe 13.2.5 is relevant here.\r\n\r\nAnd proves, that 13.2.5 is exactly the requirement you need for that. You can not bypass pre-flight if you require request content-type to be application/json or application/xml.\r\n\r\n> Also, its easier to trigger CSRF with formurlencode.\r\n\r\nWhich makes this as nonsense.\r\n",
+          "recorded_at": "2024-12-16T10:12:03Z"
+        },
+        {
+          "body": "> I disagree that this is CORS related. As I recall, certain content types will not trigger a pre-flight which will prevent CSRF. Also, its easier to trigger CSRF with formurlencode. Either way, it will still not allow a full CORS style attack because the response will still not be readable.\r\n\r\nTo have things in context - have you ever made one attack with that? Or ever implemented it?\r\n\r\nCORS-safelisted request (previously called \"simple request\") requires the request `Content-Type` field to be one of those:\r\n```\r\ntext/plain\r\napplication/x-www-form-urlencoded\r\nmultipart/form-data\r\n```\r\n\r\n> Also, its easier to trigger CSRF with formurlencode.\r\n\r\nWhich makes this as nonsense.\r\n\r\n> As such, I don't believe 13.2.5 is relevant here.\r\n\r\nAnd proves, that 13.2.5 is exactly the requirement you need for that. You can not bypass pre-flight if you require request content-type to be application/json or application/xml.",
+          "recorded_at": "2024-12-16T10:08:44Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2545159730",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "> To have things in context - have you ever made one attack with that? Or ever implemented it?\r\n\r\nYeah, stuff like this is a real thing\r\nhttps://www.directdefense.com/csrf-in-the-age-of-json/#h-manipulating-the-content-type\r\n\r\n> > Also, its easier to trigger CSRF with formurlencode.\r\n\r\n> Which makes this as nonsense.\r\n\r\nSometimes apps will work with json but will also accept formurlencoded so you can craft a CSRF payload which uses formurlencoded and it will succeed.\r\n\r\n> And proves, that 13.2.5 is exactly the requirement you need for that. You can not bypass pre-flight if you require request content-type to be application/json or application/xml.\r\n\r\nand I am saying that this is for reasons other than CORS",
+          "recorded_at": "2024-12-16T10:13:52Z"
+        },
+        {
+          "body": "> To have things in context - have you ever made one attack with that? Or ever implemented it?\r\n\r\nYeah, stuff like this is a real thing\r\nhttps://www.directdefense.com/csrf-in-the-age-of-json/#h-manipulating-the-content-type\r\n\r\n> > Also, its easier to trigger CSRF with formurlencode.\r\n\r\n> Which makes this as nonsense.\r\n\r\nSometimes apps will work with json but will also accept formurlencoded so you can craft a CSRF payload which uses formurlencoded and it will succeed.",
+          "recorded_at": "2024-12-16T10:13:04Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2549577590",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Brief note for this discussion, a Simple cross-origin javascript based request requires three sets of criteria to avoid pre-flight as @elarlang was elluding to.\r\n\r\nThe allowed methods are the only \"simple\" choice:\r\n- GET\r\n- HEAD\r\n- POST\r\n\r\nThe only headers which are allowed for simple cross-orgin requests:\r\n- Accept\r\n- Accept-Language\r\n- Content-Language\r\n- Content-Type (but note the additional requirements below) + automatic forbidden header names\r\n- [https://fetch.spec.whatwg.org/#forbidden-header-name](https://fetch.spec.whatwg.org/) \r\n\r\nThere are only three values allowed for Content-Type header for simple requests:\r\n- application/x-www-form-urlencoded\r\n- multipart/form-data\r\n- text/plain\r\n\r\nPlease note that CORS is not security. It's removing the security of SOP. SOP is security that CORS breaks. But also, API endpoints per other requirements require active sessions. As long as your API endpoint is not public and properly requires an active session token and proper access control, then misconfigured CORS rarely leads to a security issue at the API level.\r\n\r\nMisconfigured client side CORS based request address can lead to sending sensitive data to the wrong server, but this could be for any form or client request with a mistyped URL, not just CORS. ",
+          "recorded_at": "2024-12-17T20:41:13Z"
+        },
+        {
+          "body": "Brief note for this discussion, a Simple cross-origin javascript based request requires three sets of criteria to avoid pre-flight as @elarlang was elluding to.\r\n\r\nThe allowed methods are the only \"simple\" choice:\r\n- GET\r\n- HEAD\r\n- POST\r\n\r\nThe only headers which are allowed:\r\n- Accept\r\n- Accept-Language\r\n- Content-Language\r\n- Content-Type (but note the additional requirements below) + automatic forbidden header names\r\n- [https://fetch.spec.whatwg.org/#forbidden-header-name](https://fetch.spec.whatwg.org/) \r\n\r\nThere are only three values allowed for Content-Type header for simple requests\r\n- application/x-www-form-urlencoded\r\n- multipart/form-data\r\n- text/plain\r\n\r\nPlease note that CORS is not security. It's removing the security of SOP. SOP is security that CORS breaks. But also, API endpoints per other requirements require active sessions. As long as your API endpoint is not public and properly requires an active session token and proper access control, then misconfigured CORS rarely leads to a security issue at the API level.\r\n\r\nMisconfigured client side CORS based request address can lead to sending sensitive data to the wrong server, but this could be for any form or client request with a mistyped URL, not just CORS. ",
+          "recorded_at": "2024-12-17T20:40:23Z"
+        },
+        {
+          "body": "Brief note for this discussion, a Simple cross-origin javascript based request requires three sets of criteria to avoid pre-flight as @elarlang was elluding to.\r\n\r\nThe allowed methods are the only \"simple\" choice:\r\n- GET\r\n- HEAD\r\n- POST\r\n\r\nThe only headers which are allowed:\r\n- Accept\r\n- Accept-Language\r\n- Content-Language\r\n- Content-Type (but note the additional requirements below)\r\n\r\n+ automatic forbidden header names\r\n[https://fetch.spec.whatwg.org/#forbidden-header-name](https://fetch.spec.whatwg.org/) \r\n\r\nThere are only three values allowed for Content-Type header for simple requests\r\n- application/x-www-form-urlencoded\r\n- multipart/form-data\r\n- text/plain\r\n\r\nPlease note that CORS is not security. It's removing the security of SOP. SOP is security that CORS breaks. But also, API endpoints per other requirements require active sessions. As long as your API endpoint is not public and properly requires an active session token and proper access control, then misconfigured CORS rarely leads to a security issue at the API level.\r\n\r\nMisconfigured client side CORS based request address can lead to sending sensitive data to the wrong server, but this could be for any form or client request with a mistyped URL, not just CORS. ",
+          "recorded_at": "2024-12-17T20:40:04Z"
+        }
+      ]
+    }
+  ]
+}

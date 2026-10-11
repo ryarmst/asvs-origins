@@ -1,0 +1,54 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwNTgwMTE=",
+    "is_bot": false,
+    "login": "narfbg",
+    "name": "Andrey Andreev"
+  },
+  "body": "| # | Description | Level |\n| :---: | :--- | :---: |\n| **6.4.6** | Verify that administrative users can initiate the password reset process for the user, but that this does not allow them to change or choose the user's password. This prevents a situation where they know the user's password. | 3 |\n\nLevel 3 seems too high for this.\n\nIt is unfortunately not uncommon for admins to set trivial temporary passwords as a form of manual password reset, particularly in customer support and similar contexts. Additionally, some users are not receptive of good security practices and will put pressure on support agents to break policies (such as by setting a specific password for them), while support agents themselves are often incentivised to close tickets fast and have poor discipline as a result. This makes set-password-by-admin functionality very tempting to abuse.\nBecause it's an admin override, also it's not uncommon for set-password-by-admin functionality to ignore other policies that should serve as mitigations.\n\nThe combination of these factors makes it a high-risk feature. Requiring that all level 3 apps should _have_ reset-by-admin is reasonable, but that shouldn't lower the bar for how securely the feature is designed at lower levels. Perhaps the requirement should be split in two?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7q5quU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Passwords' content is covered by other requirements (V6.2.*), and this requirement only describes the procedure. Also note that MFA is required from Level 2.",
+      "createdAt": "2026-02-22T13:49:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3337#issuecomment-3940985748",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7q8AmU",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm aware of that, but if you look at 6.2, you'll find that the most important requirement (when it comes to strength) arguably doesn't apply to admin-set passwords:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **6.2.1** | Verify that **_user set_** passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended. | 1 |\n\nIt's also the case that many people interpret 6.2.* as applicable only to end user interactions and not admin functionality, even though a strict reading shouldn't result in that.\n\nIn the case where admins intend to set a temporary password, the functionality would bypass another requirement:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **6.4.1** | Verify that system generated initial passwords or activation codes are securely randomly generated, follow the existing password policy, and expire after a short period of time or after they are initially used. These initial secrets must not be permitted to become the long term password. | 1 |\n\nThen, even with MFA required, password-set-by-admin functionality can still be abused with great effect. Consider this: An attacker manages to steal a physical authenticator and calls customer support for a password reset, attempting to impersonate the legitimate user. In this case, the presence of a second factor can even make admins less vigilant because they think \"the user has MFA, what's the worst that could happen if I bend the rules a little bit and change the password?\"\nNot to say that this exact scenario is common, but impersonation attacks over the phone with customer support are a major pain.\n\nIt's the sum of many edge cases and/or otherwise low-severity threats that make this a more serious problem.",
+      "createdAt": "2026-02-22T19:46:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3337#issuecomment-3941599636",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2026-02-22T11:33:32Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 3337,
+  "state": "OPEN",
+  "title": "Lower level requirement for 6.4.6",
+  "url": "https://github.com/OWASP/ASVS/issues/3337"
+}

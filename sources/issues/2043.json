@@ -1,0 +1,443 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "The following verifications  are suggested to address least privilege client configuration for the Authorization Server and to follow recommendations from https://oauth.net/2.1/ (not to use ROPC or Implicit flows). \r\n\r\nNote that not using the ROPC flow is addressed in 51.1.6, but if the verifications in this issue and in #2041 are added then 51.1.6 is included and could be replaced/removed.\r\n\r\n \r\n## V51.2 Authorization Server\r\n\r\nVerify that all clients are configured to only allow the required grant. Avoid reusing clients for different purposes (allowing e g both 'code' and 'client-credentials' for a given client). Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be supported for any client. (L1, L2, L3)\r\n\r\nVerify that allowed scopes for each client asserts least privilege. (L1, L2, L3)\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6LCXVa",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that all clients are configured to only allow the required grant. Avoid reusing clients for different purposes (allowing e g both 'code' and 'client-credentials' for a given client).\r\n\r\nI am not sure about this one. Is that *really* bad?\r\n\r\nIf the usage of the \"client credentials\" flow is tightly related to the usage of \"code\" flow, it might make much sense to only have a single client_id.\r\n\r\nMoreover, having separate \"FooApp B2B\", \"FooApp User\" client IDs would only clutter the list of registered client (in the AS user interface) and would make it more difficult to deprovision a client application: \"I disabled FooApp.\" ,\"Did you disable FooApp B2B as well?\"",
+      "createdAt": "2024-09-05T21:23:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2332652890",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LLw6p",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The important thing is \"least privilege\" client configuration, maybe this is better\r\n\r\n>  Verify that all clients are configured to only allow the required grant. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be supported for any client. (L1, L2, L3)\r\n\r\nI agree that that the \"Avoid reusing clients for different purposes (allowing e g both 'code' and 'client-credentials' for a given client)\"-remark makes sense in some scenarios, but in other contexts it does not. \r\n\r\nThe thing I wanted to point out with that remark was that combining grants (code and client-credentials) in one client (to limit No of clients) might give users access to scopes (if not using PAR) that only system integrations should be granted, which is problematic if authorization is based on just a valid token and scopes...\r\n\r\nBut that is in a way addressed by  \r\n> Verify that allowed scopes for each client asserts least privilege. (L1, L2, L3)\r\n\r\nMaybe modify that to \r\n> Verify that allowed scopes for each client asserts least privilege for any allowed client grant. (L1, L2, L3)   \r\n\r\n    ",
+      "createdAt": "2024-09-07T08:26:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2335116969",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LLyMC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Does it really matter if a client supports this or not? Isn’t the real issue regarding whether or not the authorization server supports this?",
+      "createdAt": "2024-09-07T08:50:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2335122178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LRSW9",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I believe both aspects are important for limiting attack vectors, the reason for not suggesting a separate AS verification like\r\n\r\n> Verify that AS does not support Implicit or ROPC flow (L2, L3)\r\n\r\nis that many AS supports this today and it is unlikely to change in the near future, so all you can do as an application developer is to assert that your client configuration does not allow for using those flows. In example, if multiple flows are allowed, an attacker could by simply adding \"token\" to the \"id-token\" or \"code\" authorization-request or change it to \"password\", extract an access-token or initiate ROPC (PAR mitigates this)\r\n\r\nI agree that ASVS should make it clear that AS should no longer support Implicit and ROPC flows, perhaps this could be expressed better than in the note? ",
+      "createdAt": "2024-09-08T06:22:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2336564669",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MGHFx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposed it in https://github.com/OWASP/ASVS/issues/2048#issuecomment-2350227447 but I thik it belongs here:\r\n> Verify that OAuth / OIDC Client ID is unique and used only by the client.\r\n\r\n(requires wordsmithing)\r\n\r\nedit: I think it is already discussed in\r\n* #1826\r\n* #2003\r\n",
+      "createdAt": "2024-09-13T21:59:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2350412145",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MGQ3-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's move on with those:\r\n\r\n> Verify that all clients are configured to only allow the required grant. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be supported for any client.\r\n\r\n> Verify that allowed scopes for each client asserts least privilege.\r\n",
+      "createdAt": "2024-09-13T22:09:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2350452222",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MRHSJ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that OAuth / OIDC Client ID is unique and used only by the client.\r\n\r\n@elarlang I read this as \"Verify that a given (unique) OAuth/OIDC client is used according to least privilege, for a single application scope\". Is that correct? Then I think it belongs to the Client section more than the Authorization Server section.   ",
+      "createdAt": "2024-09-16T15:50:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2353296521",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MRLZS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would not put least privilege topic into this, just unique.\r\n\r\nThe client only uses what is configured for it and can not control, how it is configured. In my opinion it is authorization server responsibility to configure it correctly.\r\n\r\nedit: my context is 1st party solutions, it may be a different need when clients can register themselves on 3rd party solutions.",
+      "createdAt": "2024-09-16T15:57:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2353313362",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MdiFP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "A bit update to this one:\r\n> Verify that the client can only use the required grant. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be supported for any client.\r\n\r\n(note for myself: it replaces 51.1.6 (and the number is maybe changed for that time)\r\n\r\nThis requirement is a bit vague. By principle I can understand that you should not have more permissions than you need, but how do I test it?\r\n> Verify that allowed scopes for each client asserts least privilege.\r\n\r\nusual ping @randomstuff @TobiasAhnoff :)",
+      "createdAt": "2024-09-17T17:48:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2356552015",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MeECl",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the client can only use the *required* grant.\r\n\r\n“required” in this sentence feels a bit weird to me. Is that clear enough? Maybe something like: “Verify that for a given client, the authorization server only allows the usage of grants that this client actually needs to use.\"",
+      "createdAt": "2024-09-17T19:07:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2356691109",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MlTx4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that for a given client, the authorization server only allows the usage of grants that this client actually needs to use.\r\n\r\nI think we somehow need to send clear message, about password grant etc. \r\n\r\n> Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be supported for any client.\r\n\r\nShould we keep \"the note\", have a separate requirement or there is some good reason to not have it covered at all?",
+      "createdAt": "2024-09-18T14:11:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2358590584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mqm3B",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think adding it as a note captures that they are both omitted from best current practices, https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-10, where ROPC _must_ not be used while Implicit _should_ not be used. \r\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-27#section-2.4\r\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-27#section-2.1.2\r\n\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client actually needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used.\r\n",
+      "createdAt": "2024-09-19T04:58:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2359979457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MqoS2",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": ">This requirement is a bit vague. By principle I can understand that you should not have more permissions than you need, but how do I test it?\r\n\r\n> >  Verify that allowed scopes for each client asserts least privilege.\r\n\r\nYes, perhaps this is better?\r\n\r\n> Verify that for a given client, the authorization server only allows the usage of scopes that this client and grant actually needs to use. For example, if supporting the code flow, only scopes that the end-user (resource owner) are allowed to used should be configured for the client. ",
+      "createdAt": "2024-09-19T05:05:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2359985334",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MqzjS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the scope and grant topics are different enough to keep them separate. And merging them does not answer my questions\r\n> By principle I can understand that you should not have more permissions than you need, but how do I test it?",
+      "createdAt": "2024-09-19T05:48:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2360031442",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mqzyy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This I'll handle with PR tomorrow.\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client actually needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used.\r\n\r\nedit: PR done and the current state is:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.5** | [ADDED] Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used. | ✓ | ✓ | ✓ |\r\n\r\nThe requirement above is subject to finetune via #2047.\r\n\r\n---\r\n\r\nThis one is still waiting to be inserted into the document, but I think it should be a bit more descriptive, why it exists or what problem it solves.\r\n\r\n> Verify that allowed scopes for each client asserts least privilege.\r\n\r\n",
+      "createdAt": "2024-09-19T05:48:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2360032434",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NyjN6",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> > Verify that allowed scopes for each client asserts least privilege.\r\n\r\n> By principle I can understand that you should not have more permissions than you need, but how do I test it?\r\n\r\nOne way to test this is to try add more scopes to the auth request, then use the more powerful token in API requests and see if you are allowed to access resources you should not have access to.\r\n\r\n> This one is still waiting to be inserted into the document, but I think it should be a bit more descriptive, why it exists or what problem it solves.\r\n \r\nConfiguration of scopes for clients is one case where least privilege is important, but sometimes forgotten, and I think it is good to have something in ASVS that address this, to mitigate the risk of \"unexpected\" privilege escalation for a user/client.\r\n",
+      "createdAt": "2024-09-27T09:21:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2378838906",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NzAcw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "A bit different wording\r\n> Verify that the OAuth Client has assigned only required scopes using the least privilege principle.",
+      "createdAt": "2024-09-27T10:27:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2378958640",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NzJpo",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe\r\n\r\n> Verify that the OAuth Client has *requested* only required scopes using the least privilege principle.\r\n\r\nCould be extended:\r\n\r\n> Verify that the OAuth Client has requested only required scopes *(or other authorizations)* using the least privilege principle.\r\n\r\nin order to include [RAR](https://www.rfc-editor.org/rfc/rfc9396) and [resource indicators](https://www.rfc-editor.org/rfc/rfc8707).\r\n",
+      "createdAt": "2024-09-27T10:49:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2378996328",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NzMEc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "request and assigned are different things and requirements\r\n\r\nFor me, current requirement focuses what is available for this OAuth client.\r\n\r\nAnother topic is, what is the client requesting for certain action.",
+      "createdAt": "2024-09-27T10:55:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2379006236",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N5GRE",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Another topic is, what is the client requesting for certain action.\r\n\r\nThis is addressed in #2044 by having\r\n\r\n> Verify that clients asserts least privilege in token requests, by minimizing the set of requested scopes or any other parameter that affects permissions.\r\n\r\nBut it can be replaced by the requirement suggested here\r\n\r\n> Verify that the OAuth Client has requested only required scopes (or other authorizations) using the least privilege principle.\r\n\r\n\r\n> For me, current requirement focuses what is available for this OAuth client.\r\n\r\nYes, that is the intent, if not using PAR, the client is not in control of the requested scopes using the code flow, the user/attacker is, we can only limit the set of allowed scopes configured for the client...which is addressed by:\r\n\r\n> Verify that the OAuth Client is assigned only required scopes using the least privilege principle. \r\n\r\nPerhaps both requirements can be made shorter as \"only required\" and \"least privilege\" says the same thing or is it good to have \"least privilege\"?\r\n\r\n> Verify that the OAuth Client is assigned only required scopes.\r\n \r\n> Verify that the OAuth Client has requested only required scopes (or other authorization parameters).\r\n\r\n",
+      "createdAt": "2024-09-28T07:49:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2380555332",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N_t1J",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Trying to make them more understandable for \"out of context\".\r\n\r\nSection OAuth Authorization Server\r\n> Verify that the OAuth Client is assigned only the required scopes in the authorization server configuration.\r\n\r\nSection OAuth Client\r\n> Verify that the OAuth Client has requested only required scopes (or other authorization parameters) in requests to the authorization server.",
+      "createdAt": "2024-09-30T07:12:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2382290249",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OsRFI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Via #2124 \r\n\r\n**V51.2 OAuth Authorization Server**\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.8** | [ADDED] Verify that the OAuth Client is assigned only the required scopes in the authorization server configuration. | ✓ | ✓ | ✓ |\r\n\r\n\r\n**V51.3 OAuth Client**\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.3.6** | [ADDED] Verify that the OAuth Client has requested only required scopes (or other authorization parameters) in requests to the authorization server. | ✓ | ✓ | ✓ |\r\n",
+      "createdAt": "2024-10-04T15:32:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2393968968",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_cLc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirements are now in. In case those need additional improvement, it's better to open a separate issue.",
+      "createdAt": "2024-10-08T06:52:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2043#issuecomment-2398995164",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-31T15:01:13Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2043,
+  "state": "CLOSED",
+  "title": "V51 OAuth: Add verifications for Authorization Server client configuration ",
+  "url": "https://github.com/OWASP/ASVS/issues/2043"
+}

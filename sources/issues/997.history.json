@@ -1,0 +1,97 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2021-05-16T16:54:23Z",
+      "diff": "Reading 7.1 and 7.2 it seemed to me that there may be some duplication. Perhaps I have missed something.\r\n\r\nIt looks to me as if 7.2.1 and 7.2.2 are specific cases of 7.1.3 and 7.1.4 combined, and if so, they would be redundant. The descriptions in the sections don't really help me to understand the difference. One section seems to be about the content, the other about the format. Could someone explain this?\r\n\r\n| **7.1.3** | Verify that the application logs security relevant events including successful and failed authentication events, access control failures, deserialization failures and input validation failures. ([C5, C7](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n| **7.1.4** | Verify that each log event includes necessary information that would allow for a detailed investigation of the timeline when an event happens. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n| **7.2.1** | Verify that all authentication decisions are logged, without storing sensitive session tokens or passwords. This should include requests with relevant metadata needed for security investigations.  | | ✓ | ✓ | 778 |\r\n| **7.2.2** | Verify that all access control decisions can be logged and all failed decisions are logged. This should include requests with relevant metadata needed for security investigations. | | ✓ | ✓ | 285 |\r\n\r\nIf I explain logging to developers, I tell them they need to decide which events to log (i.e. all relevant security events, failed and successful) and what data to log for that event (enough for a security investigation, but as few sensitive data). 7.1 nicely summarizes this.\r\n"
+    },
+    {
+      "editedAt": "2021-05-16T17:05:46Z",
+      "diff": "Reading 7.1 and 7.2 it seemed to me that there may be some duplication. Perhaps I have missed something.\r\n\r\nIt looks to me as if 7.2.1 and 7.2.2 are specific cases of 7.1.3 and 7.1.4 combined, and if so, they would be redundant. The descriptions in the sections don't really help me to understand the difference. One section seems to be about the content, the other about the format. Could someone explain this?\r\n\r\n| **7.1.3** | Verify that the application logs security relevant events including successful and failed authentication events, access control failures, deserialization failures and input validation failures. ([C5, C7](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n| **7.1.4** | Verify that each log event includes necessary information that would allow for a detailed investigation of the timeline when an event happens. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n| **7.2.1** | Verify that all authentication decisions are logged, without storing sensitive session tokens or passwords. This should include requests with relevant metadata needed for security investigations.  | | ✓ | ✓ | 778 |\r\n| **7.2.2** | Verify that all access control decisions can be logged and all failed decisions are logged. This should include requests with relevant metadata needed for security investigations. | | ✓ | ✓ | 285 |\r\n\r\nIf I explain logging to developers, I tell them they need to decide which events to log (i.e. all relevant security events, failed and successful) and what data to log for that event (enough for a security investigation, but as few sensitive data as possible). 7.1 nicely summarizes this.\r\n"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-841846770",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "another one from my todo list :)\r\n\r\nMy current improvement idea on that field:\r\n7.1 should be clearly \"what must every log line contain and what it should not contain\", \"Log Content\" is ok category name here. I'm ok with this part.\r\n7.2 is the confusing one here. It seems to be list of security events. Category name \"Log Processing\" is confusing here. I think I have discussed it in some issue already, but did not find it at the moment. And my current setup, I agree, both 7.2.1 and 7.2.2 are covered by 7.1.3+7.1.4.\r\n\r\nGood material was recently published under CheatSheet project:\r\nhttps://cheatsheetseries.owasp.org/cheatsheets/Application_Logging_Vocabulary_Cheat_Sheet.html\r\n\r\nNow it's good question, how to list all expected security events - at the moment there is only 2: authentication and authorization but this gives a false signal - like logging only those is already good enough.",
+          "recorded_at": "2021-05-16T17:16:43Z"
+        },
+        {
+          "body": "another one from my todo list :)\r\n\r\nMy current improvement idea on that field:\r\n7.1 should be clearly \"what must every log line contain and what it should not contain\", \"Log Content\" is ok category name here. I'm ok with this part.\r\n7.2 is the confusing one here. It seems to be list of security events. Category name \"Log Processing\" is confusing here. I think I have discussed it in some issue already, but did not find it at the moment.\r\n\r\nGood material was recently published under CheatSheet project:\r\nhttps://cheatsheetseries.owasp.org/cheatsheets/Application_Logging_Vocabulary_Cheat_Sheet.html\r\n\r\nNow it's good question, how to list all expected security events - at the moment there is only 2: authentication and authorization but this gives a false signal - like logging only those is already good enough.",
+          "recorded_at": "2021-05-16T17:14:26Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-841866764",
+      "author": "timhemel",
+      "previous_versions": [
+        {
+          "body": "Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nDo I understand correctly that you intend 7.1 to be about the 'what' and 7.2 about the 'when'? Currently both are in 7.1 and that is fine, i don't see any reason to split it, unless you want to be more detailed about the specific events.\r\n\r\nIt is going to be hard to be complete with respect to expected security events, as some events may be very domain specific. Therefore I would use the system's threat model as inspiration. Good candidates would be:\r\n\r\n* any functionality that requires non-repudiation\r\n* any important status of a mitigation in progress, such as the result of a security check or a security decision.\r\n\r\nOf course the ASVS could suggest some common ones, like authentication, authorization, validation, DoS-protection, security relevant errors, attack detection. That list in the cheatsheet is a good source of inspiration, it could grow into a standard of its own!\r\n\r\nSo, I would give the reader the general guidelines and some examples, rather than give the false impression of completeness.",
+          "recorded_at": "2021-05-16T19:42:58Z"
+        },
+        {
+          "body": "Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nDo I understand correctly that you intend 7.1 to be about the 'what' and 7.2 about the 'when'? Currently both are in 7.1 and that is fine, i don't see any reason to split it, unless you want to be more detailed about the specific events.\r\n\r\nIt is going to be hard to be complete with respect to expected security events, as some events may be very domain specific. Therefore I would use the system's threat model as inspiration. Good candidates would be:\r\n\r\n* any functionality that requires non-repudiation\r\n* any important status of a mitigation in progress, such as the result of a security check or a security decision.\r\n\r\nOf course the ASVS could suggest some common ones, like authentication, authorization, validation, DoS-protection, security relevant errors, attack detection. That list in the cheatsheet is a good source of inspiration, it could grow into a standard of its own!",
+          "recorded_at": "2021-05-16T19:40:25Z"
+        },
+        {
+          "body": "Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nDo I understand correctly that you intend 7.1 to be about the 'what' and 7.2 about the 'when'? Currently both are in 7.1 and that is fine, i don't see any reason to split it, unless you want to be more detailed about the specific events.\r\n\r\nIt is going to be hard to be complete with respect to expected security events, as some events may be very domain specific. Therefore I would use the system's threat model as inspiration. Good candidates would be:\r\n\r\n* any functionality that requires repudiation\r\n* any important status of a mitigation in progress, such as the result of a security check or a security decision.\r\n\r\nOf course the ASVS could suggest some common ones, like authentication, authorization, validation, DoS-protection, security relevant errors, attack detection. That list in the cheatsheet is a good source of inspiration, it could grow into a standard of its own!",
+          "recorded_at": "2021-05-16T19:39:39Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-842057635",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nNo reason to say sorry. I like that someone else notices this kind stuff as well. And I like your fact-based arguments, keep going!\r\n\r\n> It is going to be hard to be complete with respect to expected security events, as some events may be very domain spec\r\n\r\nOne way to go is to have \"architecture\" requirement like (however to say it in English correctly) \"Verify, that all expected security events for logs are documented.\" Like requirement https://github.com/OWASP/ASVS/issues/892\r\n\r\nThis could be required input for current 7.1.3. In this case 7.2.* requirements are not necessary, but on the other hand, it's nice to point out \"minimum list of events what must be logged\". ",
+          "recorded_at": "2021-10-22T11:09:43Z"
+        },
+        {
+          "body": "> Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nNo reason to say sorry. I like that someone else notices this kind stuff as well. And I like you fact-based arguments, keep going!\r\n\r\n> It is going to be hard to be complete with respect to expected security events, as some events may be very domain spec\r\n\r\nOne way to go is to have \"architecture\" requirement like (however to say it in English correctly) \"Verify, that all expected security events for logs are documented.\" Like requirement https://github.com/OWASP/ASVS/issues/892\r\n\r\nThis could be required input for current 7.1.3. In this case 7.2.* requirements are not necessary, but on the other hand, it's nice to point out \"minimum list of events what must be logged\". ",
+          "recorded_at": "2021-05-17T07:32:44Z"
+        },
+        {
+          "body": "> Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nNo reason to say sorry. I like that some one else notices this kind stuff as well. And I like you fact-based arguments, keep going!\r\n\r\n> It is going to be hard to be complete with respect to expected security events, as some events may be very domain spec\r\n\r\nOne way to go is to have \"architecture\" requirement like (however to say it in English correctly) \"Verify, that all expected security events for logs are documented.\" Like requirement https://github.com/OWASP/ASVS/issues/892\r\n\r\nThis could be required input for current 7.1.3. In this case 7.2.* requirements are not necessary, but on the other hand, it's nice to point out \"minimum list of events what must be logged\". ",
+          "recorded_at": "2021-05-17T07:00:04Z"
+        },
+        {
+          "body": "> Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nNo reason to say sorry. I like that some one else notices this kind stuff as well. And I like you fact-based arguments, keep going!\r\n\r\n> It is going to be hard to be complete with respect to expected security events, as some events may be very domain spec\r\n\r\nOne way to go is to have \"architecture\" requirement like (however to say it in English correctly) \"Verify, that all expected security events for logs are documented.\" Like requirement https://github.com/OWASP/ASVS/issues/892\r\n\r\nThis could required be input for current 7.1.3. In this case 7.2.* requirements are not necessary, but on the other hand, it's nice to point out \"minimum list of events what must be logged\". ",
+          "recorded_at": "2021-05-17T06:55:12Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1826739944",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "ping @timhemel - I did some reorganizing and deduplications https://github.com/OWASP/ASVS/pull/1794\r\n\r\nIt all requires more work, but lets start from the first step - do you think it solves the first set of problems addressed when the issue was opened (https://github.com/OWASP/ASVS/issues/997#issue-892711114)?",
+          "recorded_at": "2023-11-26T10:00:17Z"
+        },
+        {
+          "body": "ping @timhemel - I did some reorganizing and duplications https://github.com/OWASP/ASVS/pull/1794\r\n\r\nIt all requires more work, but lets start from the first step - do you think it solves the first set of problems addressed when the issue was opened (https://github.com/OWASP/ASVS/issues/997#issue-892711114)?",
+          "recorded_at": "2023-11-26T10:00:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1829246093",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I tried to put self-explaining commit messages:\r\nhttps://github.com/OWASP/ASVS/pull/1794\r\n\r\na) commit https://github.com/OWASP/ASVS/pull/1794/commits/5790450cd3149064988a11c0490fbd21200678c2 says \"deduplicate 7.2.1 and 7.2.2 from 7.1.4\"\r\n\r\nand current 7.1.4 is:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.4** | Verify that each log event includes necessary information that would allow for a detailed investigation of the timeline when an event happens. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n\r\nb) commit https://github.com/OWASP/ASVS/pull/1794/commits/1584d726975fc7c86dc05af04dedc67b0956238a says \"hide outdated section descriptions\"\r\n\r\nThose texts are outdated - if we make changes and want to get feedback, we don't want to get feedback for already known outdated or out of sync intro texts.",
+          "recorded_at": "2023-11-28T19:51:47Z"
+        },
+        {
+          "body": "I tried to put self-explaining commit messages:\r\nhttps://github.com/OWASP/ASVS/pull/1794\r\n\r\na) commit https://github.com/OWASP/ASVS/pull/1794/commits/5790450cd3149064988a11c0490fbd21200678c2 says \"deduplicate 7.2.1 and 7.2.2 from 7.1.4\"\r\n\r\nand current 7.1.4 is:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.4** | Verify that each log event includes necessary information that would allow for a detailed investigation of the timeline when an event happens. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n\r\nb) commit https://github.com/OWASP/ASVS/pull/1794/commits/1584d726975fc7c86dc05af04dedc67b0956238a says \"hide outdated section descriptions\"\r\n\r\nThose texts are outdate - if we make changes and want to get feedback, we don't want to get feedback for already known outdated or out of sync into texts.",
+          "recorded_at": "2023-11-28T07:21:41Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,244 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "There is a vulnerability in some applications where the dot character is not properly escaped in regular expressions designed to validate hostnames. This oversight can lead to bypassing security checks, such as those for preventing attacks like request forgeries and malicious redirections. Incomplete checks may also cause undesirable behaviors when they accidentally succeed. \r\nIf an attacker successfully exploits this vulnerability, they may perform unauthorized actions like forging requests or redirecting users to malicious websites. This can lead to a range of security issues, including data breaches, compromised application functionality, and exposing users to additional risks.\r\n\r\nSuggested ASVS check:\r\n_Verify that the application properly escapes special characters, such as the dot character, in regular expressions used for hostname validation to prevent security threats like request forgeries and malicious redirections._\r\n\r\n\r\nSample vulnerable code:\r\n```\r\napp.get('/some/path', function(req, res) {\r\n    let url = req.param('url'),\r\n        host = urlLib.parse(url).host;\r\n    // BAD: the host of `url` may be controlled by an attacker\r\n    let regex = /^((www|beta).)?example.com/;\r\n    if (host.match(regex)) {\r\n        res.redirect(url);\r\n    }\r\n});\r\n```",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5Y9Zt1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "URL validation - We have requirement for validating URL's (5.1.5), so from the opened issue point of view - URL validation is just done incorrectly and the problem is covered.\r\n\r\nRegex - If you don't escape data for regex, it's general problem (not host validation specific). I think this is something we should have but without context limitation (like hostname validation). Like in PHP, use function [preg_quote](https://www.php.net/manual/en/function.preg-quote.php) when building for regular expressions dynamically.\r\n\r\nProbably we can combine it with other issue: https://github.com/OWASP/ASVS/issues/1562",
+      "createdAt": "2023-03-31T19:31:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1492491125",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Y9ekT",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for your response. I believe #1562 is fundamentally different. In order to remove context limitation we can have this check:\r\n_Verify that the application properly escapes special characters, such as the dot character, in regular expressions for various input validation tasks_ ",
+      "createdAt": "2023-03-31T19:46:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1492510995",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Y9e-n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "But why to put the dot for special spotlight? It may take attention away from others or give an impression, that the dot is the only or at least most important symbol. You need to escape all of them:\r\n```\r\n. \\ + * ? [ ^ ] $ ( ) { } = ! < > | : - #\r\n```",
+      "createdAt": "2023-03-31T19:48:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1492512679",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Y9hWm",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can write it more generic like this, the reason that I considered a special place for dot is that I have seen that issue in many clients and an attacker could easily bypass their filters. \r\n\r\n_Verify that the application properly escapes special characters in regular expressions for various input validation tasks_\r\n\r\n",
+      "createdAt": "2023-03-31T19:54:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1492522406",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Y9jOS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Probably we can fine-tune it more, but it's a good input and for me good requirement to have in ASVS :)",
+      "createdAt": "2023-03-31T19:57:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1492530066",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Y9prQ",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for your feedback! I'm glad that you find the proposed ASVS check valuable. Your input and suggestions have been instrumental in refining the requirement.",
+      "createdAt": "2023-03-31T20:10:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1492556496",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmP9D",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ImanSharaf what do you think about:\r\n\r\n> Verify that the application uses slashes to correctly escape special characters being used in regular expressions to ensure they are not misinterpreted as control characters.",
+      "createdAt": "2023-05-31T14:06:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1570307907",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmaQc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is it written somewhere that slash is the only escape character and it's not up to the configuration?",
+      "createdAt": "2023-05-31T14:29:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1570350108",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmvfV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Pretty sure slash is the only option:\r\nhttps://learn.microsoft.com/en-us/dotnet/standard/base-types/character-escapes-in-regular-expressions",
+      "createdAt": "2023-05-31T15:19:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1570437077",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dnG63",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For category it waits: https://github.com/OWASP/ASVS/issues/1643",
+      "createdAt": "2023-05-31T16:16:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1570533047",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e7RrJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang are you ok for me to create a PR based on:\r\n\r\n> Verify that the application uses slashes to correctly escape special characters being used in regular expressions to ensure they are not misinterpreted as control characters.\r\n\r\nI would currently put this in 5.2 \"**Sanitization** and Sandboxing\" but we can use that other issue #1643 to consider future categorization.",
+      "createdAt": "2023-06-15T08:26:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1592597193",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e8Qwb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang are you ok for me to create a PR based on:\r\n\r\nyes",
+      "createdAt": "2023-06-15T11:18:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1592855579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e9iRg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1699",
+      "createdAt": "2023-06-15T14:35:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1600#issuecomment-1593189472",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-03-31T18:14:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 1600,
+  "state": "CLOSED",
+  "title": "Incomplete Regular Expression for Hostnames: Unescaped Dot Character",
+  "url": "https://github.com/OWASP/ASVS/issues/1600"
+}

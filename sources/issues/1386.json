@@ -1,0 +1,241 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUxMTY2",
+    "is_bot": false,
+    "login": "jsulinski",
+    "name": "James Sulinski"
+  },
+  "body": "[3.3.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v33-session-termination)\r\n\r\n\"Verify that the application gives the option to terminate all **other** active sessions after a successful password change (including change via password reset/recovery), and that this is effective across the application, federated login (if present), and any relying parties.\"\r\n\r\nWhen a user changes their password to regain control of an account in the case of compromise, they likely expect that all sessions will be terminated or renewed, such that an attacker would not be able to persist access to the current session. \r\n\r\nI think either the word \"other\" should be removed here or language should be added similar to the [Session Management Cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#renew-the-session-id-after-any-privilege-level-change).\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5LRGMW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I interpret, that if user has active session and changes password, we don't need to log out user from this current active session and that's why there is \"all other\".\r\n\r\nJust in case, a bit related requirement:\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.7.1** | [MODIFIED] Verify the application requires re-authentication or secondary factor verification before allowing any sensitive transactions or account modifications. | ✓ | ✓ | ✓ | 306 | |",
+      "createdAt": "2022-09-29T20:21:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1262773014",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LRI3x",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, that is the way it is currently written. However, some best practices suggest that the current session be expired and/or the session id renewed. Otherwise, there is no way to block access to attackers in the case of account compromise with the existing session (ie, remediated mitm, device access, etc). \r\n\r\n3.7.1 refers to re-authentication **before** sensitive transactions/account modifications. 3.3.3 refers to **after**. ",
+      "createdAt": "2022-09-29T20:32:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1262783985",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LRL86",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Got it.\r\n\r\nOne option is to cover it in another requirement:\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.2.1** | Verify the application generates a new session token on user authentication. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 384 | 7.1 |\r\n\r\nSomething like: for password change you need to re-authenticate (3.7.1), which means your all other sessions are terminated (3.3.3) and your current session id/token is regenerated (3.2.1).",
+      "createdAt": "2022-09-29T20:46:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1262796602",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LRQJb",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Awesome, thanks for the advice! I'd love to get more input on best practices here and/or do some more research before drafting a PR. \r\n\r\nI couldn't find any references in NIST 800-63. The [Session Management Cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html#renew-the-session-id-after-any-privilege-level-change) says \"The most common scenario where the session ID regeneration is mandatory is during the authentication process, as the privilege level of the user changes from the unauthenticated (or anonymous) state to the authenticated state though in some cases still not yet the authorized state. Common scenarios to consider include; password changes [...]\"\r\n\r\nThis is technically fulfilled by either expiring all sessions or regenerating the session ID, as both will inevitably result in a new session ID. The mention of unauthenticated state also makes it sound like this passage only relates to password reset requests, rather than password changes.\r\n\r\nI don't think I've encountered any applications in the wild that only regenerate the session ID, but some do expire all sessions. \r\n\r\nThe Devise library does neither, but it does expire all old sessions if you're using server-side sessions (not sure if this is the case for the default cookie-based sessions). \r\n\r\nAnyone familiar with other best practices or implementations around this topic? \r\n",
+      "createdAt": "2022-09-29T21:04:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1262813787",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LSjE5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My proposal could to extend 3.2.1 with \"including re-authentication, and terminate previous session token\".\r\n\r\nWith regenerate session token there are sometimes mistakes like - instead of \"create new one, destroy previous one\" is used \"create new token, copy content from previous (but old one stays valid as well)\"",
+      "createdAt": "2022-09-30T06:20:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1263153465",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LTE5t",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good idea Elar, I like it.",
+      "createdAt": "2022-09-30T08:47:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1263292013",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LUlsO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would like to get help to wordsmith it to correct english, @jsulinski @jmanico ",
+      "createdAt": "2022-09-30T15:01:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1263688462",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LdRfZ",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This proposal seems to be unrelated to my concern and would result in terminating all previous sessions (including other devices) whenever a user logs in. \r\n\r\nThe specific sensitive action that I'm concerned about is when a user utilizes an existing session to change their password.\r\n\r\nI reviewed a half-dozen major web applications today and the behavior around this action is varied. The vast majority of them enable the user to review and terminate sessions manually (ASVS 3.3.4), which might be viewed as an acceptable alternative to forcing the logout after password change. One, however, did both (Gitlab). \r\n\r\nMy concern here is around applications that do not implement 3.3.4 (including device information to distinguish between sessions and devices accessing said sessions). They should probably at least log users out on password change and/or generate a new session id and expire old sessions.\r\n\r\nGiven that the ASVS is not designed to take an if/else approach to requirements, perhaps no change is required here. I think we can close this issue out. ",
+      "createdAt": "2022-10-03T20:02:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1265965017",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LfUjU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some more comments.\r\n\r\n> The specific sensitive action that I'm concerned about is when a user utilizes an existing session to change their password.\r\n\r\nWith session takeover, when an attacker wants to change password for victim account, he/she need to know current valid password. Related requirements:\r\n* _V2.1.6 Verify that password change functionality requires the user's current and new password._\r\n* _V3.7.1 [MODIFIED] Verify the application requires re-authentication or secondary factor verification before allowing any sensitive transactions or account modifications._\r\n\r\nIf victim's account credentials are leaked, then there is hope only for MFA. Related requirements:\r\n* _V2.2.9 [ADDED, SPLIT FROM 2.2.4] Verify that multi-factor authentication is required, that is, the application uses either a multi-factor authenticator or a combination of single-factor authenticators._\r\n* _V2.2.10 [ADDED, SPLIT FROM 2.2.3] Verify that users are notified of suspicious authentication attempts. Suspicious authentication attempts may include successful or unsuccessful authentication from an unusual location or client, partially successful authentication with only one of multiple factors, successful or unsuccessful authentication after a long period of inactivity or successful authentication after several unsuccessful attempts._\r\n\r\nBefore closing the issue, I'm going to implement my own proposal, as it fixes 2 problems.",
+      "createdAt": "2022-10-04T07:07:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1266501844",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LiSxU",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> With session takeover, when an attacker wants to change password for victim account, he/she need to know current valid password.\r\n\r\nUnderstood. My concern is not that the attacker will change the password, but that the existing session the attacker is using will remain active after the user changes their password in an attempt to recover their account. For example, in the case of MITM that has been resolved or if the user leaves their account logged in on a public computer.\r\n\r\nHowever, if the user can see and terminate previous sessions through a feature in the application then this is probably fine.",
+      "createdAt": "2022-10-04T16:45:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1267280980",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LiTZl",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify the application generates a new session token on user authentication. \r\n\r\n> including re-authentication, and terminate previous session token\r\n\r\nIf you combine these two, you get:\r\n\r\n\"Verify the application generates a new session token on user authentication, including re-authentication, and terminate previous session token.\"\r\n\r\nWhile this is an improvement for security, the user experience is going to be pretty poor for applications that utilize separate sessions for mobile or desktop applications. \r\n\r\nIt might also be prudent to investigate whether many popular auth libraries support this functionality, as it will be a heavy lift getting the recommendation implemented otherwise. The one I know off-hand is that Devise does not support this without modifications.",
+      "createdAt": "2022-10-04T16:47:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1267283557",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LifPF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"terminate previous session token\" should cover here only current active session.\r\n\r\nAll other sessions are up to user choice with requirement 3.3.3:\r\n_V3.3.3 [LEVEL L2 > L1] Verify that the application gives the option to terminate all other active sessions after a successful password change (including change via password reset/recovery), and that this is effective across the application, federated login (if present), and any relying parties._\r\n",
+      "createdAt": "2022-10-04T17:31:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1267332037",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LifwT",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Ah, then how about:\r\n\r\n\"Verify the application generates a new session token on user authentication, including re-authentication, and terminates the current session token.\"",
+      "createdAt": "2022-10-04T17:33:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1267334163",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Lyius",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jsulinski - my change is merged. Is here something else to clarify / improve / solve from your side or we can close this issue?",
+      "createdAt": "2022-10-07T12:40:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1271540652",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-09-29T18:36:08Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    }
+  ],
+  "number": 1386,
+  "state": "CLOSED",
+  "title": "3.2.1 / 3.3.3 Does not require terminating current session or renewing session id",
+  "url": "https://github.com/OWASP/ASVS/issues/1386"
+}

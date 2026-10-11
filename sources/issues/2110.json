@@ -1,0 +1,1093 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nSpin-off from https://github.com/OWASP/ASVS/issues/2040#issuecomment-2338933353\r\n\r\n> Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks. (L1, L2, L3)\r\n\r\nThe proposal updates the requirement we already have as 51.2.4\r\n> Verify that refresh tokens are sender-constrained or use refresh token rotation to prevent token replay attacks. Refresh token rotation prevents usage in the event of a compromised refresh token. Sender-constrained refresh tokens cryptographically binds the refresh token to a particular Client.\r\n\r\n---\r\n\r\n> Verify that refresh tokens for public clients ... (L1, L2, L3)\r\n\r\nFor how many levels we allow \"public clients\"?\r\n\r\nAnd we have a separate discussion/requirement for confidential clients in #2109 \r\n> Verify that confidential clients must use client authentication in refresh token requests. (L1, L2, L3)\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6NGt9l",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks. (L1, L2, L3)\r\n\r\nI'm wondering whether it would make sense to require the usage of sender-constrained refresh tokens (as opposed to refresh token rotation) in L3.\r\n\r\n> For how many levels we allow \"public clients\"?\r\n\r\nMaybe, this does not really matter in this verification but would be the object of another verification (?). Even if public clients are disallowed in L3, you would still want to have (because some L3 applications won't be 100% conformant from day one):\r\n\r\n> Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks. (L1, L2, **L3**)",
+      "createdAt": "2024-09-23T06:44:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2367348581",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NG76q",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We must be aligned with proposal from #2038 \r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'.",
+      "createdAt": "2024-09-23T07:18:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2367405738",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NHILW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks. (L1, L2, L3)\n\nThe refresh-refresh pattern by itself is more of intrusion detection as opposed to attack mitigation. The other defenses force me to have full access to the client. Refresh refresh does not. If I can steal an active refresh token there is no other sender constraint that prevents me from using it. Only stealing am expired refresh token asserts the defense.\n\nI suggest recommending (DPoP AND refresh-refresh) or (mTLS AND refresh-refresh) as opposed to recommending refresh-refresh as an alternative to the other defenses.\n",
+      "createdAt": "2024-09-23T07:46:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2367455958",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NchTD",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I'm wondering whether it would make sense to require the usage of sender-constrained refresh tokens (as opposed to refresh token rotation) in L3.\r\n\r\nFrom OAuth 2.1 and FAPI 2, as far as I understand, refresh-token misuse is primary mitigated by client authentication for confidential clients. So, L3 is covered by requiring confidential clients (with strong authentication methods) and client authentication for all token requests (#2009)   \r\n\r\nFor public clients (which I think needs to be allowed for L1 and L2) OAuth 2.1 states: Either DPoP/mTLS or Refresh-token rotation. Which was the intent to capture with\r\n\r\n>  Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks. (L1, L2, L3)\r\n\r\nBut e g FAPI 2 notes that refresh-token rotation is a weaker mitigation (and sometimes problematic), so, as I think @jmanico suggests, ASVS should reflect this and more clearly recommend DPoP or mTLS over just rotation, correct? Perhaps like this\r\n\r\n>  Verify that refresh tokens for public clients are sender-constrained using DPoP or Certificate-Bound Access Tokens (mTLS) and, if appropriate, also use refresh token rotation to mitigate refresh token replay attacks. (L1, L2, L3)",
+      "createdAt": "2024-09-25T05:35:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2373063875",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N_y4B",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh tokens for public clients are sender-constrained using Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS) and, if appropriate, also use refresh token rotation to mitigate refresh token replay attacks.\r\n\r\n@randomstuff - any further feedback or need for changes?",
+      "createdAt": "2024-09-30T07:23:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2382310913",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OBO76",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that requiring sender-constrained tokens even for L1 is a little drastic. Using sender-constrained access tokens all the time is a good idea but I'm not sure this matches much with the current state of software/frameworks, etc. This might therefore be a little too much for L1?",
+      "createdAt": "2024-09-30T10:07:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2382687994",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OBTC5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree with that. To this direction?\r\n> Verify that the authorization server mitigates refresh token replay attacks for public clients by using (L1, L2) refresh token rotation or (L3) sender-constrained refresh tokens using Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS).",
+      "createdAt": "2024-09-30T10:14:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2382704825",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OBW29",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe:\r\n\r\n> Verify that the authorization server mitigates refresh token replay attacks for public clients by using (L1, L2) refresh token rotation or (L1, L2, L3) sender-constrained refresh tokens using Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS).",
+      "createdAt": "2024-09-30T10:22:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2382720445",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OEFr8",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the authorization server mitigates refresh token replay attacks for public clients by using (L1, L2) refresh \r\n> token rotation or (L1, L2, L3) sender-constrained refresh tokens using Demonstrating Proof of Possession (DPoP) or \r\n> Certificate-Bound Access Tokens (mTLS).\r\n\r\nActually, I noticed that this [conflicts with DPoP](https://datatracker.ietf.org/doc/html/rfc9449#section-5):\r\n\r\n> Refresh tokens issued to confidential clients (those having established authentication credentials with the authorization  server) **are not bound to the DPoP proof public key** because they are already sender-constrained with a different existing mechanism.\r\n\r\nThe existing mechanism being client authentication.",
+      "createdAt": "2024-09-30T14:52:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2383436540",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OEI4e",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Actually, I noticed that this [conflicts with DPoP](https://datatracker.ietf.org/doc/html/rfc9449#section-5)\r\n\r\nWell actually no, it does not because of \"public clients\" :facepalm:",
+      "createdAt": "2024-09-30T14:57:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2383449630",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OEKT9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, all good or need for changes?",
+      "createdAt": "2024-09-30T14:59:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2383455485",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OwhI-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current 51.2.4:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.4** | [ADDED] Verify that the authorization server mitigates refresh token replay attacks for public clients by using (L1, L2) refresh token rotation or (L1, L2, L3) sender-constrained refresh tokens using Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS). | ✓ | ✓ | ✓ |\r\n\r\nFor refresh token rotation - we should require revoking previous refresh token, as decribed in:\r\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-4.3.1-10.2.1\r\n",
+      "createdAt": "2024-10-05T14:54:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2395083326",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PFr1z",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For refresh token rotation - we should require revoking previous refresh token, as decribed in:\r\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#section-4.3.1-10.2.1\r\n\r\nI was going to say that this is implied in \"refresh token rotation\" but actually that's not true. So you are right! :+1: ",
+      "createdAt": "2024-10-08T19:17:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2400632179",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PPu1q",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal for add-on to the current requirement 51.2.4:\r\n> If the refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.\r\n\r\n\"for that authorization\" should be thought carefully - is it correct and is it understandable?",
+      "createdAt": "2024-10-09T19:22:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2403265898",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PP7uw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> for that authorization\" should be thought carefully - is it correct and is it understandable?\r\n\r\nI think the word we are looking for is the same we are [discussing](https://github.com/OWASP/ASVS/issues/1968#issuecomment-2395410180) in #1968.",
+      "createdAt": "2024-10-09T19:55:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2403318704",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PQATn",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, Yes, I think \"authorization\" if probably the better word.\r\n\r\nSee these snippets from the Oauth 2.1 draft:\r\n\r\n> The access token represents **the authorization** granted to the client.\r\n>\r\n> [...]\r\n>\r\n> An authorization grant represents **the resource owner's authorization** (to access its protected resources) used by the client to obtain an access token.\r\n>\r\n> [...]\r\n>\r\n> Access tokens are credentials used to access protected resources. An access token is a string representing an **authorization** issued to the client.\r\n\r\nAd discussed in #1968, grant [could be used to have a similar meaning](https://aaronparecki.com/2024/03/29/3/oauth-terminology) of \"granted authorization\" but in OAuth it is always used to mean [\"authorization grant\"](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-authorization-grant) which is some concrete representation of a granted authorization (such as a refresh token or an authorization code).",
+      "createdAt": "2024-10-09T20:07:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2403337447",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PSySF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal for update (a bit lengthy but I would like to have one requirement per attack vector instead of implementing testing guide):\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.4** | [ADDED] Verify that the authorization server mitigates refresh token replay attacks for public clients by using (L1, L2) refresh token rotation or (L1, L2, L3) sender-constrained refresh tokens using Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS). If ~~the~~ refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-10-10T05:34:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2404066437",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PYXla",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Wording nitpick: \" If the refresh token rotation is used\" → \" If refresh token rotation is used\"?\r\n\r\nOtherwise LGTM.",
+      "createdAt": "2024-10-10T16:11:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2405529946",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QPHRX",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A little late...but the way I read 51.2.4 now, it is hard to understand that sender-constrained should be used (if possible) since that is a stronger mitigation than rotation. For L3 that is somewhat clear since rotation as mitigation is only for L1 and L2, but for L1 and L2 we seem to suggest that they are equally strong mitigations, that it doesn´t matter which one you choose.\r\n\r\nPerhaps  this is more clear, but a bit long?\r\n\r\n> Verify that the authorization server mitigates refresh token replay attacks for public clients by using refresh token rotation or sender-constrained refresh tokens using Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS). **Note that for L3 sender-constrained refresh tokens are required, while preferred for L1 and L2,  since it is a stronger form of mitigation than rotation.**  If refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.\r\n\r\n",
+      "createdAt": "2024-10-17T15:35:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2419881047",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QPmAn",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What about something such as:\r\n\r\n> [ADDED] Verify that the authorization server mitigates refresh token replay attacks for public clients by using either sender-constrained refresh tokens (i.e. DPoP or Certificate-Bound Access Tokens) if possible or, if not possible and for L1 only, refresh token rotation. If refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.",
+      "createdAt": "2024-10-17T16:33:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2420006951",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QQBsh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One more version:\r\n> Verify that the authorization server mitigates refresh token replay attacks for public clients. For L1, L2, and L3 applications sender-constrained refresh tokens (i.e. DPoP or Certificate-Bound Access Tokens) can be used. For L1 applications it is an option to use refresh token rotation, and if used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.",
+      "createdAt": "2024-10-17T17:36:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2420120353",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QQe9v",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the authorization server mitigates refresh token replay attacks for public clients, *preferably* using sender-constrained refresh tokens (i.e. DPoP or Certificate-Bound Access Tokens). For L1 applications only, refresh token rotation may be used instead.  If refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.",
+      "createdAt": "2024-10-17T18:24:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2420240239",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QZaqO",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yet another version (mix of the two)\r\n\r\n>Verify that the authorization server mitigates refresh token replay attacks for public clients. For L1, L2, and L3 applications sender-constrained refresh tokens (i.e. DPoP or Certificate-Bound Access Tokens) **should** be used. For L1 applications it is an option to use refresh token rotation, and if used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.\r\n\r\nBut I think I like the one from @randomstuff better",
+      "createdAt": "2024-10-18T14:15:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2422581902",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjsZk",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is there any need for a requirement about [DPoP proof replay attacks](https://datatracker.ietf.org/doc/html/rfc9449#name-dpop-proof-replay)?",
+      "createdAt": "2024-10-20T23:01:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2425276004",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QlAR2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Updated via #2170\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.4** | [ADDED] Verify that the authorization server mitigates refresh token replay attacks for public clients, preferably using sender-constrained refresh tokens (i.e. Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 applications only, refresh token rotation may be used instead. If refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-10-21T05:25:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2425619574",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QlA45",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Is there any need for a requirement about [DPoP proof replay attacks](https://datatracker.ietf.org/doc/html/rfc9449#name-dpop-proof-replay)?\r\n\r\nseems like a separate requirement and worth a separate issue?",
+      "createdAt": "2024-10-21T05:27:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2425622073",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QrYGw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @randomstuff ",
+      "createdAt": "2024-10-21T17:14:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2427290032",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RA2Gv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I opened this issue about DPoP proof replay attack #2188",
+      "createdAt": "2024-10-23T17:17:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2432917935",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d5We-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Can I politely suggest splitting 51.4.4 into  two requirements? The way it is now looks a bit complicated. I suggest:\n\nL1/L2 -Verify that the authorization server mitigates refresh token replay attacks for public clients, preferably using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 applications only, refresh token rotation may be used instead.\n\nVerify that when implementing refresh token rotation that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.",
+      "createdAt": "2025-02-10T19:38:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2649057214",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d8xs5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I politely recommend to read all the arguments already provided in #2591.\n\n> Verify that when implementing refresh token rotation that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.\n\nThis can not be used as a separate requirement:\n\n* it is not independent - it is part (one step) of other requirement\n* it must be \"only level 1\" (not for level 2 and level 3) - it is not supported now with numeric levels and was not used by any other requirements at least since ASVS v4.0\n* watching this requirement alone may give interpretation, that refresh token rotation is allowed (for L2 and L3) and it just must behave the described way\n* watching this requirement alone does not lead you to actual expected defense that is using sender-constrained tokens",
+      "createdAt": "2025-02-11T06:46:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2649955129",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eCYDa",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @randomstuff @TobiasAhnoff can I get your thoughts on this? I see two \"verify\" in 51.4.4 (one requirement) and really want to split it as described above.",
+      "createdAt": "2025-02-11T16:48:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2651422938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eCbA5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And arguments provided why it does not suit as a requirement does not matter? :)",
+      "createdAt": "2025-02-11T16:50:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2651435065",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eDG5T",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "They totally matter but I do not agree. I think you are being way to strict and see no harm in splitting. \n\nOne explains what to use, another explains how to use it. We have this elsewhere in ASVS.\n",
+      "createdAt": "2025-02-11T18:03:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2651614803",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eH9Yd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **[51.4.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x51-V51-OAuth2.md#v514-oauth-authorization-server)** | [ADDED] Verify that the authorization server mitigates refresh token replay attacks for public clients, preferably using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 applications only, refresh token rotation may be used instead. If refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided. | 1 |\n\nA few thoughts:\n* This is a single problem being solved, with a variety of different possible mechanisms to solve it.\n* At first glance. this does seem too long and ripe for splitting.\n* The slightly weird outcome of splitting these requirements would be a new requirement that is relevant for L1 but not relevant for L2 and L3 as the mechanism it refers to is not allowed for those levels. I don't know whether that is something we have elsewhere but it in itself is good argument for not splitting requirements.\n\nI think my preference would be to try and streamline the requirement as follows:\n\n\"_Verify that the authorization server mitigates refresh token replay attacks for public clients. For L1 only, refresh token rotation may be used as long as the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if a previously invalidated refresh token is provided. However the prefered approach, which is required for L2 and above, is using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS))._\"",
+      "createdAt": "2025-02-12T07:40:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652886557",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIBYx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The reasons why L1 option is the last one and should stay there\n* the preferred solution is to use sender-constrained refresh tokens or mTLS as a defense - it does not make sense to start with a refresh token rotation spotlight\n* most likely applications tested against this requirement are not L1 applications - it does not make sense to start with a  refresh token rotation spotlight\n\nrefresh token rotation is given as an acceptable option for L1. Read it as \"Note that for L1 it is acceptable to use refresh token rotation\".",
+      "createdAt": "2025-02-12T07:49:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652902961",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIQYC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here is another suggestion. Why not just drop the refresh token rotation description? That’s just describing how the RFC works.\n\r\n\r\nSo for 5.14.4 just use this and drop the rest.\n\r\n\r\nVerify that the authorization server mitigates refresh token replay attacks for public clients, preferably using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 applications only, refresh token rotation may be used instead.\n\r\n\r\nWe’re already just mentioning DPoP and mTLS without describing how they work. Why do we need to do that for refresh token rotation, especially if it’s the least important?",
+      "createdAt": "2025-02-12T08:21:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652964354",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIQ_g",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Because for L1 it is important.",
+      "createdAt": "2025-02-12T08:22:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652966880",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eISNV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Why are the implementation details for refresh token rotation important for level 1 but the implementation details of dpop and cert bound access tokens not important for level two and three?",
+      "createdAt": "2025-02-12T08:24:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652971861",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIUqr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Have I said that mTLS details are not important? No.\n\nCorrect refresh token rotation could be day-saver for L1 applications and I find it to be important. ",
+      "createdAt": "2025-02-12T08:30:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652981931",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIXqW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If they are important then why are we describing the implementation details for refresh token rotation for level 1 but not describing the implementation details of dpop and cert bound access tokens for the other levels? This seems out of sync.\n",
+      "createdAt": "2025-02-12T08:36:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652994198",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIYku",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is your problem to solve here **and** what is the problem with the requirement to solve here?",
+      "createdAt": "2025-02-12T08:37:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652997934",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIZwD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the inconsistency in when we provide implementation details and when we don't is a little puzzling but I don't think it is critical.\n\nHow about:\n\n\"_Verify that the authorization server mitigates refresh token replay attacks for public clients. The preferred approach, which is required for L2 and above, is using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 only, refresh token rotation may be used as long as the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if a previously invalidated refresh token is provided._\"",
+      "createdAt": "2025-02-12T08:40:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653002755",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eIaoG",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here is the problem.\r\n\r\nThis requirement is mentioning three critical defenses as options and only of them is being described, the least important one. This is a discrepancy that I’d like to fix by either externalizing the descriptions or remove the refresh token description so the requirement is more in alignment with the three different defenses mentioned.\r\n",
+      "createdAt": "2025-02-12T08:41:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653006342",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eJ7Rj",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that the requirement as it stands is quite long and daunting.\n\nI've tried to come up with something like:\n\n> Verify that the authorization server mitigates refresh token replay attacks for public clients. The preferred approach, which is required for L2 and above, is using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 only, refresh token rotation maye be used.\n> \n> Verify that refresh tokens which are not sender-constrained (refresh rotation, for L1 only), the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if a previously invalidated refresh token is provided.\n\nThe problem with that is that the second requirement is really details for the first one.\n\nIn the end, I think I'd keep it in single requirement but maybe try to make it less daunting.",
+      "createdAt": "2025-02-12T11:11:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653402211",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eKEHD",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What about splitting this part \"revokes all refresh tokens for that authorization if a previously invalidated refresh token is provided\" in a separate requirement? It might make verification simpler:\n\n1. you verify that refresh token rotation is used;\n2. then you verify than using revoked refresh tokens invalidates the current one (and ideally access tokens as well?).",
+      "createdAt": "2025-02-12T11:28:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653438403",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eKPDT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirements must be clear and only one way interpretable out of context as a stand-alone piece of text (without any other requirement and without any chapter text).\n\nI think the proposal does not meet those criteria as I listed here: https://github.com/OWASP/ASVS/issues/2110#issuecomment-2649955129",
+      "createdAt": "2025-02-12T11:48:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653483219",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eKvz5",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Requirements must be clear and only one way interpretable out of context as a stand-alone piece of text (without any other requirement and without any chapter text).\n\nYes, that may be true. It might depends, on the wording though.\n\n***\n\nOne argument for splitting is that we actually might want to include *more* wording in the requirement because some things are missing. Currently we have:\n\n> Verify that the authorization server mitigates refresh token replay attacks for public clients, preferably using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 applications only, refresh token rotation may be used instead. If refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and <mark>revokes all refresh tokens for that authorization</mark> if an already used and invalidated refresh token is provided.\n\nWhat it missing here is that, in case of refresh token reuse (when using refresh token rotation), all the grant (including, if possible, the access token) [should be revoked as well](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#refresh-token-endpoint-extension):\n\n> […] The authorization server cannot determine which party submitted the invalid refresh token, but it will revoke the active refresh token <mark>as well as the access authorization grant associated with it</mark>.\n\n***\n\nWhat about something like:\n\n> Verify that the authorization server mitigates refresh token replay attacks for public clients. The preferred approach, which is required for L2 and above, is using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). For L1 only, refresh token rotation maye be used.\n> \n>  Verify that refresh tokens when refresh token rotation is used (for L1 only), the authorization server revokes all refresh tokens and all the access authorization grant (including when possible the active tokens) for that authorization if a previously invalidated refresh token is provided.\n\n***\n\nTo clarify, I think there are valuable arguments for both positions (splitting and not splitting the requirement) and I currently don't prefer one solution of the other. Mostly experimenting with the possible solutions.",
+      "createdAt": "2025-02-12T12:47:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653617401",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eLGeL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "At the moment we don't have support or any intention to use requirements that are valid for one level and are not valid for higher level. This says no to \"level 1 only\" solution as I pointed out in https://github.com/OWASP/ASVS/issues/2591#issuecomment-2648774593, https://github.com/OWASP/ASVS/issues/2110#issuecomment-2649955129 and agreed by Josh in https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652886557\n\nThe point of the requirement is:\n> Verify that the authorization server mitigates refresh token replay attacks for public clients\n\nAnd whatever says that point, must stay in this requirement to avoid confusions that to mitigate the same problem, there are more than one solutions and those are in conflict with each other.",
+      "createdAt": "2025-02-12T13:25:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653710219",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eLQ48",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What it missing here is that, in case of refresh token reuse (when using refresh token rotation), all the grant (including, if possible, the access token) [should be revoked as well](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#refresh-token-endpoint-extension):\n\nYou previously opened this discussion in https://github.com/OWASP/ASVS/issues/2110#issuecomment-2403337447 - can you recall why it did not reach to the requirement?",
+      "createdAt": "2025-02-12T13:43:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653752892",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eiRDX",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This might be a solution. If we add refresh token to 51.4.11\n\n> Verify that the authorization server issues only sender-constrained (Proof-of-Possession) access **and refresh** tokens, either using mTLS certificate binding or Demonstration of Proof of Possession (DPoP).\n\nThen 51.4.4 (for level 1) could be\n\n> Verify that for public clients, if refresh tokens are not sender-constrained, then the authorization server must mitigate refresh token replay attacks. In example by using refresh token rotation.\n\nWith this level 3 requires confidential clients (51.4.10) and sender-constrained tokens (51.4.11), this aligns with FAPI, for 1 and 2 this is optional, but additional refresh token protection is required if the client is public (for level 1 and 2 a confidential client is enough to protect tokens).  \n\nIf we want to say something about refresh token rotation, it could be a separate requirement, like this\n\n> If refresh token rotation is used, verify that the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if an already used and invalidated refresh token is provided.\n\nDoes this work?",
+      "createdAt": "2025-02-14T16:33:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2659782871",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ejR8K",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think that is a great idea @TobiasAhnoff ",
+      "createdAt": "2025-02-14T18:53:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2660048650",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ekGvA",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the authorization server issues only sender-constrained (Proof-of-Possession) access and refresh tokens, either using mTLS certificate binding or Demonstration of Proof of Possession (DPoP).\n\nThis does not work as it stands because RFC 9449 (DPoP) [only supports DPOP-bound refresh token for public clients](https://datatracker.ietf.org/doc/html/rfc9449#section-5):\n\n> Refresh tokens issued to confidential clients (those having established authentication credentials with the authorization server) are not bound to the DPoP proof public key because they are already sender-constrained with a different existing mechanism.\n\nIt should be something like:\n\n> Verify that the authorization server issues only sender-constrained (Proof-of-Possession) access and, **for public client**, refresh tokens, either using mTLS certificate binding or Demonstration of Proof of Possession (DPoP).\n\nAlso this is a downgrade in security compared to the current version which requires sender-contrains refresh tokens for public clients in L2.\n",
+      "createdAt": "2025-02-14T21:03:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2660264896",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ekK_p",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I like @tghosth's proposition https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653002755. I would try to simplify it. Would something like that work?\n\n> Verify that the authorization server mitigates refresh token replay for public clients, preferably using using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)) or using refresh token rotation. Refresh token rotation must only be used for L1: in this case, the authorization server must revoke all refresh tokens for that authorization if an invalidated refresh token is used.",
+      "createdAt": "2025-02-14T21:15:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2660282345",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ewx-t",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": ">It should be something like:\n\n>>Verify that the authorization server issues only sender-constrained (Proof-of-Possession) access and, for public client, refresh tokens, either using mTLS certificate binding or Demonstration of Proof of Possession (DPoP).\n\nYes, maybe better to revert the change I suggested and just have 51.4.11 focused on access tokens\n\n> Verify that the authorization server issues only sender-constrained (Proof-of-Possession) **access** tokens, either using mTLS certificate binding or Demonstration of Proof of Possession (DPoP).\n\nI think what you suggested in https://github.com/OWASP/ASVS/issues/2110#issuecomment-2660282345 above works, but maybe this makes it clearer that rotation is weaker? \n\n> Verify that the authorization server mitigates refresh token replay for public clients, preferably using sender-constrained refresh tokens, i.e. Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS). If this is not possible, L1 applications can use refresh token rotation. In this case, the authorization server must revoke all refresh tokens for that authorization if an invalidated refresh token is used.",
+      "createdAt": "2025-02-17T16:27:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2663587757",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fNt0u",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The discussion over spliting the requirement should be avoided, as stated in https://github.com/OWASP/ASVS/issues/2110#issuecomment-2649955129 and https://github.com/OWASP/ASVS/issues/2110#issuecomment-2652886557.\n\nI rework levels for the requirements, and I feel that refresh token rotation should be accepted also for L2. It was pushed to L1 only because \"otherwise it is equal to mTLS etc\" (discussion started from https://github.com/OWASP/ASVS/issues/2110#issuecomment-2419881047). It is already quite clear in the requirement text, that is a weaker solution than DPoP or mTLS, but I'm not sure having DPoP and mTLS as the only acceptable solutions is aligned with the rest of the requirements.\n\nOpinions and arguments, @randomstuff @TobiasAhnoff ?\n\nFor developing the requirement text I prefer to go back to Josh's proposal: https://github.com/OWASP/ASVS/issues/2110#issuecomment-2653002755\n",
+      "createdAt": "2025-02-20T11:05:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2671172910",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fPeGh",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I rework levels for the requirements, and I feel that refresh token rotation should be accepted also for L2.\n\nYes, I agree.",
+      "createdAt": "2025-02-20T14:16:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2671632801",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fPktj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I rework levels for the requirements, and I feel that refresh token rotation should be accepted also for L2. It was pushed to L1 only because \"otherwise it is equal to mTLS etc\" (discussion started from [#2110 (comment)](https://github.com/OWASP/ASVS/issues/2110#issuecomment-2419881047)). It is already quite clear in the requirement text, that is a weaker solution than DPoP or mTLS, but I'm not sure having DPoP and mTLS as the only acceptable solutions is aligned with the rest of the requirements.\n\nI agree. RFC 9700 clearly states that sender-constrained methods **_or_** token-refresh methods are acceptable for public clients. https://datatracker.ietf.org/doc/html/rfc9700#refresh_token_protection\n\nRefresh token rotation can be implemented with very strong intrusion detection and can me implemented to be just as strong as mTLS and DPoP as described in the RFC link above. ",
+      "createdAt": "2025-02-20T14:26:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2671659875",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fRSs2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang do you mean:\n\n_Verify that the authorization server mitigates refresh token replay attacks for public clients. The preferred approach, which is required for **L3**, is using sender-constrained refresh tokens (i.e., Demonstrating Proof of Possession (DPoP) or Certificate-Bound Access Tokens (mTLS)). **For L1 and L2**, refresh token rotation may be used as long as the authorization server invalidates the refresh token after usage and revokes all refresh tokens for that authorization if a previously invalidated refresh token is provided._",
+      "createdAt": "2025-02-20T17:00:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2672110390",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fRZtc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In general yes, but I really don't like this \"as long as\" part. Maybe not as \"smooth spoken text\", but something like this?\n> For L1 and L2, refresh token rotation may be used, and if used, the authorization server must invalidate the refresh token after usage and revoke all refresh tokens for that authorization if a previously invalidated refresh token is provided.\n\n---\n\nBasically it is with small changes back to what we have at the moment:\n> For L1 and L2 applications refresh token rotation may be used. If refresh token rotation is used, the authorization server must invalidate the refresh token after usage and revoke all refresh tokens for that authorization if an already used and invalidated refresh token is provided.",
+      "createdAt": "2025-02-20T17:10:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2672139100",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fjjCw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @tghosth - I would like to get this sorted asap",
+      "createdAt": "2025-02-23T14:38:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2110#issuecomment-2676895920",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-23T06:04:40Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2110,
+  "state": "CLOSED",
+  "title": "V51 - OAuth - sender-contrained refresh tokens",
+  "url": "https://github.com/OWASP/ASVS/issues/2110"
+}

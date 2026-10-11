@@ -1,0 +1,228 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "The following verifications are suggested to be added to the proposed new OIDC chapter (see #2037).\r\n\r\n## Authorization Server\r\n\r\nVerify that well known industry standard Authorization Servers are used, preferably these services are certified and listed at https://openid.net/certification/#OPENID-OP-P. For L3 applications they should also be implement the FAPI security profile.\r\n\r\nVerify that only the grant types 'code', 'ciba' or 'id-token' are used. Note that FAPI 2.0 recommends 'code' over the OIDC Hybrid flow 'id-token code' (which was previously recommended in FAPI 1.0).\r\n\r\nVerify that all clients requiring access tokens are using the 'code' grant or, if needed for device flows, the 'ciba' grant.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6KfaQe",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that only the grant types 'code', 'ciba' or 'id-token' are used. Note that FAPI 2.0 recommends 'code' over the OIDC Hybrid flow 'id-token code' (which was previously recommended in FAPI 1.0).\r\n\r\nI believe the wording is somewhat misleading: there is no `grant_type=id_token` but `response_mode=id_token / code id_token`.",
+      "createdAt": "2024-09-01T20:38:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2323489822",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MFho6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that well known industry standard Authorization Servers are used, preferably these services are certified and listed at https://openid.net/certification/#OPENID-OP-P. For L3 applications they should also be implement the FAPI security profile.\r\n\r\nFor me it feels that we have it covered with dependency requirements in V14.2 Dependency. I think ASVS should concentrate on vulnerabilities not on certificates, although there can be correlation.\r\n\r\n> Verify that only the grant types 'code', 'ciba' or 'id-token' are used. Note that FAPI 2.0 recommends 'code' over the OIDC Hybrid flow 'id-token code' (which was previously recommended in FAPI 1.0).\r\n\r\nIs the wording updated based on feedback?\r\n\r\n> Verify that all clients requiring access tokens are using the 'code' grant or, if needed for device flows, the 'ciba' grant.\r\n\r\ntodo: is it covered somewhere else?\r\n",
+      "createdAt": "2024-09-13T21:19:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2350258746",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NBhtL",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that only the grant types 'code', 'ciba' or 'id-token' are used. Note that FAPI 2.0 recommends 'code' over the OIDC Hybrid flow 'id-token code' (which was previously recommended in FAPI 1.0).\r\n\r\nand \r\n\r\n> Verify that all clients requiring access tokens are using the 'code' grant or, if needed for device flows, the 'ciba' grant.\r\n\r\nboth overlaps with #2043 which has\r\n\r\n> Verify that for a given client, the authorization server only allows the usage of grants that this client actually needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) should no longer be used.\r\n\r\nBut this address OAuth, not OIDC, and I think it is good to keep OIDC details separated, perhaps rewrite the two suggested OIDC requirements as one, like this\r\n\r\n> Verify that the OIDC Implicit flow is not used by any Relying Party. The OpenID Provider should only allow respone-modes 'code', 'ciba', 'id-token' or 'id-token code'. Note that 'code' should be preferred over 'id-token code' (the OIDC Hybrid flow), while 'token' (any Implicit flow) should not be used.\r\n",
+      "createdAt": "2024-09-22T08:17:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2365987659",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NB-77",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "\r\n> > Verify that well known industry standard Authorization Servers are used, preferably these services are certified and listed at https://openid.net/certification/#OPENID-OP-P. For L3 applications they should also be implement the FAPI security profile.\r\n\r\n>For me it feels that we have it covered with dependency requirements in V14.2 Dependency. I think ASVS should concentrate on vulnerabilities not on certificates, although there can be correlation.\r\n\r\nI agree that ASVS should not mandate certifications, the vulnerability I aim to address with this is that some of the most broken OAuth and OIDC implementations are the ones that are custom built, not following the specs.\r\n\r\nI don´t think V14.2 currently captures this clearly, however 1.2.3 actually address this by stating \r\n\r\n> Verify that the application uses a single vetted user authentication mechanism that is known to be secure\r\n\r\nPerhaps that is enough to mitigate the risks with custom built flows and OAuth/OIDC token services?\r\n\r\nMaybe  instead of having this as a requirement, add a note on the importance of using \"well known industry standard Authorization Servers/OpenID Providers and flows\" to the OAuth/OIDC chapter text? (without referring to the OIDC certification)\r\n\r\nIf so, make this part of [#2036](https://github.com/OWASP/ASVS/issues/2036),  [#2037](https://github.com/OWASP/ASVS/issues/2037) and [#2039](https://github.com/OWASP/ASVS/issues/2039)",
+      "createdAt": "2024-09-22T08:42:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2366107387",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NdmAB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the OIDC Implicit flow is not used by any Relying Party. The OpenID Provider should only allow respone-modes 'code', 'ciba', 'id-token' or 'id-token code'. Note that 'code' should be preferred over 'id-token code' (the OIDC Hybrid flow), while 'token' (any Implicit flow) should not be used.\r\n\r\nSome things to work on:\r\n* It is written as a \"negative\" requirement\r\n* is \"should\" here recommendation or requirement?\r\n\r\n> Maybe instead of having this as a requirement, add a note on the importance of using \"well known industry standard Authorization Servers/OpenID Providers and flows\" to the OAuth/OIDC chapter text? (without referring to the OIDC certification)\r\n\r\nIt can be mentioned in the chapter text, but in general, I would not say that \"don't write your own\", as our focus must be that whatever is written, must follow the requirements. Often those \"well-known\" products have their own weaknesses.",
+      "createdAt": "2024-09-25T08:00:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2373345281",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N0x2V",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> It can be mentioned in the chapter text, but in general, I would not say that \"don't write your own\", as our focus must be that whatever is written, must follow the requirements. Often those \"well-known\" products have their own weaknesses.\r\n\r\n1.2.3 is probably enough to capture this, if a note to clarify what this means for OAuth/OIDC is needed, it can be added later (when the new OIDC/OAuth chapter is more finished).\r\n\r\nIs this better?\r\n\r\nVerify that the OpenID Provider only allow respone-modes 'code', 'ciba', 'id-token' or 'id-token code'. Note that 'code' is preferred over 'id-token code' (the OIDC Hybrid flow), while 'token' (any Implicit flow) should not be used.\r\n",
+      "createdAt": "2024-09-27T14:31:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2379423125",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N0z-X",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note that we are going to delete 1.2.3 (as duplicate of 1.2.4), https://github.com/OWASP/ASVS/issues/1181",
+      "createdAt": "2024-09-27T14:36:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2379431831",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N1Pw3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Updated proposal:\r\n> Verify that the OpenID Provider only allows values 'code', 'ciba', 'id-token', or 'id-token code' for response mode. Note that 'code' is preferred over 'id-token code' (the OIDC Hybrid flow), and 'token' (any Implicit flow) should not be used.\r\n\r\nThe section?",
+      "createdAt": "2024-09-27T15:27:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2379545655",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N5nBa",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I suggest OIDC OpenID Provider or, if there will be only two or three  OIDC requirements, perhaps only have a OIDC section?",
+      "createdAt": "2024-09-28T15:11:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2380689498",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N5tUW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Added via #2122 \r\n\r\n**V51.5 OIDC OpenID Provider**\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.6.1** | [ADDED] Verify that the OpenID Provider only allows values 'code', 'ciba', 'id-token', or 'id-token code' for response mode. Note that 'code' is preferred over 'id-token code' (the OIDC Hybrid flow), and 'token' (any Implicit flow) should not be used. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-09-28T15:49:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2380715286",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N7VHR",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Note that we are going to delete 1.2.3 (as duplicate of 1.2.4), https://github.com/OWASP/ASVS/issues/1181\r\n\r\n@elarlang thanks for noting that! Using \"secure token services\" is of course critical for secure OIDC/OAuth implementations, but, as noted in https://github.com/OWASP/ASVS/issues/1181#issuecomment-1455248994, this is hard to express in a requirement or two...regardless of outcome from #1181, I think it is good to keep generic things like that in chapter 1 and not have requirements in  the OIDC/OAuth chapter for \"secure token services\". \r\n\r\nGiven that, it is clear for the reader of the OAuth/OIDC chapter that the requirements are in addition to most other chapters in ASVS. In example with a note like this in the beginning of the chapter (copy from V13 API and Web Service)\r\n\r\n> Please read this chapter in combination with all other chapters at this same level; we do not duplicate authentication, authorization, session management, general input validation concerns and so on. Rather, the general requirements from other chapters always apply and therefore this chapter can not be taken out of context and be tested separately.\r\n\r\nSo, with that, I think all 3 initially suggested requirements have been addressed. ",
+      "createdAt": "2024-09-29T07:11:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2047#issuecomment-2381140433",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-31T15:25:24Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2047,
+  "state": "CLOSED",
+  "title": "V51 OAuth: Add new OIDC Authorization Server verifications ",
+  "url": "https://github.com/OWASP/ASVS/issues/2047"
+}

@@ -1,0 +1,685 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.6.2** | [ADDED, SPLIT FROM 5.3.3] Verify that JavaScript context-aware methods are used when handling untrusted data to avoid unintended content execution, such as executing content as HTML instead of displaying it as text. | ✓ | ✓ | ✓ | |\r\n\r\nSeems that this requirement needs clarification or an example.\r\n\r\nSomething like:\r\n> For example, untrusted input must not be applied via innerHTML or outerHTML properties, or not used via setHTMLUnsafe, insertAdjacentHTML or document.write functions. Instead, createTextNode should be used.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6XsqW5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @randomstuff - I saw \"in some other source\" that this requirement was confusing for you, does the proposed addon make sense and make it more clear?",
+      "createdAt": "2024-12-16T09:36:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2545067449",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xw1VG",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks, I intended to make a pass of the requirements I did not understand at some point and either try to understand them or raise an issue :)\r\n\r\nThe thing I did not understand was \"context-aware methods\" but with the examples I understand what we are talking about. So that's a clear improvement.\r\n\r\n(However, maybe we could make this clearer or make explicit that (AFAIU) interpretation of the user-provided HTML may depend on where we are on the DOM. Searching \"context-aware JavaScript\" does not give much help. I don't have any suggestion for now, however.)",
+      "createdAt": "2024-12-16T16:59:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2546160966",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X97HK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> For example, untrusted input must not be applied via innerHTML or outerHTML properties, or not used via setHTMLUnsafe, insertAdjacentHTML or document.write functions. Instead, createTextNode should be used\r\n\r\nAs a side note, here are functions in JS that are safe besides createTextNode\r\n\r\n- elem.textContent = dangerVariable;\r\n- elem.insertAdjacentText(dangerVariable);\r\n- elem.className = dangerVariable;\r\n- elem.setAttribute(safeAttribute, dangerVariable); \r\n- formfield.value = dangerVariable;\r\n- document.createTextNode(dangerVariable);\r\n- document.createElement(dangerVariable);\r\n\r\nAnd anything else can be made safe with DOMPurify (which is also an experimental native browser function)\r\n\r\n- elem.innerHTML =DOMPurify.sanitize(dangerVariable);\r\n",
+      "createdAt": "2024-12-17T20:46:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2549592522",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X-HKn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we just need to pick one most widespread function as an example to explain the idea behind the requirement.\r\n\r\nI would not recommend DOMPurify here as this does not display the input **as is** - it changes the value and is part of sanitization.",
+      "createdAt": "2024-12-17T21:12:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2549641895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X-Jbp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think we just need to pick one most widespread function as an example to explain the idea behind the requirement.\r\n\r\nThat fine, but I just don't want to imply it's the only one. (And I agree on DOMPurify)\r\n\r\nPerhaps:\r\n\r\n_Verify that untrusted input must not be applied via innerHTML, outerHTML, insertAdjacentHTML, document.write or other properties or functions that render HTML. Instead, createTextNode, textContent  and similar safe functions that do not render HTML and only render content as text should be used._",
+      "createdAt": "2024-12-17T21:18:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2549651177",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X-LkJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "removed 2 examples, added few commas, should > must:\r\n> Verify that untrusted input must not be applied via innerHTML,  document.write, or other properties or functions that render HTML. Instead, createTextNode, textContent, and similar safe functions that do not render HTML and only render content as text must be used.",
+      "createdAt": "2024-12-17T21:21:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2549659913",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X-QlZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it Elar. One small change suggestion at the end.\n\n_Verify that untrusted input must not be applied via innerHTML, document.write, or other properties or functions that render HTML. Instead, use createTextNode, textContent, and similar safe functions that do not render HTML and only render content as text._\n\n",
+      "createdAt": "2024-12-17T21:32:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2549680473",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YBN9t",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This seems to have resulted in a negative requirement.\r\n\r\nCan I suggest:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.6.2** | [ADDED, SPLIT FROM 5.3.3] Verify that HTML is rendered using safe functions such as createTextNode or textContent, that do not render HTML and only render content as text. Untrusted input must not be applied via innerHTML, document.write, or other properties or functions that render HTML. | ✓ | ✓ | ✓ | |",
+      "createdAt": "2024-12-18T06:22:52Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2550456173",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YBYJ7",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that **HTML is rendered using safe functions** such as createTextNode or textContent, that do not render HTML and only render content as text. Untrusted input must not be applied via innerHTML, document.write, or other properties or functions that render HTML.\r\n\r\nThis went a bit in wrong direction I guess.\r\n\r\nProbably needs some wordsmithing, but alternative direction:\r\n> Verify that when applying untrusted content with JavaScript into HTML or DOM, safe functions (such as createTextNode, textContent) are used that render content as text. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used.",
+      "createdAt": "2024-12-18T06:53:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2550497915",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YBh3N",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"_Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply untrusted to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used._\"\r\n\r\nHow about this?",
+      "createdAt": "2024-12-18T07:16:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2550537677",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YDcvN",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> are used to apply untrusted to an HTML page or the DOM.\r\n\r\n* \"untrusted\" > untrusted content, untrusted input\r\n* \"**an** HTML page\" vs \"**the** DOM\" - is that correct?",
+      "createdAt": "2024-12-18T11:11:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2551040973",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YDzbs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \"untrusted\" > untrusted content, untrusted input\r\n\r\nYeah content is better \r\n\r\n> \"an HTML page\" vs \"the DOM\" - is that correct?\r\n\r\nYeah\r\n\r\n\"_Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply untrusted **content** to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used._\"\r\n\r\n",
+      "createdAt": "2024-12-18T11:56:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2551133932",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YWFls",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> \"Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply untrusted content to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used.\"\r\n\r\nFolks, there are a lot of good use cases for innerHTML and document.write. You just need to make sure if its untrusted data, that you use DOMPurify or the browers upcoming native HTML sanitizer function.\r\n\r\nPerhaps replace the last sentence:\r\n\r\nFunctions or properties that render content as HTML (such as innerHTML and document.write) must only be used when the content is sanitized using a trusted library like DOMPurify.",
+      "createdAt": "2024-12-19T23:06:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2555926892",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YWnPB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you provide a use-case that is not covered by any other requirement?",
+      "createdAt": "2024-12-20T01:20:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2556064705",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ybjjp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The point I am making is that this sentence is to extreme.\n\n\"Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used.\"\n\nThere are many use cases for these functions to be used. To say \"must not or even should not\" is too extreme.\n\nThis has nothing to do with other requirements. The \"must\" in this one is not right, as there are use cases for using these functions safely with sanitizers.",
+      "createdAt": "2024-12-20T16:40:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557360361",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YboAO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \"Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used.\"\r\n\r\nWhy to produce fake news (with out of context explanation part), if the requirement says:\r\n> Verify that functions (such as createTextNode, textContent) which safely render content as text, **are used to apply untrusted content to an HTML page or the DOM**.\r\n\r\nMentioning DOMpurify is allowing sanitization (changing the user data) instead of displaying it correctly (as the data was meant to be displayed).\r\n\r\nIf there is business need to use sanitization, including DOMPurify or similar, we have requirement 5.2.1 for that:\r\n> Verify that all untrusted HTML input from WYSIWYG editors or similar is properly sanitized using a well-known and secure HTML sanitization library or framework feature.",
+      "createdAt": "2024-12-20T16:53:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557378574",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YcS2p",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Fake news? Are you struggling with English again? Why don’t you read my comment more carefully before you reply. Maybe AI can help you with the English.\r\n\r\nThe problem is that this “must” is too aggressive. There are many cases where using these functions on untrusted data to modify the DOM is necessary and this requirement as it stands denies that.\r\n\r\nIf you need help with English or understanding my comment better let me know off-line and we can zoom or similar over this.\r\n",
+      "createdAt": "2024-12-20T18:56:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557554089",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YcTfn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Coming from person who complains about \"personal attacks\"? :)\r\n\r\n> Fake news? Are you struggling with English again? **Why don’t you read my comment more carefully before you reply**. Maybe AI can help you with the English.\r\n\r\n... and such a irony.\r\n",
+      "createdAt": "2024-12-20T18:58:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557556711",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YcVYe",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What’s good for the goose is good for the gander. You dish it out all the time. Don’t cry when you get it right back. 😊 ",
+      "createdAt": "2024-12-20T19:03:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557564446",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YcYbq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, there is no surprise in the fact that English is not my native language. At the same time, I can not recall any situation, where it has caused any problem to achieve the goal.\r\n\r\nComing out with that, it's just a lame. You should get over from the proofed vulns in your solution or not admitting you are not correct. Or whatever disturbs you.\r\n\r\nIf you want to have requirement updated, re-read comments from re-open and maybe few comments before.\r\n\r\nIf you want to have a fight, you'll get it.",
+      "createdAt": "2024-12-20T19:11:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557576938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ycc9l",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Can we please change “must” to “should” at least?\r\n",
+      "createdAt": "2024-12-20T19:23:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557595493",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YeuD5",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "At first I am only suggesting one small edit.\r\n\r\n_Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply untrusted content to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML **_should_** not be used._\r\n\r\nBut even still, something is missing. As we have discussed, there are two use cases:\r\n\r\na) If we want to render data as content—exactly as the user typed it in strictly as text —then I agree, use textContent and similar.\r\nb) If we want to render data as HTML, then use innerHTML and DOMPurify.\r\n\r\nI realize for (b), we capture DOMPurify in other requirements.\r\n\r\nMy problem with this requirement as is, is that \"used to apply untrusted content to an HTML page or the DOM\" does not capture the idea that this applies only when you want to render user input as text, as described in (a).\r\n\r\nSo perhaps:\r\n\r\n_Verify that functions (such as createTextNode, textContent) are used to apply untrusted content to an HTML page or the DOM when content needs to be rendered strictly and safely as text and not as HTML. Properties or functions (such as innerHTML, document.write) that render content as HTML should not be used when content should be rendered strictly as text._\r\n\r\nAgain, we do not always want to render data as text. So to say \"never use innerHTML\" is a bit too strict.",
+      "createdAt": "2024-12-21T18:02:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558189817",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YfUjN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I seem to recall that we discussed the \"must\" vs \"should\" thing in a cabin in Bedfordshire :) I think the decision was that as a general rule whilst \"must\" sounds harsh, it is more technically correct and makes things clearer given that [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) defines \"should\" as a recommendation.\r\n\r\nFor this requirement specifically, I am not sure that I understand the following statements @jmanico:\r\n\r\n> There are many cases where using these functions on untrusted data to modify the DOM is necessary and this requirement as it stands denies that.\r\n\r\n> My problem with this requirement as is, is that \"used to apply untrusted content to an HTML page or the DOM\" does not capture the idea that this applies only when you want to render user input as text, as described in (a).\r\n\r\nThe way I understand it is that if we want to render HTML based on untrusted content, we need to make it safe first which is why we have [5.2.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v52-sanitization-and-sandboxing). \r\n\r\nIf we have done that then in principle it is not longer untrusted and therefore shouldn't really be covered by the requirement we are currently discussing.\r\n\r\nWe could make this clearer with the following small change at the end of the requirement:\r\n\r\n> [ADDED, SPLIT FROM 5.3.3] Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply untrusted content to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used **for untrusted content**.\r\n\r\nDoes this satisfy your concern @jmanico ?",
+      "createdAt": "2024-12-22T06:22:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558347469",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YfbEJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Josh, I think in your version the last \"untrusted content\" just the duplicates already mentioned \"untrusted\" and does not give anything extra.\r\n\r\nI think Jim's version for the last proposal works, but should >must.\r\n> Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used when content should be rendered strictly as text.\r\n\r\n---\r\n\r\nJim, take this comment (https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558189817) as standard how to respond. I think you have comments to regret here.\r\n\r\n> If you need help with English or understanding my comment better let me know off-line and we can zoom or similar over this.\r\n\r\nIf you need help with ASVS or understanding, what is the scope, context, requirement, or the role for co-leader, let me know off-line and we can Google Meet over this.",
+      "createdAt": "2024-12-22T08:21:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558374153",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Yf-ym",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar, \r\n\r\nI think you’re still struggling with language and I prefer Zoom over Google Meet. Happy to talk live.\r\n\r\nThis sentence is still wrong when you look at it by itself.\r\n\r\n“Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used for untrusted content.”\r\n\r\nThis is still not accurate, you only want to avoid these properties and functions when you are not trying to render HTML.\r\n\r\nAs it stands it says “you must NEVER use these functions on untrusted content” and that is just not true as we have discussed.\r\n\r\nI’m looking for a fairly small change that explains when it’s not good to use these functions and leave room for when it’s ok to use these functions. It just not true that we should never use them.\r\n\r\nAnd I consider data that has been run through DOMPurify still be be untrusted. So maybe:\r\n\r\n“Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used for untrusted content that is meant to be rendered only as text.”\r\n\r\nAnd what I’m trying to imply is:\r\n\r\n… But these functions can be used to render untrusted content safely if the content is sanitized.\r\n",
+      "createdAt": "2024-12-22T17:03:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558520486",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YgNb5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Elar,\r\n\r\n> I think you’re still struggling with language and I prefer Zoom over Google Meet. Happy to talk live.\r\n\r\n> This sentence is still wrong when you look at it by itself.\r\n\r\n> “Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used for untrusted content.”\r\n\r\n> This is still not accurate, you only want to avoid these properties and functions when you are not trying to render HTML.\r\n\r\nWith all the attempts to clue some \"you are struggling with language\" to me you are just ridiculous because the sentence is written by Josh :) \r\n\r\nhttps://github.com/OWASP/ASVS/issues/2468#issuecomment-2551133932\r\n> Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply untrusted content to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used.\r\n\r\nAs I agreed with your proposal (https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558374153) in my comment before you said that I still struggling - so if I proposed your proposal and \"I was struggling with the language\", then who actually struggles?\r\n\r\nWhat was the actual point to come with the rant? There was no reason, and for sure not any good intent.\r\n\r\nOh, and: https://github.com/OWASP/ASVS/issues/2468#issuecomment-2557556711\r\n\r\nThe level of failure on this is getting more and more epic. Know when to stop.\r\n\r\n---\r\n\r\nAlso I agree with the comment by Josh, that kind of concludes the points I previously wrote: https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558347469\r\n",
+      "createdAt": "2024-12-22T20:05:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558580473",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YgROb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This requirements second sentence is just logically wrong. Period. Regardless of who wrote it.\r\n\r\nAnd I’m not trying to mess with you, this seems like a language issue since we both agree on the details, so I’m suggesting we meet up to discuss since we are going round in circles.\r\n\r\nI am only asking for some wordamithing here because sentence two is *wrong*.",
+      "createdAt": "2024-12-22T20:54:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558595995",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YjA7R",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used for untrusted content.\r\n\r\n> This is still not accurate, you only want to avoid these properties and functions when you are not trying to render HTML.\r\n\r\nI queried this statement [in a comment above](https://github.com/OWASP/ASVS/issues/2468#issuecomment-2558347469) and said the following:\r\n\r\n\"_The way I understand it is that if we want to render HTML based on untrusted content, we need to make it safe first which is why we have [5.2.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v52-sanitization-and-sandboxing)._\r\n\r\n_If we have done that then in principle it is not longer untrusted and therefore shouldn't really be covered by the requirement we are currently discussing._\r\n\r\n_So I am not sure I understand in what context you would use these functions with untrusted content._\"\r\n\r\nCan you respond to this question please @jmanico ",
+      "createdAt": "2024-12-23T09:43:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2559315665",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Y_gLp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> So I am not sure I understand in what context you would use these functions with untrusted content.\r\n\r\nEncoding or Sanitizing untrusted content can make them safe for innerHTML. Or when untrusted content has been validated to numerics only, that would be safe to drop into innerHTML. Or maybe content was validated to just letters and numbers of a certain size, that would be safe to drop into innerHTML.\r\n\r\nAnd we consider valid data to still often be unsafe. I would say the same for encoded data (like in the case of a HTML encoded URL still executing in a href attribute) or even sanitized data (if dropped into the wrong area of your document). \r\n\r\nSo the point is, I still consider validated, sanitized and encoded data to sometimes still be untrusted. Or at least unsafe.\r\n\r\nSo how about this small addition?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n50.6.2 | [ADDED, SPLIT FROM 5.3.3] Verify that HTML is rendered using safe functions such as createTextNode or textContent, that do not render HTML and only render content as text. Untrusted input must not be applied via innerHTML, document.write, or other properties or functions that render HTML **_unless other security precautions (such as strict validation or sanitization) are taken_**. | ✓ | ✓ | ✓\r\n\r\n ",
+      "createdAt": "2025-01-01T01:04:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2566783721",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Y_9-C",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So my perspective on that was that if we have already applied relevant strict validation or sanitization then I don't see it as untrusted and therefore I feel like your addition is confusing and refers to a case which should be covered by one of the other related requirements such as:\r\n\r\n[5.2.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v52-sanitization-and-sandboxing):\r\n\r\n> [MODIFIED] Verify that all untrusted HTML input from WYSIWYG editors or similar is properly sanitized using a well-known and secure HTML sanitization library or framework feature.\r\n\r\n[5.3.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v53-injection-prevention):\r\n\r\n> [MODIFIED, SPLIT TO 5.3.13] Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, CSS, or HTTP header fields, to avoid changing the message or document structure.\r\n\r\n[5.3.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v53-injection-prevention):\r\n\r\n> [MODIFIED, SPLIT TO 50.6.2] Verify that output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or document structure (to avoid JavaScript and JSON injection).\r\n\r\n\r\nI would propose the following clarification:\r\n\r\n\"_[ADDED, SPLIT FROM 5.3.3] Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply **unsanitized** content to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used for **unsanitized** content._\"",
+      "createdAt": "2025-01-01T08:25:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2566905730",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZAFtf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From https://github.com/OWASP/ASVS/issues/2468#issuecomment-2566783721\r\n> Or when untrusted content has been validated to numerics only, that would be safe to drop into innerHTML. \r\n\r\nThis is the exact reason, why we move input validation away from output encoding requirements. To send a clear message, that those are separate topics.\r\n\r\nMy comment (https://github.com/OWASP/ASVS/issues/2476#issuecomment-2548545693) in other thread:\r\n\r\n> Some may also think, that input validation is a defense or replacement for output encoding, but although it **may have a defensive effect** in certain cases, it is not - building the output is a completely separate topic.\r\n\r\nBuilding an output must not rely on business logic validation rules, as those may change over time. You may argue, that some id-value does not change to text, but the concept stays. Also, there is no reason to send number values to innerHTML.\r\n\r\n---\r\n\r\n> Verify that functions (such as createTextNode, textContent) which safely render content as text, are used to apply unsanitized content to an HTML page or the DOM. Properties or functions (such as innerHTML, document.write) that render content as HTML must not be used for unsanitized content.\r\n\r\nNo, this proposal gives a wrong signal, like sanitization is an alternative to use instead of innerHTML. It is not.\r\n\r\nThe scope for the requirement is only to show correctly the content **as is** and must only focus on that. I think the requirement should contain the goal \"to display the content as is\" to not have discussion we have here.\r\n\r\nPlease keep all the sanitization topics away from here, which is out of scope for this requirement.\r\n",
+      "createdAt": "2025-01-01T10:00:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2566937439",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZApP9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like Josh’s proposal. It directly addresses my concerns.\r\n\r\n> No, this proposal gives a wrong signal, like sanitization is an alternative to use instead of innerHTML. It is not.\r\n\r\nSanitization is not an “alternative” that is the wrong word and no one said that. \r\n\r\nSanitization is *necessary* to use innerHTML safely. Sanitization *allows* you to use innerHTML safely.\r\nThis is so critical to web development that it’s being discussed as a native browser feature. https://github.com/WICG/sanitizer-api/\r\n\r\nThis is exactly why I like Josh’s proposal to clarify when it’s ok to use these functions and methods. The way the requirement stands it’s implies we must never use them and I’d like clarification here.\r\n",
+      "createdAt": "2025-01-01T17:14:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2567083005",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZAw2S",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let me document and note here that taking one line out of context and going to the opposite with \"fight mode on\" is just wasting contributors' time and motivation.",
+      "createdAt": "2025-01-01T19:04:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2567114130",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZA3fW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Josh made a minor but effective suggestion that addresses my concern.\r\n\r\nOverall, this requirement is strong and reflects a lot of solid work. I really like its general direction—I'm simply asking for a small adjustment for clarity. The concern I mentioned stood out enough that I felt it necessary to raise.",
+      "createdAt": "2025-01-01T20:46:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2567141334",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZByzs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang let's discuss but for the record can you provide an alternative requirement text that you would prefer to help understand the direction you are going in.",
+      "createdAt": "2025-01-02T07:45:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2567384300",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZCN5h",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang let's discuss but for the record can you provide an alternative requirement text that you would prefer to help understand the direction you are going in.\r\n\r\nhttps://github.com/OWASP/ASVS/issues/2468#issuecomment-2566937439\r\n> I think the requirement should contain the goal \"to display the content as is\" to not have discussion we have here.",
+      "createdAt": "2025-01-02T09:37:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2567495265",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZCz-Z",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @jmanico, I think the gap here is that the requirement is intended for a specific situation where sanitization would not be necessary. \r\n\r\nDo you think the following rewording makes this clearer:\r\n\r\n\"_Verify that, for content which needs to be displayed as text (and not to be rendered as HTML), only functions which safely render content (such as createTextNode, textContent) are used, to prevent unintended execution of HTML or JavaScript._\"",
+      "createdAt": "2025-01-02T11:45:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2567651225",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZE2b-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "“Verify that, for content which needs to be displayed as text (and not to be rendered as HTML), only functions which safely render content (such as createTextNode, textContent) are used, to prevent unintended execution of HTML or JavaScript.\"\r\n\r\nI like this suggestion the best, it’s closest to my original suggestion. A small change:\r\n\r\n“Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of HTML, JavaScript, CSS or other markup.”\r\n",
+      "createdAt": "2025-01-02T18:21:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2568185598",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZFBm4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> to prevent unintended execution of HTML, JavaScript, CSS or other markup.\r\n\r\nI did not like to have the \"to JavaScript at the end, if we want to make it more wide open\r\n\r\n> to prevent unintended content execution such as HTML or JavaScript.",
+      "createdAt": "2025-01-02T18:59:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2568231352",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZGMb0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it. Small change:\r\n\r\n…to prevent unintended execution of content such as HTML or JavaScript.\r\n\r\n",
+      "createdAt": "2025-01-03T00:02:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2568537844",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZSE40",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang can this now be closed?",
+      "createdAt": "2025-01-05T14:53:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2468#issuecomment-2571652660",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-12-15T12:40:56Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 2468,
+  "state": "CLOSED",
+  "title": "clarify 50.6.2",
+  "url": "https://github.com/OWASP/ASVS/issues/2468"
+}

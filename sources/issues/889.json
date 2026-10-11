@@ -1,0 +1,159 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "If the proxy and application server keep an open connection and don't agree on where HTTP messages start and end, it may be possible to inject into the next HTTP request, a vulnerability known as [HTTP request smuggling](https://portswigger.net/web-security/request-smuggling).\r\n\r\nThis can be verified hands-on by trying several HTTP requests. It may be a little bit out of scope, since it concerns the infrastructure more than the application itself. ",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc1MTcwNjAyOA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is interesting research. Can you take this information and convert it into a set of remediation requirements? This paper provides a set of defensive instructions at the end that should guide how we write this up as requirements...\n\n--\nJim Manico\n@Manicode\n\n> On Dec 28, 2020, at 1:51 AM, Sjoerd Langkemper <notifications@github.com> wrote:\n> \n> ﻿\n> If the proxy and application server keep an open connection and don't agree on where HTTP messages start and end, it may be possible to inject into the next HTTP request, a vulnerability known as HTTP request smuggling.\n> \n> This can be verified hands-on by trying several HTTP requests. It may be a little bit out of scope, since it concerns the infrastructure more than the application itself.\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-12-28T13:05:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-751706028",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzczNzI1OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Would you care to take the advice at the bottom of this article and provide one PR for this issue? cc @Sjord ",
+      "createdAt": "2021-03-12T20:29:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-797737259",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjAxMjE5OA==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps for the ASVS something like this is sufficient.\r\n\r\n> Verify that the infrastructure handles each request separately, even with conflicting `Transfer-Encoding` and `Content-Length` headers, to prevent HTTP request smuggling.\r\n\r\nThis does not offer very concrete steps to resolve it. One way to solve request smuggling is to use HTTP/2 for the backend connection, because HTTP/2 has better separation of requests. However, pentesters can't really verify how the backend and the proxy are connected, or even if there is a proxy.",
+      "createdAt": "2021-03-18T15:17:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-802012198",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjAxOTUzNg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Because developers cannot take much action and testers can not easily discover this, I am inclined to let it go and drop the issue.\r\n\r\nhttps://www.youtube.com/watch?v=L0MK7qz13bU",
+      "createdAt": "2021-03-18T15:26:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-802019536",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjA2MzIwNg==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Because developers cannot take much action\r\n\r\nThe application developers probably can't solve this issue. Someone from infrastructure or operations would need to fix the configuration of the proxy. However, this is also the case for TLS versions as in [9.1.3](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x17-V9-Communications.md#user-content-v91-client-communications-security-requirements:~:text=9.1.3,-%5BMODIFIED%5D).\r\n\r\n> and testers can not easily discover this\r\n\r\nIt's not particularly hard to find. I have found it several times, and I think Burp detects it with its built-in scanner. However, the reverse is not true; it is pretty hard to verify that an application isn't vulnerable. But again, that is also true for XSS and many other vulnerabilities.\r\n\r\n> I am inclined to let it go\r\n\r\nI agree that this vulnerability is a bit unconventional. However, it can have a high impact. In some cases, an unauthenticated user can perform arbitrary authenticated requests, or steal the session token of another user.",
+      "createdAt": "2021-03-18T16:20:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-802063206",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjE3NDk1NA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In that case I like your requirement, let's PR this. :)",
+      "createdAt": "2021-03-18T18:10:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-802174954",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjY4NTgxNg==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "In the PR I set this as L1, but I am not very sure about that. L2 would also be OK for me.\r\n",
+      "createdAt": "2021-03-19T09:29:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-802685816",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjgwOTk4OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with L2.\n\nOn 3/19/21 5:29 AM, Sjoerd Langkemper wrote:\n>\n> In the PR I set this as L1, but I am not very sure about that. L2 \n> would also be OK for me.\n>\n> —\n> You are receiving this because you were assigned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/889#issuecomment-802685816>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCMGVZTFPZF32GYOPPDTEMKQ3ANCNFSM4VL57YGA>.\n>\n",
+      "createdAt": "2021-03-19T12:48:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-802809989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjgyMDQ0Mg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Moved this to L2 ce3a70e and closing this out",
+      "createdAt": "2021-03-19T13:07:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/889#issuecomment-802820442",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-12-28T11:51:44Z",
+  "labels": [],
+  "number": 889,
+  "state": "CLOSED",
+  "title": "Protect against HTTP request smuggling",
+  "url": "https://github.com/OWASP/ASVS/issues/889"
+}

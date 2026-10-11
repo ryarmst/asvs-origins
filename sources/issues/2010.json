@@ -1,0 +1,704 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "The advice to use sessionStorage is really non-standard. It breaks multi-tab browser use.\r\n\r\nYou can see us talking about this in the cheatsheet series here https://github.com/OWASP/CheatSheetSeries/issues/1458\r\n\r\nI suggest we allow localStorage for sessions, but only if the token has both idle and absolute timeout so long terms token storage is less risky.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6HXGla",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> 8.2.2 Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session tokens which should be stored in either cookies or sessionStorage.\r\n\r\nRelated:\r\n\r\n- [Questions on rigidity of token-based session storage, \"sessionStorage for token-based sessions\" guidance in 8.2.2 · Issue #1141 · OWASP/ASVS](https://github.com/OWASP/ASVS/issues/1141)\r\n- [V3.2.3 Session storage · Issue #843 · OWASP/ASVS](https://github.com/OWASP/ASVS/issues/843#issuecomment-815276689)\r\n- [8.2.2 - \"with the exception of session tokens\" is a bit too wide · Issue #1091 · OWASP/ASVS](https://github.com/OWASP/ASVS/issues/1091)",
+      "createdAt": "2024-08-06T10:48:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2270980442",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6HXJ8t",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "In one application I use, the session token is indeed not shared across tabs. When you open a new tab with the application, you are redirected to the SSO provider and automatically logged in into the application. So while the application's token is stored in sessionStorage, it still works with multi-tab browsing because of the interaction with the SSO provider.",
+      "createdAt": "2024-08-06T10:55:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2270994221",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6HXoUF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I suggest we allow localStorage for sessions, but only if the token has both idle and absolute timeout so long terms token storage is less risky.\r\n\r\n\r\nSo does this restriction automatically rule out storing a JWT  in local storage? @jmanico ",
+      "createdAt": "2024-08-06T11:59:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2271118597",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ha1UE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Not at all. JWT have expiration times. If it’s low it’s effectively both idle and absolute timeout.",
+      "createdAt": "2024-08-06T19:05:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2271958276",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6HgSBc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> In one application I use, the session token is indeed not shared across tabs. When you open a new tab with the application, you are redirected to the SSO provider and automatically logged in into the application. So while the application's token is stored in sessionStorage, it still works with multi-tab browsing because of the interaction with the SSO provider.\r\n\r\nThis is very compelling info, thank you for this.",
+      "createdAt": "2024-08-07T12:44:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2273386588",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IDmCC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @Tib3rius, I believe you originated this request. As @Sjord [pointed out above](https://github.com/OWASP/ASVS/issues/2010#issuecomment-2270980442), there has already been a lot of discussion on this. Nevertheless, I take your point about practicality.\r\n\r\nIf we talk about using [\"Local Storage but with tokens that have short expiration times\"](https://github.com/OWASP/CheatSheetSeries/issues/1458#issue-2436606952).\r\n\r\n1) What do you consider to be a short expiration time\r\n2) Do you have a suggestion on how do we handle the refresh token pattern (i.e. where would a refresh token be stored) or is the expectation that users will reauthenticate after the short expiration time?\r\n\r\n",
+      "createdAt": "2024-08-11T06:34:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2282643586",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IjNLm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In one application I use, the session token is indeed not shared across tabs. When you open a new tab with the application, you are redirected to the SSO provider and automatically logged in into the application. So while the application's token is stored in sessionStorage, it still works with multi-tab browsing because of the interaction with the SSO provider.\r\n\r\nThis is vulnerability itself and I addressed it via https://github.com/OWASP/ASVS/issues/1815\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.2.5** | [ADDED] Verify that creating a session for the application requires the user's consent and that the application is protected against a CSRF-style attack where a new application session for the user is created via SSO without user interaction. | | ✓ | ✓ | | |",
+      "createdAt": "2024-08-15T09:02:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2290930406",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IjQkT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The advice to use sessionStorage is really non-standard. It breaks multi-tab browser use.\r\n\r\nWhy we should mandate multi-tab browser use? sessionStorage is made for a reason - to be more secure than localStorage. For example, can you use reflected XSS or clickjacking against authenticated users or not - do you need to access the correct tab or it work in any opened tab?\r\n\r\nI really don't like the idea of saying that they are equal or it does not matter which one of them you use.",
+      "createdAt": "2024-08-15T09:12:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2290944275",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Im4ie",
+      "author": {
+        "login": "Tib3rius"
+      },
+      "authorAssociation": "NONE",
+      "body": "I just wanted to comment here to let you know I've been at DEF CON + some vacation time after but I'll be back tomorrow so will get involved in the discussion then. I think there are some good points that have been brought up already. I'll share my full thoughts tomorrow.",
+      "createdAt": "2024-08-15T18:19:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2291894430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JEKz8",
+      "author": {
+        "login": "Tib3rius"
+      },
+      "authorAssociation": "NONE",
+      "body": "OK only just getting around to responding here, I mostly blame covid, but apologies.\r\n\r\n@tghosth\r\n\r\n> If we talk about using https://github.com/OWASP/CheatSheetSeries/issues/1458#issue-2436606952.\r\n> What do you consider to be a short expiration time\r\n\r\nI would say it depends on the nature of the app, but an hour would be OK for most. Banking apps etc. could be 15-20 minutes.\r\n\r\n> Do you have a suggestion on how do we handle the refresh token pattern (i.e. where would a refresh token be stored) or is the expectation that users will reauthenticate after the short expiration time?\r\n\r\nI don't really have a suggestion for this tbh. I assume right now the recommendation is to store it in session storage? If that is the case, I guess technically we could still keep it there, the idea being that even though the refresh token is in session storage, if a user does open the app in a new tab, they *should* be authenticated via the local storage token, which could then be used to fetch a refresh token? That may cause other issues however, especially if we only expect a refresh token to be generated at login, etc.\r\n\r\n@elarlang \r\n\r\n> Why we should mandate multi-tab browser use?\r\n\r\nThis is less about \"mandating\" multi-tab browser use, and more about providing realistic security recommendations that apps can use. That is to say, I have no issue with keeping the current recommendations providing we make it clear that they only work for single-tab apps. The larger point is that we should also provide security recommendations for apps which people expect to work in multiple tabs. It is fine, IMO, to state categorically that those security recommendations are less secure / less ideal, but I imagine opening links in new tabs is a feature expected by quite a lot of users, and may also be part of a developer's design for the app.\r\n\r\n> I really don't like the idea of saying that they are equal or it does not matter which one of them you use.\r\n\r\nI agree, and I don't think I was trying to imply that. Clearly session storage is more secure because it's only accessible by a single tab, rather than all tabs with the same origin. However, that increase in security comes with a usability tradeoff that affects session management and makes the current recommendations practically impossible to implement in most apps due to user / dev expectations.",
+      "createdAt": "2024-08-20T19:08:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2299571452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JKfCr",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The comments from @Tib3rius are astute and well thought-out and makes me re-think our recommendation to use sessionStorage. ",
+      "createdAt": "2024-08-21T06:24:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2301227179",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JKt98",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Our options here are to say:\r\n\r\n1) It is ok to store session tokens in localStorage - to support multi-tab functionality and to lose security mechanisms provided by sessionStorage\r\n\r\nOR\r\n\r\n2) Use sessionStorage over localStorage - you don't have multi-tab support but you have an extra protection (tab scope + tab lifetime) provided by sessionStorage\r\n\r\n\r\nI think this is not a general decision we can make for ASVS to make everyone happy and this is something to be decided by the application owner based on threat-modeling or risk-analysis (vs functionality expectations).",
+      "createdAt": "2024-08-21T07:03:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2301288316",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JKwMz",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> this is something to be decided by the application owner\r\n\r\nI think the ASVS should not make a recommendation, but just state what it allows. Currently it says:\r\n\r\n> with the exception of session tokens which should be stored in either cookies or sessionStorage.\r\n\r\nBut we could make that less of a recommendation with:\r\n\r\n> with the exception of session tokens which may be stored in either cookies or sessionStorage.\r\n\r\n",
+      "createdAt": "2024-08-21T07:09:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2301297459",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Jm415",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK, I spent ages going back through old discussion and guidance on this.\r\n\r\nIn summary, I think we need to stop being prescriptive about this particular point because there is no one true answer and any secure system requires a combination of controls.\r\n\r\nInstead, we should aim for a requirement which details the goals that need to be achieved rather than implementation detail.\r\n\r\nI would therefore suggesting bringing back [the original requirement 3.2.3](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md#v32-session-binding) in a less prescriptive way. We would also need to modify [8.2.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x16-V8-Data-Protection.md#v82-client-side-data-protection) to avoid any contradictions.\r\n\r\nMy DRAFT suggestion would be:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---:| :---: | :---: | :---: |\r\n| **3.2.3** | [MODIFIED] Verify that the application's session management model uses a combination of controls around secure storage, identifier expiration and identifier rotation to avoid session identifiers being stolen through attacks such as cross-site scripting or direct access to the browser. | ✓ | ✓ | ✓ | 539 | 7.1 |\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.2.2** | [MODIFIED] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, **with the exception of session identifiers which should be stored in accordance with the application's session management model**. | ✓ | ✓ | ✓ | 922 |\r\n\r\n\r\n\r\nI would also suggest providing the following supplemental background guidance which talks about different storage mechanisms:\r\n\r\n* [Options (other than cookies) for storing tokens](https://github.com/OWASP/ASVS/issues/843#issuecomment-713712375) (a summary of [this talk](https://youtu.be/roG99LkSkZA?t=118)).\r\n* [How to Store Session Tokens in a Browser (and the impacts of each)](https://blog.ropnop.com/storing-tokens-in-browser)\r\n\r\n",
+      "createdAt": "2024-08-25T06:17:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2308672889",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JnDKS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Seeing how complex this issue is, I think this is a wise suggestion, Josh.\n",
+      "createdAt": "2024-08-25T07:35:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2308715154",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JnIEt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm ok to make 8.2.2 more abstract.\r\n\r\nI can not see the point or the need for proposed 3.2.3.",
+      "createdAt": "2024-08-25T08:40:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2308735277",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JnLjd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think that is very reasonable suggestion from @elarlang - I like the \"new\" abstract 8.2.2 as well.",
+      "createdAt": "2024-08-25T09:26:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2308749533",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JppVT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang @jmanico I just feel like we should say *something* about session identifier storage, no?",
+      "createdAt": "2024-08-26T06:08:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2309395795",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Jp0F5",
+      "author": {
+        "login": "Tib3rius"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang\r\n\r\n> I can not see the point or the need for proposed 3.2.3.\r\n\r\nI think currently it says session tokens should only be stored in secured cookies or session storage. Whereas the proposed 8.2.2 implies that session tokens can be stored in local storage provided the session management model allows for it. That would seem like the contradiction @tghosth hinted at.",
+      "createdAt": "2024-08-26T06:36:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2309439865",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Jp1Ld",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with Elar and Tiberius since there are so many considerations and ways to do session storage that we can’t easily be prescriptive without a serious run of 5-6 requirements for different situations.",
+      "createdAt": "2024-08-26T06:39:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2309444317",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Jp5RK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would therefore suggesting bringing back the original requirement 3.2.3 in a less prescriptive way\r\n\r\nThe original 3.2.3:\r\n\r\n> Verify the application only stores session tokens in the browser using secure methods such as appropriately secured cookies (see section 3.4) or HTML 5 session storage.\r\n\r\nProposed 3.2.3 - it is quite far away from the original one and tries to \"fix the world\" without actually fixing anything:\r\n\r\n> Verify that the application's session management model uses a combination of controls around secure storage, identifier expiration and identifier rotation to avoid session identifiers being stolen through attacks such as cross-site scripting or direct access to the browser.\r\n\r\n- combination of controls - does not say, what it is—testability problem.\r\n- identifier expiration - JWT specific, it sends the wrong signal if cookies are used, to use cookie expiration as session lifetime\r\n- identifier rotation to avoid session identifiers being stolen - how rotating defends identifiers being stolen via XSS? It is against fixation for cookies and for a lifetime for JWT\r\n- if there is XSS, you most-likely can steal tokens. If you can not steal, you can force victim browser to make the requests you want using valid session values and mechanism\r\n- direct access to browser - if you can access the browser, you can access whatever is there\r\n",
+      "createdAt": "2024-08-26T06:49:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2309461066",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Jp6Xh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang @jmanico I just feel like we should say _something_ about session identifier storage, no?\r\n\r\nI'm not against the idea to bring back 3.2.3 or to address the problem. I'm against proposed new 3.2.3. Maybe let's start with the question: what problem it should solve and then we can find a suitable requirement text.",
+      "createdAt": "2024-08-26T06:52:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2309465569",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JqBsZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey Tiberius, would you be willing to work on https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html\r\n\r\nIt’s missing a discussion on sessionstorage vs localstorage, as well as multi-tab and multi-device issues as well at token rotation.\r\n\r\nYou have a lot of expertise here Tiberius. Would you care to take this on (just updates to the cheat sheet) so we can reference it from ASVS?\r\n",
+      "createdAt": "2024-08-26T07:10:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2309495577",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JqGil",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Hey Tiberius, would you be willing to work on https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html\r\n\r\nThis issue is spin-off from https://github.com/OWASP/CheatSheetSeries/issues/1458#issue-2436606952 (linked by yourself) so you can carry another project-specific questions there.",
+      "createdAt": "2024-08-26T07:20:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2309515429",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JtADt",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Regarding 3.2.3, based on related discussions, it seems recommending a Session Storage approach to mitigate XSS has been abandoned due to the fact that XSS is essentially \"Game over\" as I believe it was said. Therefore, the remaining concern appears to be browser persistence of session identifiers as per @elarlang's comment [here](https://github.com/OWASP/ASVS/issues/843#issuecomment-815875372): \r\n\r\n> Difference comes, when users closes a browser without properly log out (it may also happen with hard reset like computer crash, losing electricity etc). If you then reopen the same workstation - question is, should valid token be available in that situation or not (we don't take in account browser own recovery mechanisms here).\r\n\r\nSession expiration/timeout does mitigate the risk (as captured by other requirements), but perhaps there is a case for some (L3?) apps to be more strict in client-side storage of sessions?\r\n\r\n",
+      "createdAt": "2024-08-26T13:53:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2310275309",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Jt5W-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> it seems recommending a Session Storage approach to mitigate XSS has been abandoned due to the fact that XSS is essentially \"Game over\" as I believe it was said\r\n\r\n@ryarmst  So I think that it is less a case of XSS being game over and more the fact that from a functionality perspective it is problematic to store the identifier in session storage because it doesn't persist even between different browser tabs.\r\n\r\n> Maybe let's start with the question: what problem it should solve and then we can find a suitable requirement text.\r\n\r\n@elarlang so I think we started off by solving the problem of 'how do you \"securely\" store session tokens' but I guess the real problem to solve is 'how do you prevent session tokens being stolen and misused' which makes me think that short lived tokens is a better option although that then leads to questions around the refresh token pattern...\r\n\r\n>  perhaps there is a case for some (L3?) apps to be more strict in client-side storage of sessions?\r\n \r\n@ryarmst  I agree conceptually but I am not what that stricter guidance would look like. It also occurs to me that the main problem with local storage is that it is long lived which is in some ways irrelevant because the identifier should be expired at the server side anyway.\r\n\r\n\r\n",
+      "createdAt": "2024-08-26T15:40:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2310510014",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ju-N6",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth To clarify, my original point was just confirming that the problem to address is not XSS. As far as multi-tab support, I mentioned [here](https://github.com/OWASP/CheatSheetSeries/issues/1458#issuecomment-2310192503) that there are apps already that accept this limitation (admittedly, these are annoying to use) BUT there may also be patterns to implement multi-tab support with Session Storage (disclaimer: I have not thoroughly investigated these and have never encountered them in actual apps). \r\n\r\nRegarding your point about server side expiration, you could similarly say that Content-Security-Policy is irrelevant because XSS issues should be addressed where the injection vulnerability occurs. I think strictly controlled client storage of session identifiers is similarly a defense in depth approach (for the most part). That said, CSP by comparison is certainly a more effective control practically and implementing proper session expiration should be much easier than mitigating all XSS vectors. ",
+      "createdAt": "2024-08-26T18:16:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2310792058",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JyFe4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ryarmst thanks, that is useful to have a couple of examples for that.\r\n\r\nSo based on that, we could bring back 3.2.3 but make it L3 only. What do others thing @jmanico @elarlang @Tib3rius.\r\n\r\nThe proposal could be as follows:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---:| :---: | :---: | :---: |\r\n| **3.2.3** | [MODIFIED] Verify that the application only stores session identifiers in the browser using secure methods such as session storage, web workers, JavaScript closures or appropriately secured cookies. | | | ✓ | 539 | 7.1 |\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.2.2** | [MODIFIED] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, **with the exception of session identifiers for which guidance is provided in the session management chapter**. | ✓ | ✓ | ✓ | 922 |",
+      "createdAt": "2024-08-27T05:34:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2311608248",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Jy7dM",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I did some additional thinking here and have a lot of suggestions. I'll keep it brief but please consider. **_If this too far off-track please disregard._** I think this is really hard to get right.\r\n\r\n_3.2.3: Verify that the application only stores session identifiers in the browser using secure methods such as session storage, secured cookies (with Secure, HttpOnly, and SameSite attributes), and ensure that any JavaScript handling session data is protected against cross-site scripting (XSS) attacks through proper output encoding and Content Security Policies (CSP). Web workers and JavaScript closures should be used to isolate sensitive computations, but not for long-term session identifier storage._\r\n\r\n_8.2.2: Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data. If sensitive data must be stored, ensure it is encrypted and integrity-protected, and that it is only stored temporarily with appropriate expiration mechanisms. Exceptions are made for session identifiers, provided their handling follows other guidance in the session management section, including the use of secure cookies and robust protection against cross-site scripting (XSS) attacks._",
+      "createdAt": "2024-08-27T08:00:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2311829324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JzC60",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think for 3.2.3 I prefer the shorter text as other requirements are covered elsewhere.\r\n\r\nFor 8.2.2 I think the idea of allowing encrypted data is interesting. It leads to a key management problem but may still be worthwhile a a cut out, I think I would carve this out as a separate question, opened #2029.",
+      "createdAt": "2024-08-27T08:16:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2311859892",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6J4D-z",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What about abstracting it to the level of the problem (just focusing on locally persisted identifiers here):\r\n\r\n_3.2.3: Verify that active session identifiers are not persisted when the associated browsing contexts are closed, such as when a user closes their browser or restarts their system._\r\n\r\nThis does not impose a mechanism and the _active_ qualifier provides some additional flexibility.",
+      "createdAt": "2024-08-27T17:48:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2313174963",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KHrny",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So that is a possibility although that doesn't necessarily highlight the specific problem of session theft. \r\n\r\nAlso, would this still be L3 requirement only @ryarmst?",
+      "createdAt": "2024-08-29T10:29:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2317269490",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KJiiW",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good point, I'll suggest the following then, which I think makes the purpose more clear: \r\n\r\n_3.2.3: Verify that active session identifiers are not persisted when the associated browsing contexts are closed, such as when a user closes their browser or restarts their system, preventing client-side session theft following context termination._\r\n\r\nIn terms of setting the level (or adding this requirement at all), I would like to hear more feedback from others. This particular issue has an extensive discussion history (mostly relating to Session Storage). The requirement above avoids mandating an implementation, but may be impractical in some scenarios. ",
+      "createdAt": "2024-08-29T14:01:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2317756566",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KJnZn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What about remember me type functionality? Even several high risk sites (like Google) keeps the session persisted almost permanently and then requires re-auth for admin level functions. I don't think closing the browsing context should always kill a session, especially when re-auth is in play properly.\r\n\r\nAnother example is a popular payment app. I can stay logged in for months and I just need to re-auth before issuing a payment.\r\n\r\nAnd I don't mean to keep throttling these conversations. I just find that almost any advice on session management is hard.",
+      "createdAt": "2024-08-29T14:07:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2317776487",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KJ-8_",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico does it make sense to add an exception for when sessions must be persisted in this way, or would this make the requirement pointless? Should user informed consent for Remember Me be a factor? I didn't see a reference to Remember Me functionality in the ASVS, but this is an item we have reported for critical/sensitive applications:\r\n\r\n_Warning that use of the function is less secure and should only be used on a private system_\r\n\r\nThe scenarios you mention mitigate the risk of extended/persisted sessions with re-auth/step up and I have also seen a number of apps use additional detection heuristics to identify session theft. Would it make sense to split requirements based on the intended lifetime of sessions? ",
+      "createdAt": "2024-08-29T14:27:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2317872959",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KLSY5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 3.2.3: Verify that active session identifiers are not persisted when the associated browsing contexts are closed, such as when a user closes their browser or restarts their system, preventing client-side session theft following context termination.\r\n\r\nI agree with that context and I have pointed out this myself, but I'm not sure how realistic it is nowadays, as browsers support \"restore previous session\" or \"restore previous tab\" functionality, that kind of ignores the point for \"session cookies\" or even sessionStorage mechanisms.\r\n\r\nAs we have separate sections for cookies and tokens, we can also consider specific requirements based on technology used.",
+      "createdAt": "2024-08-29T15:53:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2318214713",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KL0mZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My take on this is that session expiration and re-authentication are the fundamental session controls these days and that depending on the removal of browser based tokens has a very low security benefit.\r\n\r\nAnd I’m just thinking through this as the comments come up. Previous comments from me may have had a different perspective.",
+      "createdAt": "2024-08-29T16:49:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2318354841",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KPYFn",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree with both of your points: this is a low value requirement and is challenging to ensure/implement in practice. @elarlang I will explore technology-specific requirements if any make sense. \r\n\r\nTo keep things moving, I will suggest we simply leave 3.2.3 as it was (deleted) for now. ",
+      "createdAt": "2024-08-29T23:03:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2319286631",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KfNYY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I think being non-prescriptive is the only thing that makes sense at this point and hopefully the other session management requirements will cover us.\r\n\r\nAs such, I think the final proposal is that 3.2.3 stays deleted and we modify 8.2.2 as follows:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.2.2** | [MODIFIED, MERGED FROM 3.2.3] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, **with the exception of session identifiers**. | ✓ | ✓ | ✓ | 922 |\r\n\r\nThanks all for a thoughtful discussion :)\r\n\r\nAny further comments @elarlang @jmanico @ryarmst  ?",
+      "createdAt": "2024-09-01T17:38:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2323437080",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kl4TT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "After this long and helpful conversation, I think your conclusion is spot on, @tghosth :) ",
+      "createdAt": "2024-09-02T18:30:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2010#issuecomment-2325185747",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-04T12:46:12Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    }
+  ],
+  "number": 2010,
+  "state": "CLOSED",
+  "title": "8.2.2 advice on sessionStorage breaks multi-tab web application use unlike cookies",
+  "url": "https://github.com/OWASP/ASVS/issues/2010"
+}

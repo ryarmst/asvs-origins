@@ -1,0 +1,191 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "5.2.7 and 5.2.8 are quire similar:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **5.2.7** | [MODIFIED] Verify that user-supplied Scalable Vector Graphics (SVG) scriptable content is validated or sanitized to contain only tags and attributes (such as draw graphics) that are safe for the application, e.g., do not contain scripts and foreignObject. | 1 | 159 |\n| **5.2.8** | Verify that the application sanitizes, disables, or sandboxes user-supplied scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode, or similar. | 1 | 94 |\n\nCould they be merged?\n\nWhy are we allowing sandboxing of user-scriptable content for Markdown, CSS or XSL stylesheets, BBCode, or similar but not for SVG?\n\nProposition: Can we merge the two requirements as follows?\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **5.2.8** | Verify that the application sanitizes, disables, or sandboxes user-supplied scriptable or expression template language content, such as SVG, Markdown, CSS or XSL stylesheets, BBCode, or similar. | 1 | 94 |\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6ieUSl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Very good eye on this @randomstuff -  I agree 100%.",
+      "createdAt": "2025-03-14T22:01:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2725856421",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igII-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "By principle this kind of abstraction and merge can be made but I prefer to not do that.\n\nSVG is a nasty tool for an attacker (in my trainings I call it \"Super-Vulnerable-Graphic\") - and proposed merge removed important aspects from SVG such as foreignObject and scripts. Developers are often not aware of SVG possibilities and the separate requirement exists because of \"to put special spotlight to a widespread problem\".\n\nFor context, the impacts from SVG are reduced by requirements:\n* browser-side\n  * V50.6.1 Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields, such as Sec-Fetch-*, indicate it is the correct context, using the \"Content-Security-Policy: sandbox\" header or using the \"Content-Disposition: attachment header\".\n* server-side\n  * V14.7.4 Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load data or files from.",
+      "createdAt": "2025-03-15T08:22:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2726330942",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igQAz",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, Would it be OK to allow sandboxing of SVG in 5.2.7 (aligning it with 5.2.8)? (In practice, by serving SVG from a separate dedicated domain.)",
+      "createdAt": "2025-03-15T08:56:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2726363187",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igQ0J",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "5.2.7 is sanitizing the SVG content. Serving the SVG for front-end is a subject of V50 and is covered by V50.6.1. Using/serving SVG for the backend is subject to mitigating SSRF attacks. 5.2.7 is only making an SVG safe(er).\n\nWe had ~2 months ago 5.2.7-related discussion in #2518",
+      "createdAt": "2025-03-15T09:05:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2726366473",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igR9V",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  5.2.7 is only making an SVG safe(er).\n\nOK, my point (which may be somewhat nitpicky) was that there are legitimate cases where the application may need to allow user-supplied SVG scripts and foreignObject (eg. CodePen-like applications). This is currently completely disallowed according to 5.2.7. My point was that this requirement may be relaxing if other mitigations are in place.",
+      "createdAt": "2025-03-15T09:19:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2726371157",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igSq7",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This part I tried to cover with the \"that are safe for the application\" in the requirement text.\n\n> [MODIFIED] Verify that user-supplied Scalable Vector Graphics (SVG) scriptable content is validated or sanitized to contain only tags and attributes (such as draw graphics) **that are safe for the application**, e.g., do not contain scripts and foreignObject.",
+      "createdAt": "2025-03-15T09:24:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2726374075",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igW8D",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, OK for me.",
+      "createdAt": "2025-03-15T09:30:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2726391555",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6igcSH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To not leave issues hanging - are we ok here, or do we have some action to make?\n\nNote that the last quote is already an existing requirement, not an update proposal.",
+      "createdAt": "2025-03-15T10:10:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2726413447",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ilFrF",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I agree that the requirements is probably OK because of the snippet you mentionned. This I'm closing the issue. Thanks and sorry for the noise :)",
+      "createdAt": "2025-03-16T20:25:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2713#issuecomment-2727631557",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-03-14T21:22:05Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 2713,
+  "state": "CLOSED",
+  "title": "Harmonize requirements bout user-supplied scriptable content",
+  "url": "https://github.com/OWASP/ASVS/issues/2713"
+}

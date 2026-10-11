@@ -1,0 +1,186 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjYwOTczNjk=",
+    "is_bot": false,
+    "login": "cronchie",
+    "name": "Eden"
+  },
+  "body": "Requirement [11.1.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x19-V11-BusLogic.md#v111-business-logic-security) alludes to a few different problems, including:\r\n\r\n- Thread safety\r\n- TOC/TOU\r\n- Synchronization and locking\r\n\r\nI'm proposing a new section in V11 called **Concurrency** so we can break out [11.1.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x19-V11-BusLogic.md#v111-business-logic-security) into three dedicated requirements, plus:\r\n\r\n| Requirement Basis | CWE |\r\n| -------- | ------- |\r\n| Using thread safe types | ([CWE-362](https://cwe.mitre.org/data/definitions/362.html)) |\r\n| Deadlock, Livelock, and Thread Starvation | ([CWE-833](https://cwe.mitre.org/data/definitions/833.html)) |\r\n| Avoid double-checked locking | ([CWE-609](https://cwe.mitre.org/data/definitions/609.html)) |\r\n| Locks should not be publicly modifiable | ([CWE-412](https://cwe.mitre.org/data/definitions/412.html)) |\r\n| Use after free | ([CWE-416](https://cwe.mitre.org/data/definitions/416.html)) |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6SciJC",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "For visibility: @ImanSharaf @jmanico @elarlang",
+      "createdAt": "2024-11-05T11:44:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2456953410",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ScjzG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Nice idea  @cronchie :)\r\n\r\nCan you add some more detail about the specific attack being addressed for each item and the proposed fix to implement",
+      "createdAt": "2024-11-05T11:48:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2456960198",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SetRS",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Per @tghosth's suggestion, I'm creating a separate issue to put use-after-free in section 5.4 with unmanaged code requirements",
+      "createdAt": "2024-11-05T15:46:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2457523282",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SfKIC",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I believe we can add this subsection.",
+      "createdAt": "2024-11-05T16:29:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2457641474",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SfbHt",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'll propose verbiage for the existing requirements here, use the corresponding PR to create the new section, and open another issue for the new requirements:\r\n\r\n| **Issue**                       | **Verification Statement**                                                                                                                                                                                                                  | **Impact**                                                                                                                                                               | **CWE**              |\r\n|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------|\r\n| **Thread Safety**               | Verify that only thread-safe types are used in multithreaded contexts, and that non-thread-safe types are properly synchronized to prevent race conditions.                                                                        | [CVE-2024-41779 ](https://vulners.com/ibm/9730F1FF60626887FE641D9E818EB30562F7BDBF757ED1FBAB814769E39ADE86)       | CWE-362               |\r\n| **Synchronization**             | Verify that concurrent access to shared resources is controlled using synchronization primitives (e.g., locks, mutexes, semaphores) to prevent race conditions and ensure atomic operations on these resources.                    | [CVE-2022-1729](https://www.cvedetails.com/cve/CVE-2022-1729/)                                                                                                        | CWE-366               |\r\n| **TOC/TOU (Time-of-Check to Time-of-Use)** | Verify that all access to shared resources is consistently checked and accessed in a single atomic operation to prevent Time-of-Check to Time-of-Use (TOC/TOU) race conditions, ensuring resource state consistency between check and use. | [CVE-2015-1743](https://nvd.nist.gov/vuln/detail/CVE-2015-1743)                                                                                                         | CWE-367               |\r\n",
+      "createdAt": "2024-11-05T16:59:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2457711085",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Shr8B",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "* Thread Safety - Seems like a possible option for threadsafe coding in 10.4, L3 requirement.\r\n* Synchronization - Seems like a possible option for threadsafe coding in 10.4, L3 requirement.\r\n* TOC/TOU (Time-of-Check to Time-of-Use) - Does this definitely not conflict with our current TOCTOU requirement?\r\n\r\n@cronchie ",
+      "createdAt": "2024-11-05T22:49:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2458304257",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Shtwn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> TOC/TOU (Time-of-Check to Time-of-Use) - Does this definitely not conflict with our current TOCTOU requirement?\r\n\r\nDiscussed idea was to split current 11.1.6 to different requirements.",
+      "createdAt": "2024-11-05T22:51:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2458311719",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sh2Di",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@tghosth I'm down to put the concurrency section in V10 if that's a better fit! Though I think Concurrency and Race Conditions merits its own section. Since 11.1.6 is already three problems in one requirement, and there are more problems to cover, I'd like to split 11.1.6 into three starting requirements, including one dedicated to TOC/TOU.\r\n\r\nFor instance, here's my proposed verbiage:\r\n\r\n`Verify that all access to shared resources is consistently checked and accessed in a single atomic operation to prevent Time-of-Check to Time-of-Use (TOC/TOU) race conditions, ensuring resource state consistency between check and use.`\r\n\r\nThoughts on moving to V10 or should I keep 'em here?",
+      "createdAt": "2024-11-05T23:01:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2458345698",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SkPYx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so the way I see it, V10 is about code level considerations whereas V11 should be at a higher level of abstraction where you are designing a system to avoid race conditions at the business logic layer. Almost like differentiating between code level and design level considerations. Does that help you with the decision on how to categorise?",
+      "createdAt": "2024-11-06T08:20:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2458973745",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SmS53",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Ok so the way I see it, V10 is about code level considerations whereas V11 should be at a higher level of abstraction where you are designing a system to avoid race conditions at the business logic layer. Almost like differentiating between code level and design level considerations. Does that help you with the decision on how to categorise?\n\n@elarlang any objection to creating this section in V10?",
+      "createdAt": "2024-11-06T11:36:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2231#issuecomment-2459512439",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-05T11:40:42Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNVBUQ",
+      "name": "V2 (prev V11)",
+      "description": "",
+      "color": "378329"
+    }
+  ],
+  "number": 2231,
+  "state": "CLOSED",
+  "title": "Create a dedicated section for concurrency issues in V11",
+  "url": "https://github.com/OWASP/ASVS/issues/2231"
+}

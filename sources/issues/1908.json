@@ -1,0 +1,223 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Web Socket requirements were introduced following discussions in #842 and #649.\r\n\r\nIn preparation for 5.0, I have been through them and would suggest making the following changes (additions in **bold**, deletions in ~~strikethrough~~.)\r\n\r\n## V13.5 WebSocket\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **13.5.1** | [ADDED] Verify that WebSocket Secure (wss) is used for all WebSocket connections. | ✓ | ✓ | ✓ | 319 |\r\n| **13.5.2** | [ADDED] Verify that, during the initial HTTP WebSocket handshake, the Origin header is checked against an allow list of authorized origins. | ✓ | ✓ | ✓ | 346 |\r\n| **13.5.3** | ~~[ADDED] Verify that rate limiting is in place for WebSocket messages.~~ | ✓ | ✓ | ✓ | 770 |\r\n| **13.5.4** | [ADDED] **Verify that, if the application's standard session management cannot be used, dedicated tokens are being used for this which comply with the relevant Session Management security requirments.** ~~Verify that tokens possess at least 128 bits of entropy and are generated using approved cryptographic algorithms if session or channel tokens specific to WebSockets are being used.~~ | ✓ | ✓ | ✓ | 331 |\r\n| **13.5.5** | [ADDED] Verify that the dedicated WebSocket session management tokens are initially obtained from a response to secure POST request only, and are not sent by the server through the WebSocket connection. | ✓ | ✓ | ✓ | 319 |\r\n| **13.5.6** | ~~[ADDED] Verify that authentication is done before opening the WebSocket connection if only authenticated users should be able to use WebSockets.~~ | ✓ | ✓ | ✓ | 306 |\r\n\r\nI don't think 13.5.3, the original 13.5.4 and 13.5.6 are specific enough to web sockets. I think the others have specific application to web sockets so they should stay.\r\n\r\n@Racater @elarlang any thoughts before I commit the changes?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM53yFkq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some references I used:\r\nhttps://ably.com/topic/websocket-security\r\nhttps://devcenter.heroku.com/articles/websocket-security\r\nhttps://payatu.com/blog/websocketsecurity/",
+      "createdAt": "2024-03-20T13:51:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2009618730",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM53z0en",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just quick feedback:\r\n\r\n**13.5.1** - in a way covered by 9.1.1\r\n\r\n> Verify that TLS is used for all connectivity between a client and external facing, HTTP-based services, and does not fall back to insecure or unencrypted communications.\r\n\r\nI don't know the answer, but can you use not secure web socket, when you have HSTS set?\r\n\r\n**13.5.2** - in a way covered by 4.1.1\r\n\r\n> Verify that the application enforces access control rules at a trusted service layer and doesn't rely on controls which an untrusted user could manipulate such as client-side JavaScript.\r\n\r\nWhat means \"list of **authorized** origins\"?\r\n\r\n**13.5.3** - remove as duplicate of 11.2.2?\r\n\r\n**13.5.4** - what is the message or goal for the requirement? Require session? For everyone? How it is aligned wit 13.5.5?\r\n\r\n**13.5.6** - what is/was the point for this?",
+      "createdAt": "2024-03-20T17:02:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2010072999",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5342uU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "---\r\n\r\n> **13.5.1** - in a way covered by 9.1.1\r\n\r\n> > Verify that TLS is used for all connectivity between a client and external facing, HTTP-based services, and does not fall back to insecure or unencrypted communications.\r\n\r\n> I don't know the answer, but can you use not secure web socket, when you have HSTS set?\r\n\r\nLooks like HSTS also applies to WebSocket:\r\n\r\nSources to support\r\n* https://bugzilla.mozilla.org/show_bug.cgi?id=664284\r\n* https://issues.chromium.org/issues/40081328\r\n* https://github.com/glowing-bear/glowing-bear/issues/1117\r\n\r\nI agree it is theoretically a duplicate but it is also quite a specific case that would need to be specific configured, especially if for whatever reason HSTS is not in use. Hence suggesting leaving it in.\r\n\r\n---\r\n\r\n> **13.5.2** - in a way covered by 4.1.1\r\n\r\n> Verify that the application enforces access control rules at a trusted service layer and doesn't rely on controls which an untrusted user could manipulate such as client-side JavaScript.\r\n\r\nAgain, this is a very specific case which is why I think it is worth including it\r\n\r\n> What means \"list of **authorized** origins\"?\r\n\r\nYeah I agree, I think it should be worded slightly better:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **13.5.2** | [ADDED] Verify that, during the initial HTTP WebSocket handshake, the Origin header is checked against a list of origins allowed for the application. | ✓ | ✓ | ✓ | 346 |\r\n\r\n---\r\n\r\n> **13.5.3** - remove as duplicate of 11.2.2?\r\n\r\nBasically yes, I didn't tag it because it is ADDED\r\n\r\n---\r\n\r\n> **13.5.4** - what is the message or goal for the requirement? Require session? For everyone? How it is aligned wit 13.5.5?\r\n\r\nBasic problem is that websockets support cookie based sessions but not tokens in headers so if that is the required Auth mechanism you have to do something specific.\r\n\r\nAt that point, how you get the token is important hence the need for 13.5.5 as well.\r\n\r\n---\r\n\r\n> **13.5.6** - what is/was the point for this?\r\n\r\nNot sure but it doesn't seem like it adds something specific on V2 and 13.5.4/13.5.5\r\n\r\n---",
+      "createdAt": "2024-03-21T07:42:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2011392916",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM53_hWW",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Regarding 13.5.4/13.5.5, having seen a number of implementations, it seems the most common practice is to associate connections with standard sessions supplied during the handshake. \r\n\r\n> Basic problem is that websockets support cookie based sessions but not tokens in headers so if that is the required Auth mechanism you have to do something specific.\r\n\r\nUnless I am misunderstanding, I think this is not correct. Cookies, headers, and query parameters equally (though the latter obviously not preferred) can be utilized from a handshake to authenticate a connection. From a complexity point of view, I think it's probably preferred to use the standard session management regardless.",
+      "createdAt": "2024-03-21T17:33:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2013140374",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55OVjh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @ryarmst :)\r\n> > Basic problem is that websockets support cookie based sessions but not tokens in headers so if that is the required Auth mechanism you have to do something specific.\r\n> \r\n> Unless I am misunderstanding, I think this is not correct. Cookies, headers, and query parameters equally (though the latter obviously not preferred) can be utilized from a handshake to authenticate a connection. From a complexity point of view, I think it's probably preferred to use the standard session management regardless.\r\n\r\nSo I think I wasn't clear enough. What I should have said was:\r\n\r\n> Basic problem is that the **websocket \"upgrade\" handshake** supports cookie based sessions but not tokens in headers so if that is the required Auth mechanism you have to do something specific.\r\n\r\nSo if I have an app where all my authentication involves using a header token, for the handshake request which will result in a 101 upgrade response, it will be necessary to somehow transmit that header separately.\r\n\r\nDoes that match how you understand it? If so, I may try and reword/clarify 13.5.4/13.5.5.",
+      "createdAt": "2024-04-03T07:50:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2033801441",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM55WU5a",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @tghosth!\r\n\r\nSorry, I was mistaken. I checked the protocol spec, but ignored the API spec that does not support custom headers. I had seen an implementation repurpose `Sec-WebSocket-Protocol` to send session/auth data, but I think this should not be recommended. That said, 13.5.5 feels overly specific but without detailing the complete flow that is expected. Am I correct that the approach would involve obtaining a transient token for session transfer and subsequently sending in an initial WS message to \"authenticate\" the WS connection (tracked server-side)?\r\n",
+      "createdAt": "2024-04-04T01:04:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2035895898",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55YT6M",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Hi @tghosth!\r\n> \r\n> Sorry, I was mistaken. I checked the protocol spec, but ignored the API spec that does not support custom headers. I had seen an implementation repurpose `Sec-WebSocket-Protocol` to send session/auth data, but I think this should not be recommended. That said, 13.5.5 feels overly specific but without detailing the complete flow that is expected. Am I correct that the approach would involve obtaining a transient token for session transfer and subsequently sending in an initial WS message to \"authenticate\" the WS connection (tracked server-side)?\r\n\r\nSo from an access control/session management perspective, my understanding is that securing the websocket handshake is the crucial part so if a non-cookie session mechanism is in use then a session token of some sort would need to be obtained from the server and then sent in the handshake request. The server would then only perform the handshake \"upgrade\" if the session token was valid. It may be better if the regular session token is not used for this as sending it in the handshake request might expose it more than usual (e.g. if it goes in the request header).",
+      "createdAt": "2024-04-04T07:40:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2036416140",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM557LoY",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So from an access control/session management perspective, my understanding is that securing the websocket handshake is the crucial part so if a non-cookie session mechanism is in use then a session token of some sort would need to be obtained from the server and then sent in the handshake request. The server would then only perform the handshake \"upgrade\" if the session token was valid.\r\n\r\nI am assuming the scenario where \"securing the websocket handshake\" means to associate the created WS connection with a user's existing web session/identity (derived from an HTTP-based web app). IMO the ideal approach would be with a properly secured cookie-based session mechanism, but obviously that does not account for the diversity of mechanisms as implemented. The challenge with authenticating in the handshake/upgrade without cookies is that there are essentially only 2 other options within this HTTP request to send a token to associate the connection with the existing session:\r\n\r\n1. Use of a query parameter (not ideal, but not terrible for a transient token revoked on use)\r\n2. Use of the `Sec-WebSocket-Protocol` header (not the intended use of this header)\r\n3. Use of a cookie just for this purpose even if the application's primary session mechanism does not use cookies.\r\n\r\nHowever, there are also other options following the creation of the WS connection, using messages within the connection (that each also have their own pros/cons):\r\n\r\n4. A token specific to this purpose (session transfer) is generated server-side and retrieved over HTTP. In the initial WS message from the client to the server, the client submits this token, which is used by the server to associate the WS connection with the user's existing session before revoking the token. \r\n5. A token specific to this purpose is generated server-side and returned in an initial WS message from the server to the client. The client must then resubmit the token within their existing HTTP session. The server receives the token and associates the identified WS connection with the user's active session. (Disclaimer: I don't think I have seen this pattern).\r\n6. Same as (1) above, but the token is stored by the client and sent in every WS message, associating individual messages with their existing session rather than the connection. \r\n7. The user re-authenticates over the WS connection following the handshake (IMO this is the worst approach, but worth mentioning for completeness). I have seen this pattern where the only authenticated portion of an application is over the WS connection. \r\n\r\nThe way I interpret `13.5.5` right now is either (1), (2), (3), or (4) from above. I also interpret it as advising against (5), but I think this is a fine approach if implemented correctly. All approaches will have implementation concerns with respect to cross-origin and cross-site attacks. \r\n\r\n>It may be better if the regular session token is not used for this as sending it in the handshake request might expose it more than usual (e.g. if it goes in the request header).\r\n\r\nAgree 100% that a secondary and ideally transient token should be used when an existing cookie mechanism isn't available. I cannot immediately think of a phrasing I would recommend for the requirement, but I think it should either be adjusted to be more broad or more specific (endorsing a specific implementation, though I think flexibility will be required in practice). \r\n",
+      "createdAt": "2024-04-09T16:01:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2045557272",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56rtQN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for the feedback @ryarmst :)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **13.5.5** | [ADDED] Verify that the dedicated WebSocket session management tokens are initially obtained or validated through a previously authenticated HTTPS session. | ✓ | ✓ | ✓ | 319 |\r\n\r\nDo you think this updated version of 13.5.5 is more accommodating whilst also secure?",
+      "createdAt": "2024-04-16T05:48:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2058277901",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM563lP3",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth That looks great! It might also be worth adding an exclusion for when the primary session (and authentication) occurs over WS rather than HTTP (this is seemingly rare, but I have seen at least one case). What about this?\r\n\r\n| #| Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **13.5.5** | [ADDED] When transitioning an existing HTTPS session to a WebSocket channel, verify that the dedicated WebSocket session management tokens are initially obtained or validated through the previously authenticated HTTPS session. | ✓ | ✓ | ✓ | 319 |\r\n",
+      "createdAt": "2024-04-17T14:25:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2061390839",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM57AhH0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "That looks great @ryarmst, fancy opening a PR with your change into the following branch?\r\nhttps://github.com/OWASP/ASVS/tree/refresh_v13_websockets\r\n\r\nNote that the requirement will now be 13.5.4 because 13.5.3 got deleted.",
+      "createdAt": "2024-04-18T12:18:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2063733236",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM57Qdp4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Closed by #1909",
+      "createdAt": "2024-04-21T05:35:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1908#issuecomment-2067913336",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-03-20T13:45:29Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    }
+  ],
+  "number": 1908,
+  "state": "CLOSED",
+  "title": "Finalize web socket requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/1908"
+}

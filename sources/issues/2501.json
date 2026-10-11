@@ -1,0 +1,324 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Suggested recuirement from Bart Preneel:\r\n\r\n> 6.7.2. [ADDED] For Diffie-Hellman and Elliptic Curve Diffie-Hellman, verify that the point received is legitimate: e.g, for Diffie-Hellman the values 0, 1, and p-1 are not valid and for Elliptic Curve Diffie-Hellman (ECDH) the point should lie on the elliptic curve and should not be the point P or the point at infinity.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6ZFm5L",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It is indeed important that the code verifies that the DH points are valid.\r\n\r\nI think the wording should be instead:\r\n\r\n> 6.7.2. [ADDED] Verify that the when the application receives a Diffie-Hellman point for Diffie-Hellman key agreement,  it verified that this point is valid. For Finite Field Diffie-Hellman the values 0, 1, and p-1 are not valid. For Elliptic Curve Diffie-Hellman (ECDH), the point should lie on the elliptic curve and should not be the point P or the point at infinity.\r\n\r\n<del>Question: I'm wondering what \"the point P\" is? Are we talking about the generator of the subgroup? If so, this requirement should equally apply to FFDH?</del>\r\n\r\nAbout \"the point P\", should this requirement apply to FFDH as well (i.e. the point should not be the generator)?",
+      "createdAt": "2025-01-02T21:12:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2568384075",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZFooc",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "See RFC 2631 for some [validation of Finite Field Diffie-Hellman public keys](https://datatracker.ietf.org/doc/html/rfc2631#section-2.1.5).",
+      "createdAt": "2025-01-02T21:19:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2568391196",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZSDxH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I defer to @danielcuthbert ",
+      "createdAt": "2025-01-05T14:37:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2571648071",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZzLZi",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This is a very valid point, but totally dependent on whether they are writing their own curve code (which might raise other red flags if they aren't a large conglomerate or defence prime). But avoiding p-1, {p,0}, and 1 are very important things to do for ECDH - I'm not sure how often developers using libraries can make this kind of error though.",
+      "createdAt": "2025-01-09T14:16:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2580330082",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Z3S9M",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is a very valid point, but totally dependent on whether they are writing their own curve code\r\n\r\nYes, the vulnerability could be in [dependencies](https://auth0.com/blog/critical-vulnerability-in-json-web-encryption/#Vulnerable-Libraries) as well, though.",
+      "createdAt": "2025-01-09T23:01:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2581409612",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6arN-s",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff do you think this is generally relevant enough to include, it sounds like a very specific case...",
+      "createdAt": "2025-01-16T09:38:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2595020716",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6asC7A",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghost, I am not sure whether this is relevant enough to include in ASVS (or too low-level and not much a consideration in practice for people writing general *application* code).\r\n\r\nI think this might apply for example if you use JWA/JKW/JWE/JWT (with [ECDH-ES](https://datatracker.ietf.org/doc/html/rfc7518#page-15))? Would you have to take care of this case?\r\n\r\nAlso the current requirement is about \"Diffie-Hellman and Elliptic Curve Diffie-Hellman\". Would such a requirement apply as well to other EC uses such as signatures (ECDSA) for example?\r\n\r\nI think we would have to review the impact on this kind of situation (JWE with ECDH-ES for example) from application code.",
+      "createdAt": "2025-01-16T11:10:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2595237568",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6at0lL",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you think of a case where the developer would be doing that themselves and not getting a library to do it...",
+      "createdAt": "2025-01-16T13:32:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2595703115",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bagAl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff ping :)",
+      "createdAt": "2025-01-22T14:35:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2607415333",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bdyRu",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Can you think of a case where the developer would be doing that themselves and not getting a library to do it...\n\n@tghosth, I agree that application developer would be expected to use a high level library which takes care of this (… and I don't want to check that my TLS library actually does the right thing for me) however the same might be said of other crypto requirements such as:\n\n* 6.5.3 Verify that nonces, initialization vectors, and other single-use numbers are not used for more than one encryption key/data-element pair. The method of generation must be appropriate for the algorithm being used.\n* 6.5.4 Verify that encrypted data is authenticated via signatures, as well as through authenticated cipher modes or HMAC for protection against unauthorized modification.\n* 6.7.1 Verify that industry-proven cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. This should prevent attacks on the key establishment process which could lead to adversary-in-the-middle attacks or cryptographic breaks. \t\n* 6.2.1 Verify that all cryptographic modules fail securely, and errors are handled in a way that does not enable vulnerabilities, such as Padding Oracle attacks.\n\nI'm not sure where to draw the line between things which are too low-level (and we do not expect application code developers to have to touch without going through a library) vs. things which are not.\n\nSome cases where the application developer might end up try to have to care about the validation of group elements (without claiming that these are good ideas):\n\n* Implementing JOSE/COSE ECDSA (so not actually ECDH) signature verification without having a good library to do that (while still relying on reputed cryptographic library for implementing ECDSA signature validation). Would that be a problem? I don't know.\n* Implementing your own end-so-end-secure chat (hum hum) using based on X3DH → Maybe not a great example, if you are implementing X3DH with the [Curve25519 you don't need to validate the key](https://cr.yp.to/ecdh.html#validate).",
+      "createdAt": "2025-01-22T21:09:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2608276590",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6beFvH",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is a very valid point, but totally dependent on whether they are writing their own curve code (which might raise other red flags if they aren't a large conglomerate or defence prime).\n\nAre we talking about \"writing their own curve point computation and signature validation code\" (which indeed is quite a read flag) or are we talking about \"writing their own crypto code on top of existing ECDH/ECDSA library code\" which might be more prevalent.\n\n(For example, OpenSSL has `EC_KEY_check_key()` to check that a given EC key is valid. The verification appears to be done implicitly by some functions which create an `EC_KEY*` (such as `EC_KEY_set_public_key_affine_coordinates`) but if this function exists there must be some path which don't make the verification.)",
+      "createdAt": "2025-01-22T21:58:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2608356295",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b0kst",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> however the same might be said of other crypto requirements such as:\n\nTo me, each of those requirements are less detailed than specific/specific DH curves. My overall feeling from reading through this thread is that this topic is probably too detailed so I think I would be inclined to skip this recommendation or push it to an appendix discussion.\n\nDo you have any strong objections @randomstuff ?",
+      "createdAt": "2025-01-26T07:16:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2614250285",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b1jkU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  skip this recommendation\n\n@tghosth, I'd say it's OK for me to skip this requirement.\n\n> push it to an appendix discussion\n\nI am not sure how well it would fit in the appendix section however but why not.",
+      "createdAt": "2025-01-26T17:05:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2614507796",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b3Xg0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so I will leave this issue open as a potential item to consider for the appendix but not for the v6 chapter itself, thanks!",
+      "createdAt": "2025-01-27T07:04:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2614982708",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dVH7N",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yeah I worry we are going super deep into the weeds now and beyond what V6 should be. Whilst this is valid, it's also specific and a niche case in most cases. ",
+      "createdAt": "2025-02-06T11:27:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2639560397",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dVNoz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think after 5.0 we should split out all the crypto requirements and make them a separate standard (CASVS) \n\nCrypto is such a black hold of knowledge that never ends. \n\nThe crypto work you are doing is stellar, Daniel. \n\nFor ASVS I think a set of requirements closer to MASVS would be prudent after 5.0.\n\nI digress, I'm really excited about this body of work.\n",
+      "createdAt": "2025-02-06T11:38:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2639583795",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kylR0",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK, I think we all agree to skip this one because it goes deep in the low-level cryptographic details which, as a first approximation, should be implemented in some crypto library and not in application code. Going to close this one. If anyone feel this is really needed, feel free to comment/reopen.",
+      "createdAt": "2025-03-30T20:05:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2501#issuecomment-2764723316",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-01-02T21:07:07Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABy9sfPQ",
+      "name": "AppendixV",
+      "description": "Appendix with crypto details",
+      "color": "540616"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB2sOmrg",
+      "name": "Bart Preneel",
+      "description": "Issues raised from a crypto review by Bart Preneel (received via Aram H)",
+      "color": "2988D9"
+    }
+  ],
+  "number": 2501,
+  "state": "CLOSED",
+  "title": "Cryptography - suggested verification of Diffie-Hellman points",
+  "url": "https://github.com/OWASP/ASVS/issues/2501"
+}

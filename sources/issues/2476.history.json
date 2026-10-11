@@ -1,0 +1,145 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2024-12-17T13:31:32Z",
+      "diff": "We currently have an explanation of the thinking around L1 [which can be found here](https://appsecg.host/level1).\r\n\r\nThere are a few major areas where we have differing opinions about whether a particular type of control falls into the category of L1 for version 5.0.\r\n\r\nThis issue is to discuss input validation requirements from the current [section 5.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v51-input-validation)\r\n\r\nThe currently disputed requirements are 5.1.3, 5.1.4,and 5.1.7 (ignore the level marking below). 5.1.5 is a different discussion and it is agreed that the others in this section are not L1)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.3** | [MODIFIED] Verify that all input is validated using positive validation, against an allowed list of values, patterns or ranges to enforce business or functional expectations for that input. | ✓ | ✓ | ✓ | 20 |\r\n| **5.1.4** | [MODIFIED, SPLIT TO 5.1.7] Verify that data items with an expected structure are validated according to the pre-defined rules. | ✓ | ✓ | ✓ | 20 |\r\n| **5.1.7** | [ADDED, SPLIT FROM 5.1.4] Verify that the application ensures that combinations of related data items are reasonable according to the pre-defined rules. | ✓ | ✓ | ✓ | 20 |\r\n\r\nI personally believe that these requirements do not belong in L1 for the following reasons:\r\n\r\n- In all except very specific cases, input validation is a defense in depth issue. There will usually be another first line control (e.g. output encoding, parametrization, context specific sanitization, etc) which is needed to prevent a security vulnerability from being exploited. For instances where a specific mechanism is not mentioned, we already have [5.2.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v52-sanitization-and-sandboxing) to cover those.\r\n- As a second layer of defense, there is less risk reduction compared to the first line control.\r\n- Comprehensive input validation is very labour intensive, to be done correctly it requires a full mapping of all possible inputs and their business reasoning. This is a problem because:\r\n  - It is hard to justify the effort for a second line control at the lowest level of maturity.\r\n  - In general, it violates the idea that L1 should have a low barrier to entry.\r\n  - Security cannot provide guidance for this alone but will rather need the business/product management team to agree to restrict inputs for which there is likely to be pushback.\r\n  - If I am honest, I am not sure how exactly this would be verified anyway? Certainly it would be problematic to verify \"black box\" style.\r\n\r\n"
+    },
+    {
+      "editedAt": "2024-12-17T13:37:36Z",
+      "diff": "We currently have an explanation of the thinking around L1 [which can be found here](https://appsecg.host/level1).\r\n\r\nThere are a few major areas where we have differing opinions about whether a particular type of control falls into the category of L1 for version 5.0.\r\n\r\nThis issue is to discuss input validation requirements from the current [section 5.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v51-input-validation)\r\n\r\nThe currently disputed requirements are 5.1.3, 5.1.4,and 5.1.7 (ignore the level marking below). 5.1.5 is a different discussion and it is agreed that the others in this section are not L1)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.3** | [MODIFIED] Verify that all input is validated using positive validation, against an allowed list of values, patterns or ranges to enforce business or functional expectations for that input. | ✓ | ✓ | ✓ | 20 |\r\n| **5.1.4** | [MODIFIED, SPLIT TO 5.1.7] Verify that data items with an expected structure are validated according to the pre-defined rules. | ✓ | ✓ | ✓ | 20 |\r\n| **5.1.7** | [ADDED, SPLIT FROM 5.1.4] Verify that the application ensures that combinations of related data items are reasonable according to the pre-defined rules. | ✓ | ✓ | ✓ | 20 |\r\n\r\nI personally believe that these requirements **do not** belong in L1 for the following reasons:\r\n\r\n- In all except very specific cases, input validation is a defense in depth issue. There will usually be another first line control (e.g. output encoding, parametrization, context specific sanitization, etc) which is needed to prevent a security vulnerability from being exploited. For instances where a specific mechanism is not mentioned, we already have [5.2.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v52-sanitization-and-sandboxing) to cover those.\r\n- As a second layer of defense, there is less risk reduction compared to the first line control.\r\n- Comprehensive input validation is very labour intensive, to be done correctly it requires a full mapping of all possible inputs and their business reasoning. This is a problem because:\r\n  - It is hard to justify the effort for a second line control at the lowest level of maturity.\r\n  - In general, it violates the idea that L1 should have a low barrier to entry.\r\n  - Security cannot provide guidance for this alone but will rather need the business/product management team to agree to restrict inputs for which there is likely to be pushback.\r\n  - If I am honest, I am not sure how exactly this would be verified anyway? Certainly it would be problematic to verify \"black box\" style.\r\n\r\n"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2548545693",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Although discussed, the provided arguments were a bit one-sided.\r\n\r\nSome may think, that security is only confidentiality and maybe availability, ignoring the integrity and data quality part.\r\n\r\nSome may also think, that input validation is a defense or replacement for output encoding, but although it may have a defensive effect in certain cases, it is not - building the output is a completely separate topic.\r\n\r\nWhy are applications made? To provide some automated solutions to satisfy the business need. And it is not possible to achieve that without input validation.\r\n\r\n* email address - how do you send emails? password recovery?\r\n* phone - if there is a need to get in contact, how do you achieve that?\r\n* address - if you need to send a package to this address and if it is not validated, you may spend a lot of money to handle the return or delivery mess\r\n* social security number / person id code - this identifier one person from another\r\n* date - from .. to choices? the \"after date\" is before the \"before date\"? nice solution for insurance, traveling etc.\r\n* prices, amounts, quantities - numbers? allowed range? int vs float?\r\n\r\nThe number of different validation rules is not usually that large.\r\n\r\n",
+          "recorded_at": "2024-12-17T15:24:16Z"
+        },
+        {
+          "body": "Although discussed, the provided arguments were a bit one-sided.\r\n\r\nSome may think, that security is only confidentiality and maybe availability, ignoring the integrity and data quality part.\r\n\r\nSome may also think, that input validation is a defense or replacement for output encoding, but although it may have a defensive effect in certain cases, it is not - building the output is a completely separate topic.\r\n\r\nWhy are applications made? To provide some automated solutions to satisfy the business need. And it is not possible to achieve that without input validation.\r\n\r\n* email address - how do you send emails? password recovery?\r\n* phone - if there is a need to get in contact, how do you achieve that?\r\n* address - if you need to send a package to this address and if it is not validated, you may spend a lot of money to handle the return or delivery mess\r\n* social security number / person id code - this identifier one person from another\r\n* date - from .. to choices? the \"after date\" is before the \"before date\"? nice solution for insurance, traveling etc.\r\n\r\nThe number of different validation rules is not usually that large.\r\n\r\n",
+          "recorded_at": "2024-12-17T14:03:09Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2548944057",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "> And it is not possible to achieve that without input validation.\r\n\r\nAny input validation which causes the business pain, the business will have already implemented and we don't need to mandate. For anything which doesn't cause them pain, trying to convince them that this is an essential business need is not a job for ASVS 5.0 L1.\r\n\r\n\r\n\r\n",
+          "recorded_at": "2024-12-17T16:26:00Z"
+        },
+        {
+          "body": "> And it is not possible to achieve that without input validation.\r\n\r\nAny input validation which causes the business pain, the business will have already implemented. Anything which doesn't cause them pain, trying to convince them that this is an essential business need is not a job for ASVS 5.0 L1,\r\n\r\n\r\n\r\n",
+          "recorded_at": "2024-12-17T16:25:47Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2549128286",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "So in short, you say, that if the data in the application is trash, it is not a security issue?\r\n\r\nAnd taking into account #2476 - you don't care about data quality, but you want to protect it with cryptography?\r\n\r\n(for further comments from here I could get another notice through other channels :) )",
+          "recorded_at": "2024-12-17T17:58:26Z"
+        },
+        {
+          "body": "So in short, you say, that if the data in the application is trash, it is not a security issue?",
+          "recorded_at": "2024-12-17T17:34:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2549629407",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "> Maybe we need a specific requirement to validate an email address as there is a specific security purpose for this, it doesn't justify the full \"input validation for everything\" in the requirements above.\r\n\r\nI agree. Before accepting an email address, especially as part of authentication, I suggest:\r\n\r\n1) Validate the email specifically with the HTML5 email validation rules. https://html.spec.whatwg.org/multipage/input.html#email-state-(type=email)\r\n2) Send email to that address and seek confirmation that the email is active (a common practice).\r\n\r\n![Screenshot 2024-12-17 at 1 05 50 PM](https://github.com/user-attachments/assets/eff7a511-27ea-4eb8-93d5-44feba8bb5ec)\r\n\r\n\r\n",
+          "recorded_at": "2024-12-17T21:06:37Z"
+        },
+        {
+          "body": "> Maybe we need a specific requirement to validate an email address as there is a specific security purpose for this, it doesn't justify the full \"input validation for everything\" in the requirements above.\r\n\r\nI agree. Before accepting an email address, especially as part of authentication, I suggest:\r\n\r\n1) Validate the email specifically with the HTML5 email validation rules. https://html.spec.whatwg.org/multipage/input.html#email-state-(type=email)\r\n2) Send email to that address and seep confirmation that the email is active (a common practice).\r\n\r\n![Screenshot 2024-12-17 at 1 05 50 PM](https://github.com/user-attachments/assets/eff7a511-27ea-4eb8-93d5-44feba8bb5ec)\r\n\r\n\r\n",
+          "recorded_at": "2024-12-17T21:06:29Z"
+        },
+        {
+          "body": "> Maybe we need a specific requirement to validate an email address as there is a specific security purpose for this, it doesn't justify the full \"input validation for everything\" in the requirements above.\r\n\r\nI agree. Before accepting an email address, especially as part of authentication, I suggest:\r\n\r\n1) Validate the email specifically with the HTML5 email validation rules. https://html.spec.whatwg.org/multipage/input.html#email-state-(type=email) In particular:\r\n2) Send email to that address and seep confirmation that the email is active (a common practice).\r\n\r\n![Screenshot 2024-12-17 at 1 05 50 PM](https://github.com/user-attachments/assets/eff7a511-27ea-4eb8-93d5-44feba8bb5ec)\r\n\r\n\r\n",
+          "recorded_at": "2024-12-17T21:06:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2558377681",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> In general I can see why good input validation is not a L1 control. Stopping injection attacks is usually about escaping, encoding and parameterization. Input validation is usually a secondary defense.\r\n\r\nWell, details, but let me repeat that: https://github.com/OWASP/ASVS/issues/2476#issuecomment-2548545693\r\n\r\n> Some may also think, that input validation is a defense or replacement for output encoding, but although it may have a defensive effect in certain cases, it is not - building the output is a completely separate topic.\r\n\r\nAnd the point is: if you measure input validation level as \"secondary defense\" for output encoding, then it does not take into account the data quality and business-logic area, where it is actually is important and pre-condition to achieve the application providing the business needs.",
+          "recorded_at": "2024-12-22T08:37:30Z"
+        },
+        {
+          "body": "> In general I can see why good input validation is not a L1 control. Stopping injection attacks is usually about escaping, encoding and parameterization. Input validation is usually a secondary defense.\r\n\r\nWell, details, but let me repeat that: https://github.com/OWASP/ASVS/issues/2476#issuecomment-2548545693\r\n\r\n> Some may also think, that input validation is a defense or replacement for output encoding, but although it may have a defensive effect in certain cases, it is not - building the output is a completely separate topic.",
+          "recorded_at": "2024-12-22T08:35:27Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2559385420",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "One option is to have 5.1.1, ~~5.1.5~~ and 5.1.6 in V10.4 Defensive Coding.",
+          "recorded_at": "2024-12-23T13:07:42Z"
+        },
+        {
+          "body": "One option is to have 5.1.1, 5.1.5 and 5.1.6 in V10.4 Defensive Coding.",
+          "recorded_at": "2024-12-23T10:25:33Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2559648054",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Entire point is to not have input validation as part of current V5. If to keep some here and some there, it is even more confusing.\r\n\r\nI would say, that 5.1.1 is not a input validation as such. It is more how the programming language, framework or whatever takes the input processes the input. Validation is - accept or reject it, I think it is not perfect match for input validation and belongs to defensive coding. This is my proposal despite what will happen with all other changes here.\r\n\r\nV5.1.5 is not just a technical input validation - it relies on logic and a defined list to define, what is a trusted and allowed destination.\r\n\r\nV5.1.6 it is a technical check, but during a building the header. It may involve more than one input or other logic - just that the combined length that is used in one header field value can not exceed defined limit. It is a question of program code logic and fits to defensive coding.",
+          "recorded_at": "2024-12-23T13:06:45Z"
+        },
+        {
+          "body": "Entire point is to not have input validation as part of current V5. If to keep some here and some there, it is even more confusing.\r\n\r\nI would say, that 5.1.1 is not a input validation as such. It is more how the programming language, framework or whatever takes the input processes the input. Validation is - accept or reject it, I think it is not perfect match for input validation and belongs to defensive coding. This is my proposal despite what will happen with all other changes here.\r\n\r\nV5.1.5 is not just a technical input validation - it relies on logic and a defined list to define, what is a trusted and allowed destination.\r\n\r\nV5.1.6 it is a technical check, but during a building the header process. It may involve more than one input or other logic - just that the combined length that is used in one header field value can not exceed defined limit. It is a question of program code logic and fits to defensive coding.",
+          "recorded_at": "2024-12-23T12:48:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2559892147",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "@elarlang do you agree with my levels and changes on 5.1.3, 5.1.4 and 5.1.7?",
+          "recorded_at": "2024-12-23T15:20:25Z"
+        },
+        {
+          "body": "@elarlang do you agree with my levels and changes on 5.1.3, 5.1.4 and 5.1.7",
+          "recorded_at": "2024-12-23T15:20:21Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2476#issuecomment-2562880232",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Opened #2488 but levels are going to need some  love.\r\n\r\nAlso opened #2487 to deal with remaining 5.1.5 and 5.1.6\r\n\r\nAlso opened #2486 to remind me to update the several levels doc after this gets merged.",
+          "recorded_at": "2024-12-26T15:17:21Z"
+        },
+        {
+          "body": "Opened #2488 but levels are going to need some  love.\r\n\r\nAlso opened #2487 to deal with remaining 5.1.5 and 5.1.6\r\n\r\nAlso opened #2486 to remind me to update the several levels doc after this get merged.",
+          "recorded_at": "2024-12-26T15:17:15Z"
+        }
+      ]
+    }
+  ]
+}

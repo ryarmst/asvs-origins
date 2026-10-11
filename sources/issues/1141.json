@@ -1,0 +1,417 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjU4MzMwMDk=",
+    "is_bot": false,
+    "login": "drschulz",
+    "name": "Drew Schulz"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nHi all, I read through https://github.com/OWASP/ASVS/issues/843 and https://github.com/OWASP/ASVS/issues/1091 to see that the bleeding edge has some exceptions for token-based session storage.\r\n\r\nFrom the change to [8.2.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x16-V8-Data-Protection.md#v82-client-side-data-protection) it appears (from my understanding) that two types of sessions are mentioned:\r\n- **cookie-based sessions**: Sessions where an application server sets the cookie with a Set-Cookie header (HTTP-Only), and the domain of the cookie is the recipient of authorized API requests. There is no reason why client JS would need to access the session, which is the basis for the clarification in [8.2.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x16-V8-Data-Protection.md#v82-client-side-data-protection).\r\n- **token-based sessions**: Tokens used by browser clients (delegated access token, for example) that are attached as Authorization headers to outbound CORS requests. Token storage for these sessions in the browser seems to be a necessary evil, and the guidance is to use sessionStorage.\r\n\r\nMy question is, the session distinction makes sense, but should sessionStorage be mentioned here at all?\r\n\r\nStorage for token-based sessions comes up in the first place because of two persistence needs:\r\n1. Session retention across page refreshes\r\n2. Session retention across browser tabs of the same application\r\n\r\nThe sessionStorage exception only solves persistence need 1, but not persistence need 2. The only path forward for these types of applications is to initiate new token-based sessions per tab, which requires a new login/authorization per tab. This doesn't really make the client more _secure_ from a storage perspective, since XSS can still steal tokens from sessionStorage, and also adds a lot of complexity to the app for session management. It, in my opinion, opens up even more questions (and potentially insecure solutions) about how to securely manage token-based sessions across tabs, which doesn't seem to be covered.\r\n\r\nShould there be specific guidance about which browser storage to use for token-based sessions? All browser storage is inherently insecure because of XSS, so what benefit does sessionStorage provide that it is worth being called out?\r\n\r\n| Storage | Susceptible to XSS | Susceptible to Token Exfiltration | Meets Persistence Need 1 | Meets Persistence Need 2 | Notes |\r\n| ---- | ---- | ---- | ---- | ---- | ---- |\r\n| Web Workers | Yes | No | :white_check_mark: | :white_check_mark: | Accessible across tabs if SharedWorker is used. Potentially complex to set up. |\r\n| In-memory Closures | Yes | No (?) | - | - |  Only available within current tab. |\r\n| Session Storage | Yes | Yes | :white_check_mark: | - | Only available within current tab. |\r\n| Cookie - Samesite=Strict, Secure, _not_ HTTP-Only (essentially \"stricter\" local storage) | Yes | Yes | :white_check_mark: | :white_check_mark: | Expires when token expires if expiration is set (or additionally when browser is closed if set as a session cookie). If used purely for storage, does not open itself up for CSRF, because outbound requests require attached Auth Headers. |\r\n| Local Storage | Yes | Yes | :white_check_mark: | :white_check_mark: | Accessible within domain. No expiration, needs to be manually cleared by the client, but [8.2.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x16-V8-Data-Protection.md#v82-client-side-data-protection) covers this. |\r\n\r\n\r\nShould the distinction instead be something along the lines of:\r\n> Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of cookie-based session tokens and token-based session tokens, with the former stored only in cookies, following [V3.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Session-management.md#v34-cookie-based-session-management).\r\n\r\nVery curious on thoughts here. Also, let me know if there is another discussion somewhere discussing this.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM46nOwT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Nice homework for opening the issue :)\r\n\r\nIf you put token- based session token to cookie, you probably mixing 2 different ways how to handle it (and you should not do it). Token should not be in cookies, otherwise you'll get CSRF there as well.\r\n\r\nPlease read those materials and let us know, does it change your view on the topic:\r\n* http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/\r\n* http://cryto.net/~joepie91/blog/2016/06/19/stop-using-jwt-for-sessions-part-2-why-your-solution-doesnt-work/\r\n",
+      "createdAt": "2021-12-01T07:24:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-983362579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46qj5e",
+      "author": {
+        "login": "drschulz"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks Elar :), been doing a lot of reading. From what I understood, those articles discuss JWT in the context of a traditional web application, where cookie-based sessions would be used. Within that context, the points in that article make sense and I agree.\r\n\r\nI'm more concerned with access tokens received from Single Page Apps and OAuth flows (or any \"serverless\" app), whether they're a JWT or not. Essentially, for SPAs that make API calls cross domain, they need to store the access token somewhere in the browser. The table listed above demonstrates that no browser storage options are immune to XSS issues (further outlined really nicely in https://www.pingidentity.com/en/company/blog/posts/2021/refresh-token-rotation-spa.html and https://pragmaticwebsecurity.com/talks/xssoauth.html) so I'm curious why sessionStorage is isolated as the go-to for this exception? Sort of along the lines of [this article](https://pragmaticwebsecurity.com/articles/oauthoidc/localstorage-xss.html) written last year, but perhaps opinions have changed?\r\n\r\nUnless a proper BFF is implemented for the app in question, the only option left is some flavor of browser storage, and they're all insecure. \r\n\r\nAlso, I wanted to clarify that the cookie row in the table is implying that client JS is creating/setting the cookie, _not_ a web server. In token-based applications with CORs API calls, I'm curious how CSRF is still a concern. If Domain A, web server or CDN, is not serving APIs for authorized data under its own domain (A), and the client is making API calls to Domain B with auth headers, where is the CSRF concern?\r\n\r\nI suppose I'm just curious how sessionStorage + silent iframe token refreshes are a better recommendation than local storage or a non http-only cookie, specifically for token-based apps? All three are subject to exfiltration.",
+      "createdAt": "2021-12-02T02:29:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-984235614",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46q_n1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "XSS is not the only problem in security field :)\r\n\r\ntoken-based session token storage in cookie vs localStorage vs sessionStorage discussion we had in issue https://github.com/OWASP/ASVS/issues/843#issuecomment-815276689. Please (re)read this one first (as my arguments are provided there). If there is some new angle to provide, we can discuss it here.\r\n\r\nCSRF is not concern when extra request headers are involved, but my question here stays - why you need cookies AND headers in this case?",
+      "createdAt": "2021-12-02T07:07:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-984349173",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46sZ-O",
+      "author": {
+        "login": "willfarrell"
+      },
+      "authorAssociation": "NONE",
+      "body": "One idea I've been thinking on for a while is to store the session in memory inside of a service worker. SharedWorker are not supported in Safari, making Service Workers the only way to share cross-tabs. I've only see this approach mentioned once (https://blog.ropnop.com/storing-tokens-in-browser/#service-worker). Now that service worker have been in all browsers for a few years now, should this be considered as well for OWASP and ASVS?",
+      "createdAt": "2021-12-02T15:12:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-984719246",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46tVOY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Service workers have been in discussion in #843.\r\n\r\nI think from this current issue point of view, it's separate topic - if you store it in memory, it does not require exception in 8.2.2.\r\n\r\nIf you have clear idea for proposal, how service workers could be involved in ASVS, please open separate issue for that. ",
+      "createdAt": "2021-12-02T20:07:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-984961944",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46uURT",
+      "author": {
+        "login": "drschulz"
+      },
+      "authorAssociation": "NONE",
+      "body": "> token-based session token storage in cookie vs localStorage vs sessionStorage discussion we had in issue [#843 (comment)](https://github.com/OWASP/ASVS/issues/843).\r\n\r\nThose points definitely make sense for local storage, especially when the browser closes without a logout/cleanup. I'm not saying that I'm advocating for the cookie approach, but if expiration is set as a browser session cookie by the client, it does not suffer the same post browser session issues of local storage (it would get removed on browser close).\r\n\r\n> why you need cookies AND headers in this case?\r\n\r\nIn that sort of approach, utilizing the cookie is _purely_ a storage mechanism for the client and nothing else. The API calls would not to the domain with the cookie, but cross origin with a header (similar to your comment https://github.com/OWASP/ASVS/issues/843#issuecomment-698312053). Not immune to XSS (among other attacks) but I thought it was worth mentioning in the table as a storage option for the client.\r\n\r\n\r\nI suppose I'm wondering why any browser storage is an exception. To me, it seems like ASVS should either (for token-based sessions):\r\n1. be strict against all browser storage mechanisms (last three in the table), recommending closures/workers\r\n2. not be opinionated about the type of browser storage. \r\n \r\nSince sessionStorage doesn't give any UX benefits over closures (besides reload retention), and is an easier attack vector, it seems strange that it's mentioned. This is why I was curious if there was a specific reason for the addition.\r\n\r\nOn the other hand, I wonder if the exception will hold now that third party cookies are soon going away, and SSO hidden iframe refresh protocols are starting to break, making new tabs and page refreshes an awkward experience at best (I even saw that Auth0 sdk now has a [local storage option](https://auth0.com/docs/libraries/auth0-single-page-app-sdk#change-storage-options) because of these problems). Things are looking pretty bleak for access token options in client JS 😬 .\r\n\r\nThe service worker idea is interesting and would be great to discuss in another issue.",
+      "createdAt": "2021-12-03T05:06:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-985220179",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46xjO_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In that sort of approach, utilizing the cookie is purely a storage mechanism for the client and nothing else.\r\n\r\nIf you need it only for the client, why to store it in a cookie (which is sent to server with every request)?\r\n\r\nIf something is wrong or outdated in some requirement, then we need to change it. At the moment I don't see the reason, yet.\r\n\r\nTake a look here as well: https://restfulapi.net/\r\n\r\nRestful means, that you don't have any state - in other words, you should not have cookies involved.\r\n\r\nYou may have cookie-based session to SSO and token-based session to an application, but even in this case you don't need to store cookie-based session token to localStorage and token-based session token to cookie.\r\n\r\nRecommending closures/workers may happen in the future, at the moment it does not seem realistic to require it. Personally I have not seen them in use in application which I pentest daily.",
+      "createdAt": "2021-12-04T18:01:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-986067903",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46xjeT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Restful means, that you don't have any state - in other words, you should not have cookies involved.\n\nThat is a mischaracterization of stateless. There is no reason you cannot put a JWT token in a cookie and still achieve statelessness. Cookies have protections that no other artifact in web security has (HTTPOnly, SameSite, cookie prefixes, path limitations) and make them compelling storage and transport mechanisms for even stateless services.\n\nStatelessness means there is no server side session. It does not (at all) say you cannot put your stateless session artifact like a JWT in a cookie.\n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On Dec 4, 2021, at 10:01 AM, Elar Lang ***@***.***> wrote:\n> \n> ﻿\n> In that sort of approach, utilizing the cookie is purely a storage mechanism for the client and nothing else.\n> \n> If you need it only for the client, why to store it in a cookie (which is sent to server with every request)?\n> \n> If something is wrong or outdated in some requirement, then we need to change it. At the moment I don't see the reason, yet.\n> \n> Take a look here as well: https://restfulapi.net/\n> \n> Restful means, that you don't have any state - in other words, you should not have cookies involved.\n> \n> You may have cookie-based session to SSO and token-based session to an application, but even in this case you don't need to store cookie-based session token to localStorage and token-based session token to cookie.\n> \n> Recommending closures/workers may happen in the future, at the moment it does not seem realistic to require it. Personally I have not seen them in use in application which I pentest daily.\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n> Triage notifications on the go with GitHub Mobile for iOS or Android. \n",
+      "createdAt": "2021-12-04T18:06:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-986068883",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM463KAq",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Dear @drschulz and @elarlang I believe that once you have XSS in an app it's a critical event in relation to session functionality. I can use XSS to either steal or force the use of any browser-based session mechanism and overall I do not believe differentiating between whether or not the token can be stolen is very useful because even if I cannot steal a cookie I can always abuse it (ie: force its use) with XSS.\r\n\r\nI also see use cases for storing session data in cookies due to some of their advanced protections. I also see validity with using LocalStorage (long term), SessionStorage (short term), and other mechanisms. Even closures and web workers can be abused with XSS, btw.\r\n\r\nNow on that note, I think 8.2.2 is not reasonable as is.\r\n\r\n8.2.2 | [MODIFIED] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of cookie-based session tokens in cookies and token-based session tokens in sessionStorage. | ✓ | ✓ | ✓ | 922\r\n-- | -- | -- | -- | -- | --\r\n\r\nAnd I suggest we change it to:\r\n\r\n8.2.2 | [MODIFIED] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session artifacts. | ✓ | ✓ | ✓ | 922\r\n-- | -- | -- | -- | -- | --\r\n\r\nBecause ANY place you store tokens in the DOM is susceptible to XSS and I do not think we should be prescriptive about session storage in the browser when all of the options are bad in the face of XSS.\r\n",
+      "createdAt": "2021-12-07T03:33:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-987537450",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM463hCv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As they are equal against XSS, please keep XSS away from the discussion. And we have had this discussion already: https://github.com/OWASP/ASVS/issues/843#issuecomment-815276689. So no point to go there again.\r\n\r\n> I do not believe differentiating between whether or not the token can be stolen is very useful because even if I cannot steal a cookie I can always abuse it (ie: force its use) with XSS.\r\n\r\nBasically you say that cookie-based session tokens do not need `httpOnly` attribute? I don't agree with that. IF you have XSS then you can force victim browser to do whatever, but it's a bit more complicated compared to session hijacking/fixation. Risk is different as likelihood component is different, an attacker needs more time/information to make attack. If we can keep away one attack vector, it makes sense to do it.\r\n\r\nIf we now allow to store cookie-based tokens in every storage, it's again conflict between 8.2.2 and 3.4.* and we will start all over again with the same discussion from another angle like in #843 . My arguments on the topic are provided here: https://github.com/OWASP/ASVS/issues/843#issuecomment-815875372\r\n\r\nIf there is need to allow token-based session token anywhere else than sessionStorage, then please provide arguments:\r\n  * which are not related to XSS\r\n  * \"I'm using it that way\" is not valid argument\r\n \r\nLike I wrote already, if there is need to change 8.2.2, we do it. But we need to have as bullet-proof arguments as we can get do not start this discussion again and again.\r\n\r\nBefore any new comments, please investigate arguments so far in #843, #1091 and in this issue.",
+      "createdAt": "2021-12-07T07:09:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-987631791",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM465E-p",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": ">      Basically you say that cookie-based session tokens do not need httpOnly attribute? I don't agree with that. \r\n\r\nYes, to a real adversarial attacker HTTPOnly is **_useless_** to stop them from doing critical harm to your app and users. You can still XSS them and abuse the session and force that user to make any request you want them to, with authentication. In fact, stealing the cookie is worse because then you have a signature of that cookie being used on a real IP. So it's even better to abuse the token vs. stealing it.\r\n\r\n**_HTTPOnly is useless when it comes to real-world defense._**\r\n\r\n> As they are equal against XSS, please keep XSS away from the discussion\r\n\r\nWith respect, I want to encourage *everyone* to keep talking and discussing.",
+      "createdAt": "2021-12-07T15:37:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-988041129",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM465FXF",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And I'm still remiss because the phrase \"...exception of cookie-based session tokens in cookies and token-based session tokens in sessionStorage...\" does not make sense to me. It's a combination of poor English (due to the repetition) and sends the wrong message about the storage of client-side artifacts.",
+      "createdAt": "2021-12-07T15:39:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-988042693",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM47rjQE",
+      "author": {
+        "login": "GavinRay97"
+      },
+      "authorAssociation": "NONE",
+      "body": "@drschulz \r\n\r\n> The sessionStorage exception only solves persistence need 1, but not persistence need 2. The only path forward for these types of applications is to initiate new token-based sessions per tab, which requires a new login/authorization per tab. This doesn't really make the client more secure from a storage perspective, since XSS can still steal tokens from sessionStorage, and also adds a lot of complexity to the app for session management. It, in my opinion, opens up even more questions (and potentially insecure solutions) about how to securely manage token-based sessions across tabs, which doesn't seem to be covered.\r\n\r\nI'm not convinced that `sessionStorage` is any more secure than `localStorage` provided that the other guidelines are followed, but for what it's worth a way around the multi-tab issue is by syncing sessionStorage securely between tabs using localStorage as a cross-tab event emitter:\r\n\r\n```js\r\n// Taken from https://blog.guya.net/2015/06/12/sharing-sessionstorage-between-tabs-for-secure-multi-tab-authentication/\r\nif (!sessionStorage.length) {\r\n    // Ask other tabs for session storage\r\n    console.log(\"Calling getSessionStorage\")\r\n    localStorage.setItem(\"getSessionStorage\", String(Date.now()))\r\n}\r\n\r\nwindow.addEventListener(\"storage\", (event) => {\r\n    console.log(\"storage event\", event)\r\n    if (event.key == \"getSessionStorage\") {\r\n        // Some tab asked for the sessionStorage -> send it\r\n        localStorage.setItem(\"sessionStorage\", JSON.stringify(sessionStorage))\r\n        localStorage.removeItem(\"sessionStorage\")\r\n    } else if (event.key == \"sessionStorage\" && !sessionStorage.length) {\r\n        // sessionStorage is empty -> fill it\r\n        const data = JSON.parse(event.newValue)\r\n        for (let key in data) {\r\n            sessionStorage.setItem(key, data[key])\r\n        }\r\n    }\r\n})\r\n```",
+      "createdAt": "2021-12-27T01:04:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1001272324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5CK38a",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Cookies and session storage provide an expiration mechanisms to make sure tokens do not live on forever, even when the application exits unexpectedly. Local storage does not have that which is why we make the differentiation.\r\n\r\nWe know that there are other possible mechanisms like service workers but they seem to be too complicated to make widespread adoption likely at this point.\r\n\r\n@jmanico I would suggest the following to try and maintain both clarity and accuracy.\r\n\r\n> [MODIFIED] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session identifiers which should be stored in either cookies or sessionStorage.",
+      "createdAt": "2022-04-26T19:01:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1110146842",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FaYuA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Token should not be in cookies, otherwise you'll get CSRF there as well.\r\n\r\nThis is not a reasonable suggestion at all. Cookies have significant protections, including automatic same-site CSRF protection, secure flagging, host or secure cookie labels, HTTPOnly, and more that makes them a compelling way to store tokens in browser-based apps.\r\n\r\n",
+      "createdAt": "2022-06-23T15:18:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1164544896",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FaY_L",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Cookies and session storage provide an expiration mechanisms to make sure tokens do not live on forever, even when the application exits unexpectedly. Local storage does not have that which is why we make the differentiation.\r\n> \r\n> We know that there are other possible mechanisms like service workers but they seem to be too complicated to make widespread adoption likely at this point.\r\n> \r\n> @jmanico I would suggest the following to try and maintain both clarity and accuracy.\r\n> \r\n> > [MODIFIED] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session identifiers which should be stored in either cookies or sessionStorage.\r\n\r\nI like this suggestion, Josh.",
+      "createdAt": "2022-06-23T15:19:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1164545995",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FaZWd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The complete change would be:\r\n\r\n8.2.2 | [MODIFIED] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session identifiers which should be stored in either cookies or sessionStorage. | ✓ | ✓ | ✓ | 922\r\n\r\n\r\n\r\n\r\n\r\n",
+      "createdAt": "2022-06-23T15:20:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1164547485",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5HQ6oN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened PR to resolve this, @jmanico please review :)",
+      "createdAt": "2022-07-26T15:15:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1195616781",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IASUT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "current PR is in conflict with `HttpOnly` requirement (3.4.2).\r\n* the point of 3.4.2 is that session token should not be readable for javascript\r\n* 8.2.2 now allows to store session token in localStorage and sessionStorage which is readable for JavaScript\r\n\r\nIf you use Authorized header for sending session token, it must be readable for JavaScript - in this case it does not matter, where it is stored, because in XSS situation it is readable anyway.\r\n\r\nIf you use session cookie, then `httpOnly` flag gives extra defence - you can not read the token out in XSS situation. Yes, you can force victim browser to make requests etc, but for that you need to have some extra time and knowledge, it's more complicated/slower attack scenario to build than simple-stupid session takeover by stealing the token.\r\n\r\nBut I feel this topic and discussion is in endless loop long time already :)",
+      "createdAt": "2022-08-08T11:59:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1208034579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5JD2Pr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @elarlang \r\n\r\nWe are not making a blanket rule that \"session token should not be readable for javascript\" because that would not be possible :) Therefore, that is not the point of 3.4.2.\r\n\r\nThe point 3.4.2 is that when a session token is stored in a cookie, it should be marked as HttpOnly which is practically speaking a defense in depth control but a very easy one to implement.\r\n\r\nAs such, I do not believe 3.4.2 is in conflict with 8.2.2.\r\n\r\nWhat do you think?",
+      "createdAt": "2022-08-24T13:42:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-1225745387",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM598T92",
+      "author": {
+        "login": "regoravalaz"
+      },
+      "authorAssociation": "NONE",
+      "body": "In the end, there is no secure mechanism.\r\n\r\nIf you use refresh tokens in Cookies and web token in Storage, as recommended, what will be achieved is complicate the process of accessing the information.\r\n\r\nThat means that what ultimately matters is the motivation of the attacker. How motivated are you to invest time in resolving both sides of the proposal.\r\n\r\nBecause if you are really motivated, you can use the two techniques to handle the 2 values that are being saved in Coockies and Storage.\r\n\r\nI think we need to work on a radical change in the Web so that this does not continue to be a problem for dedicated or lazy attackers.",
+      "createdAt": "2024-05-15T16:17:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-2112962422",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM598W2r",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't know how you ended up here when the issue is 1.5 years closed, but note that your comments most likely are ignored in closed issues.\r\n\r\nWhen we talk about OAuth refresh tokens, those should never be sent to the client anyway:\r\n* see https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 1\"\r\n* see https://github.com/OWASP/ASVS/issues/1925 \"proposal 8\"\r\n\r\nIn this issue context - if you have an JavaScript execution, you can not automate victim's browser without ever knowing the session token, so I agree with:\r\n> In the end, there is no secure mechanism.",
+      "createdAt": "2024-05-15T16:23:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1141#issuecomment-2112974251",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-12-01T01:29:54Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 1141,
+  "state": "CLOSED",
+  "title": "Questions on rigidity of token-based session storage, \"sessionStorage for token-based sessions\" guidance in 8.2.2",
+  "url": "https://github.com/OWASP/ASVS/issues/1141"
+}

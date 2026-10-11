@@ -1,0 +1,223 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Split from #1154 \n\nCurrent [4.3.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V4-API.md#v43-http2):\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **4.3.3** | Verify that any full CRLF (\\r\\n) sequence within an HTTP/2 header field is either removed or rejected to prevent header injection attacks. | 3 | v5.0.be-13.7.3 |\n\n@randomstuff [said](https://github.com/OWASP/ASVS/issues/1154#issuecomment-2777164507):\n\n> Additional question about 4.3.3:\n> \n> Does it only apply to a full CRLF? Should it apply as well to \"\\n\" or \"\\r\" alone?\n> \n> * Neither CR nor LF are allowed in [field names](https://www.rfc-editor.org/rfc/rfc9110.html#name-field-names);\n> * Neither CR nor LF are allowed in [field values](https://www.rfc-editor.org/rfc/rfc9110.html#name-field-values).\n\n@jmanico [responded](https://github.com/OWASP/ASVS/issues/1154#issuecomment-2777220235):\n\n> This applies to CR, LF and CRLF for both field names and values. Perhaps a change?\n> \n> | # | Description | Level | #v5.0.be |\n> | :---: | :--- | :---: | :---: |\n> | **4.3.3** | Verify that HTTP/2 header field names and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences. If any such characters are detected, the header must be rejected or sanitized to prevent header injection attacks. | 3 | v5.0.be-13.7.3 |\n\n\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6l16-d",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As I understand, the requirement applies to HTTP/2 request - it should be mentioned in the requirement text.\n\n> If any such characters are detected, the header must be rejected or sanitized to prevent header injection attacks.\n\nWhy not to reject entire request? (Not a proposal, it is actual question)",
+      "createdAt": "2025-04-07T08:03:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2782375837",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6l-D_u",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> As I understand, the requirement applies to HTTP/2 request - it should be mentioned in the requirement text.\n> \n> > If any such characters are detected, the header must be rejected or sanitized to prevent header injection attacks.\n> \n> Why not to reject entire request? (Not a proposal, it is actual question)\n\nI agree with @elarlang here. I think the entire request should be rejected. I think this is an astute observation. ",
+      "createdAt": "2025-04-07T20:10:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2784509934",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6l-tHA",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> As I understand, the requirement applies to HTTP/2 request - it should be mentioned in the requirement text.\n\nIt applies to HTTP/3 as well.\n\nIt could apply to HTTP/1 if the requirement is understood to apply to the sender as well: the sender should not be tricked into inserting CR/LF/CRLF in the header fields it sends as HTTP/1 as it would be used to header/body injections attacks.\n\n> Why not to reject entire request? (Not a proposal, it is actual question)\n\nIf you receive such a message, the request is indeed clearly bogus and it would be better to reject it. I'm not sure it is clearly bad to sanitize it in general (through it might probably lead to many problems) to allowing it may not a problem (?). In practice, I agree that the best course of action is certainly to reject the request entirely.",
+      "createdAt": "2025-04-07T21:34:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2784678336",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mDIgG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It sounds like this is specific to HTTP/2 and above and is also related to downgrade issues:\nhttps://portswigger.net/web-security/request-smuggling/advanced#request-smuggling-via-crlf-injection\n\nHow about:\n\n\"_Verify that HTTP/2 header field names and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences. If any such characters are detected, the request must be rejected prevent header injection attacks._\"",
+      "createdAt": "2025-04-08T09:37:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2785839110",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mDuZV",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It sounds like this is specific to HTTP/2 and above and is also related to downgrade issues:\n\nI would at least include HTTP/3 as well. HTTP/2 and HTTP/3 work the same in this regard. Maybe we don't need to include HTTP/1.\n\nI don't know if this happens/has happened in practice, but a a lenient HTTP/1 client/server implementation might possibly be tricked into injecting headers and HTTP request splitting (*) with something like:\n\n~~~ \nresponse.set(\"X-Tenant-Id\", tenant);\n~~~\n\n~~~http\nGET / HTTP/1.1\nHots: www.example.com\nContent-Type: application/json\nX-Tenant-Id: ${tenant}\n\n…\n~~~\n\nwith `tenant = \"foo\\nContent-Length: XXXX\\n\\nmalicious_payload\"`\n\nwhich would expand into:\n\n~~~http\nGET / HTTP/1.1\nHots: www.example.com\nContent-Type: application/json\nX-Tenant-Id: foo\nContent-Length: XXXX\n\nmalicious_payload\n\n…\n~~~\n\n(*) Not in the context of HTTP propagation by reverse proxy but in the context of the application generating the original HTTP message.",
+      "createdAt": "2025-04-08T10:35:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2785994325",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mD7Ne",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would at least include HTTP/3 as well.\n\nThat is what I meant by \"specific to HTTP/2 and above\".\n\n\nYour HTTP/1 example is a sender mess-up and probably a violation of the HTTP spec, like it is on the library to implement that correctly. \n\n> Maybe we don't need to include HTTP/1.\n\nI agree :)",
+      "createdAt": "2025-04-08T10:57:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2786046814",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mD7Xg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Any comments on my [suggestion above](https://github.com/OWASP/ASVS/issues/2914#issuecomment-2785839110) @randomstuff?",
+      "createdAt": "2025-04-08T10:57:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2786047456",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mItRF",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My point about HTTP/3 as that I would change your wording:\n\n> Verify that HTTP/2 header field names and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences. If any such characters are detected, the request must be rejected prevent header injection attacks.\n\ninto\n\n> Verify that HTTP/2 or HTTP/3 header field names and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences. If any such characters are detected, the request must be rejected prevent header injection attacks.\n",
+      "createdAt": "2025-04-08T18:14:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2787300421",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mItX9",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Apart from that, OK for me :)",
+      "createdAt": "2025-04-08T18:14:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2787300861",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mKo5t",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Same here, I like this direction.",
+      "createdAt": "2025-04-08T22:39:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2787806829",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mMoCU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that HTTP/2 or HTTP/3 header field names and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences. If any such characters are detected, the request must be rejected prevent header injection attacks.\n\n* \"HTTP/2 or HTTP/3\" > \"HTTP/2 and HTTP/3\"\n\n> Verify that HTTP/2 and HTTP/3 header field names and values do not contain any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences. If any such characters are detected, the request must be rejected prevent header injection attacks.\n\nBut this is negative requirement.\n\nAttempt to re-build it:\n> Verify that HTTP/2 and HTTP/3 request is rejected if a header field or value contains any CR (\\r), LF (\\n), or CRLF (\\r\\n) sequences, to prevent header injection attacks.",
+      "createdAt": "2025-04-09T05:33:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2788327572",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mOSW4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2932",
+      "createdAt": "2025-04-09T08:24:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2914#issuecomment-2788763064",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-07T07:39:26Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2914,
+  "state": "CLOSED",
+  "title": "Fix up 4.3.3 / v5.0.be-13.7.3",
+  "url": "https://github.com/OWASP/ASVS/issues/2914"
+}

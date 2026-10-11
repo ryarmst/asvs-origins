@@ -1,0 +1,198 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "V3 is now getting scoped to have session functionality without being dependent on any technical solution - such as cookies or any-kind-of-token.\r\n\r\nWe are going to move V3.5 away. If we leave V3.4 Cookies, then it may feel like it is the only acceptable solution for session managament - so part of the moving away V3.5 is also moving away V3.4.\r\n\r\nAnother reason is, that V3.4 by content belong clearly to front-end security. Also, cookies as technology is wider topic than only managing session cookies.\r\n\r\nFor both moved away section - we need to provide strong link - if you use this mechanism for your sessions, take a look / take into scope that section etc.\r\n\r\nedit: proposal is to move V3.4 into V50 Web Frontend Security. \r\n\r\n---\r\n\r\nRequirements as they are at the moment:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **3.4.1** | Verify that cookie-based session tokens have the 'Secure' attribute set. | ✓ | ✓ | ✓ | 614 |\r\n| **3.4.2** | [MODIFIED] Verify that cookie-based session tokens are not readable by client-side scripts. The session token cookie should have the 'HttpOnly' attribute set and the session token value should only be transferred to the client via the Set-Cookie header field. | ✓ | ✓ | ✓ | 1004 |\r\n| **3.4.3** | Verify that cookie-based session tokens utilize the 'SameSite' attribute to limit exposure to cross-site request forgery attacks. | ✓ | ✓ | ✓ | 1275 |\r\n| **3.4.4** | Verify that cookie-based session tokens use the \"__Host-\" prefix so cookies are only sent to the host that initially set the cookie. | ✓ | ✓ | ✓ | 16 |\r\n\r\nRequirements should be written to be \"need specific\". The struggle here is, if to make cookie requirements more abstract, how to send a clear set of rules that are expected for session cookie.\r\n\r\n\r\nTo just describe or validate the idea, changed requirements:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **3.4.1** | Verify that cookies have the 'Secure' attribute set. | ✓ | ✓ | ✓ | 614 |\r\n| **3.4.2** | Verify that if the cookie is not meant to be for client-side scripts (such as cookie for session token), the cookie must have the 'HttpOnly' attribute set and the same value (e. g. session token) must only be transferred to the client via the Set-Cookie header field. | | ✓ | ✓ | 1004 |\r\n| **3.4.3** | Verify that cookies have the 'SameSite' attribute set according to the purpose of the cookie. For example, if the cookie is not meant to be sent from cross-site party, it must have SameSite attribute with value Lax or Strict to limit exposure to cross-site request forgery attacks. | | ✓ | ✓ | 1275 |\r\n| **3.4.4** | Verify that if the cookie is meant to be used only by the same host, the cookie has \"__Host-\" prefix for the cookie name. | | ✓ | ✓ | |\r\n\r\n---\r\n\r\nAdditional requirement (or coverage) proposal: `Partitioned` attribute for cookies:\r\n\r\n  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#partitioned\r\n  * https://developer.mozilla.org/en-US/docs/Web/Privacy/Privacy_sandbox/Partitioned_cookies\r\n  * https://caniuse.com/mdn-http_headers_set-cookie_partitioned\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6U80HW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do you want to open a PR or should I comment on the wording first?",
+      "createdAt": "2024-11-25T20:28:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2498970070",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U9wGg",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Additional potential cookie requirements/considerations (not a wording proposition):\r\n\r\n* Authentication and/or encryption of the cookie content (when the cookie is self-contained and its content must be protected). Basically the considerations of V3.5 should apply to cookies as well when it makes sense (this is not necessary if the cookie is storing my preferred theme). Do we just need to say \"Note that the requirements for self-encoded token apply for the cookie content when the cookie if self-encoded\"?\r\n  * eg. Flak sessions by default are implemented by a MAC-ed self-encoded cookie. They are protected by a MAC (and include a timestamp) but are not encrypted which means that the session content can be inspected by the user.\r\n* Entropy of the cookie when it is a reference cookie (see #2411).\r\n* For self-encoded cookie make sure that the user cannot do bad things by replaying old cookies.\r\n  * eg. Flask sessions are by default implemented by a MAC-ed self-encoded cookie. This means that if someone manages to steal your session cookie logging out won't help because the cookie will still be valid for some time. Moreover if for example you session contains a limit (eg. max number of attemps for some action), you can \"rewind\" the previous state to bypass the limit.",
+      "createdAt": "2024-11-25T23:07:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2499215776",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U9w1G",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> so part of the moving away V3.5 is also moving away V3.4.\r\n\r\nDo you intend to move V3.4 into the same chapter as V3.5? Or do you intent to have separate chapters?",
+      "createdAt": "2024-11-25T23:09:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2499218758",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VGlS_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Response to @tghosth \r\n> Do you want to open a PR or should I comment on the wording first?\r\n\r\nThe first layer is to get feedback on the idea. If the direction is agreed upon, then we can talk about wording. Given wordings are just a bit random wording to show that cookies do not need to be session-specific.\r\n\r\n---\r\n\r\nResponse to @randomstuff \r\n\r\nIn short - I watch cookies as a separate information-transfer technology, it is not related to any specific functionality and I have a feeling, that your proposed requirements are more specific functionality-related and not cookie-related. Using the same logic, I proposed to move away V3.5 from sessions, because it is a separate, independent, and underlying technology.\r\n\r\n>> so part of the moving away V3.5 is also moving away V3.4.\r\n\r\n> Do you intend to move V3.4 into the same chapter as V3.5? Or do you intend to have separate chapters?\r\n\r\nNo, if agreed, then cookies will be moved to V50 - those requirements are valid only if browser is involved.\r\n\r\n> Authentication and/or encryption of the cookie content (when the cookie is self-contained and its content must be protected).\r\n\r\nI don't think we need to duplicate this part to cookies. If the content is self-contained, you need to validate it the same for every delivery method.\r\n\r\n> Entropy of the cookie when it is a reference cookie\r\n\r\nCookies do not require entropy. Maybe the session identifier does, but the cookie is just an underlying technology that transfers the information.\r\n\r\n> For self-encoded cookie make sure that the user cannot do bad things by replaying old cookies.\r\n\r\nWe can not have a requirement of \"do not replay a cookie\". It must be the content in the cookie and probably belong to some more specific section.",
+      "createdAt": "2024-11-26T17:23:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2501530815",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VT8g2",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In short - I watch cookies as a separate information-transfer technology, it is not related to any specific functionality and I have a feeling, that your proposed requirements are more specific functionality-related and not cookie-related. Using the same logic, I proposed to move away V3.5 from sessions, because it is a separate, independent, and underlying technology.\r\n\r\nYes, I agree. It makes sense to only include cookie-as-a-technology-only considerations in the cookie section and let everything which is about the cookie payload (but could apply as well to other means of transporting the same payload) in other sections.\r\n\r\nIt would probably deserve to have good references from the cookie section to other important/relevant section. Something as simple as: \"See as well section W.X and Y.Z which would usually apply to the cookie payloads.\"",
+      "createdAt": "2024-11-28T00:17:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2505033782",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VVK7A",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It would probably deserve to have good references from the cookie section to other important/relevant section. Something as simple as: \"See as well section W.X and Y.Z which would usually apply to the cookie payloads.\"\r\n\r\nYes, as I wrote in initial issue: https://github.com/OWASP/ASVS/issues/2410#issue-2691931036\r\n> For both moved away section - we need to provide strong link - if you use this mechanism for your sessions, take a look / take into scope that section etc.\r\n\r\nBut I think the focus for links should be vice versa. In the section text for cookies we can list the classical use-cases (e.g. sessions), but for the technologies or functionalities that are use cookies (again, sessions) as underlying technologies there is need to highlight that \"in case you use cookies, you need to take into account cookie section from X.Y\"\r\n\r\n",
+      "createdAt": "2024-11-28T06:29:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2505354944",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VXuN3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'll move it to V50 as it is after #2384. After that we will discuss each requirement how to have non-session-specific version of it.",
+      "createdAt": "2024-11-28T12:37:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2506023799",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VZKQG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "PR #2418 moves requirements from V3.4 to V50.2 as they are. I'll open a separate issue for each requirement separately to find new suitable wording for them.",
+      "createdAt": "2024-11-28T15:45:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2506400774",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VcfoD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\r\nList of opened new issues:\r\n\r\n* #2419\r\n* #2420\r\n* #2421\r\n* #2422\r\n* #2423",
+      "createdAt": "2024-11-29T08:01:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2410#issuecomment-2507274755",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-25T19:18:19Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 2410,
+  "state": "CLOSED",
+  "title": "move (and re-org) V3.4 cookies",
+  "url": "https://github.com/OWASP/ASVS/issues/2410"
+}

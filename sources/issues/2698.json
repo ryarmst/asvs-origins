@@ -1,0 +1,214 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "The parent issue with description is #2690 \n\nProposed level changes for requirement in chapter \"V9 Secure Communication\"\n\nFull list of requirements for the chapter is listed here: https://github.com/OWASP/ASVS/blob/master/5.0/en/0x17-V9-Communications.md\n\n| # | Description | Level change |\n| :---: | :--- | :---: |\n| **9.2.6** | [ADDED] Verify that TLS clients validate certificates received before communicating with a TLS server. | 1 > 2 |\n| **9.4.1** | [MODIFIED, MOVED FROM 9.1.2] Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must only support cipher suites which provide forward secrecy. | 1 > 2 |\n| **9.4.3** | [MOVED FROM 9.2.4] Verify that proper certification revocation, such as Online Certificate Status Protocol (OCSP) Stapling, is enabled and configured. | 2 > 3 |\n| **9.4.5** | [ADDED] Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authorization. | 3 > 2 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6id7g5",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that having validation of TLS certificate (9.2.6) is a really basic requirement and really important and I would include it in L1.\n\nThe same could be said of 9.4.5. If we are using mTLS this is because we want to authenticate the client (as part of some authorization decision). If we don't validate the client certificate, a malicious client can use its own self-signed certificate and bypass authorization. Can we really *not* make it a L1 requirement? We want to keep the number of requirements in L1 small, however if the application is targeting L1, it probably does not use mTLS and therefore won't have any work for 9.4.5. On the other hand, if the application uses mTLS, the verification is certainly important.",
+      "createdAt": "2025-03-14T21:01:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2725754937",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ieTzE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think that having validation of TLS certificate (9.2.6) is a really basic requirement and really important and I would include it in L1.\n> \n> The same could be said of 9.4.5. If we are using mTLS this is because we want to authenticate the client (as part of some authorization decision). If we don't validate the client certificate, a malicious client can use its own self-signed certificate and bypass authorization. Can we really _not_ make it a L1 requirement? We want to keep the number of requirements in L1 small, however if the application is targeting L1, it probably does not use mTLS and therefore won't have any work for 9.4.5. On the other hand, if the application uses mTLS, the verification is certainly important.\n\nTake look at https://github.com/OWASP/ASVS/issues/2710 where I suggested we drop this requirement completely. As a developer, I never have to worry about this for normal TLS. The library or browser does this for me; I almost never ever have to do this in code. And if I do, I think a weak component is being used.\n\nThis only matters if I am doing mTLS.\n\nJust my 2 cents on this, you can take it to https://github.com/OWASP/ASVS/issues/2710 if you like. \n\nAnd I agree, this is super important - it's just that as a developer, I almost never have to do this myself unless I am using weak frameworks or libraries.",
+      "createdAt": "2025-03-14T21:59:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2725854404",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iecMp",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> As a developer, I never have to worry about this for normal TLS. The library or browser does this for me; I almost never ever have to do this in code. And if I do, I think a weak component is being used.\n\nI have seen *many* instances of application code manually disabling TLS certificate validation (in different projects, different programming languages, by different teams). In my experience, this has been quite prevalent.\n\nWhy does it happen? I can think of two possible explanations for this:\n\n* The team of your project sets up a staging/preproduction/test/integration/development environment. This environment does not use certificates issued by a public CA but self-signed certificates. Some developer finds that his application does not work in this environment and has to fix it.\n* You company is using a TLS-intercepting proxy for security. The application code on your development machine sees a \"bogus\" certificate (issued by the proxy). Even if the CA proxy certificate is provisioned on your system, your application code might not knwo this CA certificate (for example because it is executed in a container or a VM).\n\nIn both cases:\n\n* The developer just wants to get things done and searches for a solution (eg. on stackoverflow) and finds someone suggesting to simply disable certificate validation.\n* The modification stays there, is forgotten (because things are working allright) and ships into production never to be seen again.\n\nEven [ZAP proxy does that](https://nvd.nist.gov/vuln/detail/CVE-2022-27820)  (see [`_trustAllCerts`](https://github.com/zaproxy/zaproxy/blob/1183daf691705a206448bef1c43a55e2b8fa495d/zap/src/main/java/ch/csnc/extension/httpclient/SSLContextManager.java#L129)).\n\nReferences:\n\n* https://stackoverflow.com/a/2893932/637866\n* https://stackoverflow.com/a/46469430/637866\n* https://stackoverflow.com/a/25620345/637866\n* https://sentry.io/answers/how-to-solve-pkix-path-building-failed-error-in-java/#disabling-certificate-validation\n* https://medium.com/javarevisited/java-http-client-invalid-certificate-93673415fdec\n* https://stackoverflow.com/a/28886953/637866\n* https://stackoverflow.com/a/53221811/637866\n* https://stackoverflow.com/a/72741309/637866",
+      "createdAt": "2025-03-14T22:13:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2725888809",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iezXp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I trust your judgement @randomstuff and stand corrected. Your references are epic. Thanks for taking the time to explain your position here.",
+      "createdAt": "2025-03-14T23:13:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2725983721",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ijsWD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - mentioned requirements come into play only/after if an attacker have been able to get a foothold into a network that carries machine-to-machine communication?",
+      "createdAt": "2025-03-16T08:32:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2727265667",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1D9-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In principle, all of the TLS stuff is not a perfect fit for L1 because it is not a simple exposure but rather requires other pre-conditions such as \"attacker in the middle\". In practice, clearly some of these requirements must be L1 and that can be justified by the fact that implementing this is relatively easy nowadays and the impact of not doing it is huge.\n\nI agree that 9.2.6 needs to exist for the reasons @randomstuff [provided here](https://github.com/OWASP/ASVS/issues/2698#issuecomment-2725888809) but 9.2.6 and 9.4.5 are not L1 due to the reasons above and also the fact that these will generally be backend processes acting as TLS clients meaning that the pre-condition (attacker in the middle between two services) is even more unlikely as @elarlang is [saying here](https://github.com/OWASP/ASVS/issues/2698#issuecomment-2727265667).\n",
+      "createdAt": "2025-03-18T06:26:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2731818878",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1Esj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder in 24 hours open PR if there are no further discussions.",
+      "createdAt": "2025-03-18T06:27:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2731821859",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1EuG",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nWednesday, March 19, 2025 7:28 AM (GMT+01:00)\r\n> in  open PR if there are no further discussions.",
+      "createdAt": "2025-03-18T06:28:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2731821958",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1rQw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I agree that 9.2.6 and 9.4.5 require a MITM position and therefore do not fit under the L1 criteria. 👍 ",
+      "createdAt": "2025-03-18T07:45:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2731979824",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i5j_f",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As there seems to be agreement, I opened a PR for that.",
+      "createdAt": "2025-03-18T12:12:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2732998623",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jC-t1",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/2698#issuecomment-2731821859) @tghosth\n> in  open PR if there are no further discussions.",
+      "createdAt": "2025-03-19T06:29:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2698#issuecomment-2735467381",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-03-14T16:22:35Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvdMg",
+      "name": "V12 (prev V9)",
+      "description": "",
+      "color": "BB73F6"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB1p1gwg",
+      "name": "levels",
+      "description": "",
+      "color": "44DF16"
+    }
+  ],
+  "number": 2698,
+  "state": "CLOSED",
+  "title": "Level changes for V9",
+  "url": "https://github.com/OWASP/ASVS/issues/2698"
+}

@@ -1,0 +1,105 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "Suggest a change to specify this is server side, from:\r\n\r\n2.6.2 | [MODIFIED] Verify that lookup secrets with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm which incorporates a 32 bit random salt. If the secret has 112 bits of entropy or more, a standard hash function can be used. |   | ✓ | ✓ | 330 | 5.1.2.2\r\n-- | -- | -- | -- | -- | -- | --\r\n\r\n... to perhaps ...\r\n\r\n2.6.2 | [MODIFIED] Verify that lookup secrets stored on your server with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a 32-bit random salt. A standard hash function can be used if the secret has 112 bits of entropy or more. |   | ✓ | ✓ | 330 | 5.1.2.2\r\n-- | -- | -- | -- | -- | -- | --\r\n\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5e8Tgy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirement history:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.6.2** | [MODIFIED] Verify that lookup secrets with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm which incorporates a 32 bit random salt. If the secret has 112 bits of entropy or more, a standard hash function can be used. | | ✓ | ✓ | 330 | 5.1.2.2 |\r\n| **2.6.2** | [MODIFIED] Verify that lookup secrets with 112 bits of entropy or more (typically 19 random alphanumeric characters or 34 random digits is sufficient) are hashed with an approved password storage hashing algorithm. If the secret has less than 112 bits of entropy, a 32bit random salt should be incorporated. | | ✓ | ✓ | 330 | 5.1.2.2 |\r\n| **2.6.2** | [MODIFIED] Verify that lookup secrets have sufficient randomness (112 bits of entropy), or if less than 112 bits of entropy, are hashed with an approved password storage hashing algorithm. | | ✓ | ✓ | 330 | 5.1.2.2 |\r\n| **2.6.2** | Verify that lookup secrets have sufficient randomness (112 bits of entropy), or if less than 112 bits of entropy, are hashed with an approved password storage hashing algorithm. | | ✓ | ✓ | 330 | 5.1.2.2 |\r\n| **2.6.2** | Verify that lookup secrets have sufficient randomness (112 bits of entropy), or if less than 112 bits of entropy, salted with a unique and random 32-bit salt and hashed with an approved one-way hash. | | ✓ | ✓ | 330 | 5.1.2.2 |\r\n\r\n",
+      "createdAt": "2023-06-15T11:27:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1614#issuecomment-1592866866",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e8T1t",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico would you accept:\r\n\r\n> [MODIFIED] Verify that lookup secrets stored **at the back-end** with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a 32-bit random salt. A standard hash function can be used if the secret has 112 bits of entropy or more.",
+      "createdAt": "2023-06-15T11:28:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1614#issuecomment-1592868205",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5fAy8C",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I’d much rather just suggest Argon2id. We do not have to talk about salting, the algorithms of the day for password storage already do this (bcrypt, Argon2id, PBKDF2).\r\n\r\nI’m not sure we need to actually suggest bit sizes and similar. It would be way easier for developers if we just pointed to the work of the password storage cheatsheet.\r\n\r\n\r\nForgive me if I’m out of context with this suggestion. ",
+      "createdAt": "2023-06-16T03:46:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1614#issuecomment-1594044162",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hBMlz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico so this section is talking about \"lookup secrets\" as opposed to regular passwords.\r\n\r\nLookup secrets are defined by NIST as:\r\n\r\n> ...pre-generated lists of secret codes, similar to Transaction Authorization Numbers (TAN), social media recovery codes, or a grid containing a set of random values. These are distributed securely to users. These lookup codes are used once, and once all used, the lookup secret list is discarded. This type of authenticator is considered \"something you have\".\r\n\r\nThis requirement is specifically worded in accordance with NIST .\r\n\r\nYour original suggestion was (main change bolded):\r\n\r\n> [MODIFIED] Verify that lookup secrets stored **on your server** with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a 32-bit random salt. A standard hash function can be used if the secret has 112 bits of entropy or more.\r\n\r\nI proposed a very similar change:\r\n\r\n> [MODIFIED] Verify that lookup secrets stored **at the back-end** with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a 32-bit random salt. A standard hash function can be used if the secret has 112 bits of entropy or more.\r\n\r\nAre you comfortable with my suggestion?",
+      "createdAt": "2023-07-09T12:35:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1614#issuecomment-1627703667",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hGNbN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yes, way better.\n\n",
+      "createdAt": "2023-07-10T13:54:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1614#issuecomment-1629017805",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-04-18T14:47:21Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1614,
+  "state": "CLOSED",
+  "title": "Seeking clarification in 2.6.2 that this is server side",
+  "url": "https://github.com/OWASP/ASVS/issues/1614"
+}

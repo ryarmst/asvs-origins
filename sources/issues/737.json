@@ -1,0 +1,530 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQwMDI3NjU=",
+    "is_bot": false,
+    "login": "csfreak92",
+    "name": "Ralph Andalis"
+  },
+  "body": "ASVS 4.0 - 1.11.2 verification requirement is:\r\n\r\n`Verify that all high-value business logic flows, including authentication, session management and access control, do not share unsynchronized state.`\r\n\r\nI am confused about what the term \"unsynchronized state\" means here. There was no clarification or heading in ASVS documentation explaining this sub-section about this term. Can someone from the community or project leads please clarify what this means? And maybe we could add a sentence or two in this ASVS verification requirement as an edit to reflect it? \r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxODU3MzU3MA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good point, leaving this for when we prepare 4.1",
+      "createdAt": "2020-04-23T18:29:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-618573570",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5MTkwMjE4OQ==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, revisiting this issue since it still haunts our pentesters about what this means. Any idea about the \"unsynchronized state\" term here? ",
+      "createdAt": "2021-03-06T09:29:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-791902189",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc3MzA4Nw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest just delete this requirement, it makes no sense. Care to PR this @csfreak92 ? It needs to go!",
+      "createdAt": "2021-03-12T21:44:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-797773087",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODg3MTk4OQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we should be quite careful with deleting requirement in case we just don't clearly understand what it says - the risk is that requirement actually have good meaning but just bad wording.\r\n\r\nIn this case, linked CWE points to:\r\nhttps://cwe.mitre.org/data/definitions/362.html\r\n\r\nI can use this requirement for authentication when authentication state is not handled properly (it's not possible to verify is the same client reporting code for OAuth who actually started the authentication process) and therefore causing Race-Condition. Pure Race-Condition you can report to current 11.1.6, this one you can use for missing state. I feel I'm lacking English skills to explain that, so if it was not understandable then we can do another attempt.",
+      "createdAt": "2021-03-14T08:58:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-798871989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTAyOTMyMw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The CWE helps me understand this more. Can you change \"synchronized state\" to \"business logic workflow\" so the issue is more clear? Otherwise, I'm +1 on a requirement for this topic. I get it now.",
+      "createdAt": "2021-03-15T01:27:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799029323",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTE4MTIxNg==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for pointing that out @elarlang! That helped me understand this more. \r\n\r\n@jmanico, in that case I would reword this into: `Verify that all high-value business logic flows, including authentication, session management and access control, prevent race condition issues by not sharing business logic workflow` What do you think? ",
+      "createdAt": "2021-03-15T07:23:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799181216",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTI2MTM3OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "+1 I like this direction a lot. We’re getting close to a PR I’d enjoy merging to main.\n\nOne of the main attacks and I see in this area is step skipping attacks, like skipping the payment step in a e-commerce workflow. Can we someone emphasize non-security flows a bit better? Maybe?\n\n--\nJim Manico\n@Manicode\n\n> On Mar 15, 2021, at 3:23 AM, Ralph Andalis ***@***.***> wrote:\n> \n> ﻿\n> Thanks for pointing that out @elarlang! That helped me understand this more.\n> \n> @jmanico, in that case I would reword this into: Verify that all high-value business logic flows, including authentication, session management and access control, prevent race condition issues by not sharing business logic workflow What do you think?\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-15T09:25:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799261379",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTI2ODc3Mg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just in case - for skipping steps there is requirement 11.1.1\r\n\r\nNow this proposal is getting quite close to \"Race-Condition\" requirement 1.11.3 (also covered by 11.1.6).",
+      "createdAt": "2021-03-15T09:35:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799268772",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTUwMDYyOQ==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Elar was right, this now looks like 1.11.3 and if we add step skipping attacks, then this is more like 11.1.1. So, how do you propose we make it better @elarlang? My main problem was the word `unsynchronized state`, but maybe that is how it really should be and we should just add an introduction sentence or two in V1.11 Business Logic Architectural Requirements explaining the term unsynchronized state? Thoughts? ",
+      "createdAt": "2021-03-15T15:14:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799500629",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTUyOTYzMQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't know :) But I agree, this requirement may need some improvement - it describes what should NOT be done, but should describe what should be done.\r\n\r\nI interpret this \"state for authentication\" as \"session for authentication\". Example:\r\nClient starts authentication from application A via application SSO\r\nIf client is sent from A to SSO without having session/state fixed on application A then it's not possible to check, is this the same client who is requesting application A with \"authentication decision\" from SSO.\r\nUsually - application A should send `state` parameter (or something like that) to SSO and then validate this `state` parameter, when client is sent from SSO back to application A. If there is no state in use, then it opens race-condition.\r\n\r\nTo which category my scenario suits, it's also good question. Is \"keeping state\" business logic, I'm not sure.",
+      "createdAt": "2021-03-15T15:51:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799529631",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTU5NDMwNg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Now that I see 11.1.1 and 11.1.3 and other JWT related requirements, I really do think we should close this out, it’s already well covered.\n\n--\nJim Manico\n@Manicode\n\n> On Mar 15, 2021, at 11:52 AM, Elar Lang ***@***.***> wrote:\n> \n> ﻿\n> I don't know :) But I agree, that this requirements may need some improvement - it describes what should NOT be done, but should describe what should be done.\n> \n> I interpret this \"state for authentication\" as \"session for authentication\". Example:\n> Client starts authentication from application A via application SSO\n> If client is sent from A to SSO without having session/state fixed on application A then it's not possible to check, is this the same client who is requesting application A with \"authentication decision\" from SSO.\n> Usually - application A should send state parameter (or something like that) to SSO and then validate this state parameter, when client is sent from SSO back to application A. If there is no state in use, then it opens race-condition.\n> \n> To which category my scenario suits, it's also good question. Is \"keeping state\" business logic, I'm not sure.\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-15T17:15:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799594306",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTYxMTg2OA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Where is covered \"keeping state\"?",
+      "createdAt": "2021-03-15T17:37:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799611868",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTY1NDQ2MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "It's implied in 11.1.1\r\n\r\n**Verify the application will only process business logic flows for the same user in sequential step order and without skipping steps.**\r\n\r\nIn order to track proper sequences you need to track state. Perhaps augment this requirement as opposed to a new one?",
+      "createdAt": "2021-03-15T18:34:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-799654461",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDkxNjQzNQ==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree, state tracking is done if proper sequences are being tracked. With that said, then 11.1.1 covers it so should we remove 1.11.2 then? ",
+      "createdAt": "2021-03-17T09:02:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-800916435",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk4NDEwNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yes. I would accept a PR that removes 1.11.2 since it's a duplicate and hard to parse. I would like @elarlang to be on board... Elar, would you be ok with removing 1.11.2 and enhancing 1.11.1 in some way? ",
+      "createdAt": "2021-03-17T10:49:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-800984107",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk4OTEzMw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In wishful thinking you can say that you can use requirement 11.1.1 for situation where state is not checked.\r\nI would like have requirement which says clearly \"Verify that there is state checked\". I'm not sure 11.1.1 is the best one for that and maybe we need something clear and separate.\r\n\r\nI need to analyze it a bit more, I'll come back to that later if it's ok.",
+      "createdAt": "2021-03-17T10:57:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-800989133",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk5MjIzMw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Absolutely. I'm willing to keep 11.1.2 if the language is improved. :)\n\nOn 3/17/21 6:57 AM, Elar Lang wrote:\n>\n> In wishful thinking you can say that you can use requirement 11.1.1 \n> for situation where state is not checked.\n> I would like have requirement which says clearly \"Verify that there is \n> state checked\". I'm not sure 11.1.1 is the best one for that and maybe \n> we need something clear and separate.\n>\n> I need to analyze it a bit more, I'll come back to that later if it's ok.\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/737#issuecomment-800989133>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCKGZNHPZWHD5QGXAS3TECDLHANCNFSM4MK3VKSA>.\n>\n",
+      "createdAt": "2021-03-17T11:02:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-800992233",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzEyNjEwOA==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hey guys, just revisiting this requirement the other day and I kept reading all the related controls for a bunch of times. I agree with Elar that we still need `1.11.2`, since neither `11.1.1` nor `11.1.3` talk about the state in an explicit way and it would be good for developers to be aware of that. Now, having said that, my revised control for `1.11.2` is missing a piece for defining the phrase `\"checking of state\"` mean and I can propose a PR soon. If you could help me out with the words for \"state\", then I think we will be in good shape. \r\n\r\nIn my understanding and as per the examples given previously, an application's state is used for determining whether a user has been authenticated, has a valid session, and has proper authorization to a specific function/API call. In the example mentioned by Elar, state could be used by the SSO to determine which party started the authentication process. State could be represented by a parameter or a token sent to the SSO in this case. \r\n\r\nSo, I think maybe we could make the current `1.11.2` to this - `Verify that all high-value business logic flows, including authentication, session management and access control, checks the application state to prevent race conditions and business logic flaws`. How does that sound, @elarlang , @jmanico? \r\n\r\nIf my proposed revision still sounds a bit off, then I would say we can leave it as is and then just add an introductory paragraph in V1.11 Business Logic Architecture section to explain what we mean by \"unsynchronized state\" as it is the unclear term. Thoughts? ",
+      "createdAt": "2021-05-06T00:05:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-833126108",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzI5MDc1OQ==",
+      "author": {
+        "login": "avasiljeva"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'm following this discussion with a big interests, since in our group nobody can effectively interpret 1.11.2 as well.\r\nNow it is starting to get clearer to me.\r\n\r\nSlight adjustment on your @csfreak92 proposal:\r\n```Verify that all high-value business logic flows, including authentication, session management and access control, maintain a consistent application state and check it to prevent race conditions and business logic flaws```\r\n\r\nHow does it sound?",
+      "createdAt": "2021-05-06T07:17:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-833290759",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzMwNTcxNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me there is one precondition to move on with proposals - I need to understand, what is the purpose for entire \"V1 Architecture, Design and Threat Modeling\" from point of view - what should be there and what should not be there.\r\n\r\nAfter that we can define, is some requirement actually belongs to that category or should be in some other category. In this given example, for me it seems that this requirement (1.11.2) is by current wording more \"implementation\" check, than architecture check.",
+      "createdAt": "2021-05-06T07:42:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-833305717",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzQ4NzczNQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I'm following this discussion with a big interests, since in our group nobody can effectively interpret 1.11.2 as well.\r\n> Now it is starting to get clearer to me.\r\n> \r\n> Slight adjustment on your @csfreak92 proposal:\r\n> `Verify that all high-value business logic flows, including authentication, session management and access control, maintain a consistent application state and check it to prevent race conditions and business logic flaws`\r\n> \r\n> How does it sound?\r\n\r\nI think this proposal is ready or almost ready for a PR. I like it!",
+      "createdAt": "2021-05-06T12:36:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-833487735",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzQ4ODM2Ng==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> For me there is one precondition to move on with proposals - I need to understand, what is the purpose for entire \"V1 Architecture, Design and Threat Modeling\" from point of view - what should be there and what should not be there.\r\n> \r\n> After that we can define, is some requirement actually belongs to that category or should be in some other category. In this given example, for me it seems that this requirement (1.11.2) is by current wording more \"implementation\" check, than architecture check.\r\n\r\nThis has been a long conversation and we are close to resolution. Let's focus on fixing the issue in this thread and open a new thread to move it to a new category if needed so we do not lose track of the progress made, please.",
+      "createdAt": "2021-05-06T12:37:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-833488366",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTQyNjI0MA==",
+      "author": {
+        "login": "wet-certitude"
+      },
+      "authorAssociation": "NONE",
+      "body": "I've tried to reconstruct the meaning of 1.11.2 based on this discussion. However, I'm not sure I quite get it. \r\n\r\nFrom what I've gathered \"state\" is supposed to be the state of a user on the application, as in whether the user is logged in, which roles they have or where in the authentication process they currently are (in regards to e.g. to OAuth). In plain English a state could be `Client X is in the process of authenticating against the IdP` or `User U is logged in on Client X and has the role 'admin'`. \r\n\r\nThe new stipulation is:\r\n> Verify that business logic flows, including authentication, session management and access control, maintain a consistent application state and check to prevent race conditions and business logic flaws.\r\n\r\nBased on that interpretation of \"state\" I tried to dissect this sentence:\r\n\r\n\"maintain a consistent application state\" is somewhat unclear as there is no definition of what \"consistent\" means in this context. When thinking about race conditions, etc. \"consistent\" to me means the \"state\" is atomic. For example, when the user logs out, all parts of the application must be aware that the state is `Client X is not authenticated` at the same time. Vulnerabilities could result from parts of the application maintaining a different state (e.g. that the user is still logged in) due to race conditions.  \"business logic flaws\" I think is very broad and can cover, I believe, a wide variety of flaws. \r\n\r\nBy my interpretation, this stipulation basically mandates that there should be no flaws (race condition or otherwise) when handling user state. A simplified requirement would be: \r\n`Verify that the application handles user state (e.g. login status) in a way that attackers cannot influence it in an undesired way.`\r\nHowever, this is a VERY broad statement and may therefore not be useful.\r\n\r\nI might be way off with my interpretation. If that is the case, please provide a hypothetical vulnerability that violates this requirement, so I can understand its intention.",
+      "createdAt": "2021-05-27T08:02:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-849426240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44oeVa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Checking old and closed issues and I'm going to re-open this issue to address questions and concerns by @wet-certitude .\r\n\r\nIn general, @wet-certitude - if no-one reacts on comments on closed issues (like here), it makes sense to open new one.",
+      "createdAt": "2021-10-23T10:52:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-950134106",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44oohl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I am removing myself as the assignee for this bug because the conversation is circuitous and we are making no progress, and I'd like other stakeholders here to make the decision\r\n\r\nBefore I go....\r\n\r\nI again suggest we delete this requirement 1.11.12 because (1) no one understands it clearly and (2) it's covered elsewhere well enough\r\n\r\nWhen this much confusion abounds, it's time to remove the requirement.",
+      "createdAt": "2021-10-23T16:19:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-950175845",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hK9V",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I would consider changing this to:\r\n\r\n> Verify that all application flows maintain including authentication, session management and access control, maintain a consistent user state to prevent race conditions and business logic flaws.\r\n\r\nDo you think that provides sufficient coverage?",
+      "createdAt": "2022-02-23T15:08:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-1048883029",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hYGn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This class of race conditions is so ultra rare in web apps, I would drop \nthe requirement.\n\nI'd rather talk about race conditions separate from auth if we must talk \nabout it.\n\n- Jim\n\n",
+      "createdAt": "2022-02-23T16:00:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-1048936871",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BqLvp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@wet-certitude do you have any feedback on my suggestion above.\r\nhttps://github.com/OWASP/ASVS/issues/737#issuecomment-1048883029\r\n\r\nIf I don't get feedback then I might just make the change.",
+      "createdAt": "2022-04-18T17:13:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-1101577193",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FRA0G",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, quick-fix is done for 1.11.2, but as it is implementation requirement, then we should move it to V11.1 category.\r\n\r\nNow the good question is - is it unique requirement or it duplicates V11.1.1.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.11.2** | [MODIFIED] Verify that all application flows including authentication, session management and access control, maintain a consistent application and user state to prevent race conditions and business logic flaws. | | ✓ | ✓ | 362 |\r\n| **11.1.1** | Verify that the application will only process business logic flows for the same user in sequential step order and without skipping steps. | ✓ | ✓ | ✓ | 841 |\r\n",
+      "createdAt": "2022-06-21T17:46:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-1162087686",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FUzKq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please open a new issue on this as I agree some thought it needed there.",
+      "createdAt": "2022-06-22T13:12:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-1163080362",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FYp50",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Please open a new issue on this as I agree some thought it needed there.\r\n\r\n#1303",
+      "createdAt": "2022-06-23T08:07:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/737#issuecomment-1164090996",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-04-17T16:09:07Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 737,
+  "state": "CLOSED",
+  "title": "1.11.2 - [Clarification/For Discussion] for \"unsynchronized state\"",
+  "url": "https://github.com/OWASP/ASVS/issues/737"
+}

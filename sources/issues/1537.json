@@ -1,0 +1,171 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I am writing to request clarification on ASVS item 11.1.6 which states `Verify the application does not suffer from \"time of check to time of use (TOCTOU) issues or other race conditions for sensitive operations` This item is a bit vague and I would like to understand how we can properly test it.\r\nCan you provide more information on what specific types of race conditions or TOCTOU issues are included in this item? I would also like to know if there are any specific techniques or tools that can be used to detect these issues. Additionally, I would like to suggest that the language in this item be revised to provide clearer guidance to those implementing security controls.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5XgkNR",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Original requirement is [here](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x19-V11-BusLogic.md#v111-business-logic-security).\r\n\r\nI would consider rewording this to:\r\n\r\n> Verify that the application has protection against race conditions such as \"time of check to time of use (TOCTOU)\" issues for sensitive operations.\r\n\r\nI think race conditions are relatively well understood but I agree that more information would help and would suggest adding some sort of reference to the bottom. For some reason there doesn't seem to be an OWASP official one right now but maybe this: https://research.nccgroup.com/wp-content/uploads/2021/09/TOCTOU_whitepaper.pdf\r\n\r\nWhat do you think @ImanSharaf ?",
+      "createdAt": "2023-03-14T13:58:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1468154705",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X3fn5",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The primary concern with this item is that, when discussing it with other appsec consultants, they typically refer to scenarios involving file read and write operations. However, I've come across more intriguing cases, such as a store where it was possible to redeem a gift card multiple times by exploiting the lack of a locking mechanism on the database. This was achieved using Burp Turbo Intruder, as its implementation differs from the regular Burp Intruder and enables this kind of exploitation. \r\nFor example, what do you think about this: \r\n`Verify the application is not susceptible to race conditions, including 'time of check to time of use (TOCTOU)' vulnerabilities, for sensitive operations in different contexts, such as file operations, database operations, inter-process communication, and other cases where proper synchronization and locking mechanisms are essential to maintain consistency and prevent unintended consequences.`",
+      "createdAt": "2023-03-17T17:21:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1474165241",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmA9M",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, so I prefer not to try and list all sort of contexts but what do you think about the following:\r\n\r\n> Verify that the application uses proper synchronization and locking mechanisms for sensitive operations in order to maintain internal consistency and prevent race conditions, including 'time of check to time of use (TOCTOU)' vulnerabilities.\r\n",
+      "createdAt": "2023-05-31T13:32:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1570246476",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmJiI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, let's try to get some examples / attack scenarios here what it covers.\r\n\r\n* onetime codes (giftcard) can be used only once\r\n* (we can watch it as 11.1.3) resource lockup - attacker can put all items from shop to own shoping card and keep them bronned (not accessible to others)\r\n* (we can watch it as 11.1.1) sso - application need to keep state to be sure that returning user (to application) is the same who was sent to authenticate (by application) to sso\r\n\r\nCan you provide more scenarios?",
+      "createdAt": "2023-05-31T13:52:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1570281608",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nGZ6l",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Ok, let's try to get some examples / attack scenarios here what it covers.\r\n> \r\n>     * onetime codes (giftcard) can be used only once\r\n> \r\n>     * (we can watch it as 11.1.3) resource lockup - attacker can put all items from shop to own shoping card and keep theb bronned (not accessible to others)\r\n> \r\n>     * (we can watch it as 11.1.1) sso - application need to keep state to be sure that returning user (to application) is the same who was sent to authenticate (by application) to sso\r\n> \r\n> \r\n> Can you provide more scenarios?\r\n\r\nAny thoughts on this @ImanSharaf ",
+      "createdAt": "2023-09-21T14:44:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1729732261",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nQm67",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In my assessment, if we choose to categorize one-time codes under ASVS 11.1.3, it would logically imply that the entirety of 11.1.6 could also fall under 11.1.3. Such a categorization seems inadvisable and may lead to ambiguities in interpretation.\r\n\r\nThis one looks good @tghosth :\r\n\r\n`Verify that the application uses proper synchronization and locking mechanisms for sensitive operations in order to maintain internal consistency and prevent race conditions, including 'time of check to time of use (TOCTOU)' vulnerabilities.`",
+      "createdAt": "2023-09-23T20:52:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1732406971",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ncZw-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang this is a modification of 11.1.6 so I think it is sufficient for that purpose as I don't see it as a major change. Do you still want more info?",
+      "createdAt": "2023-09-26T13:01:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1735498814",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5wk8EG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> sso - application need to keep state to be sure that returning user (to application) is the same who was sent to authenticate (by application) to sso\r\n\r\n@tghosth - do you consider \"keeping the state\" per user to be part of the requirement? If so, let's add \"keeping the state for the user\" (or something like that), if not, let's do the PR.",
+      "createdAt": "2024-01-12T09:24:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1888731398",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xtC-G",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I opened a PR where I clarified the text and included something about user state.",
+      "createdAt": "2024-01-24T08:31:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1537#issuecomment-1907634054",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-02-03T23:02:50Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNVBUQ",
+      "name": "V2 (prev V11)",
+      "description": "",
+      "color": "378329"
+    }
+  ],
+  "number": 1537,
+  "state": "CLOSED",
+  "title": "Request for clarification on ASVS item 11.1.6 ",
+  "url": "https://github.com/OWASP/ASVS/issues/1537"
+}

@@ -1,0 +1,567 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nThe main goal is, that logs must contain actual user IP, not some firewall, load-balancer, proxy etc IP.\r\n\r\nand the other part of it, that users should not be able to fake their IP addresses using X-Forwarded-For or similar request headers.\r\n\r\nTo what category to put this requirement - I'm not sure. Most important it is for logs as it is the corner-stone for every investigation.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5LdSHE",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Also important for effective IP-based rate limiting. ",
+      "createdAt": "2022-10-03T20:05:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1265967556",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LdSs8",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "8.1.x might be a good place for this.",
+      "createdAt": "2022-10-03T20:07:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1265969980",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LfO2L",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "8.1 is valid when we like to protect the client ip from leaking (covered it as sensitive data anyway).\r\n\r\nI think first choice should be current 14.5, as it is delivered via HTTP request header and in general is configuration issue.",
+      "createdAt": "2022-10-04T06:49:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1266478475",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LfRzh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "But with requirement text, in valid and correct English, I need help :)",
+      "createdAt": "2022-10-04T06:58:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1266490593",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LiWTU",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Good call, I agree that 14.5 is a solid place for this. Perhaps:\r\n\r\n14.5.6 \"Verify that headers containing the user's IP address, such as X-Forwarded-For and/or X-Real-IP, include the true IP address.\" \r\n\r\nCould also consider adding rationale: \"to prevent spoofing in logs and rate limits.\"",
+      "createdAt": "2022-10-04T16:59:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1267295444",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Lk7AI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Final pieces:\r\n* Level - proposal for level 1, 2, 3 - IP is the main corner-stone for investigations, if you don't have this data, there is nothing to investigate.\r\n* CWE - [CWE-348](https://cwe.mitre.org/data/definitions/348.html): Use of Less Trusted Source",
+      "createdAt": "2022-10-05T05:44:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1267970056",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Lk-Zy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Analyzing this proposal text and maybe it needs still some finetuning - what if headers contain the faked IP, but application just ignores them? The point is - application should use only trusted one.\r\n\r\nI throw some pieces here / potential points to cover (at the moment overlapped in wording):\r\n* Verify that application uses only user's real IP\r\n* accross all applicaiton components (load balanceres, firewalls, apis, application, etc)\r\n* which is not spoofed by headers like X-Forwarded-For or X-Real-IP\r\n* to provide data integrity related to user IP like to prevent spoofing in logs, rate limits ",
+      "createdAt": "2022-10-05T06:06:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1267983986",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Lnpto",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> what if headers contain the faked IP, but application just ignores them? The point is - application should use only trusted one.\r\n> \r\n> I throw some pieces here / potential points to cover (at the moment overlapped in wording):\r\n> \r\n>     * Verify that application uses only user's real IP\r\n> \r\n>     * accross all applicaiton components (load balanceres, firewalls, apis, application, etc)\r\n\r\nThe last point would be difficult to achieve on some cloud vendors/devices, for example: [Google Cloud Load Balancers](https://cloud.google.com/load-balancing/docs/https#x-forwarded-for_header). \r\n\r\nAside from this point, the wording could be:\r\n\r\n\"Verify that the application is able to discern and utilizes the user's true, non-spoofed IP address from a header, for example X-Forwarded-For or X-Real-IP, and that rate limiting and logging use this true IP.\"\r\n\r\nThe non-spoofed part here is probably also superfluous as true IP suggests as much, so could probably be cut.",
+      "createdAt": "2022-10-05T16:51:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1268685672",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5L1qC4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for brainstorming. Part of making requirement texts good, is to \"attacking\" them.\r\n\r\n_Verify that the application is able to discern and utilizes the user's true, non-spoofed IP address from a header, for example X-Forwarded-For or X-Real-IP, and that rate limiting and logging use this true IP._\r\n\r\nIP can come also from environment variable like REMOTE_ADDR, it's not always read from header.\r\n\r\nIs this the material we can improve?\r\n_Verify that application uses only user's real IP which is not spoofed by headers like X-Forwarded-For or X-Real-IP to provide data integrity related to user IP like to prevent spoofing in logs, rate limits_",
+      "createdAt": "2022-10-08T16:51:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1272357048",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5L9XL8",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Well said. And IP addresses are not just sensitive data, they are also \nGDPR/Privacy protected data.\n\n",
+      "createdAt": "2022-10-11T09:15:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1274376956",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5L_799",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Here's another draft:\r\n\r\nVerify that the application is able to discern and utilizes the user's true IP address to provide data integrity and that rate limiting and logging use this true IP.",
+      "createdAt": "2022-10-11T17:39:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1275051901",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hH6rg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application is able to discern and utilizes the user's true IP address to provide data integrity and that rate limiting and logging use this true IP.\r\n\r\n@elarlang what do you think about this suggestion from @jsulinski?",
+      "createdAt": "2023-07-10T18:13:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1629465312",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mGL9z",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This issue is in a way related to https://github.com/OWASP/ASVS/issues/1697\r\n\r\nNeed to think should we merge them or not. Those are like 2 sides of the same problem.",
+      "createdAt": "2023-09-10T17:58:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1712897907",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mRKWr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Waiting for response to https://github.com/OWASP/ASVS/issues/1697#issuecomment-1715772670",
+      "createdAt": "2023-09-12T13:54:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1715774891",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mS7IW",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "These two issues can likely be merged as this one is part of #1697 with a bit more detail. I'm not sure that detail is necessary, so could probably drop this one and accept #1697 (after adding X-Real-IP). ",
+      "createdAt": "2023-09-12T18:39:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1716236822",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mTIaq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It makes sense to keep them separately. One (#1697) is for avoiding end-users to manipulate or override expected headers and other is just being sure one of the most important piece of information for investigations - IP - is the correct one, not some waf, or proxy IP. In some cases they overlap, but at the moment it seems good for me to keep them separately.\r\n\r\nSo the reason and problem to solve is - IP addresses in application data and logs are often incorrect \"by design\" (without attackers attacking or spoofing)",
+      "createdAt": "2023-09-12T19:22:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1716291242",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mTKgH",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Good point and agreed. ",
+      "createdAt": "2023-09-12T19:29:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1716299783",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mVqgx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From @jsulinski \r\n\r\n> Verify that the application is able to discern and utilizes the user's true IP address to provide data integrity and that rate limiting and logging use this true IP.\r\n\r\nPreviously I left it on hold as there was something to improve in my opinion - \"now it is fixed\" as I don't remember, what it was :) So I think we can put this requirement in and if needed, improve it later.",
+      "createdAt": "2023-09-13T05:12:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1716955185",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mV1s8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "IP spoofing vector is / will be covered now via #1697, so this requirement focus should be to avoid misconfiguration on the application side. Which rises questions like:\r\n* category?\r\n* cwe?\r\n* level?",
+      "createdAt": "2023-09-13T06:06:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1717001020",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mWfI-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application is able to discern and utilizes the user's true IP address to provide data integrity and that rate limiting and logging use this true IP.\r\n\r\nWhat do you mean by \"data integrity\" in this case @jsulinski? Do you think you could be more specific?\r\n",
+      "createdAt": "2023-09-13T08:23:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1717170750",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mnjsG",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> What do you mean by \"data integrity\" in this case @jsulinski? Do you think you could be more specific?\r\n\r\nThis seems superfluous and was from previous copy that I was editing. \r\n\r\nPerhaps:\r\n\r\n`Verify that the application is able to discern and utilizes the user's true IP address to provide for sensitive functions, including rate limiting, logging, and/or as an aspect of authentication.`\r\n\r\nCWE: 348\r\nCategory: 14.4 or 10.3\r\nLevel: 2",
+      "createdAt": "2023-09-15T17:56:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1721645830",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mnkhn",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I added the part about authentication because IP is sometimes used in the decision to require additional authentication factors (along with other information) but this can be removed if the requirement is becoming too unclear or unfocused. ",
+      "createdAt": "2023-09-15T17:58:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1721649255",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mnvTB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I added the part about authentication because IP is sometimes used in the decision to require additional authentication factors (along with other information) but this can be removed if the requirement is becoming too unclear or unfocused.\r\n\r\nYes, I would skip this authentication part - if authentication is limited by IP, probably they use actual IP. But geolocation or whatever can be topic.\r\n\r\nCategory - actually I don't know where it fits. In big picture V14 configuration seems to be correct place.\r\n* 14.4 are response headers for browser, so this does not seems to be correct. 14.5 is better, but this part is covered via #1697 .\r\n* 10.3 - V10 in general wait rebuild and proper cleanup.\r\n\r\n",
+      "createdAt": "2023-09-15T18:40:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1721693377",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtIAQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think about chapter 11.2 (\"Anti-automation\" within \"Business Logic\") as this new requirement mostly seems to be related to this.",
+      "createdAt": "2023-09-18T10:05:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1723105296",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtNRn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V11.2 uses it. So do entire logging V7 and whatever uses IP as input data.\r\n\r\nBy v4.0.3 logic suitable category is V1.14, but it requires cleanup itself. As a temporary solution to just get the requirement in, we can use this maybe.",
+      "createdAt": "2023-09-18T10:21:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1723126887",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nqRBy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirement got in and at the moment is in V1 category as there was not any better one at this moment.\r\n\r\n## V1.14 Configuration Architecture\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.14.8** | [ADDED] Verify that the application is able to discern and utilizes the user's true IP address to provide for sensitive functions, including rate limiting and logging. | | ✓ | ✓ | 348 |\r\n\r\nVia #1324 / PR #1343 we may get new subcategory to V14 Configuration category named \"V14.7 Web Application Server Configuration\" , and I think it makes to move this requirement to V14.7",
+      "createdAt": "2023-09-28T13:09:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1739133042",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nq23R",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I disagree that this is server configuration because it is the application itself that needs a clear way of doing this. \r\n\r\nI think I would still support being in the business logic section as it is kinda a business logic thing",
+      "createdAt": "2023-09-28T14:03:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1739288017",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nssPH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ack, I agree that it is not (only) server configuration question.",
+      "createdAt": "2023-09-28T17:50:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-1739768775",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PaAlo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Reopen for moving the requirement away from V1.14",
+      "createdAt": "2024-10-10T20:14:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-2405960040",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P8OwN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think I am less opinionated about this right now, I think it could be considered to be V7 logging or V11 business logic so maybe V14 is a good compromise. Any further thoughts @elarlang ?",
+      "createdAt": "2024-10-15T20:21:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-2414930957",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P_6H3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is something that program code does and that most likely you need to check from the program code, so from the paragraph choice is V10, but there is no suitable section there at the moment.",
+      "createdAt": "2024-10-16T06:57:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-2415895031",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QfYo-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hmm, not sure about that, this doesn't feel that simple as it probably involves various components including program code, might also involve configuration of front end devices such as waf or proxy or cloud component or something. That's why I like v14 as more general than just code or v7 as less code connected ",
+      "createdAt": "2024-10-19T19:02:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-2424146494",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QhI1G",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "See my previous comment https://github.com/OWASP/ASVS/issues/1389#issuecomment-1267983986 and your own comment here https://github.com/OWASP/ASVS/issues/1389#issuecomment-1739288017.\r\n\r\nIn case there are WAF or whatever component in place to \"mess\" with the IP address, it's the application's decision to use the correct one - that is why the requirement exists.\r\n\r\nFor \"do not mess with IP address\" we have:\r\n> V13.6.4 Verify that any HTTP headers used by the application and defined by intermediary devices like load balancers or proxies, such as X-Real-IP and X-Forwarded-*, cannot be overridden by the end-user.\r\n\r\n(for other topic discussion, V13.6.4 may suit to configuration better)",
+      "createdAt": "2024-10-20T05:31:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-2424606022",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qwuxu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK having discussed with Elar, ultimately the buck stops with the program code to be able to correctly interpret this so I would support this going into V10.\r\n\r\n@elarlang please PR it in",
+      "createdAt": "2024-10-22T09:01:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1389#issuecomment-2428693614",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-09-30T16:31:21Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    }
+  ],
+  "number": 1389,
+  "state": "CLOSED",
+  "title": "Clear separate requirement for making sure that application gets actual user IP (move V1.14.7 away from V1)",
+  "url": "https://github.com/OWASP/ASVS/issues/1389"
+}

@@ -1,0 +1,489 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Started to re-investigate issue #1790, then checked the section \"V3.5 Token-based Session Management\" and reached to the conclusion, that the entire section should be just cleaned up.\r\n\r\nAt the moment collecting first impressions as feedback. If needed, I split each topic into separate issues.\r\n\r\n## TLDR\r\n\r\n* Requirements 3.5.3, 3.5.4, 3.5.5, and 3.5.6 are general token validation requirements, that are not limited to session context and should be moved to \"V13 API and Web Service\"\r\n* Requirement 3.5.1 - it is not a session requirement, should belong to OAuth or be moved together with 3.5.7.\r\n* Requirement 3.5.7 - it is not a session requirement, and should be moved to access control\r\n\r\n\r\n## 3.5.1\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.1** | [GRAMMAR] Verify that the application allows users to revoke OAuth tokens that form trust relationships with linked applications. | | ✓ | ✓ | 290 | 7.1.2 |\r\n\r\nIs it really a session management issue? Seems more like a business logical permission management - if a user has given permission for the application to access some 3rd party application on his/her behalf, then:\r\n\r\n  * 1) the application must provide the functionality to revoke those tokens\r\n  * 2) the 3rd party application must revoke them (but it's out of scope from the application point of view)\r\n\r\nCWE is not helpful here.\r\n\r\nAlso, if it is OAuth specific, it should be moved there.\r\n\r\nIn case it is not OAuth specific, it should be considered as access control requirement and move together with 3.5.7.\r\n\r\n\r\n\r\n## 3.5.3, 3.5.5\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.3** | [MODIFIED, LEVEL L2 > L1] Verify that stateless session tokens make use of a digital signature to protect against tampering and this is checked before processing it further. | ✓ | ✓ | ✓ | 345 | |\r\n| **3.5.5** | [ADDED] Verify that only allow-listed signing algorithms are allowed for a stateless token. | ✓ | ✓ | ✓ | 757 | |\r\n\r\n3.5.3 should not be limited with \"stateless session tokens\", just \"stateless tokens\".\r\n\r\nNot a session specific requirements.\r\n\r\n\r\n## 3.5.4\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.4** | [ADDED] Verify that stateless tokens are checked for expiration before processing them further. | ✓ | ✓ | ✓ | 613 | |\r\n\r\nSo it should cover \"time window\" when the token is valid.\r\n\r\nTo check the expiration, we need to require `exp` to be present and set.\r\n\r\nNot sure what security problem it takes down, but technically it should also cover to check `nbf` (Not Before).\r\n\r\nRelated RFC https://datatracker.ietf.org/doc/html/rfc7519\r\n\r\nNot a session specific requirement.\r\n\r\n\r\n## 3.5.6\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.6** | [ADDED] Verify that other, security-sensitive attributes of a stateless token are being verified. For example, in a JWT this may include issuer, subject, and audience. | ✓ | ✓ | ✓ | 287 | |\r\n\r\nNot a session specific requirement.\r\n\r\n\r\n## 3.5.7\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.5.7** | [ADDED] Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked when admins change the entitlements or roles of the user. | ✓ | ✓ | ✓ | 613 | |\r\n\r\nThe context here - first-party party tokens. It should be clarified in the requirement if we'll keep it.\r\n\r\nAnother problem - to have the requirement in the session category, it assumes, that stateless tokens are used as a replacement for stateful session.\r\n\r\nAs I wrote here: https://github.com/OWASP/ASVS/issues/1790#issuecomment-1823972356\r\n\r\nFrom [NIST SP 800-63B version 4 (not released)](https://pages.nist.gov/800-63-4/sp800-63b.html#access-tokens) 7.1.2 Access Tokens:\r\n\r\n> An access token — such as found in OAuth — is used to allow an application to access a set of services on a subscriber’s behalf following an authentication event. The presence of an OAuth access token SHALL NOT be interpreted by the RP as presence of the subscriber, in the absence of other signals. The OAuth access token, and any associated refresh tokens, MAY be valid long after the authentication session has ended and the subscriber has left the application.\r\n\r\nIf we remove the session context from the requirement, it is still a valid requirement - but should be moved to the \"V4 Access Control\" category.\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM54sn0L",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "3.5.1 - Agree it should be part of the OAuth Chapter\r\n3.5.7 - Agree it can be moved to access control.\r\n\r\nThe rest, I would support some rewording of the requirements and the section name but I am not convinced about moving them to an entirely different chapter as people will **mostly** (admittedly not always) come across these tokens in a session management context.",
+      "createdAt": "2024-03-28T11:30:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2024963339",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM540nWw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's try to get the first 2 sorted...\r\n\r\n## 3.5.1\r\n\r\nThinking more about 3.5.1 - I think it is not the best fit for OAuth, although suits there better than in the session category, but maybe we should look at it as general access management logic, not as an OAuth protocol-specific requirement.\r\n\r\n## 3.5.7\r\n\r\nWe don't have a matching requirement for the same situation in the \"classical session management\" - if the permissions for the user are changed, it must have immediate effect. Such as in case those are buffered to session data, those also must be \"revoked\".\r\n\r\nSo maybe we need to make this requirement to cover both situations and to be more abstract. Or do we need to have another requirement for \"classical session management\".\r\n\r\n\r\n## both\r\n\r\nTill we don't have anything better, I propose moving them to the current V4.3 Other Access Control Considerations, or, if anyone has a good proposal, to a new section with the meaning \"Access Control Management\". Need to re-check when we going to re-work V4.\r\n\r\nping @tghosth ",
+      "createdAt": "2024-03-29T10:44:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2027058608",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55YNBI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Thinking more about 3.5.1 - I think it is not the best fit for OAuth, although suits there better than in the session category, but maybe we should look at it as general access management logic, not as an OAuth protocol-specific requirement.\r\n\r\nI agree with the concept where access tokens have been issued and I agree with moving it to access control but you would need to reword it to make it a little clearer as to why.\r\n\r\n> So maybe we need to make this requirement to cover both situations and to be more abstract. Or do we need to have another requirement for \"classical session management\".\r\n\r\nSo the reason this exists is that in a stateless session, the session token might be relied upon for the permissions the user has whereas in stateful it will always be checked against the database. I agree that it could be combined into one requirement and made more abstract",
+      "createdAt": "2024-04-04T07:24:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2036387912",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-6ILK",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that stateless session tokens make use of a digital signature to protect against tampering and this is checked before processing it further.\r\n\r\nTo be strict this should be \"digital signature or MAC\": \"Verify that stateless session tokens are protected against tampering (eg. using a digital signature or a MAC) and this protection is checked before processing it further.\"",
+      "createdAt": "2024-05-24T10:12:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2129167050",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-6I7X",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked when admins change the entitlements or roles of the user.\r\n\r\nWe can't revoke the token if it is really stateless, though.",
+      "createdAt": "2024-05-24T10:14:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2129170135",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_H_Gl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is not true. There are several revocation strategies first discussed here. https://datatracker.ietf.org/doc/html/rfc7009 And certain tokens like refresh token require revocation after users cancel that relationship and more.\r\n\r\nA common strategy is to maintain a unique token ID or use redis/memcache to maintain temporary revoke lists.\r\n\r\nAnd although this may mean by a strict definition the architecture is not completely stateless, these revocation strategies are still *mostly* stateless and not not require a full-on server-side sessions.\r\n\r\n> We can't revoke the token if it is really stateless, though.\r\n\r\n",
+      "createdAt": "2024-05-27T07:14:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2132799909",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_IQYq",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> A common strategy is to maintain a unique token ID or use redis/memcache to maintain temporary revoke lists.\r\n\r\nYes, my point was that it is not really stateless anymore. I believe some people want really-stateless stateless tokens and use short-lived access-tokens and that this should not be forbidden (?).\r\n\r\nWhat about something such as: « Verify that changes in the entitlements or roles of the user are reflected in all active stateless tokens after at most {DURATION}. ».\r\n\r\nIf you have a short-lived stateless token which a duration of 1 minutes, it might be OK if role/entitlement change is not reflected on the RP before the next token refresh. Anyway, in many cases, you will have some delay because of caching and such. For example, if you use [Status List](https://www.ietf.org/archive/id/draft-ietf-oauth-status-list-00.html).\r\n",
+      "createdAt": "2024-05-27T07:55:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2132870698",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_Jz-s",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What is the use case for very short-lived tokens that last just a few minutes? I'm sincerely asking because I have not encountered that before.",
+      "createdAt": "2024-05-27T11:30:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2133278636",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_MJIW",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would say the use case for access tokens which last a few minutes is to have really stateless access tokens while providing short grant revocation propagation.\r\n\r\n[RFC6819](https://www.rfc-editor.org/rfc/rfc6819#section-5.1.5.2) says:\r\n\r\n> tokens may expire after a few minutes (e.g., for payment transactions) or stay valid for hours (e.g., read access to contacts).\r\n\r\nSome examples in the wild:\r\n\r\n* [Some Stack Overflow answer](https://stackoverflow.com/a/49556417/637866) suggests that Rakuten access token  is (was?) 5 minutes.\r\n* [Pro Santé Connect](https://industriels.esante.gouv.fr/produits-et-services/pro-sante-connect/documentation-technique) (OIDC) access token is 2 minutes.\r\n\r\n",
+      "createdAt": "2024-05-27T17:58:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2133889558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_xmm5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this issue is waiting for the V3 rework which I don't think has been assigned yet but the points will certainly be considered when it happens",
+      "createdAt": "2024-06-02T05:47:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2143709625",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AHx8O",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Before we  move 3.5.7 I want to make a comment.\r\n\r\n3.5.7 | [ADDED] Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked when admins change the entitlements or roles of the user. | ✓ | ✓ | ✓ | 613\r\n-- | -- | -- | -- | -- | --\r\n\r\nRevoking the token when the admin entitlement is not the best strategy. Just like using REDIS for revocation, I can set a REDIS rule to over-ride the tokens access control with the new entitlement and not force a user to log in again, if this is used for session management. Token revocation here is a fairly weak and user-unfriendly method. So if we keep 3.5.7 I'd suggest:\r\n\r\n3.5.7 | [ADDED] Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked or overridden with the new access control entitlement when admins change the entitlements or roles of the user. | ✓ | ✓ | ✓ | 613\r\n-- | -- | -- | -- | -- | --",
+      "createdAt": "2024-06-05T11:04:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2149523214",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ALpmY",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> And although this may mean by a strict definition the architecture is not completely stateless, these revocation strategies are still mostly stateless and not not require a full-on server-side sessions.\r\n\r\nI think that \"stateless\" token should be stateless by definition :wink:. If you don't intend to mean that the stateless token is stateless the name should be changed for something more precise.",
+      "createdAt": "2024-06-05T16:59:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2150537624",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6APr2Q",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "In real-world scenarios, systems *frequently* mix stateless and stateful design elements to find a good balance between security, performance, and scalability. \n\nOne of the common strategies is cache-based revocation so the performance impact is less:\n\n1. Better Security:  Revocation helps reduce the risk of compromised tokens being used until they expire.\n2. Trade-offs: This approach adds some state management, which can impact scalability and performance, especially in systems that are spread out over many servers.\n3. Implementation: Managing the cache efficiently, such as using distributed caches like Redis or Memcach (very common revocation strategies), can help reduce some of the performance issues.",
+      "createdAt": "2024-06-06T07:32:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2151595408",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BLA-g",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest a change to 3.5.3 from:\r\n\r\n3.5.3 | [MODIFIED, LEVEL L2 > L1] Verify that stateless session tokens make use of a digital signature to protect against tampering and this is checked before processing it further. | ✓ | ✓ | ✓ | 345\r\n-- | -- | -- | -- | -- | --\r\n\r\nto\r\n\r\n3.5.3 | [MODIFIED, LEVEL L2 > L1] Verify that stateless tokens use a digital signature or HMAC to protect against tampering, ensuring it is checked before processing further.. | ✓ | ✓ | ✓ | 345\r\n-- | -- | -- | -- | -- | --\r\n\r\nThis accounts for the comments above as well.",
+      "createdAt": "2024-06-14T03:34:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2167148448",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BNPoS",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"HMAC\" should be replaced by \"MAC\": any other (non-broken) MAC could be used.\r\n\r\n(Would it be useful, to mention authenticated encryption algorithms here?)",
+      "createdAt": "2024-06-14T10:29:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2167732754",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BNQSc",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"before processing further\" is somewhat vague/ambiguous.",
+      "createdAt": "2024-06-14T10:30:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2167735452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BOA7q",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So how about:\r\nHow about this?\r\n\r\n3.5.3 | [MODIFIED, LEVEL L2 > L1] Verify that stateless tokens use a digital signature or MAC to protect against tampering, ensuring it is checked before performing any other actions based on the token's contents. | ✓ | ✓ | ✓ | 345\r\n-- | -- | -- | -- | -- | --\r\n\r\nIt's a LOT more specific, but too much so?\r\n\r\n",
+      "createdAt": "2024-06-14T12:32:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2167934698",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q5zpx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Each requirement has now a separate issue for discussion and not to be discussed here:\r\n\r\n* 3.5.1 - will be moved/replaced to OAuth via #2111\r\n* 3.5.2 - (already moved away)\r\n* 3.5.3 - #2184\r\n* 3.5.4 - #2185\r\n* 3.5.5 - #2204\r\n* 3.5.6 - #1967\r\n* 3.5.7 - will be moved/replaced to V4 via #2059\r\n\r\n---\r\n\r\nThe section name \"Token-based Session Management\" is just misleading (the same way as \"Cookie-based Session Management\"). Token or Cookie is just a technical solution, how the \"state\" is delivered to the server, it's nothing about the management.\r\n\r\nSession is a logic on topic of technology. I think session paragraph should not contain sections for validating stateless tokens or cookie setup, as those are technical things to validate also without the session context. In case we move them away, the link/reference must be clear.",
+      "createdAt": "2024-10-23T06:54:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2431072881",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S_l5_",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree, either there is a session and then it should meet session requirements in V3 or it can be regarded as an access token and should meet access token requirements (with the note that access tokens or OAuth does not replace sessions).\r\n\r\nTo \"clean up V3.5\" (this issue and also to address #1790) I suggest to: \r\n\r\n- Delete V3.5 and create a new \"Access token\" section in V13 (or another chapter than V3)\r\n\r\n- Remove/rewrite \"stateless session\" things that are left in V3 (to adjust to that V3.5 is gone/moved)\r\n\r\n- Perhaps move Cookie section last in V3 (it is not a perfect fit for V3, but cookies are closely related to sessions, just as tokens a related to API access, so I think the cookie section can remain in V3) \r\n\r\nThen add the following requirements to the new \"Access token\" section (in V13) where each requirement does not depend on token format, but for clarity and since JWTs are commonly used, examples are only given for JWTs. They are based on the RFCs https://www.rfc-editor.org/rfc/rfc7519 and https://www.rfc-editor.org/rfc/rfc8725.html \r\n\r\nBelow is an example of how this section could look like (each requirement have it´s own specific issue, some reference existing open V3 issues, while some are new) \r\n\r\n**V13.?? Access tokens**\r\n\r\nRegardless of token format the following requirements should be met  to assert that the token is a valid access token. Examples are given for JWTs, but this applies to other token formats (like SAML) as well.\r\n\r\nRequirements related to authorization decisions is part of V4 and OAuth related requirements are part of V51.\r\nNote that access tokens (or OAuth) is not a replacement for the session management (which is part of V3). \r\n\r\n\r\nVerify that access tokens are cryptographically secure, either by using a digital signature or MAC to protect against tampering. If validation fails, the token must be rejected. (see #2184)  \r\n\r\n\r\nVerify that, for integrity protected tokens, only strong algorithms from an allow list can be used to create and verify the token. For JWTs, e g use PS256 and assert that 'None' value is not allowed for the 'alg' claim. (see new issue #2360) \r\n\r\n\r\nVerify that the cryptographic keys for tokens belong to the token issuer. If both symmetric (MAC) and asymmetric (digital signatures) algorithms needs to be supported, additional controls must prevent key confusion. For JWTs the 'iss' claim must be validated to be a preconfigured expected value. (see new issue #2361) \r\n\r\n\r\nVerify that all key material is from a trusted source for each token issuer. For JWTs this is typically achieved by having a preconfigured JWKS URI for the given issuer. (see new issue #2362) \r\n \r\nVerify that the token is an access token intended for the service (API). For JWTs this can be achieved by validating the claims 'aud' and 'typ'. If audience is present, it must be validated to match against an allow list for the given API. If the typ claim is present, it should be equal to 'at-jwt'. (see new issue #2363) \r\n\r\n\r\n Verify that the token is valid based on current time and, if present, the token identifier. For JWTs the claims 'iat', 'nbf' and 'exp' should be verified for time based validation. The claim 'jti' should be validated to identify a specific token, in example to assert that the token is only used once. (see #2185) ",
+      "createdAt": "2024-11-09T09:27:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466143871",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TA6ks",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> **Verify that the token is an access token** intended for the service (API). For JWTs this can be achieved by validating the claims 'aud' and 'typ'. If audience is present, it must be validated to match against an allow list for the given API. If the typ claim is present, it should be equal to 'at-jwt'. (see new issue https://github.com/OWASP/ASVS/issues/2363)\r\n\r\nIn this formulation, I read:\r\n\r\n> Verify that the token is an access token [...]\r\n\r\ni.e. we must (among other things) make sure that the token is indeed an access token. This is a valid requirement but is different from the one we are currently stating.\r\n\r\nI think, this should be:\r\n\r\n> Verify that the access token is intended for the service (API). For JWTs this can be achieved by validating the claims 'aud' and 'typ'. If audience is present, it must be validated to match against an allow list for the given API. If the typ claim is present, it should be equal to 'at-jwt'. (see new issue https://github.com/OWASP/ASVS/issues/2363)\r\n",
+      "createdAt": "2024-11-09T23:00:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466490668",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TA6rg",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> V13.?? Access tokens\r\n\r\nWhat quite worries me is that ~~some~~ most of these requirements are actually valid for a wide range of token outside of access tokens. If we include them in an \"access token\" section, we would end up repeating them once for each type of token.",
+      "createdAt": "2024-11-09T23:02:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466491104",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TA6v3",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that access tokens are cryptographically secure, either by using a digital signature or MAC to protect against tampering. If validation fails, the token must be rejected. (see https://github.com/OWASP/ASVS/issues/2184)\r\n\r\nThe access token can be an opaque random token which would not need to be cryptographically secure using a digital signature or a MAC. If the intent is to disallow this, this should probably be states more explicitly.",
+      "createdAt": "2024-11-09T23:03:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466491383",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TBB2j",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> The access token can be an opaque random token which would not need to be cryptographically secure using a digital signature or a MAC. If the intent is to disallow this, this should probably be states more explicitly.\r\n\r\nCorrect, the intent was not to disallow this, an access token can (just as a session identifier) be just a secure random string (without involving OAuth introspection). Perhaps this will include all (I will also update #2184)\r\n\r\n> Verify that access tokens are cryptographically secure, either by using a digital signature or MAC to protect against tampering, or being a secure random string (hard to guess and with low collision risk). If validation fails, the token must be rejected. (see https://github.com/OWASP/ASVS/issues/2184)",
+      "createdAt": "2024-11-10T00:18:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466520483",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TBDUz",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> What quite worries me is that some most of these requirements are actually valid for a wide range of token outside of access tokens. If we include them in an \"access token\" section, we would end up repeating them once for each type of token.\r\n\r\nWhat kind of tokens are you thinking about? I´m thinking APIs should should only accept some sort of access token (or be part of an application that has sessions). Other kind of tokens: OIDC ID Tokens, OAuth Reference access tokens and OAuth Refresh tokens should be part of (V51).  Is it overlap between this proposed section and V51 you are concerned about (also noted in https://github.com/OWASP/ASVS/issues/2363#issuecomment-2466219113) ? Or something else?\r\n\r\n\r\n   ",
+      "createdAt": "2024-11-10T00:39:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466526515",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TBlGo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This discussion is getting here not followable and messy.\r\n\r\nThe original goal was to clean-up 3.5 section. My recommendation to use this issue was in context that if there are more JWT specific issues, then we should put them into 3.5 first and then see do we have enough content for a separate section. Current access token discussion from this point of view is out of scope from this issue, although related.\r\n\r\nWhatever is related with precise proposal for any recommended requirement, please have discussion in related opened issue - and if there not any yet, please open new one.\r\n\r\nSo I recommend to open a new issue for with a proposal of access token related section. But first we need to figure out, do we have enough content for a separate section. ",
+      "createdAt": "2024-11-10T09:49:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466664872",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TCAeM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "More feedback on the \"Access token\" proposal.\r\n\r\nWhat problem we solve with this new proposed section? Taking into account how many potential duplication and confusion we create with that.\r\n\r\nI like that we have abstract stateless token section. As already [pointed out](https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466491383), access token may or may not use stateless token solution.\r\n\r\nEven if access token is JWT token, then the main difference for the token type comes when the application already validates the token (expires, signature, issuer, aud etc). General validation is the same procedure for every kind of tokens. \"Access token\" from the \"stateless token\" is mostly only the payload, and this can be already really flow-specific, such as OAuth. I don't think we need layers like \"stateless token\" > \"JWT\" > \"Access token\" > \"OAuth\". I still think stateless token > OAuth is enough.\r\n\r\nIf it requires more discussion, we can have some video-call. At the moment for me the direction or idea behind is not understandable.",
+      "createdAt": "2024-11-10T15:26:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466776972",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UDFzl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Problems listed here initially have been solved.\r\n\r\nThe future of the entire section we can discuss here: #2384",
+      "createdAt": "2024-11-18T18:42:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1917#issuecomment-2483838181",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-03-26T11:00:26Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABeP8AAA",
+      "name": "WG wanted",
+      "description": "We are looking for input from leaders/WG",
+      "color": "24F784"
+    }
+  ],
+  "number": 1917,
+  "state": "CLOSED",
+  "title": "cleanup V3.5 Token-based Session Management",
+  "url": "https://github.com/OWASP/ASVS/issues/1917"
+}

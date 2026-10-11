@@ -1,0 +1,126 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "**Chapter text for 2.9:**\n\nCryptographic authentication mechanism include smart cards or FIDO keys, where the user has to plug in or pair the cryptographic device to the computer to complete authentication. The authenticatoin server will send a challenge nonce to the cryptographic device or software, and the device or software calculates a response based upon a securely stored cryptographic key.\n\nThe requirements for single-factor cryptographic devices and software, and multi-factor cryptographic devices and software are the same, as verification of the cryptographic device proves possession of the authentication factor.\n\n**Relevant requirements for this issue:**\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.9.1** | [MODIFIED, LEVEL L2 > L3] Verify that the authentication verifier stores the cryptographic keys used in verification such that they are protected against modification (and for symmetric keys, against disclosure). This could involve using a Trusted Platform Module (TPM), a Hardware Security Module (HSM), or an OS service that can provide this secure storage. | 3 | 320 |\n| **14.8.1** | [MODIFIED, MOVED FROM 6.4.1, MERGED FROM 1.6.2, 2.10.4, COVERS 2.10.3] Verify that a secrets management solution such as a key vault is used to securely create, store, control access to, and destroy back-end secrets. These could include passwords, key material, integrations with databases and third-party systems, seeds and internal secrets, and API keys. Secrets must not be included in application source code or included in build artifacts. For a L3 application, this should involve a hardware-backed solution such as an HSM. | 2 | 798 |\n\nShould 2.9.1 be merged into 14.8.1? Feels like it is covered there. Is this something that absolutely needs its own separate requirement.\n\n@elarlang @jmanico  @randomstuff ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6dvW66",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Seems so, pretty much the same situation as #2576",
+      "createdAt": "2025-02-09T17:53:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2589#issuecomment-2646437562",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dwD2I",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agree that merging is the way to go.\n",
+      "createdAt": "2025-02-09T22:06:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2589#issuecomment-2646621576",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d1ykh",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Cryptographic authentication mechanism include smart cards or FIDO keys\n> \n> 2.9.1 Verify that the authentication verifier stores the cryptographic keys used in verification such that they are protected against modification (and for symmetric keys, against disclosure). […]\n\nThis is typically a per-user public key (smartcard, FIDO). In the case of smart card, the public key would often come from a X509 certificate issues by a PKI. In this case, the only thing stored on the server would be the Distinguished Name associated with the user. (Hence, there is not so much to protect anyway.)\n\nFor FIDO keys, the server would (I think) typically store the public key of the user's FIDO device. Protection against modification is relevant but I don't think this would be covered by a TPM or HSM, would it?\n\n***\n\nOn the other hand, 14.8.1 is about:\n\n> passwords, key material, integrations with databases and third-party systems, seeds and internal secrets, and API keys\n\nI don't think  that the things we are talking about in 14.8.1 and 2.9.1 are similar, have similar security requirements and would usually be handled using similar solutions.\n\nSo I'm not sure it really makes sense to merge them.\n",
+      "createdAt": "2025-02-10T14:16:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2589#issuecomment-2648123681",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d80yr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For smartcards, surely there is still a signed certificate that needs to be stored and not modified to assure the security of the system?\n\nFor FIDO keys, sounds like this is a public key where modification needs to be avoided. \n\nHowever, I accept that this is not really a \"secret\" as such.\n\nWhat if we reword the requirement to:\n\n\"_[MODIFIED, LEVEL L2 > L3] Verify that the certificates used to verify cryptographic authentication assertions are stored in a way protects them from modification._\"\n\nI would also add a note to the section text which says:\n\n'_Where shared or secret keys are used for cryptographic authentication, these should be stored using the same mechanisms as other system secrets, as documented in the \"Secret Management\" section._'\n\nWhat do you think @randomstuff ?",
+      "createdAt": "2025-02-11T06:57:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2589#issuecomment-2649967787",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ex7hP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff any further comments?",
+      "createdAt": "2025-02-17T18:53:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2589#issuecomment-2663888975",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eyj_M",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "LGTM, I think. (Sorry, I lost this thread at some point)",
+      "createdAt": "2025-02-17T20:50:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2589#issuecomment-2664054732",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-02-09T12:28:29Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 2589,
+  "state": "CLOSED",
+  "title": "Is 2.9.1 a duplicate of 14.8.1 (secrets management)",
+  "url": "https://github.com/OWASP/ASVS/issues/2589"
+}

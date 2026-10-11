@@ -1,0 +1,145 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "We currently have an explanation of the thinking around L1 [which can be found here](https://appsecg.host/level1).\r\n\r\nThere are a few major areas where we have differing opinions about whether a particular type of control falls into the category of L1 for version 5.0.\r\n\r\nThis issue is to discuss format string and memory safety requirements from the current [chapter 5](https://github.com/OWASP/ASVS/blob/main/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md).\r\n\r\nThe requirements being considered for L1 are below (ignore the level marking below).\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **[5.2.13](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v52-sanitization-and-sandboxing)** | [MODIFIED, MOVED FROM 5.4.2] Verify that format strings which might resolve in an unexpected or malicious way when used are sanitized before being processed. | | ✓ | ✓ | 134 |\r\n| **[5.4.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v54-memory-string-and-unmanaged-code)** | Verify that the application uses memory-safe string, safer memory copy and pointer arithmetic to detect or prevent stack, buffer, or heap overflows. | | ✓ | ✓ | 120 |\r\n| **[5.4.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v54-memory-string-and-unmanaged-code)** | Verify that sign, range, and input validation techniques are used to prevent integer overflows. | | ✓ | ✓ | 190 |\r\n| **[5.4.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v54-memory-string-and-unmanaged-code)** | [ADDED] Verify that dynamically allocated memory and resources are properly released, and that references or pointers to freed memory are removed or set to null to prevent dangling pointers and use-after-free vulnerabilities. | | ✓ | ✓ | 416 |\r\n\r\nPersonally I am a little split on this issue.\r\n\r\nOn the one hand, memory safety issues still seem very prevalent as do format string vulnerabilities. These are considered relatively basic having been around for years and the fixes require more defensive coding but are less labour insensitive than some other requirements that might have a wider process or business impact.\r\n\r\nOn the other hand, how many web applications (which is the scope of ASVS) are written in non-memory safe code. Does that make these requirements too niche to make it into L1.\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6X-AaL",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My initial reaction is to agree that memory issues are mostly not a web thing, but that is changing:\r\n\r\n- Memory vulnerabilities are absolutely relevant when discussing WebAssembly. Wasm brings languages like C and C++ into the web world. (Out-of-Bounds Read/Write in WebAssembly)\r\n- Years and years of Java PermGen issues to fight.\r\n- Memory leaks in Node.js\r\n- Spectre and Meltdown impacting browsers and servers\r\n- Resource Abuse Attacks: Tools like slowloris or XML Bombs",
+      "createdAt": "2024-12-17T20:57:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2478#issuecomment-2549614219",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZKBnq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just to give some feedback - if it is not widespread enough with high impact or high likelihood, then I recommend to leave those for level 2 just to have only \"really-really-must-have\" requirements for level 1.",
+      "createdAt": "2025-01-03T16:59:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2478#issuecomment-2569542122",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZKhrl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agree that if these are kept, level 2 is best. +1 @elarlang ",
+      "createdAt": "2025-01-03T18:52:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2478#issuecomment-2569673445",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bo1Hf",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application uses memory-safe string, safer memory copy and pointer arithmetic to detect or prevent stack, buffer, or heap overflows.\n>\n> Verify that sign, range, and input validation techniques are used to prevent integer overflows.\n>\n>  Verify that dynamically allocated memory and resources are properly released, and that references or pointers to freed memory are removed or set to null to prevent dangling pointers and use-after-free vulnerabilities.\n\nThe problem with these is that if you have memory unsafe code (C, C++) nearly all lines of code of your application are a candidate to at least one of these three requirements which make verification quite difficult :)",
+      "createdAt": "2025-01-23T22:46:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2478#issuecomment-2611171807",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b3cpS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Seems like there is more consensus on L2 for this, I will leave it for another week for last feedback and otherwise we should close it",
+      "createdAt": "2025-01-27T07:20:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2478#issuecomment-2615003730",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b5Is4",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As much as I'd like to be the maverick here and say L1, in reality L2 is the best spot ",
+      "createdAt": "2025-01-27T11:02:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2478#issuecomment-2615446328",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-12-17T14:06:48Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABbnQP8g",
+      "name": "requirement level",
+      "description": "Issue related to requirement levels",
+      "color": "c2e0c6"
+    }
+  ],
+  "number": 2478,
+  "state": "CLOSED",
+  "title": " Should format string and memory safety reqs be Level 1?",
+  "url": "https://github.com/OWASP/ASVS/issues/2478"
+}

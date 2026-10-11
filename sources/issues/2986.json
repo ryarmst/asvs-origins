@@ -1,0 +1,245 @@
+{
+  "author": {
+    "id": "U_kgDOCVJYEg",
+    "is_bot": false,
+    "login": "ingo-rauner",
+    "name": "Ingo Rauner"
+  },
+  "body": "An additional control with level 3 should be added to [11.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V11-Cryptography.md#v116-public-key-cryptography) to address forward secrecy.\n\nControl\nVerify that forward secrecy is ensured using appropriate algorithms and protocols.\nLevel = 3\n\nReasoning\nForward secrecy is essential for high risk applications. Depending on the protocol and algorithms used, forward secrecy requires different measures.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6nxDng",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @ingo-rauner , thanks for opening these issues, I know that forward secrecy has definitely been discussed here before so I am wondering whether it is part of a different requirement or whether there was a reason for it not being in 11.6. \n\nWould you be able to check back in the issue history to see if you can find the information? \n\nSee:\nhttps://github.com/OWASP/ASVS/issues?q=is%3Aissue%20%22forward%20secrecy%22",
+      "createdAt": "2025-04-18T06:29:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2814654944",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nx5Ge",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ingo-rauner, this is addressed by,\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **12.1.2** | Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must only support cipher suites which provide forward secrecy. | 2 | v5.0.be-9.4.1 |\n\nI don't think we would want to include forward secrecy in \"V11.6 Public Key Cryptography\" because there are legitimate cases of public key cryptography which don't use forward secrecy. For example, non-interactive public-key encryption (as used for Encrypted Client Hello and other usages of HPKE) is typically not forward secret.",
+      "createdAt": "2025-04-18T08:04:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2814874014",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nx-M-",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@danielcuthbert, any feedback on this?",
+      "createdAt": "2025-04-18T08:17:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2814894910",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n10Gy",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> [@ingo-rauner](https://github.com/ingo-rauner), this is addresses by,\n> \n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **12.1.2** | Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must only support cipher suites which provide forward secrecy. | 2 | v5.0.be-9.4.1 |et.\n\nDoes this cover everything around \"protocols and algorithms\" per the OP? Perhaps we need to expand the requirement some? This is more of a terminology question.\n\n\n\n",
+      "createdAt": "2025-04-18T17:34:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2815902130",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6Ukl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Does this cover everything around \"protocols and algorithms\" per the OP? Perhaps we need to expand the requirement some? This is more of a terminology question.\n\nNot sure what is being proposed here, could someone clarify?",
+      "createdAt": "2025-04-20T09:28:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2817083685",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7gj6",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we could be more strict in the requirement:\n\nCurrent: \"Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must only support cipher suites which provide forward secrecy.\"\n\nModified: \"Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred. *Forward secrecy must always be used except for communication with legacy applications which don't support it.* L3 applications must only support cipher suites which provide forward secrecy.\"\n\n***\n\n> Does this cover everything around \"protocols and algorithms\" per the OP? Perhaps we need to expand the requirement some? This is more of a terminology question.\n\n12.1.2 is strictly speaking is about TLS (and by extensions could be about DTLS as well) as we are talking about ciphersuites and as we are in \"General TLS Security Guidance\".\n\nIn practice, that should be quite enough, for the most of *web* applications (though I agree I would want any other form of communication in scope of my application to support forward secrecy as well as long as possible).\n\n@ingo-rauner, would you say that 12.1.2 as it stands (or the proposed modification) are enough on this topic?\n",
+      "createdAt": "2025-04-20T23:54:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2817394938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n9If6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think we could be more strict in the requirement:\n\nTo be honest, I don't think it is necessary, it is clear that forward security is desirable but we are just providing the option of only requiring it at L3. The @ingo-rauner also said to only require it for L3.\n\nI am still not sure what @jmanico meant by:\n\n> Does this cover everything around \"protocols and algorithms\" per the OP? Perhaps we need to expand the requirement some? This is more of a terminology question.\n\n@ingo-rauner anything else to do here?",
+      "createdAt": "2025-04-21T07:17:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2817820666",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oCu0B",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > I think we could be more strict in the requirement:\n> \n> To be honest, I don't think it is necessary, it is clear that forward security is desirable but we are just providing the option of only requiring it at L3. The [@ingo-rauner](https://github.com/ingo-rauner) also said to only require it for L3.\n> \n> I am still not sure what [@jmanico](https://github.com/jmanico) meant by:\n> \n> > Does this cover everything around \"protocols and algorithms\" per the OP? Perhaps we need to expand the requirement some? This is more of a terminology question.\n> \n> [@ingo-rauner](https://github.com/ingo-rauner) anything else to do here?\n\nThe OP said \"Forward secrecy is essential for high risk applications. Depending on the _protocol and algorithms_ used, forward secrecy requires different measures.\" That's what I'm referring to.",
+      "createdAt": "2025-04-21T19:10:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2819288321",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oC6FG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > > I think we could be more strict in the requirement:\n> > \n> > \n> > To be honest, I don't think it is necessary, it is clear that forward security is desirable but we are just providing the option of only requiring it at L3. The [@ingo-rauner](https://github.com/ingo-rauner) also said to only require it for L3.\n> > I am still not sure what [@jmanico](https://github.com/jmanico) meant by:\n> > > Does this cover everything around \"protocols and algorithms\" per the OP? Perhaps we need to expand the requirement some? This is more of a terminology question.\n> > \n> > \n> > [@ingo-rauner](https://github.com/ingo-rauner) anything else to do here?\n> \n> The OP said \"Forward secrecy is essential for high risk applications. Depending on the _protocol and algorithms_ used, forward secrecy requires different measures.\" That's what I'm referring to.\n\nSo I guess we'll have to see if @ingo-rauner has any further input ",
+      "createdAt": "2025-04-21T19:32:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2819334470",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pMMnN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to mark this as a non-blocker for now and close it in a few weeks if there is no further input from the original poster.\n\n@set-reminder 3 weeks @tghosth to close",
+      "createdAt": "2025-04-29T11:59:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2838546893",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rldyo",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Closed as there was no further feedback and I need to tidy issues :)",
+      "createdAt": "2025-05-14T05:31:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2878725288",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rorxT",
+      "author": {
+        "login": "ingo-rauner"
+      },
+      "authorAssociation": "NONE",
+      "body": "The problem I see here is, that 12.1.2 is only about TLS. Forward secrecy is a general security measure for cryptography. TLS is just one of many applications.\n\nNotice: While we can require forward secrecy for TLS, it can only be a recommendation for asymmetric cryptography in general.",
+      "createdAt": "2025-05-14T09:54:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2879568979",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rpHHd",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The problem I see here is, that 12.1.2 is only about TLS. Forward secrecy is a general security measure for cryptography. TLS is just one of many applications.\n>\n> Notice: While we can require forward secrecy for TLS, it can only be a recommendation for asymmetric cryptography in general.\n\nYes, we cannot require forward secrecy everywhere encryption is used.\n\nSome examples which are relevant in the context of web applications:\n\n* Encrypted Client Hello (ECH) does not provide forward secrecy. It relies on a non-ephemeral server private key.\n* Encrypted token such as encrypted JWTs (or other JWEs) do not provide forward secrecy. The rely on non-ephemeral audience private keys.\n\nThis would leave us to something like \"verify  forward secrecy is used whenever it makes sense to use it\" which does not constitute a very good requirement. 😄 (it might be a recommendation)",
+      "createdAt": "2025-05-14T10:32:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2986#issuecomment-2879680989",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-18T03:33:15Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    }
+  ],
+  "number": 2986,
+  "state": "CLOSED",
+  "title": "add forward secrecy to 11.6",
+  "url": "https://github.com/OWASP/ASVS/issues/2986"
+}

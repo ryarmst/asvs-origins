@@ -1,0 +1,276 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjM3ODAzNjQ4",
+    "is_bot": false,
+    "login": "teavanist",
+    "name": "Arun Sivadasan"
+  },
+  "body": "Verify implementation of centralized, simple (economy of design), vetted, secure, and reusable security controls to avoid duplicate, missing, ineffective, or insecure controls. \r\n\r\nI have two questions regarding 1.1.6: \r\n\r\nSection: V1 Architecture, Design and Threat Modeling\r\n\r\nhttps://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Architecture.md\r\n\r\nq1) This basically means that the organization has to make a list of security controls that developers can then follow. What are some common security controls thats referred to in this? I am assuming it could mean things like approved libraries, the approach developers must follow for authentication, authorization,  etc. Is this correct? \r\n\r\nq2) Are there other examples or guidance for someone looking to implement this? esp the part around centralized security controls? \r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5Oviab",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirement 1.1.6:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.1.6** | Verify implementation of centralized, simple (economy of design), vetted, secure, and reusable security controls to avoid duplicate, missing, ineffective, or insecure controls. ([C10](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 637 |\r\n\r\n[CWE 637](https://cwe.mitre.org/data/definitions/637.html) points to \"_Unnecessary Complexity in Protection Mechanism (Not Using 'Economy of Mechanism')_\"\r\n\r\nFor me it basically means - for the same action, in different places in code base, different solution are used for the same thing or the same solution is copy-pasted everywhere.\r\n\r\nFirst thing comes to my mind is `curl` calls in PHP application, I have seen them duplicated many times. Another one is authentication and authorization decisions, but for those we have separate requreiments (current V1.2.3, V1.4.4)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.2.3** | Verify that the application uses a single vetted authentication mechanism that is known to be secure, can be extended to include strong authentication, and has sufficient logging and monitoring to detect account abuse or breaches. | | ✓ | ✓ | 306 |\r\n| **1.4.4** | Verify the application uses a single and well-vetted access control mechanism for accessing protected data and resources. All requests must pass through this single mechanism to avoid copy and paste or insecure alternative paths. ([C7](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 284 |\r\n\r\nPlease let me know it helped, or there is some problem to solve or proposal to improve.",
+      "createdAt": "2022-11-20T09:50:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1321084571",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5OwN_G",
+      "author": {
+        "login": "teavanist"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks! What caused the confusion I think was that the control text is quite different from CWE 637. When I read the control it looks to me that \"simplicity\" (as explained in CEW637) is just one of the items that we need to verify. \r\nSince the scenario you mention is very specific, wouldnt it be better to rephrase the recommendation to: \r\n_Verify during code review that for the same action, in different places in code base, different solution are not used or the same code is not copy-pasted. All such actions should call a common code._\r\nor something similar? ",
+      "createdAt": "2022-11-20T22:39:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1321263046",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mXJnQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to mark this for the major rework of V1 as I don't think it can be considered in isolation",
+      "createdAt": "2023-09-13T10:13:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1717344720",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5t3S0C",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In case the category V10 is \"widened\", I propose to move this requirement as an \"architecture\" requirement there.",
+      "createdAt": "2023-12-06T16:09:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1843211522",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5um4NA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Elar's perspective is that 1.1.6 requires code access to really verify it which is why it fits in well with V10 which is becoming more about code level considerations.\r\n\r\nMy perspective is that 1.1.6 is absolutely foundational to everything in ASVS to the extent that I am not sure if it should actually be a requirement but rather a mindset/condition for you implement/verify security requirements.\r\n\r\nOn the other hand, as Elar says you can't verify this without code access. Maybe we need levels of verification in terms of what is actually being checked for each requirement...",
+      "createdAt": "2023-12-14T11:36:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1855685440",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5une3H",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I appreciate the efforts of penetration testers in identifying potential security risks. \r\n\r\nHowever, I believe their expertise is more effectively utilized in highlighting actual vulnerabilities rather than critiquing code design choices, such as the use of multiple libraries for similar functions. In many cases, these design decisions are made with specific considerations in mind.\r\n\r\nI suggest we concentrate on directly verifiable security issues. While code design is undoubtedly important, it's essential to distinguish between pure design preferences and actual security vulnerabilities. This approach will allow us to focus more on strengthening ASVS in a way that's both efficient and effective instead of straying into design issues that may or may not be security issues.",
+      "createdAt": "2023-12-14T13:22:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1855843783",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5uoiQy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I share Jim's point of view here.\r\n\r\nFrom a developing perspective - it is fundamental, it is a mindset question, it is common sense, etc.\r\n\r\nBut from a security verification perspective - if you have crappy code, with awful style, but without security holes - what do you report? :)\r\n\r\nAlthough it's a fundamental from development perspective, it is a bit coding style question from **application** security perspective.\r\n\r\nIn other words, @tghosth - for me it's actually easy move to V10 as architecture requirement.",
+      "createdAt": "2023-12-14T16:03:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1856119858",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM52Vyay",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yeah, this is hard to verify without code access and I agree with Elar and Jim's points on this as well. Moving it to V10 works as well since that chapter deals with code, but cannot think of the best fit for the subsection yet, maybe we need to create a subsection about high-level architecture requirement to fit this in? ",
+      "createdAt": "2024-03-08T10:16:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-1985423026",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Pl4If",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth - in case you want to keep this requirement, then I think it requires some cleanup and clear defined goal\r\n\r\nVerify\r\n* implementation of centralized - ok, definition is clear, but is it a security requirement\r\n* simple (economy of design) - how to define simple?\r\n* vetted - what it means? how to verify?\r\n* secure - what it means? how to verify? \r\n* and reusable - why? is it a security requirement?\r\n\r\n... security controls to avoid\r\n* duplicate - ok, centralized, but is it a security requirement?\r\n* missing - eem?\r\n* ineffective - what it means? how to verify? \r\n* or insecure controls- what it means? how to verify? ",
+      "createdAt": "2024-10-13T18:06:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-2409071135",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P0k9F",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Should we remove V10 label? @elarlang ",
+      "createdAt": "2024-10-15T05:23:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-2412924741",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P0lj0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Should we remove V10 label? @elarlang\r\n\r\nFirst we need to understand what to do with the requirement, then we see what we can do with the sections and paragraphs.",
+      "createdAt": "2024-10-15T05:25:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-2412927220",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P5gJ7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is a design principle and not a requirement. I think it is hard to verify and I would support moving to recommendations or deleting. @elarlang ",
+      "createdAt": "2024-10-15T15:08:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-2414215803",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P5jwt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's quite a messy \"fix the world\" requirement at the moment. If to move it to recommendation, it should carry clear principles and probably split to different recommendations.\r\n\r\nPersonally I would leave the code-beauty for other projects to handle.",
+      "createdAt": "2024-10-15T15:11:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-2414230573",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P6wAd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We also have 1.4.4...\r\n> Verify the application uses a single and well-vetted access control mechanism for accessing protected data and resources. All requests must pass through this single mechanism to avoid copy and paste or insecure alternative paths.\r\n\r\n",
+      "createdAt": "2024-10-15T16:55:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-2414542877",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P8E7K",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened PR #1434 for this issue.\r\n\r\nOpened #2147 to discuss 1.4.4",
+      "createdAt": "2024-10-15T19:58:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1434#issuecomment-2414890698",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-11-19T23:11:19Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1434,
+  "state": "CLOSED",
+  "title": "About 1.1.6 ",
+  "url": "https://github.com/OWASP/ASVS/issues/1434"
+}

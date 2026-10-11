@@ -1,0 +1,204 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "# By rules, how weak can be password\r\n\r\nAnd if someone says weak, then... weak against what?\r\n\r\n## Weak against brute force\r\n\r\n> V2.1.1 Verify that user set passwords are at least 12 characters in length.\r\n\r\nand\r\n\r\n> V2.1.9 Verify that there are no password composition rules limiting the type of characters permitted. There should be no requirement for upper or lower case or numbers or special characters.\r\n\r\nBy current rules, ASVS v4 accepts password with only numbers and 12 symbols long.\r\nIt's about the same strong as capital-letter + lower-case letters + numbers and 7 symbols long.\r\n\r\n\r\n| combinations | pattern | min length |\r\n| ---: | ---: | ---: |\r\n| `1028071702528` | `[A-Za-z0-9]` | `7` |\r\n| `1111111111110` | `[0-9]` | `12` |\r\n| `2821109907456` | `[a-z0-9]` | `8` |\r\n| `5429503678976` | `[a-z]` | `9` |\r\n| `53459728531456` | `[A-Za-z0-9]` | `8` |\r\n\r\nI think requirement V2.1.9 needs some modification. Only numbers are not ok. Can not really write this kind of recommendation to pen-test report.\r\n\r\n## Weak against dictionary attacks\r\n\r\n> V2.1.7 Verify that passwords submitted during account registration, login, and password change are checked against a set of breached passwords either locally (such as the top 1,000 or 10,000 most common passwords which match the system's password policy) or using an external API. ...\r\n\r\nIn theory, it should keep passwords okeish against dictionary attacks.\r\n\r\nI personally miss one more requirement, with meaning (but not given wording):\r\n\r\nUser must avoid simple-stupid-predictable-passwords, like:\r\n  * password can not contain user data (name, email, company, whatever is provided to application/site)\r\n  * password can not contain application/site name\r\n\r\nUsing personal data or site name as password is widespread behavior and this kind of weak passwords give more realistic attack vector (online dictionary attacks) compared to offline (how you got hashes!?) brute force or using massive breach data sets. ",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUzOTM4NzE3OA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, I dig to it more deeply.\r\n\r\n## Password change functionality\r\n\r\nCurrent:\r\n* V2.1.5 Verify users can change their password. \r\n* V2.1.6 Verify that password change functionality requires the user's current and new password. \r\n* V2.1.10 **Verify that there are no periodic credential rotation** or password history requirements. \r\n\r\nRecommendations:\r\n- [x] Recommendation no 1: Split V2.1.10 to 2 different requirements. First part is for functionality, second part for password content.\r\n  - moved to issue #940\r\n\r\n\r\n## Password format (min length, max length, allowed characters)\r\n\r\nCurrent:\r\n* V2.1.1 Verify that user set passwords are at least 12 characters in length.\r\n* V2.1.2 Verify that passwords 64 characters or longer are permitted.\r\n* V2.1.3 Verify that passwords can contain spaces and truncation is not performed. Consecutive multiple spaces MAY optionally be coalesced. \r\n* V2.1.4 Verify that Unicode characters are permitted in passwords. A single Unicode code point is considered a character, so 12 emoji or 64 kanji characters should be valid and permitted. \r\n* V2.1.9 Verify that there are no password composition rules limiting the type of characters permitted. There should be no requirement for upper or lower case or numbers or special characters. \r\n\r\nRecommendations:\r\n- [x] Recommendation no 2: add requirement, that all ascii chars must be allowed for password. From NIST 5.1.1.2:\r\n  - fixed by issue #691\r\n> All printing ASCII [RFC 20] characters as well as the space character SHOULD be acceptable in memorized secrets.\r\n\r\nNote: from NIST point of view, requirements for \"max length 64\", \"allow all ascii chars\", \"allow unicode\" and \"no composition rules\" are with keyword SHOULD.\r\n\r\n\r\n## Password content\r\nCurrent:\r\n* V2.1.7 Verify that passwords submitted during account registration, login, and password change are checked against a set of breached passwords either locally (such as the top 1,000 or 10,000 most common passwords which match the system's password policy) or using an external API. If using an API a zero knowledge proof or other mechanism should be used to ensure that the plain text password is not sent or used in verifying the breach status of the password. If the password is breached, the application must require the user to set a new non-breached password. \r\n* V2.1.10 **Verify that there are no** periodic credential rotation or **password history requirements**. \r\n\r\nProblems:\r\n- V2.1.7 is a monster - contains 3 different requirements\r\n- V2.1.7 is looking only for breaches, must look \"password blacklist\" in general\r\n\r\nNIST 5.1.1.2:\r\n> When processing requests to establish and change memorized secrets, verifiers SHALL compare the prospective secrets against a list that contains values known to be commonly-used, expected, or compromised. For example, the list MAY include, but is not limited to:\r\n- Passwords obtained from previous breach corpuses.\r\n- Dictionary words.\r\n- Context-specific words, such as the name of the service, the username, and derivatives thereof.\r\n\r\nRecommendations:\r\n- Recommendation no 3: V2.1.7 - split it to 3 different requirements (remove current version of V2.1.7)\r\n- Recommendation no 4: add requirement, that password should not contain dictionary words and \"1337 speaking version\" of them (example: password > pa55w0rd) (**part of passwords blacklist**)\r\n  - you may argue, that with min length 12 list of dictionary words are quite limited, in real world I can not see min length for 12 happening any time soon, because sites and businesses want to keep their visitors.\r\n- Recommendation no 5: add requirement, that password should not contain expected and context-specific words, like user data or site data and \"1337 speaking version\" of them (example: owaspasvs > 0wa5pasvs) (**part of passwords blacklist**).\r\n- Recommendation no 6: add requirement (first part of current V2.1.7), that password can not be something, which is available in breaches (**part of passwords blacklist**)\r\n- [x] Recommendation no 7: add requirement (second part of current V2.1.10), that application must not blacklist previously used passwords and must not keep password history\r\n  - if application keeps password history and it leaks, it causes even more damage\r\n  - moved to issue #940\r\n- Recommendation no 8: add requirement (modified first part of V2.1.7) Verify that passwords submitted during account registration, login, and password change are checked against **password blacklist**.\r\n  - It makes sense to check it against password blacklist, not only against breaches. If blacklist is modified, it affects all users.\r\n- Recommendation no 9: add requirement (replaces last part of V2.1.7), that if on authentication, password is found from blacklist, user is forced to change it.\r\n- Recommendation no 10: add requirement (replaces last part of V2.1.7), that if on authentication, password is found from breach, user is forced to reactivate account.\r\n  - If password is found from / available in breach, it's possible, that some attacker authenticated.\r\n  - I kept it separate from previous one, to be able to set this requirement from Level 2 or Level 3.\r\n- Recommendation no 11: add requirement (middle part of V2.1.7), If using an API a zero knowledge proof or other mechanism should be used to ensure that the plain text password is not sent or used in verifying the breach status of the password.\r\n\r\nNote: from NIST point of view, requirements for \"no periodic change\" and \"allow unicode\" are with keyword SHOULD.\r\n\r\n## Userinterface requirements\r\n\r\nCurrent:\r\n* V2.1.8 Verify that a password strength meter is provided to help users set a stronger password. \r\n* V2.1.11 Verify that \"paste\" functionality, browser password helpers, and external password managers are permitted. \r\n* V2.1.12 Verify that the user can choose to either temporarily view the entire masked password, or temporarily view the last typed character of the password on platforms that do not have this as native functionality.\r\n\r\nRecommendations:\r\n- ~~Recommendation no 12: split V2.1.11 to separate requirements. At least \"paste\" and rest of it separately.~~\r\n  - update: does not matter too much, let it be.\r\n\r\nDiscussion: V2.1.11 \"browser password helpers\" - does it mean \"autocomplete\"? Personally I don't think it's best idea, because it's possible to read autofilled credentials from authentication form with XSS on background without any user-interaction at all or with one keypress or click on site needed (depends on browser). If I compare risks or likelyhoods - I guess XSS is widespread enough compared to \"with autocomplete users may use stronger password\".\r\n\r\nIn NIST, all mentioned \"requirements\" are with keyword SHOULD. From \"Legend\" in OWASP ASVS (example https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md), those requirements must have \"mark\" o \"Recommended, but not required\" instead of ✓ \"Required\".",
+      "createdAt": "2019-10-08T07:36:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-539387178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU0NTU1NDEyNA==",
+      "author": {
+        "login": "averell23"
+      },
+      "authorAssociation": "NONE",
+      "body": "Just a few thoughts. First off, wether to split certain requirements is probably a matter of taste, so I'm not weighing in on this.\r\n\r\nRecommendation 2: Seems already there. 2.1.4 requires unicode characters to be allowed, and unicode is a superset of all ASCII characters.\r\n\r\nRecommendation 3 and onwards: Together, they seem to add a lot of complexity for a moderate benefit. A breach list (The HIBP one is around 9GB...) will already contain all \"popular\" passwords, including dictionary words of most languages, their \"leet\" forms as well as human names, their leet forms and more. \r\n\r\nThe only thing not likely to be in there are context-specific words, but then there is a question on how much complexity you add for this in comparison on to how often they are used.\r\n\r\nAlso, while I think there'll be some pushback against 12 characters minimum, this has probably the greatest benefit of all recommendations. In the end it will happen if standards mandate it - heck, people even got used to the old NIST rules with arbitrary requirements for special characters (and those were worse, UX-wise, than an 12-char password).",
+      "createdAt": "2019-10-23T17:34:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-545554124",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU0NjMwNjcxMg==",
+      "author": {
+        "login": "averell23"
+      },
+      "authorAssociation": "NONE",
+      "body": "Regardless of the above, I haven't found any rationale for the 12-character password recommendation. Why not the 8-char NIST, or 23? The only thing I found was a \"we had to\" in a presentation, which didn't actually shed light.\r\n\r\nAlso, some of the concerns above could be addressed by changing the phrasing from \"breached\" to \"vulnerable passwords\" in the standard.",
+      "createdAt": "2019-10-25T10:54:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-546306712",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxMjY3MDQ0MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Regardless of the above, I haven't found any rationale for the 12-character password recommendation. Why not the 8-char NIST, or 23? The only thing I found was a \"we had to\" in a presentation, which didn't actually shed light.\r\n\r\nRelated issue/question-answer: #730",
+      "createdAt": "2020-04-12T20:18:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-612670440",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxMjY3NzY4MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "That’s fair, I defer to Andrew van der Stock on this one.\n\n--\nJim Manico\n@Manicode\n\n> On Apr 12, 2020, at 4:18 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> Regardless of the above, I haven't found any rationale for the 12-character password recommendation. Why not the 8-char NIST, or 23? The only thing I found was a \"we had to\" in a presentation, which didn't actually shed light.\n> \n> Related issue/question-answer: #730\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-04-12T21:21:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-612677681",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMTI2MjE4MA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just reading back over this. There seems to be a lot going on here. I think we should have one issue per suggested change unless you want to create a large PR to help illustrate each change. What do you think @elarlang?",
+      "createdAt": "2020-04-29T14:51:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-621262180",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMTMyMDUzNg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My clear idea here is to put entire set of password rules to discussion and get some feedback - we can not solve them separately because they are all related.",
+      "createdAt": "2020-04-29T16:26:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-621320536",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMzE3MzEzOQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so let's revisit in the runup to 4.1",
+      "createdAt": "2020-05-03T20:08:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-623173139",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcyMzYwNDY0NQ==",
+      "author": {
+        "login": "stiiin"
+      },
+      "authorAssociation": "NONE",
+      "body": "I disagree with the idea that recommentation no. 1 is just a matter of style.\r\n\r\nI do understand that the two halves of 2.1.10 are not independent. Password history requirements arise when system administrators believe it is important to mitigate CWE-262/CWE-263, and notice or anticipate that users will learn to update their password twice when the password history only consists of a single entry. However, in most cases, these are two separate moves. When system administrators stop requiring periodic changes, they may forget to also repeal password history requirements.\r\n\r\nAs #840 suggests, verifying 2.1.10 as a whole requires two different strategies for each half. The first half essentially requires a design review, while the second half could be easily falsified through use of the system.\r\n\r\nWhat I've also noticed, is that the cited CWE definition and NIST section only explicitly mention the first half of the requirement:\r\n\r\n> V2.1.10a: Verify that there are no periodic credential rotation requirements.\r\n\r\n[The cited NIST section](https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver) contains a similar requirement (\"Verifiers SHOULD NOT require memorized secrets to be changed arbitrarily (e.g., periodically).\"), and [the cited CWE](https://cwe.mitre.org/data/definitions/263.html) clearly opposes this requirement (more about that in #871).\r\n\r\nBecause the second half is included, at first glance, the references appear to also lend credence/support to the second half:\r\n\r\n> V2.1.10b: Verify that there are no password history requirements.\r\n\r\nHowever, this requirement is not present in the cited NIST section. In fact, I can't find anything about password history requirements anywhere in that NIST publication. This requirement is of course again opposed by the cited CWE definition (\"... a user is required to update with a new and different password.\"), but only vaguely. I can't find any CWE that goes into detail on how to ensure that \"new and different\" bit.\r\n\r\nI think splitting the requirement would be a good idea, while only retaining the references for ~the second half~ the first half.",
+      "createdAt": "2020-11-08T16:04:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-723604645",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcyMzY2MTM0OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": " > V2.1.10b: Verify that there are no password history requirements.\n\nAs a side note, I sent a letter to the NIST 800-63 leadership about this \nand will get back to you.\n\n- Jim\n\nOn 11/8/20 6:04 AM, stiiin wrote:\n>\n> I disagree with the idea that @elarlang \n> <https://github.com/elarlang>'s recommentation no. 1 is just a matter \n> of style.\n>\n> I do understand that the two halves of 2.1.10 are not independent. \n> Password history requirements arise when system administrators believe \n> it is important to mitigate CWE-262/CWE-263, and notice or anticipate \n> that users will learn to update their password twice when the password \n> history only consists of a single entry. However, in most cases, these \n> are two separate moves. When system administrators stop requiring \n> periodic changes, they may forget to also repeal password history \n> requirements.\n>\n> As #840 <https://github.com/OWASP/ASVS/issues/840> suggests, verifying \n> 2.1.10 as a whole requires two different strategies for each half. The \n> first half essentially requires a design review, while the second half \n> could be easily falsified through use of the system.\n>\n> What I've also noticed, is that the cited CWE definition and NIST \n> section only explicitly mention the first half of the requirement:\n>\n>     V2.1.10a: Verify that there are no periodic credential rotation\n>     requirements.\n>\n> The cited NIST section \n> <https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver> contains \n> a similar requirement (\"Verifiers SHOULD NOT require memorized secrets \n> to be changed arbitrarily (e.g., periodically).\"), and the cited CWE \n> <https://cwe.mitre.org/data/definitions/263.html> clearly opposes this \n> requirement (more about that in #871 \n> <https://github.com/OWASP/ASVS/issues/871>).\n>\n> Because the second half is included, at first glance, the references \n> appear to also lend credence/support to the second half:\n>\n>     V2.1.10b: Verify that there are no password history requirements.\n>\n> However, this requirement is not present in the cited NIST section. In \n> fact, I can't find anything about password history requirements \n> anywhere in that NIST publication. This requirement is of course again \n> opposed by the cited CWE definition (\"... a user is required to update \n> with a new and different password.\"), but only vaguely. I can't find \n> any CWE that goes into detail on how to ensure that \"new and \n> different\" bit.\n>\n> I think splitting the requirement would be a good idea, while only \n> retaining the references for the second half.\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/683#issuecomment-723604645>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCP7WZFOVFS7V4I63SDSO26QNANCNFSM4I4OLNWQ>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-11-08T20:28:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-723661349",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcyNDMwNzA4OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Comment from Jim Fenton, the author of NIST 800-63\n\n\n\"There are two different password history issues. Usually password \nhistory refers to keeping a user from reusing a password they have used \npreviously. That’s mostly an issue if you’re requiring subscribers to \nperiodically change their passwords, which 800-63B advises against. \nAccordingly, 800-63B doesn’t contain any requirements to maintain a \nhistory of past passwords used by subscribers. However, there is no \nprohibition on doing so; this would be considered to be an additional \nrisk mitigation measure beyond the requirements of the specification.\n\nThe other issue you allude to has to do with the contents of blocklists. \nBreach data may be used to create a blocklist, but you’re correct there \nisn’t any specific guidance on doing so. I would personally advise \nagainst using a very large breach corpus like Have I Been Pwned as the \nblocklist, because it is so large that users may be frustrated trying to \ncome up with something that isn’t in that huge list. The focus is on \ntrying to avoid the use of very common passwords that might be guessed \nin online guessing attacks.\" - Jim Fenton\n\nOn 11/8/20 6:04 AM, stiiin wrote:\n>\n> I disagree with the idea that @elarlang \n> <https://github.com/elarlang>'s recommentation no. 1 is just a matter \n> of style.\n>\n> I do understand that the two halves of 2.1.10 are not independent. \n> Password history requirements arise when system administrators believe \n> it is important to mitigate CWE-262/CWE-263, and notice or anticipate \n> that users will learn to update their password twice when the password \n> history only consists of a single entry. However, in most cases, these \n> are two separate moves. When system administrators stop requiring \n> periodic changes, they may forget to also repeal password history \n> requirements.\n>\n> As #840 <https://github.com/OWASP/ASVS/issues/840> suggests, verifying \n> 2.1.10 as a whole requires two different strategies for each half. The \n> first half essentially requires a design review, while the second half \n> could be easily falsified through use of the system.\n>\n> What I've also noticed, is that the cited CWE definition and NIST \n> section only explicitly mention the first half of the requirement:\n>\n>     V2.1.10a: Verify that there are no periodic credential rotation\n>     requirements.\n>\n> The cited NIST section \n> <https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver> contains \n> a similar requirement (\"Verifiers SHOULD NOT require memorized secrets \n> to be changed arbitrarily (e.g., periodically).\"), and the cited CWE \n> <https://cwe.mitre.org/data/definitions/263.html> clearly opposes this \n> requirement (more about that in #871 \n> <https://github.com/OWASP/ASVS/issues/871>).\n>\n> Because the second half is included, at first glance, the references \n> appear to also lend credence/support to the second half:\n>\n>     V2.1.10b: Verify that there are no password history requirements.\n>\n> However, this requirement is not present in the cited NIST section. In \n> fact, I can't find anything about password history requirements \n> anywhere in that NIST publication. This requirement is of course again \n> opposed by the cited CWE definition (\"... a user is required to update \n> with a new and different password.\"), but only vaguely. I can't find \n> any CWE that goes into detail on how to ensure that \"new and \n> different\" bit.\n>\n> I think splitting the requirement would be a good idea, while only \n> retaining the references for the second half.\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/683#issuecomment-723604645>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCP7WZFOVFS7V4I63SDSO26QNANCNFSM4I4OLNWQ>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-11-09T22:08:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-724307088",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40qayX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As there are quite a lot of changes in analyzed requirements, I close thise out.\r\n\r\nSummary of this monster:\r\n\r\n* Recommendation 1: done, #940\r\n* Recommendation 2: done, #691\r\n* Recommendation 3: done, #841\r\n* Recommendation 4: **not done**\r\n* Recommendation 5: **not done**\r\n* Recommendation 6: done, #841\r\n* Recommendation 7: done, #940\r\n* Recommendation 8: not valid anymore, changed in #841\r\n* Recommendation 9: not valid anymore, changed in #841\r\n* Recommendation 10: not valid anymore, changed in #841\r\n* Recommendation 11: not valid anymore, changed in #841\r\n* Recommendation 12: let it be\r\n",
+      "createdAt": "2021-07-20T16:37:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/683#issuecomment-883534999",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-10-01T20:19:11Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 683,
+  "state": "CLOSED",
+  "title": "Discussion: rules for password format and content",
+  "url": "https://github.com/OWASP/ASVS/issues/683"
+}

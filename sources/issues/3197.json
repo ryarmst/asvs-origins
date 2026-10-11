@@ -1,0 +1,120 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "As discussed in [GitHub Discussion #3193](https://github.com/OWASP/ASVS/discussions/3193), I am opening this issue to formally track the proposal related to GraphQL-specific security controls. I will open additional issues for other requirements after this one is addressed to ensure clarity and focus.\n\nI have reviewed the ASVS v5.0 document and the OWASP ASVS scope content thoroughly.\n\n> I want to clarify that I am not proposing implementation-level mechanisms or technology-specific configurations, which would be out of scope. Instead, this is a suggestion to refine and contextualize existing security requirements within the ASVS model. It does not overlap with OWASP Cheat Sheet guidance or verification methods.\n\n### Problem Statement\nSection 4.3 of ASVS v5.0 currently focuses on GraphQL-specific risks such as:\n\n4.3.1 – Query cost/depth limitation\n\n4.3.2 – Disabling introspection in production\n\nHowever, based on extensive review of real-world GraphQL vulnerabilities (especially in enterprise systems), I’d like to suggest adding or clarifying two critical security requirements:\n* **Insufficient input validation at the resolver level** — developers often assume GraphQL schemas enforce safety, but type coercion is not strict validation, and business logic validation is frequently missed.\n\n* **Missing field-level authorization** — GraphQL allows users to request deeply nested and sensitive fields. Without resolver-specific access control, users can easily overreach authorized access.\n\n### Why General Requirements Are Not Sufficient\nWhile input validation (Chapter V2) and authorization (Chapter V8) are well-defined in ASVS, they are commonly interpreted in a RESTful context. Because GraphQL has:\n\n* A single dynamic endpoint,\n* A runtime execution model via resolvers, and\n* Field-level granularity in responses,\n\n...it becomes unclear to many developers that those same principles must be re-implemented inside each resolver.\n\nThis results in security gaps—even in applications that follow ASVS at a high level.\n\n\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6wiiEV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I also repeat my comment here: We do not duplicate general requirements for each technology or functionality, and it is specifically mentioned in the related chapter text:\n\n> Note that authentication, session management, and input validation concerns from other chapters also apply to APIs, so this chapter cannot be taken out of context or tested in isolation.\n\nPlease also review previous issues:\n* https://github.com/OWASP/ASVS/issues/1863\n* https://github.com/OWASP/ASVS/issues/2712",
+      "createdAt": "2025-06-11T09:09:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3197#issuecomment-2961842453",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6xO1G1",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for the response and for the context around the project's guiding principles. I fully support and understand the critical need to avoid duplicating general requirements across different technologies. My concern is not a request for duplication, but to highlight a significant usability and clarity gap that is leading to a pattern of severe, real-world vulnerabilities specific to GraphQL.\nWhile the note in the API chapter correctly states that general rules apply, it does not address the core of the issue: the subtlety of the architectural mapping.\n\nHere is the problem I see in practice:\n* **Non-Obvious Mapping**: For a technology like REST, the mapping from ASVS V8.2 (\"object-level authorization\") to an endpoint controller is straightforward. For GraphQL, the mapping from ASVS V8.2.3 (\"field-level access\") to a **field-level resolver** is a non-obvious, granular, and architecturally complex requirement. Teams new to GraphQL frequently miss this mapping entirely.\n \n* **The \"False Sense of Security Gap\"**: Developers often believe the GraphQL type system satisfies the input validation rules of Chapter V2. Similarly, after implementing object-level checks in their top-level resolvers (satisfying V8.2.2), they believe they have met the spirit of Chapter V8. They are not prompted to consider the deeper, more critical requirement of field-by-field authorization.\n \n* **Real-World Consequences**: This gap between the standard's intent and its practical interpretation is the direct cause of high-severity Broken Object Property Level Authorization (BOPLA) vulnerabilities, which are a top security risk for GraphQL APIs. Teams can, in good faith, believe they are ASVS-compliant while leaving these critical vulnerabilities wide open.\n \nThe Application Security Verification Standard is precisely the place to warn against a fundamental architectural security anti-pattern. If it doesn't clearly signpost this non-obvious but critical architectural risk, it isn't providing the level of effective security guidance that it could.\n",
+      "createdAt": "2025-06-15T03:09:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3197#issuecomment-2973454773",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yE1m3",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang is there any update on this?",
+      "createdAt": "2025-06-19T10:42:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3197#issuecomment-2987612599",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yGDSA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it is not the one and only way to solve some security problem, we can not _require_ it from everyone and always. Proper authorization can be achieved also without that proposal and in general, architecture is not well verifiable.",
+      "createdAt": "2025-06-19T12:30:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3197#issuecomment-2987930752",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yG-L0",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for the response. I may not have been clear enough in my original comment. My concern is not about mandating a specific, universal architecture. The concern is mainly that the current standard has a verifiability and usability gap specifically for GraphQL. This isn't about high-level architecture; it's about adding a necessary and concrete test case to the verification process that is currently missing. To close this gap, could we add concrete concrete verification guidance? How would the ASVS team recommend an auditor verify this specific scenario using the current standard?",
+      "createdAt": "2025-06-19T13:47:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3197#issuecomment-2988172020",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qGmnf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In my opinion, the newly suggested requirements are covered by existing requirements. I think it would be legitimate to maybe mention graphql in the section text with these requirements but I don't think separate requirements are the correct answer.\n\n@ajayojha do you have specific section text sections?\n",
+      "createdAt": "2026-02-19T14:20:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3197#issuecomment-3927599583",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-06-11T08:52:27Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    }
+  ],
+  "number": 3197,
+  "state": "OPEN",
+  "title": "Proposal to Enhance GraphQL Section (4.3)",
+  "url": "https://github.com/OWASP/ASVS/issues/3197"
+}

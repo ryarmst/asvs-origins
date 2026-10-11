@@ -1,0 +1,52 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3561761714",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Note that version 4 of NIST SP 800-63 was released after ASVS v5.0.0 was released.\n\nBut when I look into [version 3](https://pages.nist.gov/800-63-3/sp800-63b.html#523-use-of-biometrics), it had pretty much the same message\n\n> Biometrics SHALL be used only as part of multi-factor authentication with a physical authenticator (something you have).\n\n\nThe current requirement comes from v4.0.3-2.8.7\n> Verify that biometric authenticators are limited to use only as secondary factors in conjunction with either something you have and something you know.\n\nFrom the issue https://github.com/OWASP/ASVS/issues/1421 and the [proposal](https://github.com/OWASP/ASVS/issues/1421#issuecomment-1368550085), it seems to be resulted in the commit https://github.com/OWASP/ASVS/commit/bea3a23e0a7121f37fd2cef0e05462bbac40420d as\n\n> Verify that biometric authenticators are only used as secondary factors together with either something you have and something you know.\n\nLater, only the word \"mechanism\" was added:\n\n> Verify that biometric authentication mechanisms are only used as secondary factors together with either something you have or something you know.\n\n---\n\nSo the summary is, I don't see the argumentation or rationale why it should not be aligned with NIST, and it should be fixed for the next (major) release.\n\nThe problematic part here is that it could be a breaking change and can not be done with a patch release.",
+          "recorded_at": "2025-11-21T07:20:13Z"
+        },
+        {
+          "body": "Note that version 4 of NIST SP 800-63 was released after ASVS v5.0.0 was released.\n\nBut when I look into [version 3](https://pages.nist.gov/800-63-3/sp800-63b.html#523-use-of-biometrics), it had pretty much the same message\n\n> Biometrics SHALL be used only as part of multi-factor authentication with a physical authenticator (something you have).\n\n\nThe current requirement comes from v4.0.3-2.8.7\n> Verify that biometric authenticators are limited to use only as secondary factors in conjunction with either something you have and something you know.\n\nFrom the issue https://github.com/OWASP/ASVS/issues/1421 and the [proposal](https://github.com/OWASP/ASVS/issues/1421#issuecomment-1368550085), it seems to be resulted in the commit https://github.com/OWASP/ASVS/commit/bea3a23e0a7121f37fd2cef0e05462bbac40420d as\n\n> Verify that biometric authenticators are only used as secondary factors together with either something you have and something you know.\n\nLater, only the word \"mechanism\" was added:\n\n> Verify that biometric authentication mechanisms are only used as secondary factors together with either something you have or something you know.\n\n---\n\nSo the summary is, I don't see the argumentation or rationale why it should not be aligned with NIST, and it should be fixed for the next (major) release.\n\nThe problematic part here is that it could be a breaking change and can not be done with a patch release. See https://github.com/OWASP/ASVS/blob/master/CONTRIBUTING.md#release-strategy",
+          "recorded_at": "2025-11-21T07:50:34Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4871011367",
+      "author": "sydseter",
+      "previous_versions": [
+        {
+          "body": "That is why we call it MFA and not 2FA and yes, I have to use the fingerprint together with the PIN.",
+          "recorded_at": "2026-07-02T22:34:54Z"
+        },
+        {
+          "body": "That is why we call it MFA and not 2FA and yes, I have to use the fingerprint together with the PIN.\nThat said, under normal circumstances it’s enough to use 1 of them, but for some administrative tasks, yes, I do end up having to use the pin as well.",
+          "recorded_at": "2026-07-02T22:41:48Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4874673988",
+      "author": "sydseter",
+      "previous_versions": [
+        {
+          "body": "It's often not as clear-cut as you might think. In the case of hardware authenticators like the Yubikey Bio, you can often choose to use it as an MFA mechanism only. In that case, you log in with your password, then use the Yubikey Bio as a second and third factor by combining biometric verification with passkey authentication. In the case of the Yubikey, the website can ask for User Verification (UV) through WebAuth, which then mandates that the user either authenticate using their fingerprint or their PIN. Thereby, you combine the use of the possession factor with an inherence or additional knowledge factor. The WebAuth standard does, in this case, not inform the application about which verification method was used, only that it was used. That said, practically speaking, you use \"something you know\" as the primary factor and combine a possession factor with either an inherence factor or a knowledge factor as your MFA option.\n\nThe intent behind the ASVS text is that, for level 3, it is not enough only to ask for User Presence (UP) (e.g., button press); you also need User Verification (UV) when combining this with an inherence factor (passkeys).\n\nIt is important to note that in the case of User Verification (UV) WebAuth, which I believe 100% of all projects use these days, it is not even possible to see which factor was used for User Verification (UV).  And according to FIDO, the abstract encrypted biometric identifiers are designed to never leave the security boundary of the security module (chip). I believe there are no real business reasons for creating an implementation that is not compatible with the current standards. ",
+          "recorded_at": "2026-07-03T09:15:13Z"
+        },
+        {
+          "body": "It's often not as clear-cut as you might think. In the case of hardware authenticators like the Yubikey Bio, you can often choose to use it as an MFA mechanism only. In that case, you log in with your password, then use the Yubikey Bio as a second and third factor by combining biometric verification with passkey authentication. In the case of the Yubikey, the website can ask for User Verification (UV) through WebAuth, which then mandates that the user either authenticate using their fingerprint or their PIN. Thereby, you combine the use of the possession factor with an inherence or additional knowledge factor. The WebAuth standard does, in this case, not inform the application about which verification method was used, only that it was used. That said, practically speaking, you use \"something you know\" as the primary factor and combine a possession factor with either an inherence factor or a knowledge factor as your MFA option.\n\n~~The intent behind the ASVS text is that, for level 3, it is not enough only to ask for User Presence (UP) (e.g., button press); you also need User Verification (UV) when combining this with an inherence factor (passkeys).~~\n\nI'll retract my statement. It's perhaps more wishful thinking from my side, as the intent here is to follow NIST. \n\nIt is important to note that in the case of User Verification (UV) WebAuth, which I believe 100% of all projects use these days, it is not even possible to see which factor was used for User Verification (UV).  And according to FIDO, the abstract encrypted biometric identifiers are designed to never leave the security boundary of the security module (chip). I believe there are no real business reasons for creating an implementation that is not compatible with the current standards. ",
+          "recorded_at": "2026-07-03T10:36:39Z"
+        },
+        {
+          "body": "It's often not as clear-cut as you might think. In the case of hardware authenticators like the Yubikey Bio, you can often choose to use it as an MFA mechanism only. In that case, you log in with your password, then use the Yubikey Bio as a second and third factor by combining biometric verification with passkey authentication. In the case of the Yubikey, the website can ask for User Verification (UV) through WebAuth, which then mandates that the user either authenticate using their fingerprint or their PIN. Thereby, you combine the use of the possession factor with an inherence or additional knowledge factor. The WebAuth standard does, in this case, not inform the application about which verification method was used, only that it was used. That said, practically speaking, you use \"something you know\" as the primary factor and combine a possession factor with either an inherence factor or a knowledge factor as your MFA option.\n\n~~The intent behind the ASVS text is that, for level 3, it is not enough only to ask for User Presence (UP) (e.g., button press); you also need User Verification (UV) when combining this with an inherence factor (passkeys).~~\n\nI'll retract my statement. It's perhaps more wishful thinking from my side, as the intent here is to follow NIST. The text is completely fine as it is.\n\nIt is important to note that in the case of User Verification (UV) WebAuth, which I believe 100% of all projects use these days, it is not even possible to see which factor was used for User Verification (UV).  And according to FIDO, the abstract encrypted biometric identifiers are designed to never leave the security boundary of the security module (chip). I believe there are no real business reasons for creating an implementation that is not compatible with the current standards. ",
+          "recorded_at": "2026-07-03T10:38:33Z"
+        }
+      ]
+    }
+  ]
+}

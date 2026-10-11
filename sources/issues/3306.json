@@ -1,0 +1,39 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwNTgwMTE=",
+    "is_bot": false,
+    "login": "narfbg",
+    "name": "Andrey Andreev"
+  },
+  "body": "[V13.3 Secret Management (as of time of this issue)](https://github.com/OWASP/ASVS/blob/67100a95f382d7bae8058c6f63fe07680b21e34f/5.0/en/0x22-V13-Configuration.md#v133-secret-management):\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| 13.3.1 | Verify that a secrets management solution, such as a key vault, is used to securely create, store, control access to, and destroy backend secrets. These could include passwords, key material, integrations with databases and third-party systems, keys and seeds for time-based tokens, other internal secrets, and API keys. Secrets must not be included in application source code or included in build artifacts. **For an L3 application, this must involve a hardware-backed solution such as an HSM.** | 2 |\n| 13.3.3 | Verify that all cryptographic operations are performed using an isolated security module (such as a vault or hardware security module) to securely manage and protect key material from exposure outside of the security module. | 3 |\n\nI've also mentioned 13.3.1 and bolded a sentence in it because it largely overlaps, and arguably even raises the requirement of 13.3.3 (from any secure vault to a hardware-backed one).\n\nHowever, the main issue I have is that \"all cryptographic operations\" in 13.3.3 is way too aggressive when read as is.\n\nA few examples:\n- Per-row data encryption would require an individual key entry for each record in a database, while KDF-based schemes working off a single base key are ruled out.\n- In a similar fashion, applications have to interact with the security module even for ephemereal operations with no stored secrets to protect, or to add signatures to log entries. This doesn't scale well.\n- The application design may require algorithms not supported by the available security module (or any on the market, for more novel purposes like with PQC).\n- Price scheming in cloud environments can also make this cost-prohibitive.\n\nSide issure really, but it's also not explicitly clear whether this applies to all secrets (which can be interpreted in very imaginative ways) or just runtime configuration (the primary concern).\n\nI tracked this back to #2952, which didn't really give me more clarity, but its spin-off #2971 originally talked explicitly about \"very important secrets\" depending on a threat model - that doesn't refer directly to 13.3.3, but there is implied recognition that some secrets are high value and others not so much, making 13.3.3 even more aggressive with that in mind. A _lot_ of things are functionally cryptographic operations but not of proportionally high risk.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7VKwX2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for your efforts tracing back.\n\nTo clarify, 13.3.1 refers to \"create, store, control access to, and destroy\" whereas 13.3.3 refers to \"operations are performed\". The implication is that in 13.3.1 the keys are stored there but can be pulled into application memory or something for cryptographic operations. \n\nOn the other hand, 13.3.3 requires that the cryptographic material never leaves that solution. Is that really too aggressive for L3? I think I would need to see more people's input on this. In particular, I think input from @danielcuthbert and @unprovable would be valuable.",
+      "createdAt": "2025-11-25T15:57:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3306#issuecomment-3576366582",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-11-22T23:15:57Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    }
+  ],
+  "number": 3306,
+  "state": "OPEN",
+  "title": "v5.0.0: 13.3.3 is too aggressive/vague",
+  "url": "https://github.com/OWASP/ASVS/issues/3306"
+}

@@ -1,0 +1,298 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Spin off from #2908, Point 4.\n\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **11.5.2** | Verify that random number generation continues to work securely, even under heavy system load, or that the system degrades gracefully. | 3 | v5.0.be-6.3.3 |\n\nThis requirement feels not actionable and is quite vague - \"work securely\", \"heavy system load\".\n\nWhat is the problem to solve / risk to mitigate for this one? If there is a clear problem to solve, maybe set the focus around that?\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6l9IZi",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The problem is that if you depend on random numbers at scale for security, under heavy load good entropy pools will block and stop your service from working. If you do not use a blocking RNG then the risk is ending up with predictable or weak randomness. \n\nSo the goal of this control is to make sure your system doesn’t silently degrade into insecure behavior for RNG used for security when stressed.\n\nFor very high load systems that require good random numbers at scale for crypto or other security means, using pooled PRNG services (e.g., Fortuna, /dev/urandom-based pools) or otherwise having some kind of backup queue of good random numbers, is how you typically handle this problem. This is especially important in banks and high load payment services.",
+      "createdAt": "2025-04-07T18:53:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2784265826",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6l9KhY",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "As a side note @elarlang this is really only a L3 problem at best. This is all centered around the debate of wether to use /dev/urandom vs /dev/random. There are tons of articles to read on this to get deeper into the debate.\n\nFor most systems /dev/urandom (which never blocks) is random enough. Even for security purposes. \n\nThis is very debatable, especially when you consider the advances of random number generation in modern *nix systems.",
+      "createdAt": "2025-04-07T18:56:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2784274520",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6l-lpk",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For most systems /dev/urandom (which never blocks) is random enough. Even for security purposes.\n\nI am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nIf we keep this requirement as is stands, the question is how is the layperson-tester (laytester?) supposed to verify that anyway? He may try to load the system for cryptographic operations and it could lead to:\n\n1. performance degradation → you have found a potential DoS vulnerability (which is already covered in other requirements);\n2. there is no performance degradation but maybe you there is degradation of the quality of the generated random values but as a layperson-tester will have a very hard time trying to prove one way of the other (unless the generator is doing something very stupid).\n\nThe only solution would be try to verify anything meaningful would be to do a real cryptographic analysis of the random generator which is quite a expert thing to do.",
+      "createdAt": "2025-04-07T21:16:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2784647780",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6l-oXS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nI hear that a lot too and I am inclined to go that route too. Here is the other side of that coin to consider:\n\n**1. Pre-seeding or initialization attacks**\nHistorically, /dev/urandom could be read before it had sufficient entropy early in boot (on Linux systems < 5.x). \n\n- If you're on older kernels or embedded devices, /dev/urandom may not be safe early at boot.\n\n**2. Manual CSPRNG implementation**\nIf a developer thinks “I’ll just seed my own PRNG with urandom and call it cryptographic,” that’s dangerous unless done exactly right. You’re better off relying on vetted CSPRNGs like:\n\n- ChaCha20-DRBG (used in libsodium)\n- AES-CTR DRBG (used in Java SecureRandom with proper config)\n- BLAKE3 as a strong hash-based entropy expansion tool\n\n**3. Post-quantum and forward secrecy considerations**\nRelying only on ephemeral /dev/urandom-seeded values without forward secrecy or rekeying won’t help you against future quantum threats. For session keys and long-term secrets, you should:\n\n- Regularly rekey (e.g., via HKDF, DRBG reseed, etc.)\n- Consider quantum-safe key agreement protocols (e.g., Kyber)\n\n**4. Lack of auditing or compliance**\nIn regulated environments (e.g., FIPS, PCI DSS, etc.), just saying \"I use /dev/urandom\" is insufficient. You may need:\n\n- FIPS-validated DRBGs (e.g., NIST SP 800-90A compliant)\n- Entropy source validation and logging\n\n",
+      "createdAt": "2025-04-07T21:22:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2784658898",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6bFg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We know that certain requirements aren't \"pen testable\" and this is one of them.\n\nI would propose:\n\n\"_Verify that a random number generation mechanism in use which is designed to work securely, even under heavy demand._\"",
+      "createdAt": "2025-04-20T10:45:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2817110368",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7eRD",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth I think that would be:\n\n\"Verify that the random number generation mechanism in use is designed to work securely, even under heavy demand.\"",
+      "createdAt": "2025-04-20T23:23:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2817385539",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n97E-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think that would be:\n> \n> \"Verify that the random number generation mechanism in use is designed to work securely, even under heavy demand.\"\n\nHaha, good point. Thanks @randomstuff \n\nOpened #3014",
+      "createdAt": "2025-04-21T09:26:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2818027838",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oA35s",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> We know that certain requirements aren't \"pen testable\" and this is one of them.\n\nBut how do I verify that?",
+      "createdAt": "2025-04-21T15:29:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2818801260",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oB99K",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > We know that certain requirements aren't \"pen testable\" and this is one of them.\n> \n> But how do I verify that?\n\nAsk someone? Review the code? Read some documentation? :) there are plenty of ASVS requirements you cannot pen test and that have to be tested in other ways, @EnigmaRosa did a whole talk on it :)",
+      "createdAt": "2025-04-21T17:34:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2819088202",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oCNjI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I asked \"how to verify that\", nothing about pentesting.\n\nIf the requirements starts, that \"verify that\", then how can I do it?",
+      "createdAt": "2025-04-21T18:05:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2819152072",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oC4fT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's discuss any further refinements when we next  speak",
+      "createdAt": "2025-04-21T19:28:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2819327955",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oDH3Y",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I asked \"how to verify that\", nothing about pentesting.\n> \n> If the requirements starts, that \"verify that\", then how can I do it?\n\nThis is fairly easy. Find an endpoint that does random number generation and pound it with a performance testing tool like [loadrunner](https://pflb.us/glossary/load-runner/). I usually do this in dev with a purposefully low resource image so I can trigger the failure state quickly. It's not that rough.",
+      "createdAt": "2025-04-21T20:03:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2819390936",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oEAcQ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is fairly easy. Find an endpoint that does random number generation and pound it with a performance testing tool like [loadrunner](https://pflb.us/glossary/load-runner/). I usually do this in dev with a purposefully low resource image so I can trigger the failure state quickly. It's not that rough.\n\nTriggering a failure or a DoS is comparatively easy. Detecting a degradation of the quality of the random numbers under high loss (which is, I think, what we are really into) would would be much harder.",
+      "createdAt": "2025-04-21T22:28:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2819622672",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oNiwW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > This is fairly easy. Find an endpoint that does random number generation and pound it with a performance testing tool like [loadrunner](https://pflb.us/glossary/load-runner/). I usually do this in dev with a purposefully low resource image so I can trigger the failure state quickly. It's not that rough.\n> \n> Triggering a failure or a DoS is comparatively easy. Detecting a degradation of the quality of the random numbers under high loss (which is, I think, what we are really into) would would be much harder.\n\nMy point is, if I can't trigger a DOS for a random number generation endpoint then they are likely using non-blocking random number generator and the quality of those random numbers are less. Especially in dev, I can always force a DOS when using a blocking random number generator (which is more secure).\n\nYou also use Burp to evaluate the quality of random numbers.",
+      "createdAt": "2025-04-22T18:19:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2822122518",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oRPLN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There may also be documentation about the library or mechanism in use which explains how it handles a high load situation",
+      "createdAt": "2025-04-23T05:20:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2823090893",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oSeal",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> There may also be documentation about the library or mechanism in use which explains how it handles a high load situation\n\nThat makes it a documentation requirement.",
+      "createdAt": "2025-04-23T08:03:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2823415461",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oTboH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > There may also be documentation about the library or mechanism in use which explains how it handles a high load situation\n> \n> That makes it a documentation requirement.\n\nNo I am not talking about the application developer's documentation, I am talking about the documentation of what ever library they are using",
+      "createdAt": "2025-04-23T09:29:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2823666183",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-07T06:41:59Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2911,
+  "state": "CLOSED",
+  "title": "11.5.2 / v5.0.be-6.3.3 - define problem to solve",
+  "url": "https://github.com/OWASP/ASVS/issues/2911"
+}

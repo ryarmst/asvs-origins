@@ -1,0 +1,201 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "We have this requirement about UUID in \"Random Value\"\r\n\r\n> 6.3.2 [MODIFIED] Verify that UUIDs are created with an implementation of the UUID v4 or v7 algorithms which utilizes a cryptographically-secure pseudo-random number generator (CSPRNG).\r\n\r\nThere are legitimate uses of other UUID versions (outside of cryptography) and this requirement currently forbid them if interpreted literally.\r\n\r\nI think what we really intend to say here is:\r\n\r\n> 6.3.2 [MODIFIED] Verify that UUIDs with v4 or v7 use a cryptographically-secure pseudo-random number generator (CSPRNG).\r\n\r\nThis makes sure that if any of these UUID v4 or v7 are used as secrets, this is not a great deal.\r\n\r\nHowever, this quite feels weird in this section (?).",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6UbTS_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Based on UUIDs own \"[RFC 9562 Universally Unique IDentifiers (UUIDs)](https://www.rfc-editor.org/rfc/rfc9562.html#name-security-considerations)\", those MUST NOT be used for that\r\n\r\n> Implementations SHOULD NOT assume that UUIDs are hard to guess. For example, they MUST NOT be used as security capabilities (identifiers whose mere possession grants access). Discovery of predictability in a random number source will result in a vulnerability.",
+      "createdAt": "2024-11-21T06:32:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490184895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UbshX",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Implementations SHOULD NOT assume that UUIDs are hard to guess. \r\n\r\n@elarlang, Oh, yes I forgot to mention that :)\r\n\r\nBut in practice, UUIDs are often used like this (as session identifiers, [password reset tokens](https://medium.com/appsec-untangled/lessons-learned-3-is-your-random-uuid-really-random-1a8a62207c8b), etc.\r\n\r\nAnyway, this requirement should probably be removed and might be replaces into requirements for generating unique random values for security:\r\n\r\n> Verify that when generating random values [TODO, for security], the application use a cryptographically-secure pseudo-random number generator and  at least XX bits of entropy. UUIDs must not be used for this purpose.",
+      "createdAt": "2024-11-21T07:44:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490288215",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UcVP1",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, the argument is valid. The requirement, as currently worded, could be interpreted to forbid legitimate uses of other UUID versions (such as v1, v3, or v5) that are appropriate in certain contexts outside of cryptographic needs. By specifying that only UUID v4 or v7 with a CSPRNG should be used, the requirement inadvertently disallows the use of other UUID versions even when they are suitable and safe for the intended purpose. This could lead to unnecessary constraints on developers and might force them to use less optimal solutions for their specific use cases\r\n\r\nhowever, in the context of this requirement, it is in the cryptographic section and as such, would that mean it's less likely to confuse the other uses with those needing strong cryptographic foundations?\r\n\r\nIf that isn't the case, we could look at someting like this:\r\n\r\n\r\nVerify that when UUIDs are used in security-sensitive contexts where unpredictability is important (such as session identifiers, tokens, or in URLs), they are generated using a cryptographically secure pseudo-random number generator (CSPRNG), utilizing UUID v4 or v7 algorithms. For non-security contexts where determinism or ordering is required, other UUID versions may be used appropriately.\r\n\r\n\r\nI guess there does exist a need for contexts here but i'm also aware that this is about cryptography and not other uses",
+      "createdAt": "2024-11-21T09:09:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490455029",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UcajQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we can just remove the requirement 6.3.2 and we don't miss anything. UUID own spec says how to (not) use it. We can add a \"note\" to 6.3.1 if it is really necessary that \"do not use UUID for that\", but I prefer to not do it.\r\n\r\nUUID just does not match to requirement 6.3.1 and it is covered by that.",
+      "createdAt": "2024-11-21T09:18:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490476752",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ucbtk",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm good with that too ;). ill do a PR ",
+      "createdAt": "2024-11-21T09:21:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490481508",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Uccnc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "`[DELETED, DUPLICATE OF 6.3.1]`",
+      "createdAt": "2024-11-21T09:22:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490485212",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Uccuj",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> UUID just does not match to requirement 6.3.1 and it is covered by that.\r\n\r\nUUIDs might match the current requirements in 6.3.1 if generated using CSPRNG.\r\n\r\nWhat we miss (in 6.3.1 or as a separate) requirement in to say that:\r\n\r\n> Verify that all random numbers and strings which are intended to be non-guessable must have at least XXX bits of entropy. Note that UUIDs do not respect this condition.\r\n\r\nThe usage of UUIDs for this kind of usage is prevalent, so I think it would make sense to explicitly talk about this.",
+      "createdAt": "2024-11-21T09:22:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490485667",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UdhXK",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So we deleting or amending? ",
+      "createdAt": "2024-11-21T10:43:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490766794",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Udiem",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So we deleting or amending?\r\n\r\nI think it is \"deleting\" (6.3.2) and amending (6.3.1)\r\n\r\n",
+      "createdAt": "2024-11-21T10:45:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2490771366",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UnX3-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@danielcuthbert you are doing the PR?",
+      "createdAt": "2024-11-22T09:47:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2493349374",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WQutA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2436 to resolve this",
+      "createdAt": "2024-12-05T17:20:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2396#issuecomment-2520968000",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-11-20T21:27:12Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    }
+  ],
+  "number": 2396,
+  "state": "CLOSED",
+  "title": "V6 - Requirement about UUIDs and CSPRNG",
+  "url": "https://github.com/OWASP/ASVS/issues/2396"
+}

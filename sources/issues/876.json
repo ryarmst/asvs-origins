@@ -1,0 +1,843 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjI1MzExOTE1",
+    "is_bot": false,
+    "login": "jeremychoi",
+    "name": "Jeremy Bonghwan Choi"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nCurrently, CORS is covered by 14.5.3 in V14.5 \"Validate HTTP **Request** Header Requirements\" which won't fit well, because \" Access-Control-AllowOrigin header\" is a **response** header, although 14.5.3 also have a part related to the Origin header which is a request header.\r\n\r\nI'd suggest adding a new subsection such as 14.6 for CORS and let it include the following items:\r\n\r\n14.6.1 Verify that the Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header uses a strict allow list of trusted domains and subdomains to match against and does not support the \"null\" origin.\r\n14.6.2 Verify that the responses do not include any sensitive information, where they should be responded with _Access-Control-Allow-Origin: *_ \r\n\r\nIf it makes sense, I'll make a PR soon.\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDczOTg5MTczMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Problems with current 14.5.3 I have described in: https://github.com/OWASP/ASVS/issues/686 (but closed it myself back then). It contains two requirements together the way that it's not understandable, what exactly you need to check:\r\n* validate `Origin` request header\r\n* have whitelist for `Access-Control-Allow-Origin` response header\r\n\r\nProposed 14.6.2 is something what ASVS miss at the moment, but:\r\n* if to split current 14.5.3 to validate `Origin` and build correct `Access-Control-Allow-Origin` - it can be part of the last one\r\n* it's quite different, do you have `Access-Control-Allow-Credentials: true` in the same response or not.\r\n\r\nCategory - do we consider CORS topic as part of Configuration (V14 subcategory) or part of Web Service (V13 subcategory)",
+      "createdAt": "2020-12-07T12:36:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-739891730",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MDAwMDM4MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "1) The origin header fires automatically for both preflight and simple requests; developers do not do this\n\n2) I’m most worried anout access-control-allow-origin being wildcard (*), I do not think null is even supported\n\n3) access-control-allow-origin is spelled wrong below\n\nThis is really precarious stuff to be setting requirements for; can we please get several reviews before PR’s go live on this?\n\nAloha,\n--\nJim Manico\n@Manicode\n\n> On Dec 6, 2020, at 5:28 PM, Jeremy Bonghwan Choi <notifications@github.com> wrote:\n> \n> ﻿\n> Currently, CORS is covered by 14.5.3 in V14.5 \"Validate HTTP Request Header Requirements\" which won't fit well, because \" Access-Control-AllowOrigin header\" is a response header, although 14.5.3 also have a part related to the Origin header which is a request header.\n> \n> I'd suggest adding a new subsection such as 14.6 for CORS and let it include the following items:\n> \n> 14.6.1 Verify that the Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header uses a strict allow list of trusted domains and subdomains to match against and does not support the \"null\" origin.\n> 14.6.2 Verify that the responses do not include any sensitive information, where they should be responded with Access-Control-Allow-Origin: *\n> \n> If it makes sense, I'll make a PR soon.\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-12-07T15:45:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-740000381",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MjI2NTUyMw==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree with splitting the current 14.5.3 into two separate ones.  \r\n\r\nRe 14.6.2, I should have provided more details. \r\n\r\nIf  `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`,  the browsers will just make the request fail (https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials). So IMO we just don't need to care about it.\r\n\r\nThere are situations where a protection is made by IP addresses or firewall rules(e.g. communication allowed in the intranet), rather than by credentials. In this case, whether or not the `Access-Control-Allow-Credentials: true` header being returned does not matter, because it's not protected by credentials in the first place. Therefore the best is to have the strict white list in the  `Access-Control-Allow-Origin` header but if inevitably the header needs to be set to *, the sensitive information must not be contained.\r\n\r\nRe Jim's \"1) The origin header fires automatically for both preflight and simple requests; developers do not do this\", attackers can host scripts in their host, phish the victim and let the requests send from there. In that case, the Origin header can be manipulated. So we need to validate the `Origin` request.  (I recently added an example to the web security testing guide, https://github.com/OWASP/wstg/pull/657/commits/d8d10ff548b050326d8caeab82d4c344036def4b#diff-f9e5b91325a1ae6dc54f7b8fa67a5322757bfa19b5bdbfa2e4ebd3fb198e83c6R75)\r\n\r\nHow about this?\r\n\r\n14.6.1 Verify that the Cross-Origin Resource Sharing (CORS) `Access-Control-Allow-Origin` header uses a strict **white** list of trusted domains and subdomains. Where `Access-Control-Allow-Origin: *` needs to be inevitably returned, verify that the responses do not include any sensitive information.\r\n14.6.2 Verify that the `Origin` request header is validated to meet the CORS policy.",
+      "createdAt": "2020-12-10T06:11:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-742265523",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MjI2NjgzNw==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Re: \"do we consider CORS topic as part of Configuration (V14 subcategory) or part of Web Service (V13 subcategory)\", I think V14 would fit better. Technically, it doesn't necessarily have to be a **web service** to use CORS, although it's very common.",
+      "createdAt": "2020-12-10T06:14:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-742266837",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MjI4NDE5Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If `Access-Control-Allow-Credentials: true` exists in the same response with `Access-Control-Allow-Credentials: *`, the browsers will just make the request fail. So IMO we just don't need to care about it.\r\n\r\nYou are mixing `Access-Control-Allow-Credentials: *` and `Access-Control-Allow-Origin: *` here, but ok, didn't have this in my mind that credentials are not allowed with `*` Origin.\r\n\r\nBut what it means in reality then - \"do not show sensitive information for not authorized user\" (because cookies are not in request). Is there any point to have this requirement, I'm not really sure. Authorization problems are covered with V4 category requirements. Without authorization problems it does not give anything extra.\r\n\r\nMaybe I miss same cases. Where it can cause problems? What is your reason or example, where it causes problems?\r\n",
+      "createdAt": "2020-12-10T06:57:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-742284193",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MjYyMjE5NA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with Elar but keep in mind these new requirements I personally think are fantastic and it’s the right direction for ASVS. Keep charging in this direction!\n\n--\nJim Manico\n@Manicode\n\n\n> On Dec 9, 2020, at 8:57 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> If Access-Control-Allow-Credentials: true exists in the same response with Access-Control-Allow-Credentials: *, the browsers will just make the request fail. So IMO we just don't need to care about it.\n> \n> You are mixing Access-Control-Allow-Credentials: * and Access-Control-Allow-Origin: * here, but ok, didn't have this in my mind that it does credentials are not allowed with * Origin.\n> \n> But what is means in reality then - \"do not show sensitive information for not authorized user\" (because cookies are not in request). Is there any point to have this requirement, I'm not really sure. Maybe I miss same cases. Where it can cause problems? What is your reason or example, where it causes problems?\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-12-10T16:15:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-742622194",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzIyMjEyNA==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A common example is, an internal web page which is only accessible from a specific IP address range(e.g. access control via VPN), not via cookies or other Auth mechanism. In this case, a sensitive information could be read if `Access-Control-Allow-Origin: *` is set. **4.1.1** seems to be most related but, it's not clear to me whether or not VPN could be viewed as a trusted service layer (as defined in V1.5 - where the term \"trusted service layer\" is used in the ASVS, we mean any trusted enforcement point, regardless of location, such as a microservice, serverless API, server-side, a trusted API on a client device that has secure boot, partner or external APIs, and so on). Otherwise, any other item that would cover this case? \r\n\r\nMeanwhile, a question we might need to consider first would be whether or not we want to view the wildcard `Access-Control-Allow-Origin` as dangerous.\r\n\r\nIf yes, we should have an additional item to clearly mention that the wildcard needs to be avoided like:\r\n\r\n_Verify that `Access-Control-Allow-Origin: *` is not used._\r\n\r\nIf no (I prefer this as IMO it's an overkill to force not to use the wildcard ACAO at all, except null), my initial suggestion would make sense.  \r\n\r\nI tried summarizing it again. I added now 'as much as possible' to make it a bit much clearer. BTW, I missed the 'null' part in my last comment. 'null' can be used as a value for the ACAO header, but https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin suggests 'null' should not be used). It'd be good to have a separate item for it. Hence, the final version(any suggestion for better wordings is welcome):\r\n\r\n14.6.1 Verify that the Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header uses a strict white list of trusted domains and subdomains as much as possible. Where `Access-Control-Allow-Origin: *` needs to be inevitably used, verify that the responses do not include any sensitive information.\r\n14.6.2 Verify that `Access-Control-Allow-Origin: null` is not used.\r\n14.6.3 Verify that the `Origin` request header is validated to meet the CORS policy.",
+      "createdAt": "2020-12-11T14:26:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743222124",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzIzNjI3MQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Otherwise, any other item that would cover this case?\r\n\r\nDescribed situation for me is clear problem with missing authentication and authorization controls. Do not use `Access-Control-Allow-Origin: *` there makes sense but to set this header does not solve original problem - missing authentication and authorization.\r\n\r\nAt the same time we can not say do not use `Access-Control-Allow-Origin: *`, because it is required when you want to share font files from your domain for example (for other sites).\r\n\r\n> 14.6.2 Verify that `Access-Control-Allow-Origin: null` is not used.\r\n\r\nIf previous requirement says \"use strict white list\", then what this one gives extra? Instead of _\"white list\"_ you may want to use _\"allow-list\"_ nowadays.\r\n\r\nYour proposal:\r\n\r\n> 14.6.3 Verify that the Origin request header is validated to meet the CORS policy.\r\n\r\nCurrent V14.5.2\r\n\r\n> V14.5.2 Verify that the supplied Origin header is not used for authentication or access control decisions, as the Origin header can easily be changed by an attacker. \r\n\r\nFor discussion - should those be merged to one requirement or there is point to keep them separately?",
+      "createdAt": "2020-12-11T14:50:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743236271",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzI2NzM4OA==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "On Sat, 12 Dec. 2020, 12:51 am Elar Lang, <notifications@github.com> wrote:\n\n> Otherwise, any other item that would cover this case?\n>\n> Described situation for me is clear problem with missing authentication\n> and authorization controls. Do not use Access-Control-Allow-Origin: *\n> there makes sense but to set this address does not solve original problem -\n> missing authentication and authorization.\n>\n\nI agree but I'd like to further discuss with a specific item. Can you point\none?\n\nBTW my point here is we have a separate CORS section. I think even if there\nare some part overlaps, it's better to have it separately for easier and\nclearer reference.\n\n> At the same time we can not say do not use Access-Control-Allow-Origin: *,\n> because it is required when you want to share font files from your domain\n> for example (for other sites).\n>\n> 14.6.2 Verify that Access-Control-Allow-Origin: null is not used.\n>\n> If previous requirement says \"use strict white list\", then what this one\n> gives extra? Instead of white list you may want to use \"allow-list\"\n> nowadays.\n>\n\nGood with 'Allow-list'. Let's remove 'strict'.\n\nHaving a separate item would clarify the requirement of 'null' not being\nused IMO, as long as it doesn't cause trouble.\n\n> Your proposal:\n>\n> 14.6.3 Verify that the Origin request header is validated to meet the CORS\n> policy.\n>\n> Current V14.5.2\n>\n> V14.5.2 Verify that the supplied Origin header is not used for\n> authentication or access control decisions, as the Origin header can easily\n> be changed by an attacker.\n>\n> For discussion - should those be merged to one requirement or there is\n> point to keep them separately?\n>\nI suggest keeping them separately, one for a clear CORS requirement,\nanother for general cases.\n\nNow that we continuosly discussed CORS in terms of authZ, it came to my\nmind, how about having the new CORS section in V4 instead of V14?\n\n—\n> You are receiving this because you authored the thread.\n> Reply to this email directly, view it on GitHub\n> <https://github.com/OWASP/ASVS/issues/876#issuecomment-743236271>, or\n> unsubscribe\n> <https://github.com/notifications/unsubscribe-auth/AGBDVK4S73SXIOPXQHFWOZ3SUIWV3ANCNFSM4UP3AJEA>\n> .\n>\n",
+      "createdAt": "2020-12-11T15:40:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743267388",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzI3NTUzOQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I prefer one `Access-Control-Allow-Origin` which covers:\r\n* use allow-list\r\n* do not use `null` at all\r\n* do not use `*` when serving content\r\n\r\nIf I take most-widespread mistake what I have seen during pen-test cases then in practice this requirement must send clearly message: do not reflect `Origin` request header value from user back to user as `Access-Control-Allow-Origin` response header value.\r\n\r\nFor `Origin` header\r\n* one requirement for \"validate against allow-list\"\r\n* one requirement \"do not use value for authentication decisions\"\r\n\r\nIf to keep them in V14 category, I prefer to not have separate category for CORS, but just finetuned requirements in V14.4 for ACAO and V14.5 for Origin. I think all those categories and subcategories will be reorganized many times before ASVS v4.1 will be released.",
+      "createdAt": "2020-12-11T15:56:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743275539",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzMwMjY5OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "1 more note. CORS is not a replacement for access control or authentication of the user. This is just to give browser permission to send sensitive data cross origin over XHR. It’s crucial that developers propagate the session like a JWT (and have it get verified) and still do access control across the features being accessed cross origin.\n\nPoint being, CORS is shitty security. I can just use curl to completely circumvent it.\n\n--\nJim Manico\n@Manicode\n\n\n> On Dec 11, 2020, at 5:56 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> I prefer one Access-Control-Allow-Origin which covers:\n> \n> use allow-list\n> do not use null at all\n> do not use * when serving content\n> If I take most-widespread mistake what I have seen during pen-test cases then in practice this requirement must send clearly message: do not reflect Origin request header value from user back to user as Access-Control-Allow-Origin response header value.\n> \n> For Origin header\n> \n> one requirement for \"validate against allow-list\"\n> one requirement \"do not use value for authentication decisions\"\n> If to keep them in V14 category, I prefer to not have separate category for CORS, but just finetuned requirements in V14.4 for ACAO and V14.5 for Origin. I think all those categories and subcategories will be reorganized many times before ASVS v4.1 will be released.\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-12-11T16:46:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743302698",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzM5MTMzNg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Point being, CORS is shitty security. I can just use curl to completely circumvent it.\r\n\r\nAs CORS is meant for browsers, like you already pointed out yourself, for defending end-users against cross-origin attacks, then parallel with curl does not make sense here. It's kind of the same to say, that defense against CSRF is shitty security because you can bypass it with using curl.",
+      "createdAt": "2020-12-11T19:45:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743391336",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzM5MzUwNA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Oh yes it does. If you skip typical AuthN and AuthZ and just depend on \nCORS to protect user data, that data can be stolen easily.\n\nIf you skip CSRF defense, then I can hit you with - CSRF attack via the \nbrowser, only.\n\nIf you skip AuthZ/AuthN and just depend on CORS, well I can do a lot more.\n\nSo your comparison is not accurate.\n\n- Jim\n\n\nOn 12/11/20 9:45 AM, Elar Lang wrote:\n>\n>     Point being, CORS is shitty security. I can just use curl to\n>     completely circumvent it.\n>\n> As CORS is meant for browsers, like you already pointed out yourself, \n> for defending end-users against cross-origin attacks, then parallel \n> with curl does not make sense here. It's kind of the same to say, that \n> defense against CSRF is shitty security because you can bypass it with \n> using curl.\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/876#issuecomment-743391336>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCPBW77ZCN5D3E4VDFLSUJZGBANCNFSM4UP3AJEA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-12-11T19:49:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743393504",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzM5NDQwNg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, if you use tools for what they are not meant for, they don't do the job you expected.",
+      "createdAt": "2020-12-11T19:51:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743394406",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzM5NDU2Mw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar,\n\nSomeone referred to CORS as an access control mechanism. Be careful \nsaying that. My point again is that CORS is not a replacement for app \nlevel access control, so be careful calling CORS an access control \nmechanism.\n\n- Jim\n\nOn 12/11/20 9:49 AM, Jim Manico wrote:\n>\n> Oh yes it does. If you skip typical AuthN and AuthZ and just depend on \n> CORS to protect user data, that data can be stolen easily.\n>\n> If you skip CSRF defense, then I can hit you with - CSRF attack via \n> the browser, only.\n>\n> If you skip AuthZ/AuthN and just depend on CORS, well I can do a lot more.\n>\n> So your comparison is not accurate.\n>\n> - Jim\n>\n>\n> On 12/11/20 9:45 AM, Elar Lang wrote:\n>>\n>>     Point being, CORS is shitty security. I can just use curl to\n>>     completely circumvent it.\n>>\n>> As CORS is meant for browsers, like you already pointed out yourself, \n>> for defending end-users against cross-origin attacks, then parallel \n>> with curl does not make sense here. It's kind of the same to say, \n>> that defense against CSRF is shitty security because you can bypass \n>> it with using curl.\n>>\n>> —\n>> You are receiving this because you commented.\n>> Reply to this email directly, view it on GitHub \n>> <https://github.com/OWASP/ASVS/issues/876#issuecomment-743391336>, or \n>> unsubscribe \n>> <https://github.com/notifications/unsubscribe-auth/AAEBYCPBW77ZCN5D3E4VDFLSUJZGBANCNFSM4UP3AJEA>.\n>>\n> -- \n> Jim Manico\n> Manicode Security\n> https://www.manicode.com\n\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-12-11T19:52:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743394563",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzM5NDgwMg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Please do not use CORS as a replacement for app level access control. =)\n\n- Jim\n\nOn 12/11/20 9:52 AM, Elar Lang wrote:\n>\n> Yes, if you use tools for what they are not meant for, they don't do \n> the job you expected.\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/876#issuecomment-743394406>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCJUNVLEVTQXAOXV673SUJZ6VANCNFSM4UP3AJEA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-12-11T19:52:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743394802",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzM5NTcyMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have not used it as replacement, I have said clearly in every comment, that original access control problems stays. I have not said that you can fix access control with setting up CORS. Don't put words to my mouth (comments).",
+      "createdAt": "2020-12-11T19:54:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743395720",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzM5NzkyNA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar.\n\nGood, I'm glad we are on the same page! *It's always a pleasure when we \nagree.*\n\nHave a great day!\n\nAloha,\n\n- Jim\n\nOn 12/11/20 9:55 AM, Elar Lang wrote:\n>\n> I have not used it as replacement, I have said clearly in every \n> comment, that original access control problems stays. I have not said \n> that you can fix access control with setting up CORS. Don't put words \n> to my mouth (comments).\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/876#issuecomment-743395720>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCMVKBXBSF4UHYHCJBDSUJ2K5ANCNFSM4UP3AJEA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-12-11T20:00:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743397924",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzQxNDMwNA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just for pun - we are always on the same page when we are commenting same issue ;)\r\n\r\nIf someone is mixing attack vectors / defenses via victim browser and attack vectors / defenses directly to server, I just can not ignore that. That's why this curl comment and I stand for that.\r\n\r\nTakeaway for original issue/topic - category will stay V14 ;)",
+      "createdAt": "2020-12-11T20:36:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743414304",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MzQzOTg5OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Anyone who will argue minute AppSec details to the death and take each and every discussion and requirement personally and emotionally I consider to be...\n\n...“my people” !!!\n\n😉 \n--\nJim Manico\n@Manicode\n\n> On Dec 11, 2020, at 10:36 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> Just for pun - we are always on the same page when we are commenting same issue ;)\n> \n> If someone is mixing attack / defenses via victim browser and attacks vectors / defenses directly to server, I just can not ignore that. That's why this curl comment and I stand for that.\n> \n> Takeaway for original issue/topic - category will stay V14 ;)\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-12-11T21:37:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-743439898",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0NjMwNjk3NQ==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Okay. It will stay in V14. How about having the new V14.6 for CORS?\r\n\r\n> If to keep them in V14 category, I prefer to not have separate category for CORS, but just finetuned requirements in V14.4 for ACAO and V14.5 for Origin. I think all those categories and subcategories will be reorganized many times before ASVS v4.1 will be released.\r\n\r\nElar said above, whereas I suggested having a new one, so the score now is 1 - 1 :) What do you think, Jim?",
+      "createdAt": "2020-12-16T13:46:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-746306975",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0NjM5MzQ4Nw==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I suggest `v14.6 HTTP Response Headers`, or something to the likes of that.\r\nCORS is there to relax SOP in the browser sandbox on server commands. It is not a \"security\" header, it's a security-relaxation header to be precise. Not part of 14.4.\r\n\r\nI am against discussing the Origin header in the request. It's just an anti-pattern when used _(oh it's that origin, let's trust it)_. It's like telling someone not to shoot themselves in the leg. I know some do it. People do a lot of things that will bring shame to everyone ... Haha.\r\n\r\n`ACAO: *` is all good if a server is meant to serve public requests.\r\nDynamic ACAO is bad when not properly implemented as it will allow the ACAC header to be served with it, unlike the `*` value.\r\n\r\nI don't mind reviewing this once a PR is opened as this follows closely to the WSTG contribution done by @jeremychoi \r\n\r\nEdit: After reviewing 14.4, it seems those are all response headers, so that's an alright point. If CORS needs a special section, CSP does too. CSP is a much harder one to tackle to be honest. The points for the CORS headers (since there are many headers) should be part of 14.4",
+      "createdAt": "2020-12-16T14:38:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-746393487",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0NjYwMDUwOQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I prefer to have a separate category for CORS but perhaps at a later \nversion.\n\nWe have just managed to reach a level of stability I hate to shuffle the \ndeck again and move existing requirements to a new section. That \nrenumbering is my concern.\n\nSo while I hesitate to do so, and feel a sense of emotional discomfort \ndoing so....\n\n...but I...\n\n... I...\n\n.. agree with....\n\n*cough*\n\n... I agree with Elar ...\n\n- Jim\n\nOn 12/16/20 3:46 AM, Jeremy Bonghwan Choi wrote:\n>\n> Okay. It will stay in V14. How about having the new V14.6 for CORS?\n>\n>     If to keep them in V14 category, I prefer to not have separate\n>     category for CORS, but just finetuned requirements in V14.4 for\n>     ACAO and V14.5 for Origin. I think all those categories and\n>     subcategories will be reorganized many times before ASVS v4.1 will\n>     be released.\n>\n> Elar said above, whereas I suggested having a new one, so the score \n> now is 1 - 1 :) What do you think, Jim?\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/876#issuecomment-746306975>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCPDZDPWHPMUFRKIVZ3SVC22XANCNFSM4UP3AJEA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-12-16T16:38:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-746600509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0NzQxODMzNg==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you all for the input. I created a PR, trying to reflect your opinions as much as possible.\r\n\r\nPlease review. Any feedback will be welcome.",
+      "createdAt": "2020-12-17T12:46:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-747418336",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0NzQ2MDU1MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V14.4.8 - ACAO\r\n\r\n* \"_as much as possible_\" - not necessary\r\n*  `Access-Control-Allow-Origin: *` - styling/formatting question, so far we don't have \"code style\" in requirements\r\n\r\nV14.5.3 Origin\r\n\r\n* \"_is completely_\" - not necessary\r\n* maybe something like \"validated against defined list of allowed domains\" (with correct and nice wording)?\r\n* \"_when Access-Control-Allow-Origin header is dynamically configured with its value_\" - is this part necessary? I think we need to validate Origin header anyway, do we reflect it back to ACAO or not.  And if we already validate it, then this last part is not needed in requirement text",
+      "createdAt": "2020-12-17T14:09:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-747460550",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0Nzc5MzM1OA==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I will remove them that are stated as \"not necessary\" and use quotes instead of code style.\r\n\r\n> \"when Access-Control-Allow-Origin header is dynamically configured with its value\" - is this part necessary? I think we need to validate Origin header anyway, do we reflect it back to ACAO or not. And if we already validate it, then this last part is not needed in requirement text\r\n\r\nIt makes sense. I wanted to clarify the situation but removing it is fine.  Meanwhile, I still think we might need to mention that it's about CORS so that the requirement looks clearer to audience. \r\n\r\nSo, for V14.5.3, how does this sound: \"Verify that the Origin header is validated against the allow-list to meet the Cross-Origin Resource Sharing (CORS) policy\"?   ",
+      "createdAt": "2020-12-18T00:35:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-747793358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0NzkzMDkxMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One more \"spice\" removal - V14.4.8 from second part \"inevitably\" is also not necessary. Hopefully that't it from me :)\r\n",
+      "createdAt": "2020-12-18T07:56:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-747930910",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0OTkxNzg1Nw==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "made a commit to https://github.com/OWASP/ASVS/pull/884",
+      "createdAt": "2020-12-23T04:04:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-749917857",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc1ODMwMTk4NA==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Happy new year to you all. Is there something I should further do for the PR? Or is there a specific time when the PRs including others are going to be reviewed and merged? ",
+      "createdAt": "2021-01-12T00:04:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-758301984",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc1ODMwODYwMQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Please give us some time; the folks who typically merge are personally busy right now.\n\nWhat typically happens is during a release we take all the existing PR’s in similar resolve them in merge into the next version.\n\nSo please be assured that even if we don’t act on it right away, it’s in the system and before the next release (the next critical juncture) we will take care of it - at the very latest.\n\nIs this acceptable?\n--\nJim Manico\n@Manicode\n\n\n> On Jan 11, 2021, at 2:05 PM, Jeremy Bonghwan Choi <notifications@github.com> wrote:\n> \n> ﻿\n> Happy new year to you all. Is there something I should further do for the PR? Or is there a specific time when the PRs including others are going to be reviewed and merged?\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-01-12T00:20:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-758308601",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc1ODMyMDc1MQ==",
+      "author": {
+        "login": "jeremychoi"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yeah definitely. I just wanted to check if I missed something. Glad that now I got to know what's typically going on. Thanks 👍 ",
+      "createdAt": "2021-01-12T00:54:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-758320751",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc1OTE3MzY3OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "We really do appreciate your contributions. Even if you don't hear from \nus for a while you will get in the next update or sooner.\n\nThank you kindly!\n\nAloha,\n\n- Jim Manico\n\nOn 1/11/21 2:54 PM, Jeremy Bonghwan Choi wrote:\n>\n> Yeah definitely. I just wanted to check if I missed something. Glad \n> that now I got to know what's typically going on. Thanks 👍\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/876#issuecomment-758320751>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCOT5KD3U55DB2Z6XBDSZOMTZANCNFSM4UP3AJEA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2021-01-13T03:05:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-759173678",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjkwNDIxMQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Is there a lingering PR fo this issue? I am a bit overwhelmed but want to address this. What is pending? ",
+      "createdAt": "2021-03-11T17:22:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-796904211",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc0NTk0NA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@jeremychoi can you kindly build the PR's for us? We are ready!",
+      "createdAt": "2021-03-12T20:47:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-797745944",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODQzMjc4NA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Isn't it there already? https://github.com/OWASP/ASVS/pull/884\r\n\r\n... but tags/labels/prefixes",
+      "createdAt": "2021-03-13T14:20:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-798432784",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODQ0NDQ2OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Let me look at this now.\n\n- Jim\n\nOn 3/13/21 9:20 AM, Elar Lang wrote:\n>\n> Isn't it there already? #884 <https://github.com/OWASP/ASVS/pull/884>\n>\n> ... but tags/labels/prefixes\n>\n> —\n> You are receiving this because you were assigned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/876#issuecomment-798432784>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCM3225HAFSFKY37JC3TDNYC3ANCNFSM4UP3AJEA>.\n>\n",
+      "createdAt": "2021-03-13T14:29:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-798444468",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODQ1MDQ5MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Indeed, it's merged and I'm closing this issue.",
+      "createdAt": "2021-03-13T14:33:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-798450491",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XmquV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "![Rise!GIF](https://github.com/user-attachments/assets/e9b3cbe4-ac5c-40ac-84bb-80803416bb9b)\r\n",
+      "createdAt": "2024-12-15T06:42:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543496085",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xmrxo",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We currently have the following requirements:\r\n\r\n## V50.3 Browser Security Mechanism Headers\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.3.6** | [ADDED, SPLIT FROM 14.5.3] Verify that the Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header field is validated against an allowlist of trusted origins. When \"Access-Control-Allow-Origin: *\" needs to be used, verify that the responses do not include any sensitive information. | ✓ | ✓ | ✓ | 183 |\r\n\r\n## V50.4 Browser Origin Separation\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.3** | [ADDED, SPLIT FROM 14.5.3] Verify that the Origin header field is validated against a defined list of allowed origins to match the desired Cross-Origin Resource Sharing (CORS) policy. | ✓ | ✓ | ✓ | 346 |\r\n\r\nMy understanding was that the second requirement comes to handle the case where some sort of IP allowlisting is being used to restrict data but the use of * in ACAO header means that any origin can pull that data, except we now seem to cover that requirement in the first requirement.\r\n\r\nMy proposal would be to delete 50.4.3. I am struggling to see the attack scenario it prevents.\r\n\r\nI would maybe also slightly refine 50.3.6:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.3.6** | [MODIFIED, MOVED FROM 14.5.3] Verify that the Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header field will only contain values from an allowlist of trusted origins. When \"Access-Control-Allow-Origin: *\" needs to be used, verify that the responses do not include any sensitive information. | ✓ | ✓ | ✓ | 183 |",
+      "createdAt": "2024-12-15T06:51:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543500392",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XmsLi",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "FYI @jeremychoi @jmanico @elarlang \r\n",
+      "createdAt": "2024-12-15T06:53:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543502050",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xm2Pq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "TLDR: a quite clear \"no\" from me to this proposal.\r\n\r\n50.4.3 is for \"accepting the request\". `Origin` is an important requirement for filtering invalid requests made by JavaScript from third-party sites. It is one solution to mitigate CSRF and to do site isolation (#2409).  From this requirement perspective, it does not matter, if is there any ACAO in place - it only matters and focuses, on is the source of the request is validated.\r\n\r\n50.3.6 is for \"do not leak the response\". there is a duplicate part with 50.4.3 _that only contains values from an allowlist of trusted origins_, but this is in the context of sharing the response with 3rd party.\r\n\r\nWe also need them as separate requirements, as one is a request, another is a response. It is important that those are not mixed.",
+      "createdAt": "2024-12-15T07:56:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543543274",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xm515",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 50.4.3 is for \"accepting the request\". Origin is an important requirement for filtering invalid requests made by JavaScript from third-party sites. It is one solution to mitigate CSRF and to do site isolation (https://github.com/OWASP/ASVS/issues/2409). From this requirement perspective, it does not matter, if is there any ACAO in place - it only matters and focuses, on is the source of the request is validated.\r\n\r\nIf we are mitigating CSRF then I think that should go in the relevant location. I don't see any other real reason to do this. I am not sure what the relevant attack is related to site isolation. I don't see why this deserves a separate requirement. I accept that one is request and one is response but I don't see that a request level requirement is relevant or practical here except in the CSRF context",
+      "createdAt": "2024-12-15T08:34:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543558009",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xnh02",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If we are mitigating CSRF then I think that should go in the relevant location.\r\n\r\nIf it is already in the same section as CSRF, what is the more relevant location?",
+      "createdAt": "2024-12-15T10:05:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543721782",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XnuNh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > If we are mitigating CSRF then I think that should go in the relevant location.\r\n> \r\n> If it is already in the same section as CSRF, what is the more relevant location?\r\n\r\nI mean it should be in the same requirement because it is solving that single problem",
+      "createdAt": "2024-12-15T10:21:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543772513",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XoTqT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, here is again terminology madness as Cross-**Origin** Request Forgery is called Cross-**Site** Request Forgery (CSRF).\r\n\r\nI can see an argument to merge it with the \"CSRF\" requirement, but I don't like the idea.\r\n\r\nI'm leaning more towards idea of bringing 13.2.5 to this section as well, as this, with a combination of validating the Origin header, is the defense to not bypass CORS pre-flight request criteria, and that is... defense against CSRF.. or CORF.\r\n\r\n> V13.2.5 Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json.\r\n\r\nI know that you did not like the idea, but the security point for this requirement is CORS-related and it belongs to V50.",
+      "createdAt": "2024-12-15T15:53:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2543925907",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xs5la",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I'm leaning more towards idea of bringing 13.2.5 to this section as well, as this, with a combination of validating the Origin header, is the defense to not bypass CORS pre-flight request criteria, and that is... defense against CSRF.. or CORF.\r\n> \r\n> > V13.2.5 Verify that REST services explicitly check the incoming Content-Type to be the expected one, such as application/xml or application/json.\r\n> \r\n> I know that you did not like the idea, but the security point for this requirement is CORS-related and it belongs to V50.\r\n\r\nI disagree that this is CORS related. As I recall, certain content types will not trigger a pre-flight which will prevent CSRF. Also, its easier to trigger CSRF with formurlencode. Either way, it will still not allow a full CORS style attack because the response will still not be readable.\r\n\r\nThere are also good reasons to validate content types so as not to allow requests to be processed in an unexpected way which is a wider problem than CORS. As such, I don't believe 13.2.5 is relevant here.\r\n\r\n> I can see an argument to merge it with the \"CSRF\" requirement, but I don't like the idea.\r\n\r\nWhy not, is there any other specific reason to check the origin? (Remember for CORS config, it is not so much the value of the Origin header as it is allowed values for the ACAO response header.)\r\n\r\nIt don't see any other reason for this requirement.",
+      "createdAt": "2024-12-16T10:00:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2545129818",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Xs-hC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I disagree that this is CORS related. As I recall, certain content types will not trigger a pre-flight which will prevent CSRF. Also, its easier to trigger CSRF with formurlencode. Either way, it will still not allow a full CORS style attack because the response will still not be readable.\r\n\r\nTo have things in context - have you ever made one attack with that? Or ever implemented it?\r\n\r\nCORS-safelisted request (previously called \"simple request\") requires the request `Content-Type` field to be one of those:\r\n```\r\ntext/plain\r\napplication/x-www-form-urlencoded\r\nmultipart/form-data\r\n```\r\n\r\n> As such, I don't believe 13.2.5 is relevant here.\r\n\r\nAnd proves, that 13.2.5 is exactly the requirement you need for that. You can not bypass pre-flight if you require request content-type to be application/json or application/xml.\r\n\r\n> Also, its easier to trigger CSRF with formurlencode.\r\n\r\nWhich makes this as nonsense.\r\n",
+      "createdAt": "2024-12-16T10:08:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2545150018",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XtA4y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> To have things in context - have you ever made one attack with that? Or ever implemented it?\r\n\r\nYeah, stuff like this is a real thing\r\nhttps://www.directdefense.com/csrf-in-the-age-of-json/#h-manipulating-the-content-type\r\n\r\n> > Also, its easier to trigger CSRF with formurlencode.\r\n\r\n> Which makes this as nonsense.\r\n\r\nSometimes apps will work with json but will also accept formurlencoded so you can craft a CSRF payload which uses formurlencoded and it will succeed.\r\n\r\n> And proves, that 13.2.5 is exactly the requirement you need for that. You can not bypass pre-flight if you require request content-type to be application/json or application/xml.\r\n\r\nand I am saying that this is for reasons other than CORS",
+      "createdAt": "2024-12-16T10:13:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2545159730",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XtDju",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">Sometimes apps will work with json but will also accept formurlencoded so you can craft a CSRF payload which uses formurlencoded and it will succeed.\r\n\r\nThis this is the problem to fix not to say 13.2.5 is not valid defense against pre-preflight. 13.2.5 is important requirement for CORS, if there is another meaning in another context, I prefer to make a separate requirement for the other context with a clear definition, what other risk it mitigates.",
+      "createdAt": "2024-12-16T10:17:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2545170670",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XtKEY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well I would actually argue that 13.2.5 is defence in depth for CSRF because the correct fix is what is in 50.4.1. It is irrelevant for CORS because again even if you manage to send the request, you cannot read the response.\r\n\r\nI would suggest we move the 13.2.5 discussion to #2472 and focus here on the original point about these two requirements.",
+      "createdAt": "2024-12-16T10:29:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2545197336",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X93d2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Brief note for this discussion, a Simple cross-origin javascript based request requires three sets of criteria to avoid pre-flight as @elarlang was elluding to.\r\n\r\nThe allowed methods are the only \"simple\" choice:\r\n- GET\r\n- HEAD\r\n- POST\r\n\r\nThe only headers which are allowed for simple cross-orgin requests:\r\n- Accept\r\n- Accept-Language\r\n- Content-Language\r\n- Content-Type (but note the additional requirements below) + automatic forbidden header names\r\n- [https://fetch.spec.whatwg.org/#forbidden-header-name](https://fetch.spec.whatwg.org/) \r\n\r\nThere are only three values allowed for Content-Type header for simple requests:\r\n- application/x-www-form-urlencoded\r\n- multipart/form-data\r\n- text/plain\r\n\r\nPlease note that CORS is not security. It's removing the security of SOP. SOP is security that CORS breaks. But also, API endpoints per other requirements require active sessions. As long as your API endpoint is not public and properly requires an active session token and proper access control, then misconfigured CORS rarely leads to a security issue at the API level.\r\n\r\nMisconfigured client side CORS based request address can lead to sending sensitive data to the wrong server, but this could be for any form or client request with a mistyped URL, not just CORS. ",
+      "createdAt": "2024-12-17T20:40:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2549577590",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YCz5N",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussed with @elarlang. Current proposal is to merge origin validation into CSRF as it more closely relates there. \r\n\r\nOpened #2481 to discuss this and will close this issue.",
+      "createdAt": "2024-12-18T09:53:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/876#issuecomment-2550873677",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2020-12-07T03:28:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 876,
+  "state": "CLOSED",
+  "title": "having a new sub-section for CORS(e.g. V14.6) and add one more item.",
+  "url": "https://github.com/OWASP/ASVS/issues/876"
+}

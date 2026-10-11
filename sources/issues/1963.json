@@ -1,0 +1,303 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "spin-off from https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 1\"\r\n\r\nThe [summary](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#section-6.3.3.3) for browser based communication says:\r\n\r\n> To summarize, the architecture of a browser-based OAuth 2.0 client application is straightforward, but results in a significant increase in the attack surface of the application. The attacker is not only able to hijack the client, but also to extract a full-featured set of tokens from the browser-based application.\r\n\r\n> This architecture is not recommended for business applications, sensitive applications, and applications that handle personal data.\r\n\r\nWrite requirement (preferred) or at least \"really strong recommendation\" to avoid architecture where the browser communicates directly with authorization server token request and handling access token and refresh token.\r\n\r\nOr in OAuth terminology, that OAuth confidential (and not public) client is used.\r\n\r\nMay be limited to first-party solutions.\r\n\r\nIt requires quite a strong change to widespread attitude, as with using SPA architecture, often the browser uses directly OAuth service, including token endpoint.\r\n\r\n--\r\nFeedback from @tghosth in https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876\r\n\r\n> that sounds like a sensible extra requirement for L2 and L3\r\n> Overall it seems like things in Section 7 are to be banned altogether and the Browser-based OAuth 2.0 client.\r\n\r\n--\r\nOverlap by recommendation from @TobiasAhnoff in https://github.com/OWASP/ASVS/issues/1925\r\n\r\n> 8 Verify that access and refresh tokens are not accessible by Javascript\r\n\r\n\r\n--\r\n\r\nSo the question is - are there valid reasons to not disallow it?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6D2Nts",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this needs some clarification about the wording. The title of this issue talks about \"web applications\" which is [defined](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-10#section-2.1) (in OAuth 2.1) as:\r\n\r\n> A web application is a client running on a web server.\r\n\r\ni.e. a server-side application\r\n\r\nBut you are actually referencing a draft about browser-based applications which are defined as:\r\n\r\n> a client in which the client code is downloaded from a web server and executes within a user agent (e.g., web browser) on the device used by the resource owner.\r\n\r\ni.e. a browser-side application.\r\n\r\nSo are we talking about the first ones or the second ones ? or both ?\r\n\r\nFor some browser-based applications, it might make sense to have direct communication with OAuth token endpoint. For example, when there is not server-side logic at all.\r\n\r\nFor some browser-based applications, it might make sense to handle access tokens / refresh tokens themselves. For example, when the access token is used to allow access to a WebRTC service, you may actually want the access token to be sent to the frontend code becase the frontend code needs it to actually connect to the WebRTC service (you don't want to proxy this through your server).",
+      "createdAt": "2024-07-06T22:31:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2212027244",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6D4Cqf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Your note on the terminology is correct.\r\n\r\n> A web application is a client running on a web server.\r\n\r\nWe can call it 3rd party solution.\r\n\r\n> But you are actually referencing a draft about browser-based applications which are defined as:\r\n\r\nWe can call it 1st party solution.\r\n\r\nIt is good to know what are the needs and use cases to use tokens directly in the browser-based apps for the 1st party solution. My feeling is the public client solution is too often used when it actually should not be used.",
+      "createdAt": "2024-07-07T16:49:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2212506271",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6D4Uhc",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Write requirement (preferred) or at least \"really strong recommendation\" to avoid architecture where the browser communicates directly with authorization server token request and handling access token and refresh token.\r\n\r\nAnother valid reason for choosing to handle the access token in the browser is when you actually want your  data to be stored/processed on the user's device without ever touching a server of the application. This can be good for privacy. Forbidding an architecture where the access token is stored on the user's device can actually be detrimental for the user's privacy.\r\n\r\nA more nuanced requirement would take this into account and recommend against passing a token on node where it's not strictly needed.\r\n\r\n> Or in OAuth terminology, that OAuth confidential (and not public) client is used.\r\n\r\nNitpick: This is not really the same think. [Browser-based client can be confidential](https://datatracker.ietf.org/doc/html/rfc7591#section-5).",
+      "createdAt": "2024-07-07T21:16:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2212579420",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6FQ49l",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@randomstuff  Fair points! From one perspective I also like a more general nuanced verification, but lets first elaborate on this some more, hope all this text will be good input! It is hard to express things both short and nuanced 😄  \r\n\r\nIf ASVS would add a verification like \"Verify that tokens are only managed by nodes where it's strictly needed.\", with the argument that there are applications where tokens need to be accessible in Javascript frontends (even if in example OAuth BCP, https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#section-6, states that for browser-based apps a BFF solution is by design more secure than other solutions.)\r\n\r\nHow would we then reason about other verification in ASVS? Here are two examples:\r\n  \r\n9.3.3 (added) - Verify that mutual TLS (mTLS) is used by services communicating internally within a system or \"intra-service communications\" to ensure all the involved parties at each end of a network connection are who they claim to be. (L3 only)\r\n\r\n50.2.1 (moved from 14.4.3) - Verify that a Content-Security-Policy response header is in place that helps mitigate impact for XSS attacks like HTML, DOM, CSS, JSON, and JavaScript injection vulnerabilities. \r\n\r\nWe could make the same kind of argument here. There are applications that need to use a relaxed CSP, which in practice will not mitigate impact for XSS attacks, should 50.2.1 be rewritten like \"If possible considering implementation decisions verify that...\" and there are applications that can´t support mTLS in a reasonable way, should 9.3.3 also be made more nuanced (even if it is L3 only)?\r\n\r\nIn my opinion 9.3.3 is clear and actionable, and it is a fair requirement for L3 applications, even if it will be hard to meet for those building a micro-service Kubernetes solutions...even 9.3.1 could be hard to do properly...\r\n\r\n50.2.1 is nuanced, but a little hard to verify, could you have a CSP with unsafe-inline and still meet this requirement? How many hosts in src attributes is ok before the CSP becomes too weak? But then again it would be hard for ASVS to state those kind of details so this might be the best ASVS can do...keeping a good consistent balance is hard!      \r\n     \r\nBack to the new OAuth chapter. I believe any set of verifications for OAuth, applicable for Healthcare and Finance etc, should reflect the OAuth BCPs and, if login and  OIDC is involved as well, also OIDC FAPI. If not aligned with those kind of specs ASVS will become less usefull, but it would of course be great if ASVS can capture the essence (see #1925 disscusion.)   \r\n\r\nWhat do you think of this approach to capture recommendations from OAuth BCPs and OIDC FAPI:\r\n\r\nL1,L2,L3: Verify that tokens are only managed by nodes where it's strictly needed, in example avoid having tokens accessible for JavaScript frontends. \r\n\r\nTogether with some additional L3 suggestions from https://github.com/OWASP/ASVS/issues/1964#issuecomment-2233151490\r\nL3: \"Verify that all clients are confidential\" (L1-L2 could allow for public clients)\r\n\r\nL3: \"Verify that all clients are configured to use strong client authentication, mTLS or private-key-jwt\" (L1-L2 could also use client-secret, note that verification 9.3.3 mandates mTLS, but private-key-jwt is also regarded sufficient by e g FAPI)\r\n\r\nL3: Verify that PAR with client authentication is used (for L1-L2 PAR is optional and could be used without client authentication)\r\n\r\nL3: Verify that sender-constrained access-tokens are used either using mTLS or DPoP (note that for L1 and L2 this does not require client authentication if used by public clients)\r\n\r\nL3: Verify that refresh-tokens are sender-constrained (by requiring client authentication for all token requests, while L1-L2 could allow one-time mitigation strategy for public clients, this is especially important if offline_access is granted, allowing long lived tokens not attached to active user sessions)",
+      "createdAt": "2024-07-18T07:16:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        },
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2235797349",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PPk9s",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Status: I keep this issue open at the moment to analyze, what is our direct or indirect message on the topic - what requirements allow public clients and what requires confidential clients.",
+      "createdAt": "2024-10-09T19:13:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2403225452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QQ2HE",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Back to the new OAuth chapter. I believe any set of verifications for OAuth, applicable for Healthcare and Finance etc, should reflect the OAuth BCPs and, **if login and OIDC is involved as well, also OIDC FAPI**. If not aligned with those kind of specs ASVS will become less usefull, but it would of course be great if ASVS can capture the essence (see https://github.com/OWASP/ASVS/issues/1925 disscusion.)\r\n\r\nI agree. It would even make sense to port some FAPI requirements (when/if it makes sense) to non-OIDC OAuth for L3.\r\n\r\n> L1,L2,L3: Verify that tokens are only managed by nodes where it's strictly needed, in example avoid having tokens accessible for JavaScript frontends.\r\n\r\nYes.\r\n\r\n> L3: \"Verify that all clients are confidential\" (L1-L2 could allow for public clients)\r\n\r\nYes, I believe it might make sense for L3. Note that this might include, confidential client-side clients using dynamic client registration.\r\n\r\nThis requirement is actually consistent with [FAPI](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.3.2.1):\r\n\r\n> Authorization servers [...] shall only support confidential clients as defined in [[RFC6749](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#RFC6749)]\r\n\r\nI would not include this requirement in L2, though.",
+      "createdAt": "2024-10-17T19:11:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2420335044",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SzQ_G",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - if there some action expected from your last comment, as proposal to insert new requiements, please open separate issues for those.",
+      "createdAt": "2024-11-07T18:09:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2462912454",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T_oJA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just documenting potential solution: define separate levels for some requirements based on client type in use - public or confidential. For many requirements, risks are so much smaller if a confidential client is used and in this situation, many requirements can be level 3 although those need to be level 1 or level 2 requirements if a public client is used.",
+      "createdAt": "2024-11-18T12:39:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2482930240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UnRit",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Just documenting potential solution: define separate levels for some requirements based on client type in use - public or confidential. For many requirements, risks are so much smaller if a confidential client is used and in this situation, many requirements can be level 3 although those need to be level 1 or level 2 requirements if a public client is used.\r\n\r\nThis makes sense, @TobiasAhnoff @randomstuff could one of you prepare a proposed change?",
+      "createdAt": "2024-11-22T09:34:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2493323437",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyGmV",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I can try, but I think it will be good to discuss this in a call, ping @elarlang @randomstuff ",
+      "createdAt": "2024-11-24T18:39:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2496162197",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyLmu",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  For many requirements, risks are so much smaller if a confidential client is used and in this situation, many requirements can be level 3 although those need to be level 1 or level 2 requirements if a public client is used.\r\n\r\nDo you have some examples in mind?",
+      "createdAt": "2024-11-24T19:17:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2496182702",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyMcf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > For many requirements, risks are so much smaller if a confidential client is used and in this situation, many requirements can be level 3 although those need to be level 1 or level 2 requirements if a public client is used.\r\n> \r\n> Do you have some examples in mind?\r\n\r\nFor example, everything related with AS token endpoint",
+      "createdAt": "2024-11-24T19:30:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2496186143",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U8xh0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Did you cover this today @TobiasAhnoff ?",
+      "createdAt": "2024-11-25T20:23:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2498959476",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VRsqd",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@tghosth only some basic structure,  work in progress (in the Google doc)",
+      "createdAt": "2024-11-27T17:39:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2504444573",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bBdkk",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Now that chapter text has been updated by #2521 maybe this can be closed? Perhaps (when needed) open new issues for risk level discussions on specific requirements?\nping @elarlang @tghosth ",
+      "createdAt": "2025-01-19T13:03:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2600851748",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fjjOM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Goes on in #2637, closing this one.",
+      "createdAt": "2025-02-23T14:40:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1963#issuecomment-2676896652",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-05-19T19:21:48Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 1963,
+  "state": "CLOSED",
+  "title": "proposal/discussion: OAuth - disallow web application to be OAuth public client (and to have direct communication with OAuth token endpoint)",
+  "url": "https://github.com/OWASP/ASVS/issues/1963"
+}

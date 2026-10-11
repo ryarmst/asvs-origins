@@ -1,0 +1,246 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "So @danielcuthbert mentioned recent attacks whereby attackers [dos'd](https://www.vice.com/en/article/5d35yd/the-uber-hack-shows-push-notification-2fa-has-a-downside-its-too-annoying) an intended target with multiple OOB requests, \r\n\r\nThis is an issue which specifically relates to push notifications being used as MFA which I don't believe we really discuss yet but I think we should have a requirement about it somewhere. \r\n\r\n(If someone fancies checking if NIST mentions this, that would be good 😀)\r\n\r\nOften, it would be a 3rd party providing the MFA functionality but I think we should still mention it for completeness.\r\n\r\n@danielcuthbert what else should we mention here? Is it sufficient to mention only allowing a certain number within a period of time?\r\n\r\nShould we also require some sort of interactive stage i.e. you cannot just press \"Approve\" but rather you have to enter a code from screen or something?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5OBeFP",
+      "author": {
+        "login": "mgargiullo"
+      },
+      "authorAssociation": "NONE",
+      "body": "> (If someone fancies checking if NIST mentions this\r\n\r\nWe know 800-63b 5.1.3.2 talks about OOB Verifiers and their criteria. In the end, they talk about 5.2.2 (Rate Limiting).\r\n[800-63b 5.2.2](https://pages.nist.gov/800-63-3/sp800-63b.html#throttle) doesn't appear to consider push notifications\r\n\r\nAside from the count of failed logins before locking out the account (100), 800-63 doesn't appear to address a dos attack against push verifiers.\r\n\r\nMaybe someone else has a better doc to reference.\r\n\r\nIs it time to denigrate the security posture of MFA \"push approvals\"?",
+      "createdAt": "2022-11-09T16:19:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-1309008207",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P82Rg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder 2 weeks @danielcuthbert to look at this again",
+      "createdAt": "2022-12-07T17:55:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-1341351008",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P82R6",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nWednesday, December 21, 2022 12:00 AM (GMT+01:00)\r\n> @danielcuthbert to look at this again",
+      "createdAt": "2022-12-07T17:55:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-1341351034",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QCWN5",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "FYI, CISA published around push bombing threats in MFA.\r\nhttps://www.cisa.gov/sites/default/files/publications/fact-sheet-implementing-phishing-resistant-mfa-508c.pdf\r\n\r\nAccording to this, in push notification, additional step called number matching is effective to push bombing.",
+      "createdAt": "2022-12-08T14:08:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-1342792569",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RFmQx",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1415#issuecomment-1341351008) @tghosth\n> @danielcuthbert to look at this again",
+      "createdAt": "2022-12-20T23:00:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-1360421937",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Nc0LH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so the latest NIST draft says:\r\n\r\n> Out-of-band verifiers that send a push notification to a subscriber device SHOULD implement a reasonable limit on the rate or total number of push notifications that will be sent since the last successful authentication.\r\n\r\n[Source](https://pages.nist.gov/800-63-4/sp800-63b.html#out-of-band-verifiers), [Archived Source](https://web.archive.org/web/20240924130155/https://pages.nist.gov/800-63-4/sp800-63b.html#out-of-band-verifiers)\r\n\r\nI would propose: \r\n\r\n> Verify that, where push notifications are used for multi-factor authentication, rate limiting or number matching is used to prevent push bombing attacks.\r\n\r\nCould also add a link to this:\r\nhttps://www.cisa.gov/sites/default/files/publications/fact-sheet-implement-number-matching-in-mfa-applications-508c.pdf\r\n\r\nThoughts @elarlang @jmanico ?",
+      "createdAt": "2024-09-25T06:28:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373141191",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Nc552",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is it so widespread that it requires special mention? In general I would say it is covered by V11.2 Anti-automation requirements. An external user should not be able to trigger that functionality more often than the business limit allows.",
+      "createdAt": "2024-09-25T06:41:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373164662",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Nc-n2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yeah it seems a pretty big problem and I am worried it would get lost in anti automation",
+      "createdAt": "2024-09-25T06:53:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373183990",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NdWfA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Can we augment anti-automation to include this - or do we need a new requirement Josh? I have run into this issue before and it’s high impact even if it’s not widespread.\r\n",
+      "createdAt": "2024-09-25T07:31:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373281728",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NdlUN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So we sort of mention it in [11.2.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x19-V11-BusLogic.md#v112-anti-automation) but I am not convinced it is super clear:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **11.2.2** | [MODIFIED, MOVED FROM 11.1.4] Verify that the application has anti-automation controls to protect against excessive calls to application functionality which could result in mass data exfiltration, junk data creation, resource quota exhaustion, rate limit breaches, **out-of-band communication flooding**, denial of service, overuse of an expensive resource, etc. | ✓ | ✓ | ✓ | 770 |\r\n",
+      "createdAt": "2024-09-25T07:59:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373342477",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ndp20",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I am really ok to add a new requirement if you think it’s a good idea, Josh.\r\n",
+      "createdAt": "2024-09-25T08:06:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373361076",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ndv_p",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For my taste the principle of the problem is clearly covered by 11.2.2. With a separate requirement we go more the the testing guide field.",
+      "createdAt": "2024-09-25T08:16:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373386217",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_Qco",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Rate limiting is only one possible fix as there is also the number matching option. That is a specific design choice and one that Microsoft for example made and that I think we need to ask organizations to consider.\r\n\r\nAs such I would still like to add a requirement for this: https://github.com/OWASP/ASVS/issues/1415#issuecomment-2373141191 @elarlang ",
+      "createdAt": "2024-10-08T06:19:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2398947112",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SetEF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I want to merge this but I want to finish reviewing v2 first as hopefully I will then have a better idea about section.",
+      "createdAt": "2024-11-05T15:46:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1415#issuecomment-2457522437",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-11-06T18:00:26Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1415,
+  "state": "CLOSED",
+  "title": "Controls around push notifications for MFA",
+  "url": "https://github.com/OWASP/ASVS/issues/1415"
+}

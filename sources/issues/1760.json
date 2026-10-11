@@ -1,0 +1,289 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "While we do have controls in the ASVS to verify against rapid transaction submissions (11.2.1) and to safeguard against excessive calls like mass data exfiltration, DoS attacks, etc. (11.2.2), we currently do not have a specific check against mail bomb attacks.\r\n\r\nApplications with functionalities like password reset or email notifications often allow email sending without any rate limits. Malicious actors can exploit this to flood a target's mailbox, making it an attractive medium for mail bomb attacks. The impacts of such an attack can be significant:\r\n\r\n**Blacklisting:** The mail server might get blacklisted by email providers, affecting its reputation and future deliverability.\r\n**SaaS Penalties:** If a third-party SaaS solution is used to dispatch emails, the account could be banned or penalized for contravening its use policies.\r\n\r\n**ASVS Addition:**\r\nEnsure that functionalities allowing email sending have an associated rate limit to prevent abuse.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5pXLLZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would say we have it general covered by anti-automation requirements 11.2.1 and 11.2.2 (like you mentioned yourself). I don't think we need special requirement for each separate topic, such as sending too many mails, although we have separate requirement for authentication.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **11.2.1** | [MOVED FROM 11.1.2] Verify that the application will only process business logic flows with all steps being processed in realistic human time, i.e. transactions are not submitted too quickly. | ✓ | ✓ | ✓ | 799 |\r\n| **11.2.2** | [MOVED FROM 11.1.4] Verify that the application has anti-automation controls to protect against excessive calls such as mass data exfiltration, business logic requests, file uploads or denial of service attacks. | ✓ | ✓ | ✓ | 770 |\r\n\r\nOne-two abstract requirements are better in a way - if you put some specific requirement on some topic, it may give understanding, that only those are required to protect and rest of it is not. With abstract requirement it matches for all.\r\n\r\nIn general, maybe it's more point of view - I don't watch ASVS as testing framework which need to cover all test-cases, but reporting framework, which you can use to report your findings. So, for my point of view 11.2.1 and 11.2.2 are enough to cover mail-bomb or whatever mass-call to some functionality problems.",
+      "createdAt": "2023-10-18T05:42:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1767682777",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5parvb",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I also think that mail bombs can pose a risk, even though I think that the impact is not that great. I agree with Elar that the current requirements are sufficient.\r\n\r\nIt could be helpful to add another example to 11.2.2, but even then I would prefer describing it as restricting interaction with other systems, or restricting out-of-band communication, rather than email specific.",
+      "createdAt": "2023-10-18T14:34:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1768602587",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5psHyu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ImanSharaf  - do you agree that it is covered by 11.2.2 (with or without text improvements) or you have some arguments why it should be separate requirement?",
+      "createdAt": "2023-10-20T18:04:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1773173934",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p1Y9k",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "- **Granularity Matters:** While controls like 11.2.1 and 11.2.2 may capture the general idea of rate-limiting and anti-automation, email bomb attacks are a distinct threat with unique consequences, as you pointed out (e.g., email server blacklisting). Specific controls address distinct threats in a manner that's clear and actionable.\r\n\r\n- **Consistency in the ASVS:** The ASVS itself differentiates between various forms of injection attacks. If the ASVS already distinguishes between types of injection attacks, why should it not offer similar granularity for other threats? This would maintain the integrity and consistency of the ASVS.\r\n\r\n- **Avoiding Ambiguity:** While one can argue that 11.2.1 and 11.2.2 cover email bomb attacks in essence, leaving them as implied might lead to inconsistencies in interpretation. An auditor, developer, or tester could potentially overlook this risk if it's not explicitly stated.\r\n\r\n- **Guidance for Developers:** Developers look at such standards to understand specific threats and their defenses. Generalized statements might not provide adequate guidance. Specific controls, like the one you're suggesting, can help developers implement precise defenses and not overlook a particular threat.\r\n\r\n- **Benchmarking & Reporting:** From a reporting perspective, having a specific control about mail bomb attacks allows businesses to definitively state they have defenses against this specific threat. It can be more persuasive to stakeholders and clients compared to referencing a generalized control.\r\n\r\n- **Future Evolution of the ASVS:** As threats evolve, the ASVS should evolve to cover new and nuanced threats. If the ASVS moves towards only general controls, it may not remain the comprehensive and trusted standard it is today.\r\n\r\n- **Principle of Least Surprise:** Security professionals, when using a framework or standard, expect it to be thorough. Specific threats, especially widely recognized ones like mail bomb attacks, should ideally not be left out or left to interpretation.\r\n\r\nWhat is your opinion @tghosth ?",
+      "createdAt": "2023-10-23T16:47:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1775603556",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p1ig-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Nice arguments and it's good to understand the logic behind proposals.\r\n\r\nOne thing which I pointed out before:\r\n> In general, maybe it's more point of view - I don't watch ASVS as testing framework which need to cover all test-cases, but reporting framework, which you can use to report your findings.\r\n\r\nSo direction where I don't want ASVS to go is:\r\n* duplicate testing guide, there is separate project for that - there is need to have abstract requirements and it's always good question, should we spotlight something specially or not (like it is also in this case)\r\n* duplicate cheat sheet - guidance for developers is more cheat sheet project topic - ASVS can not educate developers\r\n",
+      "createdAt": "2023-10-23T17:09:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1775642686",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p5Q5q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @ImanSharaf,\r\n\r\nThanks for the detailed arguments. I have tried to respond to each of them.\r\n\r\nFirstly, my overall preference is that we should have a single requirement per separate protection mechanism which is needed. To me ASVS is most important as a standard for developers as otherwise we won't really have anything to verify :)\r\n\r\nEmail sending is fundamentally a business logic function. The threat of overuse of business logic functions such as creating new records, uploading files, etc, can lead to a variety of consequences. However, ultimately the protection/solution is an effective rate-limiting solution.\r\n\r\nIf we talk about SMTP/IMAP injection, that is not a business logic issue but rather a technical issue about how the app interacts with the protocol. As such, it would need a separate requirement to implement a specific solution against this type of threat.\r\n\r\nHowever, a rate limiting solution should cover the threat of overuse of all business logic functions.\r\n\r\nRegarding your specific points:\r\n\r\n> * **Granularity Matters:** While controls like 11.2.1 and 11.2.2 may capture the general idea of rate-limiting and anti-automation, email bomb attacks are a distinct threat with unique consequences, as you pointed out (e.g., email server blacklisting). Specific controls address distinct threats in a manner that's clear and actionable.\r\n\r\nI agree in principle but like I said the granularity should generally be at the solution level, not necessarily the consequence/threat level.\r\n \r\n> * **Consistency in the ASVS:** The ASVS itself differentiates between various forms of injection attacks. If the ASVS already distinguishes between types of injection attacks, why should it not offer similar granularity for other threats? This would maintain the integrity and consistency of the ASVS.\r\n\r\nHopefully the explanation above makes my perspective on this clearer.\r\n\r\n> * **Avoiding Ambiguity:** While one can argue that 11.2.1 and 11.2.2 cover email bomb attacks in essence, leaving them as implied might lead to inconsistencies in interpretation. An auditor, developer, or tester could potentially overlook this risk if it's not explicitly stated.\r\n\r\nI think that I would expect an auditor/tester to find and highlight these type of business logic issues. From a developer perspective, I am hoping that once 11.2.2 starts the conversation about rate-limiting, it will lead to a comprehensive solution.\r\n\r\n> * **Guidance for Developers:** Developers look at such standards to understand specific threats and their defenses. Generalized statements might not provide adequate guidance. Specific controls, like the one you're suggesting, can help developers implement precise defenses and not overlook a particular threat.\r\n \r\nSame answer: _From a developer perspective, I am hoping that once 11.2.2 starts the conversation about rate-limiting, it will lead to a comprehensive solution._\r\n\r\n> * **Benchmarking & Reporting:** From a reporting perspective, having a specific control about mail bomb attacks allows businesses to definitively state they have defenses against this specific threat. It can be more persuasive to stakeholders and clients compared to referencing a generalized control.\r\n\r\nAgain, I think the threat is not specific compared to other business logic replay issues. Also, the more requirements we have, the harder it gets to benchmark :)\r\n\r\n> * **Future Evolution of the ASVS:** As threats evolve, the ASVS should evolve to cover new and nuanced threats. If the ASVS moves towards only general controls, it may not remain the comprehensive and trusted standard it is today.\r\n\r\nAgain, I think the threat is not specific compared to other business logic replay issues. \r\n\r\n> * **Principle of Least Surprise:** Security professionals, when using a framework or standard, expect it to be thorough. Specific threats, especially widely recognized ones like mail bomb attacks, should ideally not be left out or left to interpretation.\r\n\r\nAgain, I think the threat is not specific compared to other business logic replay issues. \r\n\r\n> What is your opinion @tghosth ?\r\n\r\nI think we can clarify 11.2.2 to make this line of thinking clearer and maybe even add some explanatory text to the 11.2 section to explain in more detail. But I don't think this warrants a new requirement.\r\n\r\n",
+      "createdAt": "2023-10-24T06:42:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1776619114",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qaqsQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, general agreement seems to be, that we don't need new separate requirement to cover it.\r\n\r\nThe question stays, do we need to mention or cover it in 12.2.2?\r\n\r\nping @Sjord @tghosth @ImanSharaf ",
+      "createdAt": "2023-10-30T14:45:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1785375504",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qiiyZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so what do we think about the following? I have deliberately tried to retarget the text to be more specific.\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **11.2.2** | [MODIFIED, MOVED FROM 11.1.4] Verify that the application has anti-automation controls to protect against excessive calls to application functionality which could result in mass data exfiltration, junk data creation, resource quota exhaustion, rate limit breaches, mail or SMS flooding, denial of service, overuse of an expensive resource, etc. | ✓ | ✓ | ✓ | 770 |\r\n\r\n",
+      "createdAt": "2023-10-31T15:21:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1787440281",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qiluD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm ok with current one and ok with proposed one. For me the meaning is the same.\r\n\r\nTo list those examples is good and bad - good to give some ideas for those who need them; bad as it may kill ideas with only listed issues as it is general problem.",
+      "createdAt": "2023-10-31T15:27:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1787452291",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qi8Yz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> To list those examples is good and bad - good to give some ideas for those who need them; bad as it may kill ideas with only listed issues as it is general problem.\r\n\r\nI hear that but I think I would rather have the examples and let the \"etc\" do the extra work 🤣\r\n\r\n@ImanSharaf do you have any further thoughts?",
+      "createdAt": "2023-10-31T16:16:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1787545139",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qjD5e",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": " What do you think about this one? **11.2.2**\t[MODIFIED, MOVED FROM 11.1.4] Verify that the application has anti-automation controls to protect against excessive calls to application functionality which could result in mass data exfiltration, junk data creation, resource quota exhaustion, rate limit breaches, out-of-band communication flooding, denial of service, overuse of an expensive resource, etc.\t✓\t✓\t✓\t770\r\n\r\n",
+      "createdAt": "2023-10-31T16:33:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1787575902",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qjGHG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm good with that, @ImanSharaf do you want to open a PR?",
+      "createdAt": "2023-10-31T16:38:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1787584966",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qjGyd",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sure. I will do that.",
+      "createdAt": "2023-10-31T16:40:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1787587741",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qlSAU",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please check it [here](https://github.com/OWASP/ASVS/pull/1775) ",
+      "createdAt": "2023-10-31T23:09:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1788157972",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qlS5n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "done via https://github.com/OWASP/ASVS/pull/1775",
+      "createdAt": "2023-10-31T23:14:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1760#issuecomment-1788161639",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-10-17T19:31:47Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1760,
+  "state": "CLOSED",
+  "title": "Implement Rate Limiting to Prevent Mail Bomb Attacks",
+  "url": "https://github.com/OWASP/ASVS/issues/1760"
+}

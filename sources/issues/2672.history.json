@@ -1,0 +1,52 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2708780031",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "@randomstuff - let's try to find solution here as well.\n\nFirst, I think that 51.5.5 is not candidate for L1, as described scenario contained preconditions and it is not a first layer of defense issue.\n\nSo the question here is, should 51.4.5 be L1 to address the scenario you described?\n> V51.4.5 Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) must no longer be used.\n\nBased on RFC9700 we can require do not use password grant, but not yet implicit flow.\n\nhttps://www.rfc-editor.org/rfc/rfc9700.html#section-2.4\n> The resource owner password credentials grant [[RFC6749](https://www.rfc-editor.org/rfc/rfc9700.html#RFC6749)] MUST NOT be used.\n\nhttps://www.rfc-editor.org/rfc/rfc9700.html#section-2.1.2\n\n> In order to avoid these issues, clients SHOULD NOT use the implicit grant (response type token) or other response types issuing access tokens in the authorization response, unless access token injection in the authorization response is prevented and the aforementioned token leakage vectors are mitigated.\n\nBut, from OAuth 2.1 both will be removed anyway...\n\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-10\n\n> The Resource Owner Password Credentials grant is omitted from this specification as per Section 2.4 of [[I-D.ietf-oauth-security-topics](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29)]\n\n> The Implicit grant (response_type=token) is omitted from this specification as per Section 2.1.2 of [[I-D.ietf-oauth-security-topics](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29)]\n\nSo I'm ok to make V51.4.5 as L1 requirement to address the given scenario (ping @tghosth)\n\n",
+          "recorded_at": "2025-03-09T10:26:30Z"
+        },
+        {
+          "body": "@randomstuff - let's try to find solution here as well.\n\nFirst, I think that 51.5.5 is not candidate for L1, as described scenario contained preconditions and it is not a first layer of defense issue.\n\nSo the question here is, should 51.4.5 be L1 to address the scenario you described?\n> V51.4.5 Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) must no longer be used.\n\nBased on RFC9700 we can require do not password grant, but not yet implicit flow.\n\nhttps://www.rfc-editor.org/rfc/rfc9700.html#section-2.4\n> The resource owner password credentials grant [[RFC6749](https://www.rfc-editor.org/rfc/rfc9700.html#RFC6749)] MUST NOT be used.\n\nhttps://www.rfc-editor.org/rfc/rfc9700.html#section-2.1.2\n\n> In order to avoid these issues, clients SHOULD NOT use the implicit grant (response type token) or other response types issuing access tokens in the authorization response, unless access token injection in the authorization response is prevented and the aforementioned token leakage vectors are mitigated.\n\nBut, from OAuth 2.1 both will be removed anyway...\n\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-10\n\n> The Resource Owner Password Credentials grant is omitted from this specification as per Section 2.4 of [[I-D.ietf-oauth-security-topics](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29)]\n\n> The Implicit grant (response_type=token) is omitted from this specification as per Section 2.1.2 of [[I-D.ietf-oauth-security-topics](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29)]\n\nSo I'm ok to make V51.4.5 as L1 requirement to address the given scenario (ping @tghosth)\n\n",
+          "recorded_at": "2025-03-09T10:15:10Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2711564821",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "What is the attack scenario where disallowed grants are used? Surely there are other prerequisites for an attack to be successful? This does not feel like L1 to me.",
+          "recorded_at": "2025-03-10T19:05:42Z"
+        },
+        {
+          "body": "What is the attack scenario where disallowed grants are used? Surely there are other prerequisites for an attack to be successful?",
+          "recorded_at": "2025-03-10T19:05:28Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2711611856",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I would watch it as using a component with a known vulnerability. By principle, if tokens are transferred as part of URL, it is against some other requirements. With password grants it is more questionable in 1st party situation, but for 3rd party situation it is leaking credentials to 3rd party.\n\nIt is not a pure and clear choice for L1, but to allow \"disabled in spec\" methods for L1 feels worse.",
+          "recorded_at": "2025-03-10T19:31:23Z"
+        },
+        {
+          "body": "I would watch it as using a component with a known vulnerability. By principle, if tokens are transferred as part of URL, it is against some other requirements. With password grants it is more questionable in 1st party situation, but for 3rd party situation it is leaking credentials to 3rd party.\n\nIt is not a pure and clear choice for L1, but to allow \"disabled in spec\" methods for L1 feels worse. Especially when related spec itself disallows those.",
+          "recorded_at": "2025-03-10T19:31:10Z"
+        },
+        {
+          "body": "I would watch it as using a component with a known vulnerability. By principle, if tokens are transferred as part of URL, it is against some other requirements. With password grants it is more questionable in 1st party situation, but for 3rd party situation it is leaking credentials to 3rd party.\n\nIt is not a pure and clear choice for L1, but to allow it for L1 feels worse. Especially when related spec itself disallows those.",
+          "recorded_at": "2025-03-10T19:26:15Z"
+        }
+      ]
+    }
+  ]
+}

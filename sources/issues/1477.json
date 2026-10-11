@@ -1,0 +1,66 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Hi @jimfenton, I was hoping you could clarify something on lookup secret storage for us.\r\n\r\n[NIST 800-63B, section 5.1.2](https://pages.nist.gov/800-63-3/sp800-63b.html#-512-look-up-secrets) talks about storing \"Look-Up Secrets\" and I had a few questions:\r\n\r\n[5.1.2.2](https://pages.nist.gov/800-63-3/sp800-63b.html#5122-look-up-secret-verifiers) distinguishes between secrets with less and more than 112 bit of entropy where with the difference being in the salt value. However, in both cases it points to the guidance in [5.1.1.2](https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver) which explicitly mandates using a function which incorporates  a salt. As such, is there any practical difference in how the look-up secret should be stored?\r\n\r\nThe 2nd paragraph of [5.1.2.2](https://pages.nist.gov/800-63-3/sp800-63b.html#5122-look-up-secret-verifiers) reads:\r\n\r\n> Verifiers SHALL store look-up secrets in a form that is resistant to offline attacks. Look-up secrets having at least 112 bits of entropy SHALL be hashed with an approved one-way function as described in [Section 5.1.1.2](https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver). Look-up secrets with fewer than 112 bits of entropy SHALL be salted and hashed using a suitable one-way key derivation function, also described in [Section 5.1.1.2](https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver). The salt value SHALL be at least 32 in bits in length and arbitrarily chosen so as to minimize salt value collisions among stored hashes. Both the salt value and the resulting hash SHALL be stored for each look-up secret.\r\n\r\nHowever, do I understand correctly that it could be simplified to the following:\r\n\r\n> Verifiers SHALL store look-up secrets in a form that is resistant to offline attacks by hashing with an approved one-way function which incorporates a salt value as described in [Section 5.1.1.2](https://pages.nist.gov/800-63-3/sp800-63b.html#memsecretver).\r\n\r\nIf not then can you help me understand why?\r\n\r\nThanks :) ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5RbYX8",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "My usual disclaimer applies here: I am not a NIST employee, so what I'm saying below represents only myself. If you need an official response from NIST, it's probably best to send an email to dig-comments@nist.gov.\r\n\r\nAt 112 bits of entropy and above (actually the \"minimum security strength specified in the latest revision of SP 800-131A\" as it says at the end of 5.1.1.2), it is considered impractical to brute-force a hash function and the possibility of a collision between two randomly chosen values is negligible. Since the function of the salt is largely to prevent collisions when, say, the same password is chosen by two different users, the salt is no longer needed when there is this much entropy. For that matter, it shouldn't be necessary to _iteratively_ hash the one-time secret, because an attacker isn't going to guess a 112-bit secret. It should be sufficient to hash the secret with a good hash function (such as SHA256) and store that result. This should be sufficient to ensure that an attacker that is able to exfiltrate the database of one-time secrets isn't able to infer what any of the secrets are.\r\n\r\nBut of course if the one-time secrets have less entropy, those precautions need to be taken.\r\n\r\n5.1.1.2 contains a lot of things. The intent here was to refer to the guidelines on hash functions in 5.1.1.2, not to require everything in 5.1.1.2. But I agree this could be clearer; thanks for pointing it out.",
+      "createdAt": "2022-12-27T19:41:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1477#issuecomment-1366132220",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RkhdV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks, I think that made things clearer for us!",
+      "createdAt": "2023-01-01T20:25:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1477#issuecomment-1368528725",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-12-27T08:25:31Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 1477,
+  "state": "CLOSED",
+  "title": "Clarify how \"Look-Up Secrets\" should be stored.",
+  "url": "https://github.com/OWASP/ASVS/issues/1477"
+}

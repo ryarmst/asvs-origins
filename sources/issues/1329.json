@@ -1,0 +1,297 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "> 3.3.2 If authenticators permit users to remain logged in, verify that re-authentication occurs periodically both when actively used or after an idle period.\r\n> L1: 30 days\r\n> L2: 12 hours or 30 minutes of inactivity, 2FA optional\r\n> L3: 12 hours or 15 minutes of inactivity, with 2FA\r\n\r\nThis requirement has several issues:\r\n\r\n* It specifies different requirements for each level. We want to simplify the level column (to show just 1, 2, or 3), and having different requirements for each level doesn't fit with that.\r\n* Level 1 is supposed to be pentestable, but a session timeout of 30 days is not always testable without waiting 30 days. So realistically this is not pentestable.\r\n* I am not sure whether this requirement should say anything about 2FA at all. Maybe 2FA should be a separate requirement.\r\n* The low timeouts of 15 or 30 minutes may not give a proper tradeoff between security and reliability. Imagine if you had to reauthenticate to GitHub or Gmail every time you didn't use it for 30 minutes. It would drive me crazy. Also, apparently Google and Microsoft seem to think that having sessions persist for a long time is worth the security risk. So I think we should re-evaluate whether sessions really should expire within 30 minutes.\r\n\r\nThere was already some discussion about this in [Use of non-✓ for level · Issue #1022 · OWASP/ASVS](https://github.com/OWASP/ASVS/issues/1022)",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5IOrxR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Level 1 is supposed to be pentestable, but a session timeout of 30 days is not always testable without waiting 30 days. So realistically this is not pentestable.\r\n\r\nI guess we move from \"testability based\" to \"risk based\" levels. See https://github.com/OWASP/ASVS/issues/1127\r\n\r\nCurrent requirement is (probably) directly ported from NIST. From there the question is also, do we want to be aligned with NIST or not.",
+      "createdAt": "2022-08-11T10:29:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1211808849",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IPzqx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord can you tell if the current requirement is ported from NIST?",
+      "createdAt": "2022-08-11T14:55:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1212103345",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IQenP",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, it's literally NIST:\r\n\r\n* [reauthentication of the subscriber SHOULD be repeated at least once per 30 days during an extended usage session](https://pages.nist.gov/800-63-3/sp800-63b.html#aal1reauth)\r\n* [Reauthentication of the subscriber SHALL be repeated following any period of inactivity lasting 30 minutes or longer.](https://pages.nist.gov/800-63-3/sp800-63b.html#aal2reauth)\r\n* [following any period of inactivity lasting 15 minutes or longer. Reauthentication SHALL use both authentication factors.](https://pages.nist.gov/800-63-3/sp800-63b.html#aal3reauth)",
+      "createdAt": "2022-08-11T17:30:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1212279247",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5JEmCI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In principle, I would prefer to be aligned with NIST in this case. \r\n\r\nFor companies that violate the timeouts, I can think of three ways to handle this:\r\n1) We ignore the problem\r\n2) We say that companies who do not want to comply with the requirements should demonstrate sufficient mitigating controls without specifying further\r\n3) We create a new section of requirements you have to implement specifically, if you don't want to implement these timeout requirements.\r\n\r\nWhat do people think, @jmanico @danielcuthbert @elarlang \r\n",
+      "createdAt": "2022-08-24T16:14:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1225941128",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KS1j0",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Tricky one. I like both #2 and #3, but more so #2 as this makes those who feel longer timeouts are ok but with mitigating additional controls. ",
+      "createdAt": "2022-09-14T08:54:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1246451956",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KVbLm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In principle, I would prefer to be aligned with NIST in this case.\r\n> \r\n> For companies that violate the timeouts, I can think of three ways to handle this:\r\n> \r\n>     1. We ignore the problem\r\n> \r\n>     2. We say that companies who do not want to comply with the requirements should demonstrate sufficient mitigating controls without specifying further\r\n> \r\n>     3. We create a new section of requirements you have to implement specifically, if you don't want to implement these timeout requirements.\r\n> \r\n> \r\n\r\n\r\n@jmanico @elarlang what do you think?\r\n\r\n",
+      "createdAt": "2022-09-14T18:08:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1247130342",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5MdNrY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can not ignore the problem - if large application (facebook, gmail, ...) can handle keeping their users logged in, then there are valid alternative solutions for taking those risks done.\r\n\r\nIn ideal world we should have solution 3 - we have described requirements how to achieve alternative. In practice, we go for solution 2.",
+      "createdAt": "2022-10-18T17:04:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1282726616",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Mx2Ml",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "thanks @jmanico @danielcuthbert any other opinions?",
+      "createdAt": "2022-10-23T15:15:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1288135461",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RnV9O",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I prefer we say that companies who do not want to comply with the requirements should demonstrate sufficient mitigating controls without specifying further",
+      "createdAt": "2023-01-02T23:21:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1369268046",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RoPkN",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> For companies that violate the timeouts, I can think of three ways to handle this\r\n\r\nI think this is not the correct approach. Companies that want to have timeouts of 60 days are going to have timeouts of 60 days. They can just ignore what the ASVS says, or implement all of the ASVS except for requirement 3.3.2. Companies can determine for themselves what part they use from the ASVS, and how strict they are sticking to it. Any requirement can be ignored, with or without \"sufficient mitigating controls\". Every requirement has a way out, and we don't have to specify it with the requirement.\r\n\r\nIf we do offer a way out for this requirement, we implicitly say that this requirement is stupid and you don't really need to take it serious. If we think that's the case, we should remove it ourselves. Instead of including it but marking it as not really a requirement.\r\n\r\nI think we agree that a timeout of 15 or 30 minutes is unrealistic, but we also want to keep aligned with NIST. So either we choose NIST and keep these stupid limits, or we break with NIST and come up with our own timeouts.\r\n\r\n> Level 1 is supposed to be pentestable\r\n\r\n> I guess we move from \"testability based\" to \"risk based\" levels.\r\n\r\nI created [Risk-based instead of testability-based levels · Issue #1495 · OWASP/ASVS](https://github.com/OWASP/ASVS/issues/1495).",
+      "createdAt": "2023-01-03T08:38:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1369504013",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rqjb9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I do not at all think that 15 or 30 minutes is unrealistic for idle-timeout values for apps like banks and other high risk applications.",
+      "createdAt": "2023-01-03T18:47:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1370109693",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5SluiN",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "When I am checking my account balance, it's fine if I am logged out from my banking app after 15 minutes of inactivity. For people working at a bank and working with banking software all day, it would be pretty inconvenient if they are logged out after 15 minutes of inactivity.\r\n\r\nFurthermore, the bank possibly has a policy that the computer is locked after several minutes of inactivity. Having the application session expire after that is not very effective.",
+      "createdAt": "2023-01-17T15:41:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1385621645",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c72qh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord I accept that but I don't think we want to straight up come out against NIST. \r\n\r\nI think that we can recognise that both of the following can be true:\r\n\r\n1. We need to include a timeout requirement and that should follow NIST\r\n2. It might not be ideal for every use case\r\n\r\nI think that as long as we are standing behind most of our requirements, it is ok to specify a couple where it is clear that an alternative approach needs to be taken. This also seems to have broad agreement from the other leaders. I agree that MFA is not really relevant here and will be handled elsewhere anyway.\r\n\r\nThe original requirement:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.3.2** | If authenticators permit users to remain logged in, verify that re-authentication occurs periodically both when actively used or after an idle period. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | 30 days | 12 hours or 30 minutes of inactivity, 2FA optional | 12 hours or 15 minutes of inactivity, with 2FA | 613 | 7.2 |\r\n\r\nI would suggest one of the two following modifications:\r\n\r\n**Option 1:**\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.3.2** | [UPDATED, SPLIT TO 3.3.6, 3.3.7] If authenticators permit users to remain logged in, verify that re-authentication occurs at least every 30 days. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))| ✓ | ✓ | ✓ | 613 | 7.2 |\r\n| **3.3.6** | [ADDED, SPLIT FROM 3.3.2] If authenticators permit users to remain logged in, verify that re-authentication occurs at least every 12 hours or after 30 minutes of inactivity. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))| | ✓ | ✓ | 613 | 7.2 |\r\n| **3.3.7** | [ADDED, SPLIT FROM 3.3.2] If authenticators permit users to remain logged in, verify that re-authentication occurs at least every 12 hours or after 15 minutes of inactivity. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))| | | ✓ | 613 | 7.2 |\r\n\r\n**Option 2:**\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.3.2** | [UPDATED, SPLIT TO 3.3.6] If authenticators permit users to remain logged in, verify that re-authentication is required at least every 30 days for L1 applications or every 12 hours for L2 and L3 applications. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))| ✓ | ✓ | ✓ | 613 | 7.2 |\r\n| **3.3.6** |[ADDED, SPLIT FROM 3.3.2] If authenticators permit users to remain logged in, verify that re-authentication is required after 30 minutes of inactivity for L2 applications or after 15 minutes of inactivity for L3 applications. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering))| | ✓ | ✓ | 613 | 7.2 |\r\n\r\n\r\n@elarlang @danielcuthbert @jmanico any comments on this? I think Option 2 is cleanest.\r\n\r\n",
+      "createdAt": "2023-05-23T12:23:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1559194273",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dTf0i",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I like Option 2.\r\n\r\n_If authenticators permit users to remain logged in_ - what this phrase gives to the requirement (compared to requirement without the phrase)?\r\n\r\nProposed 3.3.6 says clearly that it is about inactivity. 3.3.2 does not say clearly it is for max session lifetime and without reading 3.3.6 it may feel it's for inactivity time.",
+      "createdAt": "2023-05-27T12:28:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1565392162",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5doVHd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like option 2 as well",
+      "createdAt": "2023-05-31T19:55:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1570853341",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e7e6G",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1660 based on option 2",
+      "createdAt": "2023-06-15T09:02:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1329#issuecomment-1592651398",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-08-11T10:11:24Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 1329,
+  "state": "CLOSED",
+  "title": "3.3.2 reauthentication on session timeout",
+  "url": "https://github.com/OWASP/ASVS/issues/1329"
+}

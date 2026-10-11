@@ -1,0 +1,371 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Spin-off from #2120\r\n\r\nLatest proposal with the intent to have a general (not OAuth and OIDC scenario specific) requirement:\r\n> Verify that the user can review, modify and revoke granted consents at any time.\r\n\r\nProblem (for me) to solve: where goes line between \"authorization\" and \"consent\"?\r\n\r\nHow I define consent - user can understand and agrees with proposed event/action to happen. If we consider consent as an event, then it is not possible to \"rollback\" or revert it later. If we don't consider it as an event or action, how it is different from granting access? Where goes the line between them?\r\n\r\nRelated added requirements from OAuth and OIDC section:\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.16** | [ADDED] Verify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured, the authorization server must always explicitly prompt the user for consent. | | ✓ | ✓ |\r\n| **51.2.17** | [ADDED] Verify that when the authorization server prompts for user consent, it presents sufficient and clear information about what is being consented to. When applicable this should include the nature of the requested authorizations (typically based on scope, resource server, rich authorization requests (RAR) authorization details), the identity of the authorized application and the lifetime of these authorizations. | | ✓ | ✓ |\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6UnO0u",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the user can review, modify and revoke granted consents at any time.\r\n\r\nI don't want to split this from OIDC/OAuth because it opens a nasty can of worms on other theoretical mechanisms for doing delegated authorization.\r\n\r\nThe way I see this requirement is that if an app is going to support using OAuth to give consent to other apps to access the user's content in the app , it also needs to provide functionality to allow users to see the consents they have granted to modify or revoke these consents.\r\n\r\nMy only question is if this is a responsibility of the authorization server or the resource server but either way I would like to see a requirement proposal with the relevant section specified @randomstuff @TobiasAhnoff.",
+      "createdAt": "2024-11-22T09:29:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2493312302",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UrPHy",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> My only question is if this is a responsibility of the authorization server or the resource server\r\n\r\nIf the consent has been given in the AS, it is managed by the AS and should be revoked in the AS.\r\n\r\n***\r\n\r\n> Verify that the user can review, modify and revoke granted consents at any time.\r\n\r\nI am wondering if this is clear enough. With this wording this requirement could be understood to equally apply to a wide variety of things such as:\r\n\r\n* \"I consent of using cookies for tracking me.\"\r\n* \"I consent of telemetry.\"\r\n* \"I consent for these terms of service.\"\r\n* \"I authorize user A to access my gallery B.\"\r\n* \"I authorize client application A to access gallery B on my behalf.\"\r\n* \"I authorize user A to user client application B to access gallery C on my behalf.\"\r\n* \"I consent on having an account on this website.\"\r\n\r\nShould we be a little bit more specific?\r\n",
+      "createdAt": "2024-11-22T17:25:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2494362098",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UraGM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Those I could call authorization, not consents. Those examples are clear - you have access, you take it away:\r\n* \"I authorize user A to access my gallery B.\"\r\n* \"I authorize client application A to access gallery B on my behalf.\"\r\n* \"I authorize user A to user client application B to access gallery C on my behalf.\"\r\n\r\nThose are a bit policy oriented - there is a bit of privacy involved, but what is the security problem to solve?\r\n* \"I consent of using cookies for tracking me.\"\r\n* \"I consent of telemetry.\"\r\n\r\nIf you agreed terms of service - what is the expected action if you redecide or tried to revoke previous consent? What is the security problem to solve?\r\n* \"I consent for these terms of service.\"\r\n\r\nRevoking this consent is just \"delete your account\"?\r\n* \"I consent on having an account on this website.\"\r\n\r\n---\r\n\r\nMy proposal is - let's solve the requirement (at least at the moment) for OAuth and OIDC scenario with specific workding and see, is it clear and actionable at least in this context.\r\n\r\nThe rest seems low-impact and/or policy-oriented gray area for me.",
+      "createdAt": "2024-11-22T17:43:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2494407052",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UsiT-",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> ose are a bit policy oriented - there is a bit of privacy involved, but what is the security problem to solve?\r\n\r\nI agree with your question :) My point was that maybe my wording was too general because it might apply to non-security topics.\r\n\r\n> My proposal is - let's solve the requirement (at least at the moment) for OAuth and OIDC scenario with specific workding and see, is it clear and actionable at least in this context.\r\n\r\nYes, I agree.\r\n\r\nI'm not so clear about consent vs. (user) authorization. They are somewhat the same thing to me.",
+      "createdAt": "2024-11-22T20:03:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2494702846",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UssEL",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Maybe we could have this to keep it OAuth/OIDC specific?\r\n\r\n> Verify that the user can review, modify and revoke consents granted by the authorization server at any time.",
+      "createdAt": "2024-11-22T20:28:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2494742795",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UtXyU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe:\r\n\r\n> Verify that the user can review, modify and revoke consents he has granted through the authorization server at any time.\r\n\r\nWould that be \"consents\" or \"consents and authorization\"?",
+      "createdAt": "2024-11-22T21:48:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2494921876",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UvR96",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would remove \"at any time\" as it does not give anything extra.\r\n> Verify that the user can review, modify and revoke consents *the user* has granted through the authorization server ~~at any time~~.\r\n\r\n> Would that be \"consents\" or \"consents and authorization\"?\r\n\r\n\"Verify that the user can revoke authorization\" sounds very much to have possibility to revoke access tokens.\r\n\r\nI think the authorization part is covered by the requirement:\r\n> V51.2.14 Verify that refresh tokens and reference access tokens can be revoked by an authorized user. It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation.\r\n\r\n",
+      "createdAt": "2024-11-23T09:56:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2495422330",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UxvG7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So the proposed requirement is:\r\n\r\n> Verify that the user can review, modify and revoke consents which the user has granted through the authorization server.\r\n\r\nWhat section are we proposing for this? \r\n",
+      "createdAt": "2024-11-24T15:32:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2496065979",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UxyRl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What section are we proposing for this?\r\n\r\nIt's authorization server responsibility. so it is V51.2 OAuth Authorization Server\r\n\r\nNot sure, should it cover \"V51.5 OIDC OpenID Provider\" as well.\r\n\r\nWe also have too many requirements in the \"V51.2 OAuth Authorization Server\" already and 3 requirements about consent. There can be some grouping done.",
+      "createdAt": "2024-11-24T15:47:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2496078949",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ux2Bp",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Not sure, should it cover \"V51.5 OIDC OpenID Provider\" as well.\r\n\r\nI think, it should apply as OIDC as well.",
+      "createdAt": "2024-11-24T16:23:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2496094313",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyAIJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sounds like OIDC also has an Authorization Server so maybe section 51.2 should be V51.2 OAuth/OIDC Authorization Server\r\n\r\n@randomstuff do you think you could propose how it could fit into 51.2 including grouping some of the consent requirements?",
+      "createdAt": "2024-11-24T17:51:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2496135689",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyGQ3",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Sounds like OIDC also has an Authorization Server so maybe section 51.2 should be V51.2 OAuth/OIDC Authorization Server\r\n\r\nThe idea is to make this clear with the first section of title text\r\n\r\n> OAuth2 has become industry standard for delegating API authorization and also the basis for end-user authentication using OpenID Connect (OIDC), where OIDC is an identity layer on top of OAuth2. Thus, all OAuth2 verifications in this chapter also apply to OIDC, while OAuth2 can be used without OIDC verifications.\r\n\r\nThat is why 5.2 is called just OAuth and not OAuth/OIDC...but I think it is good to also have OAuth/OIDC in the title to make that clearer, but  if we change to OAuth/OIDC for 5.2 then we also need to do the same change for 5.3 and 5.4 (all OAuth requirements applies to OIDC as well). Perhaps also some note on terminology for OAuth Authorization Server and OIDC OpenID Provider.\r\n\r\n> We also have too many requirements in the \"V51.2 OAuth Authorization Server\" already and 3 requirements about consent. There can be some grouping done.\r\n\r\nYes, sounds like a good idea!",
+      "createdAt": "2024-11-24T18:34:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2496160823",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyL0v",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  including grouping some of the consent requirements?\r\n\r\nI think the consent requirements are quite long/verbose enough, I'm not sure how we can stick more things into them :)",
+      "createdAt": "2024-11-24T19:20:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2496183599",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U25MQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Clarification, with \"grouping\" I meant taking group of consent-related requirements and have a separate section for them. (Not merging the existing requirements)",
+      "createdAt": "2024-11-25T09:35:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2497418000",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U6WlG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal for new section `## V51.X OAuth Authorization Server - Consent management`\r\n\r\nMove to new section:\r\n* V51.2.16 Verify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured, the authorization server must always explicitly prompt the user for consent.\r\n* V51.2.17 Verify that when the authorization server prompts for user consent, it presents sufficient and clear information about what is being consented to. When applicable this should include the nature of the requested authorizations (typically based on scope, resource server, rich authorization requests (RAR) authorization details), the identity of the authorized application and the lifetime of these authorizations.\r\n\r\nAnd add new requirement to this section:\r\n* Verify that the user can review, modify and revoke consents which the user has granted through the authorization server.\r\n\r\nDepends how to scope the section, it may cover also \"access management\"\r\n* V51.2.14 Verify that refresh tokens and reference access tokens can be revoked by an authorized user. It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation.\r\n\r\nBut at the moment I don't have any good wording in mind for section title to cover also V51.2.14, so at the moment the proposal is to have 3 consent-related requirement into new section.\r\n\r\nAction needed: section title.",
+      "createdAt": "2024-11-25T15:25:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2498324806",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U8lOX",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"V51.X OAuth Consent and authorization management\"?\r\n\r\nAs currently we have one requirement which says \"or by a client that is using authorization server APIs for revocation\", this may not be stricly/only a authorization server requirements.",
+      "createdAt": "2024-11-25T19:55:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2498909079",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VM_kV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> As currently we have one requirement which says \"or by a client that is using authorization server APIs for revocation\", this may not be stricly/only a authorization server requirements.\r\n\r\nbut it is AS responsibility to provide that API, for that reason the requirement is in that section. I don't see the conflict there.\r\n\r\nI'm afraid that \"authorization management\" is too vague and can be said everything related to authorization, so a safe option is to have \"consent management\" section for 3 consent-related requirements and leave the current V51.2.14 where it is at the moment.",
+      "createdAt": "2024-11-27T08:18:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2503211285",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VNeXW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current proposal via #2415\r\n\r\n## V51.7 Consent Management\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.7.1** | [ADDED] Verify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured, the authorization server must always explicitly prompt the user for consent. | | ✓ | ✓ |\r\n| **51.7.2** | [ADDED] Verify that when the authorization server prompts for user consent, it presents sufficient and clear information about what is being consented to. When applicable this should include the nature of the requested authorizations (typically based on scope, resource server, rich authorization requests (RAR) authorization details), the identity of the authorized application and the lifetime of these authorizations. | | ✓ | ✓ |\r\n| **51.7.3** | [ADDED] Verify that the user can review, modify and revoke consents which the user has granted through the authorization server. | | ✓ | ✓ |\r\n\r\nAny immediate improvements/fixes?\r\n* user vs end-user? additionally \"(resource owner)\"?\r\n* as we moved the requirements out from \"OAuth authorization server\" section, should we now specify the \"authrorization server\" in requirements?\r\n\r\nping @TobiasAhnoff @randomstuff ",
+      "createdAt": "2024-11-27T09:17:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2503337430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VPWHF",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Looks good to me like that.\r\n\r\nWe would add  \"(resource owner)\" to be more precise but I wonder if this would not hinder readability. Unless this is really ambiguous without it, we can probably skip it.",
+      "createdAt": "2024-11-27T13:04:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2503827909",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VWSpA",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "It looks good to me, I think user works since this is for the consent context ",
+      "createdAt": "2024-11-28T09:30:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2401#issuecomment-2505648704",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-21T10:21:57Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2401,
+  "state": "CLOSED",
+  "title": "Requirement for managing user consents",
+  "url": "https://github.com/OWASP/ASVS/issues/2401"
+}

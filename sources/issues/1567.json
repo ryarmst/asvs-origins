@@ -1,0 +1,129 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjMxNzA3MzQz",
+    "is_bot": false,
+    "login": "markonweb",
+    "name": "Mark Potter"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5W6vmW",
+      "author": {
+        "login": "markonweb"
+      },
+      "authorAssociation": "NONE",
+      "body": "Proposal to change 2.4.3 (line 98) PBKDF2 iterations value from 100,000 to 600,000 in alignment with the OWASP Password Storage Cheat Sheet https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+      "createdAt": "2023-03-07T14:09:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1567#issuecomment-1458239894",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W6zXE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is the argumentation behind the value \"600,000\"? Other than it is in the cheat sheet.",
+      "createdAt": "2023-03-07T14:18:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1567#issuecomment-1458255300",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W7gRi",
+      "author": {
+        "login": "markonweb"
+      },
+      "authorAssociation": "NONE",
+      "body": "Good question. The cheat sheet recommendation points to https://tobtu.com/minimum-password-settings/ , a page on a site owned by Steve \"sc00bz\" Thomas. Also on the site, is a link his Blackhat 2022 presentation https://tobtu.com/files/blackhat2022.pdf  \r\nSides 18-20 are about PBKDF2 including a minimum strength recommendation of \"Such that an attacker gets <10 KH/s/GPU\" with a footnote (17) that links to an ArsTechnica article about the 2015 LastPass breach https://arstechnica.com/?p=685505 ... I haven't seen what led to the 600,000 iteration recommendation.\r\nfwiw, the cheat sheet iteration recommendation carried into the wikipedia entry for pbkdf2 as an \"OWASP recommendation\" https://en.wikipedia.org/wiki/PBKDF2\r\nRFC 2898 (Sept 2000) isn't prescriptive except that it recommends a min of 1000 iterations. https://www.rfc-editor.org/rfc/rfc2898#section-4\r\nRFC 8018 (Jan 2017) obseletes RFC 2898 but restates the same numbers and section 4.2 references NIST SP 800-132 as the source. Min of 1000 iterations https://www.rfc-editor.org/info/rfc8018\r\nCWE 916 isn't prescriptive in terms of iterations https://cwe.mitre.org/data/definitions/916.html\r\nNIST SP 800-132 (Dec 2010) isn't prescriptive either, but also recommends a min of 1000 iterations in section 5.2. https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf\r\nNote - NIST just closed a public comment period on SP 800-132 (so there will likely be changes) https://content.govdelivery.com/accounts/USNIST/bulletins/3414e52\r\nNIST SP 800-63B (Jun 2017) states \"For PBKDF2, the cost factor is an iteration count: the more times the PBKDF2 function is iterated, the longer it takes to compute the password hash. Therefore, the iteration count SHOULD be as large as verification server performance will allow, typically at least 10,000 iterations.\" https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63b.pdf\r\nSo... as far as NIST or IETF are concerned, I was only able to find a high water mark minimum iteration recommendation of 10,000. Password vault companies and Microsoft's default iteration count for asp.net cite 100,000 or higher but I haven't found a source indicating why they selected their respective numbers.\r\nDo you know what the source was for the ASVS recommendation of 100,000?\r\nI found a closed issue related to this topic where the alignment of ASVS with the cheat sheet was discussed https://github.com/OWASP/ASVS/issues/1003 . Based on a comment in the thread, it appears that the two were brought into alignment at some point in 2021. There are also comments in the thread related to standing by the number of iterations based on work with the hashcat team. Lastly, someone mentioned a concern related to breaking support for older hardware (and they referenced the NIST minimum iteration count of 1000). No math or sources were shared related to the current 100,000 value.  I'm guessing that it will probably be best to wait for NIST to release an updated version of SP 800-132 unless someone can share the math behind their recommendations.",
+      "createdAt": "2023-03-07T16:12:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1567#issuecomment-1458439266",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W7q3n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you @markonweb for the research. I don't have any answers from my side, just first validation round why this change request was made and what is behind that. If later someone want to understand the reason for some change, we need to provide argumented answers :)",
+      "createdAt": "2023-03-07T16:38:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1567#issuecomment-1458482663",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W7rXj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With 2.4.3 we have another opened issue: https://github.com/OWASP/ASVS/issues/1510",
+      "createdAt": "2023-03-07T16:39:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1567#issuecomment-1458484707",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W7s9Q",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I though I already saw something like that and we actually have the same proposal in other issue: #1508",
+      "createdAt": "2023-03-07T16:44:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1567#issuecomment-1458491216",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c8tMK",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is useful context but I am going to close this issue as handled by #1508",
+      "createdAt": "2023-05-23T13:50:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1567#issuecomment-1559417610",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-03-07T14:07:39Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 1567,
+  "state": "CLOSED",
+  "title": "2.4.3 PBKDF2 iterations value should be changed from 100,000 to 600,000 in alignment with OWASP Password Storage Cheat Sheet",
+  "url": "https://github.com/OWASP/ASVS/issues/1567"
+}

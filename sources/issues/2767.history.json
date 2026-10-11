@@ -1,0 +1,61 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2025-03-24T00:47:43Z",
+      "diff": "Originating from #2409 \n\nI propose the following requirement for consideration:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **50.5.3** | [ADDED] Verify that HTTP responses for sensitive resources (such as images, videos, and documents) include a Cross-Origin-Resource-Policy header to prevent malicious applications from embedding sensitive resources within an attacker-controlled process that may result in data leaks or other side-channel attacks. Sensitive resources should be protected with the same-origin directive whereas resources intended to be embedded by other origins should return the cross-origin directive. | 3 | |\n\nI excluded scripts as an example of resources above because 50.5.2 already prohibits authorized data from being included within scripts, but this may be valuable as a defense in depth approach. While this finding could go under V50.3 as a security response header, I think it logically relates most to V50.5, which could perhaps be generalized to \"Resource Inclusion\". I suggest L3 for a number of reasons:\n- Added complexity in implementation\n- The complexity and pre-requisites for actual attacks\n- The limited impact"
+    },
+    {
+      "editedAt": "2025-03-24T08:03:02Z",
+      "diff": "Originating from #2409 \n\nI propose the following requirement for consideration:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **50.5.x** | [ADDED] Verify that HTTP responses for sensitive resources (such as images, videos, and documents) include a Cross-Origin-Resource-Policy header to prevent malicious applications from embedding sensitive resources within an attacker-controlled process that may result in data leaks or other side-channel attacks. Sensitive resources should be protected with the same-origin directive whereas resources intended to be embedded by other origins should return the cross-origin directive. | 3 | |\n\nI excluded scripts as an example of resources above because 50.5.2 already prohibits authorized data from being included within scripts, but this may be valuable as a defense in depth approach. While this finding could go under V50.3 as a security response header, I think it logically relates most to V50.5, which could perhaps be generalized to \"Resource Inclusion\". I suggest L3 for a number of reasons:\n- Added complexity in implementation\n- The complexity and pre-requisites for actual attacks\n- The limited impact"
+    },
+    {
+      "editedAt": "2025-03-24T08:04:16Z",
+      "diff": "Originating from #2409 \n\nI propose the following requirement for consideration:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **50.5.x** | [ADDED] Verify that HTTP responses for sensitive resources (such as images, videos, and documents) include a Cross-Origin-Resource-Policy header to prevent malicious applications from embedding sensitive resources within an attacker-controlled process that may result in data leaks or other side-channel attacks. Sensitive resources should be protected with the same-origin directive whereas resources intended to be embedded by other origins should return the cross-origin directive. | 3 | |\n\nI excluded scripts as an example of resources above because 50.5.2 already prohibits authorized data from being included within scripts, but this may be valuable as a defense in depth approach. While this finding could go under V50.3 as a security response header, I think it logically relates most to V50.5, which could perhaps be generalized to \"Resource Inclusion\". I suggest L3 for a number of reasons:\n- Added complexity in implementation\n- The complexity and pre-requisites for actual attacks\n- The limited impact\n\n---\n\nedit/Elar: I changed the title and requirement number to 50.5.x, to avoid confusion that we have an existing requirement with number 50.5.3."
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2767#issuecomment-2747050569",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "If the problem to solve is to \"do not allow embedding (sensitive) content to 3rd party\", then  I think there are many different technical solutions to achieve that and we can not require CORP as the one and only solution to achieve that.\n\n\"Sensitive information\" sounds like an authenticated data. If it uses CORS and API correctly, the problem is solved. So, cookies or other automatically added credentials (basic authorization) are required. For cross-site context, cookies with samesite=lax do to job.\n\nAs I understand, CORP just disallows the browser to handle the response, but the request to the server is made and the response is received.\n\nCompared to that, much more effective is to validate `Sec-Fetch-*` HTTP request header fields on the server side and the sensitive resource is not even returned as a response.\n\nSo the general message here should be, that \"The application must respond only, if the request was made by trusted party (e.g. the application itself) and for intended purpose (e.g. resource demanding API call is not called as an image resource)\".\n\nThen we need to check, that we don't duplicate and overlap with requirements like:\n* V50.3.2 Verify that all responses contain a X-Content-Type-Options: nosniff header field.\n* V50.4.4 Verify that calls to sensitive functionality use appropriate HTTP methods such as POST, PUT, PATCH or DELETE, and not methods defined by the HTTP specification as \"safe\" such as HEAD, OPTIONS, or GET. **Alternatively, strict validation of the Sec-Fetch-\\* request header fields can be used to ensure that the request did not originate from an inappropriate cross-origin call, a navigation request, or a resource load (such as an image source) where this is not expected.** This is particularly important if the application does not distinguish between URL parameters and message body parameters.\n* V50.6.1 Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). **Possible controls could include: not serving the content unless HTTP request header fields, such as Sec-Fetch-\\*, indicate it is the correct context**, using the \"Content-Security-Policy: sandbox\" header or using the \"Content-Disposition: attachment header\".",
+          "recorded_at": "2025-03-24T08:15:34Z"
+        },
+        {
+          "body": "If the problem to solve is to \"do not allow embedding (sensitive) content to 3rd party\", then  I think there are many different technical solutions to achieve that and we can not require CORP as the one and only solution to achieve that.\n\n\"Sensitive information\" sounds like an authenticated data. If it uses CORS and API correctly, the problem is solved. So, cookies or other automatically added credentials (basic authorization) are required. For cross-site context, cookies with samesite=lax do to job.\n\nAs I understand, CORP just disallows the browser to handle the response, but the request to the server is made and the response is received.\n\nCompared to that, much more effective is to validate `Sec-Fetch-*` HTTP request header fields on the server side and the sensitive resource is not even returned as a response.\n\nSo the general message here should be, that \"The application must respond only, if the request was made by trusted party (e.g. the application itself) and for intended purpose (e.g. resource demanding API call is not called as an image resource)\".\n\nThen we need to check, that we don't duplicate and overlap with requirements like:\n* V50.3.2 Verify that all responses contain a X-Content-Type-Options: nosniff header field.\n* V50.6.1 Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields, such as Sec-Fetch-*, indicate it is the correct context, using the \"Content-Security-Policy: sandbox\" header or using the \"Content-Disposition: attachment header\".",
+          "recorded_at": "2025-03-24T06:44:32Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2767#issuecomment-2756609373",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "This defense does not work. \n\nI can just use a BFF to load any public content I want from a proxy for my malicious site. If you set a resource as public then I can load it anywhere, regardless of cross origin policies. The only way to effectively protect content is via authentication and access control, and even then if you allow public registrations I can proxy a newly registered user.\n\nCross-origin policies are very poor to zero security and should not be depended on in any way.\n\nI realize this section is about browser security, and my point is that this defense does not provide any browser security at all. ",
+          "recorded_at": "2025-03-27T04:22:30Z"
+        },
+        {
+          "body": "This defense does not work. \n\nI can just use a BFF to load any public content I want from a proxy for my malicious site. If you set a resource as public then I can load it anywhere, regardless of cross origin policies. The only way to effectively protect content is via authentication and access control, and then if you allow public registrations I can proxy a newly registered user.\n\nCross-origin policies are very poor to zero security and should not be depended on in any way.",
+          "recorded_at": "2025-03-27T04:20:16Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2767#issuecomment-2756912643",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I just hesitate to worry about one website embedding public content from another website. The risk here is low and browser defenses are easily circumvented. I do not think this is worthy of a requirement and suggest we move it to recommendations.\n\nPS: The COOP post (now deleted) was in the wrong thread, I am sorry I am juggling a dozen conversations at once.",
+          "recorded_at": "2025-03-27T06:47:42Z"
+        },
+        {
+          "body": "I just hesitate to worry about one website embedding public content from another website. The risk here is low and browser defenses are easily circumvented. I do not think this is worthy of a requirement and suggest we move it to recommendations.",
+          "recorded_at": "2025-03-27T06:46:09Z"
+        }
+      ]
+    }
+  ]
+}

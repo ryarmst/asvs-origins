@@ -1,0 +1,182 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjI1ODUzNjc=",
+    "is_bot": false,
+    "login": "raviballa",
+    "name": "Ravi Balla"
+  },
+  "body": "No sensitive data should traverse through HTTP protocol. I think this requirement (8.3.1) reads as if it was allowed in the body or headers of the request.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTE3ODcxOA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "That is interesting. Please can you raise a pull request with the suggested change. Is there anywhere else in the standard that this exists?",
+      "createdAt": "2020-02-20T16:48:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589178718",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTc0NTE2Ng==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "commit 335b612\r\n\r\nThere is no such thing like HTTP**S** message body (it's HTTP message body). HTTPS is just extended HTTP. Like HTTP header is not HTTPS header just because HTTPS protocol was used.\r\n\r\nhttps://tools.ietf.org/html/rfc7230#section-3.3",
+      "createdAt": "2020-02-21T17:08:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589745166",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTc0NzYzOA==",
+      "author": {
+        "login": "raviballa"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Then the requirement 8.3.1 should read as \"Verify that sensitive data is NOT sent to the server in the HTTP message body or headers...\"",
+      "createdAt": "2020-02-21T17:14:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589747638",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTc0OTU3NA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it can not be sent in HTTP message body or headers, it means, it can not be sent at all. The point for 8.3.1 is that sensitive data can not be sent in part of URL request or parameter part (path or query part, https://tools.ietf.org/html/rfc3986#section-3), because those are often present in logs, in browser history, referrer problems etc.\r\n\r\nFor me requirement V8.3.1 is understandable and clear.",
+      "createdAt": "2020-02-21T17:19:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589749574",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTc1MTQ1Mg==",
+      "author": {
+        "login": "raviballa"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Agree with you on the URL request parameters, but the HTTP BODY (which is mentioned in 8.3.1) is causing the confusion.",
+      "createdAt": "2020-02-21T17:24:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589751452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTc1Mzc1MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's \"HTTP message body\", not \"HTTP BODY\", and it should be clear term for every security tester and web developer.\r\n\r\nHTTP request\r\n```\r\nPOST /path/no-sensitive-data-here/?parameter=no-sensitive-data-here HTTP/1.1\r\nUser-Agent: ...\r\nAnother-Header: sensitive-data-allowed\r\n\r\nmessage-body-is-here=sensitive-data-allowed\r\n```\r\n",
+      "createdAt": "2020-02-21T17:30:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589753750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTkxNTI0OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Absolutely correct. The terms \"HTTP Message Body\" or \"Message Body\" are \nstandard where \"HTTP Body\" is not.\n\n- Jim\n\nOn 2/22/20 6:30 AM, Elar Lang wrote:\n>\n> It's \"HTTP message body\", not \"HTTP BODY\", and it should be clear term \n> for every security tester and web developer.\n>\n> HTTP request\n>\n> |POST /path/nosensitivedatahere/?parameter=nosensitivedatahere \n> HTTP/1.1 User-Agent: ... message-body-is-here=sensitive-data=allowed |\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/717?email_source=notifications&email_token=AAEBYCMKQW2BFJN7IMG4WOTREAFSBA5CNFSM4KYAKMUKYY3PNVWWK3TUL52HS4DFVREXG43VMVBW63LNMVXHJKTDN5WW2ZLOORPWSZGOEMTO3FQ#issuecomment-589753750>, \n> or unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCLJYHMILPJK2S26K4TREAFSBANCNFSM4KYAKMUA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-02-22T03:59:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589915249",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTkxNTQ4Ng==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The current version I'm reading says:\n\n\"Verify that sensitive data is sent to the server in the HTTP message \nbody or headers, and that query string parameters from any HTTP verb do \nnot contain sensitive data.\"\n\nThis looks very clear to me. If anyone objects can you please suggest an \nexact replacement?\n\nThe principle to NOT put sensitive data in a querystring of any verb, \neven over HTTPS, is one of the core principles of secure web development \nand it's a solid and critical requirement.\n\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n\nOn 2/22/20 6:19 AM, Elar Lang wrote:\n>\n> If it can not be sent in HTTP message body or headers, it means, it \n> can not be sent at all. The point for 8.3.1 is that sensitive data can \n> not be sent in part of URL request or parameter part (path or query \n> part), because those are often present in logs, in browser history, \n> referrer problems etc.\n>\n> For me requirements V8.3.1 is understandable and clear.\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/717?email_source=notifications&email_token=AAEBYCLZYYRBXKJ2NVW3DG3REAEJ5A5CNFSM4KYAKMUKYY3PNVWWK3TUL52HS4DFVREXG43VMVBW63LNMVXHJKTDN5WW2ZLOORPWSZGOEMTN2RQ#issuecomment-589749574>, \n> or unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCPDBUG7CT6SD5BNJD3REAEJ5ANCNFSM4KYAKMUA>.\n>\n",
+      "createdAt": "2020-02-22T04:03:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589915486",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTkxNTUxNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed it should be NOT.... good catch.\n\nOn 2/22/20 6:14 AM, Ravi Balla wrote:\n>\n> Then the requirement 8.3.1 should read as \"Verify that sensitive data \n> is NOT sent to the server in the HTTP message body or headers...\"\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/717?email_source=notifications&email_token=AAEBYCKUUGMGR3THWQ2RKZTREADW5A5CNFSM4KYAKMUKYY3PNVWWK3TUL52HS4DFVREXG43VMVBW63LNMVXHJKTDN5WW2ZLOORPWSZGOEMTNLNQ#issuecomment-589747638>, \n> or unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCKD4HMNJPENR7MKEEDREADW5ANCNFSM4KYAKMUA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-02-22T04:03:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589915517",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTkxNTc5Mg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Ravi, we do NOT want to send sensitive data in the querystring and we \nWANT to send sensitive data ONLY in a HTTP header or HTTP message body. \nAnd of course we want to use HTTP/S but that is a different requirement.\n\nSo the current requirement 8.3.1 is still quite reasonable.\n\n- Jim\n\n\nOn 2/22/20 6:14 AM, Ravi Balla wrote:\n>\n> Then the requirement 8.3.1 should read as \"Verify that sensitive data \n> is NOT sent to the server in the HTTP message body or headers...\"\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/717?email_source=notifications&email_token=AAEBYCKUUGMGR3THWQ2RKZTREADW5A5CNFSM4KYAKMUKYY3PNVWWK3TUL52HS4DFVREXG43VMVBW63LNMVXHJKTDN5WW2ZLOORPWSZGOEMTNLNQ#issuecomment-589747638>, \n> or unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCKD4HMNJPENR7MKEEDREADW5ANCNFSM4KYAKMUA>.\n>\n\n",
+      "createdAt": "2020-02-22T04:07:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-589915792",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMzE2OTk2Mg==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sorry, made a mess of this but I think Jim was clear that we want to keep the original text.",
+      "createdAt": "2020-05-03T19:46:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/717#issuecomment-623169962",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2020-02-19T19:41:38Z",
+  "labels": [],
+  "number": 717,
+  "state": "CLOSED",
+  "title": "8.3.1: Replace HTTP with HTTPS",
+  "url": "https://github.com/OWASP/ASVS/issues/717"
+}

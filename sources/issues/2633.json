@@ -1,0 +1,178 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **14.3.5** | [ADDED, SPLIT FROM 4.3.2] Verify that the application does not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders. | 1 | |\n\nProblems to solve:\n\n  * it is a negative requirement\n  * from requirement level point of view - Thumbs.db, .DS_Store have minimal risks, .git and .svn may reveal a lot\n  * the problem is, that Thumbs.db or .DS_Store file exists in the production - solution is to get rid of them, not to disallow to read them\n  * .git and .svn are not file or directory metadata as such, probably the mistake got in during the split from current 14.3.4\n\nI think Thumbs.db and .DS_Store can be covered via:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **14.1.6** | [MOVED FROM 14.2.2] Verify that all unneeded features, documentation, sample applications and configurations are removed. | 1 | 1002 |\n\nIf to add there:\n\n> V14.1.6 Verify that all unneeded features, documentation, sample applications, **metadata and cache files (such as Thumbs.db and .DS_Store),** and configurations are removed.\n\nand then we need to address the .git and .svn folders topic somehow.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6fOg0M",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This seems like a very good solution to 14.3.5. Two thumbs up. 👍🏼 ",
+      "createdAt": "2025-02-20T12:39:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2671381772",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fkSbN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think about this:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **4.3.2** | [SPLIT TO 14.1.6, 14.1.11, 14.3.4] | | |\n| **12.5.1** | [MOVED TO **14.3.5**] | | |\n| **14.1.6** | [MOVED FROM 14.2.2, SPLIT FROM 4.3.2] Verify that all unneeded features, documentation, sample applications, configurations, and file or directory metadata (such as Thumbs.db, .DS_Store) are removed. | 1 | 1002 |\n| **14.1.11** | [ADDED, SPLIT FROM 4.3.2] Verify that the application is deployed without any source control metadata including the .git or .svn folders. | 1 | |\n| **14.3.5** | [GRAMMAR, MOVED FROM 12.5.1] Verify that the web tier is configured to serve only files with specific file extensions to prevent unintentional information and source code leakage. For example, backup files (.bak), temporary working files (.swp), compressed files (.zip, .tar.gz) and other extensions commonly used by editors should be blocked unless required. | 1 | 552 |\n\nYou can also see this in #2647",
+      "createdAt": "2025-02-23T20:07:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2677089997",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fmIw0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application is deployed without any source control metadata including the .git or .svn folders.\n\nIs there any good reason to keep this information in production - maybe there is a good use-case for updating or something?\n\nIf `.git` data is there, but it is not accessible for a web server or program code, I think it is ok.",
+      "createdAt": "2025-02-24T07:00:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2677574708",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6frVyE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am not convinced there is a good reason to have these folders in deploy, there are a variety of alternative mechanisms that are safer. Also, I think making it inaccessible to programming code might be a challenge...\n\nWe could say this but it is not super elegant:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **14.1.11** | [ADDED, SPLIT FROM 4.3.2] Verify that the application is deployed either without any source control metadata including the .git or .svn folders or in a way that these folders are inaccessible both externally and to the application itself. | 1 | |\n\nAnother option is to be less opinionated:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **14.1.11** | [ADDED, SPLIT FROM 4.3.2] Verify that the application is deployed such that any source control metadata such as the .git or .svn folders is not externally browsable or discoverable. | 1 | |\n\nWhat do you think @elarlang ?",
+      "createdAt": "2025-02-24T16:05:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2678938756",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fsTFR",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What about a more positive requirement like...\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **14.1.x** | [ADDED, SPLIT FROM 4.3.2] Verify that the application only deploys files necessary for the live application. Avoid unnecessary files and folders such as source control metadata like .git or .svn folders.\n",
+      "createdAt": "2025-02-24T17:35:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2679189841",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6fsb5o",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [ADDED, SPLIT FROM 4.3.2] Verify that the application is deployed either without any source control metadata including the .git or .svn folders or in a way that these folders are inaccessible both externally and to the application itself.\n\nI like this one.\n\n.git and .svn are high-impact cases that requires some attention.\n",
+      "createdAt": "2025-02-24T17:50:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2679225960",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ftMWT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What about a more positive requirement like...\n\n@jmanico I think the idea was to specifically focus on the source control issue, we have 14.1.6 which kinda covers everything else. Happy if you want to open a separate issue to try and clarify 14.1.6 though\n",
+      "createdAt": "2025-02-24T19:17:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2679424403",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ftOom",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I updated #2647",
+      "createdAt": "2025-02-24T19:21:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2679433766",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ftSNB",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > What about a more positive requirement like...\n> \n> [@jmanico](https://github.com/jmanico) I think the idea was to specifically focus on the source control issue, we have 14.1.6 which kinda covers everything else. Happy if you want to open a separate issue to try and clarify 14.1.6 though\n\nNo need, you guys got this. I'm good.",
+      "createdAt": "2025-02-24T19:28:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2633#issuecomment-2679448385",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-02-20T09:57:22Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    }
+  ],
+  "number": 2633,
+  "state": "CLOSED",
+  "title": "14.3.5 - needs rewrite",
+  "url": "https://github.com/OWASP/ASVS/issues/2633"
+}

@@ -1,0 +1,199 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Currently the cryptography appendix has this list of KDFs:\n\n| KDF         | Reference                                                                                     | Status |\n| ----------- | --------------------------------------------------------------------------------------------- | ------ |\n| argon2id    | [RFC 9106](https://www.rfc-editor.org/info/rfc9106)                                          | A |\n| scrypt      | [RFC 7914](https://www.rfc-editor.org/info/rfc7914)                                          | A |\n| PBKDF2      | [RFC 8018](https://www.rfc-editor.org/info/rfc8018) & [NIST SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final) | A |\n| HKDF        | [RFC 5869](https://www.rfc-editor.org/info/rfc5869)                                          | A |\n| MD5-based KDFs | [RFC 1321](https://www.rfc-editor.org/info/rfc1321)                                | D      |\n| SHA-1-based KDFs | [RFC 3174](https://www.rfc-editor.org/info/rfc3174) & [RFC 6194](https://www.rfc-editor.org/info/rfc6194) | D      |\n\nSome questions:\n\n* It is not clear from the table which one can be used for password-based key derivation. Should we add some info about this? (as a dedicated column?)\n* For the \"Hash Functions for Password Storage\" section, we list individual instances of PBKDF2 (PBKDF2-HMAC-SHA-512, PBKDF2-HMAC-SHA-256, PBKDF2-HMAC-SHA-1). Shall we do the same here?\n* If we do, shall we do the same for HKDF?\n* For the \"Hash Functions for Password Storage\" section, we include required parameter values. Shall we do the same here?\n* [Cryptographic Right Answers](https://www.latacora.com/blog/2024/07/29/crypto-right-answers-pq/) is saying that PBKDF2 should be used \"if nothing else is available\". Shall we include this information in some way? In a note? By creating a new \"discouraged\" status? By marking it a \"legacy\"?\n\nAny hindsight about that, @danielcuthbert and @unprovable?\n\nRelated to #2988",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6o6n8J",
+      "author": {
+        "login": "Sc00bz"
+      },
+      "authorAssociation": "NONE",
+      "body": "> * It is not clear from the table which one can be used for password-based key derivation. Should we add some info about this? (as a dedicated column?)\n\nHashing and key stretching are different. None of those are to be used for password KDFs.\n\n> * For the \"Hash Functions for Password Storage\" section, we list individual instances of PBKDF2 (PBKDF2-HMAC-SHA-512, PBKDF2-HMAC-SHA-256, PBKDF2-HMAC-SHA-1). Shall we do the same here?\n> * If we do, shall we do the same for HKDF?\n\nAll non-deprecated hashes can be used with HKDF.\n\n> * For the \"Hash Functions for Password Storage\" section, we include required parameter values. Shall we do the same here?\n\nThere are no required parameters. These are fundamentally different.\n\n> * [Cryptographic Right Answers](https://www.latacora.com/blog/2024/07/29/crypto-right-answers-pq/) is saying that PBKDF2 should be used \"if nothing else is available\". Shall we include this information in some way? In a note? By creating a new \"discouraged\" status? By marking it a \"legacy\"?\n\nPBKDF2 is there because it is the only NIST approved algorithm. But I'm not against stating something along the lines of \"only if you need to use NIST approved algorithms\" or \"if nothing else is available\". They're technically not legacy because it's current for NIST. Granted it does feel like legacy but governments move slow.",
+      "createdAt": "2025-04-28T04:18:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2833940233",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6o6tUz",
+      "author": {
+        "login": "Sc00bz"
+      },
+      "authorAssociation": "NONE",
+      "body": "I just realized SHA-224, SHA-512/224, SHA3-224, and SHA-1 being \"not suitable for HMAC, KDF, RBG, digital signatures\" is wrong. They all are suitable for HMAC, KDF, and RBG. The length of MAC needs to be at least 80 bits (see GCM's 128 bit MAC, but also some NIST document that mentions the 80 bits limit). The reason is an attacker that doesn't know the key only gets a 1 in 2^80 chance while being interactive (ie you can't offload the computations to the attacker like hash collisions).\n\nNow there is a caveat where the key is public and it's used like a hash then the limit of at least 256 bits comes in. I believe Mega does this. They used CBC-MAC which was broken due to collisions being trivial to create given the key. I think they switched to HMAC-SHA-256 but it could of been just SHA-256.",
+      "createdAt": "2025-04-28T04:38:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2833962291",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pS-Yv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Hashing and key stretching are different. **None of those are to be used for password KDFs.**\n\nPBKDF2's name actually is \"Password-Based Key Derivation Function\". I guess this one can be used as a password-based KDF, right?\n\nRFC 7914 is \"The scrypt **Password-Based Key Derivation Function**\", it's supposed to be used as a password-based KDF, right?\n\nAnyway it's weird to have password-absed KDFs and KDFs in the same table. They are usually not used in the same context at all, are they?\n\nDo we need to actually mention \"MD5-based KDFs\" and \"SHA-1-based KDFs\" (disallowed), anyway?\n\nCan we just say:\n\n> Key derivation functions:\n> \n> | KDF         | Reference                                                                                     | Status |\n> | ----------- | --------------------------------------------------------------------------------------------- | ------ |\n> | HKDF        | [RFC 5869](https://www.rfc-editor.org/info/rfc5869)                                          | A |\n> \n> Password-based key derivation functions:\n> \n> | KDF         | Reference                                                                                     | Status | Comment\n> | ----------- | --------------------------------------------------------------------------------------------- | ------ | ------\n> | argon2id    | [RFC 9106](https://www.rfc-editor.org/info/rfc9106)                                          | A |\n> | scrypt      | [RFC 7914](https://www.rfc-editor.org/info/rfc7914)                                          | A |\n> | PBKDF2      | [RFC 8018](https://www.rfc-editor.org/info/rfc8018) & [NIST SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final) | A | If nothing else is available, usually for NIST compliance.\n\n> There are no required parameters. These are fundamentally different.\n\nWe currently have listed argon2id, scrypt and PBKDF2 all of which have some parameters. We should put constraint on these parameters, isn't it? For example, you wouldn't want to use PBKDF2 with one iteration.",
+      "createdAt": "2025-04-29T21:48:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2840323631",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pTAv-",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I just realized SHA-224, SHA-512/224, SHA3-224, and SHA-1 being \"not suitable for HMAC, KDF, RBG, digital signatures\" is wrong. They all are suitable for HMAC, KDF, and RBG.\n\nFor HMAC, this is actually related (or can be explained) by 11.4.3:\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **11.4.3** | **Verify that hash functions used** in digital signatures, **as part of data authentication** or data integrity** are collision resistant and have appropriate bit-lengths. **If collision resistance is required, the output length must be at least 256 bits**. If only resistance to second pre-image attacks is required, the output length must be at least 128 bits. | 2 | v5.0.be-6.6.3 |\n\nThis requires an output of at least 256 bits for MACs. SHA-224, SHA-512/224, SHA3-224, and SHA-1 don't respect this condition eg. when used in HMAC: they produce an output of 224, 224, 224 and 160 bits respectively.",
+      "createdAt": "2025-04-29T21:55:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2840333310",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pTCGy",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The length of MAC needs to be at least 80 bits (see GCM's 128 bit MAC, but also some NIST document that mentions the 80 bits limit).\n\nNow, I agree that GCM's output is 128 bit only. I'm not sure what I should make out of this :)\n\n@unprovable, @danielcuthbert any feedback on this thread?\n\n> (ie you can't offload the computations to the attacker like hash collisions)\n\nCan you expand on that?",
+      "createdAt": "2025-04-29T21:59:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2840338866",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pd4Mn",
+      "author": {
+        "login": "anonymous-31"
+      },
+      "authorAssociation": "NONE",
+      "body": "I've been researching this issue and would like to contribute to the discussion. Here are my thoughts on the questions raised:\n\n1. **Distinguishing KDF types**: I believe we should add a column to clearly distinguish between password-based KDFs and general-purpose KDFs. This distinction is important because they serve different purposes and have different security requirements.\n\n2. **PBKDF2 variants**: For consistency with the password storage section, we should list specific PBKDF2 variants (PBKDF2-HMAC-SHA-512, PBKDF2-HMAC-SHA-256, PBKDF2-HMAC-SHA-1) rather than just generic PBKDF2.\n\n3. **Parameter recommendations**: We should include parameter recommendations for password-based KDFs, similar to the password storage section. This would help ensure that these KDFs are used securely.\n\n4. **HKDF variants**: Unlike PBKDF2, HKDF is typically used with SHA-256 or SHA-512, but the specific hash function is less critical since HKDF isn't designed to be computationally intensive. I don't think we need to list specific HKDF variants.\n\n5. **PBKDF2 status**: Based on modern cryptographic recommendations (including the Cryptographic Right Answers article), PBKDF2 is no longer the preferred choice for password-based key derivation. I suggest we either:\n   - Mark it as \"L\" (Legacy) instead of \"A\" (Approved)\n   - Keep it as \"A\" but add a note indicating that Argon2id and scrypt are preferred for new implementations\n\nHere's a draft of how the revised table might look:\n\n| KDF | Reference | Type | Recommended Parameters | Status | Notes |\n|-----|-----------|------|------------------------|--------|-------|\n| argon2id | RFC 9106 | Password-Based | Memory Cost ≥ 19MB, Time Cost ≥ 2, Parallelism = 1 | A | Preferred for new implementations |\n| scrypt | RFC 7914 | Password-Based | r ≥ 8, p ≥ 1 | A | |\n| PBKDF2-HMAC-SHA-512 | RFC 8018 & NIST SP 800-132 | Password-Based | ≥ 210,000 iterations | A | Use only if Argon2id and scrypt are not available |\n| PBKDF2-HMAC-SHA-256 | RFC 8018 & NIST SP 800-132 | Password-Based | ≥ 600,000 iterations | A | Use only if Argon2id and scrypt are not available |\n| PBKDF2-HMAC-SHA-1 | RFC 8018 & NIST SP 800-132 | Password-Based | ≥ 1,300,000 iterations | L | |\n| HKDF | RFC 5869 | General-Purpose | N/A | A | |\n| MD5-based KDFs | RFC 1321 | Any | N/A | D | |\n| SHA-1-based KDFs | RFC 3174 & RFC 6194 | Any | N/A | D | |\n\nThis approach would also align with issue #2988, which proposes adding a new control for deriving cryptographic keys from passwords.\n\nWhat do you think of this approach?",
+      "createdAt": "2025-04-30T20:16:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2843181863",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pd-hU",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I've been researching this issue and would like to contribute to the discussion. Here are my thoughts on the questions raised:\n> \n> 1. **Distinguishing KDF types**: I believe we should add a column to clearly distinguish between password-based KDFs and general-purpose KDFs. This distinction is important because they serve different purposes and have different security requirements.\n> \n> 2. **PBKDF2 variants**: For consistency with the password storage section, we should list specific PBKDF2 variants (PBKDF2-HMAC-SHA-512, PBKDF2-HMAC-SHA-256, PBKDF2-HMAC-SHA-1) rather than just generic PBKDF2.\n> \n> 3. **Parameter recommendations**: We should include parameter recommendations for password-based KDFs, similar to the password storage section. This would help ensure that these KDFs are used securely.\n> \n> 4. **HKDF variants**: Unlike PBKDF2, HKDF is typically used with SHA-256 or SHA-512, but the specific hash function is less critical since HKDF isn't designed to be computationally intensive. I don't think we need to list specific HKDF variants.\n> \n> 5. **PBKDF2 status**: Based on modern cryptographic recommendations (including the Cryptographic Right Answers article), PBKDF2 is no longer the preferred choice for password-based key derivation. I suggest we either:\n>    - Mark it as \"L\" (Legacy) instead of \"A\" (Approved)\n>    - Keep it as \"A\" but add a note indicating that Argon2id and scrypt are preferred for new implementations\n> \n> Here's a draft of how the revised table might look:\n> \n> | KDF | Reference | Type | Recommended Parameters | Status | Notes |\n> |-----|-----------|------|------------------------|--------|-------|\n> | argon2id | RFC 9106 | Password-Based | Memory Cost ≥ 19MB, Time Cost ≥ 2, Parallelism = 1 | A | Preferred for new implementations |\n> | scrypt | RFC 7914 | Password-Based | r ≥ 8, p ≥ 1 | A | |\n> | PBKDF2-HMAC-SHA-512 | RFC 8018 & NIST SP 800-132 | Password-Based | ≥ 210,000 iterations | A | Use only if Argon2id and scrypt are not available |\n> | PBKDF2-HMAC-SHA-256 | RFC 8018 & NIST SP 800-132 | Password-Based | ≥ 600,000 iterations | A | Use only if Argon2id and scrypt are not available |\n> | PBKDF2-HMAC-SHA-1 | RFC 8018 & NIST SP 800-132 | Password-Based | ≥ 1,300,000 iterations | L | |\n> | HKDF | RFC 5869 | General-Purpose | N/A | A | |\n> | MD5-based KDFs | RFC 1321 | Any | N/A | D | |\n> | SHA-1-based KDFs | RFC 3174 & RFC 6194 | Any | N/A | D | |\n> \n> This approach would also align with issue #2988, which proposes adding a new control for deriving cryptographic keys from passwords.\n> \n> What do you think of this approach?\n\nThis is extremely well thought out and solves many of the problems in this thread. I think it's exactly the right direction we should take. \n\ncc @Sc00bz for verification",
+      "createdAt": "2025-04-30T20:29:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2843207764",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qA5y6",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We already have a list of \"Hash Functions for Password Storage\":\n\n| Hash function | Reference | Required Parameter Sets | Status |\n| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | --|\n| argon2 | RFC 9106 | Argon2ID: Memory Cost 19MB, Time Cost 2, Parallelism 1 | A |\n| scrypt | RFC 7914 | 2^15 r = 8 p = 1 | A |\n| bcrypt |[A Future-Adaptable Password Scheme](https://www.researchgate.net/publication/2519476_A_Future-Adaptable_Password_Scheme) | At least 10 rounds. | A |\n| PBKDF2-HMAC-SHA-512 | [NIST SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final), [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | 210,000 iterations | A |\n| PBKDF2-HMAC-SHA-256 | [NIST SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final), [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | 600,000 iterations | A |\n| PBKDF2-HMAC-SHA-1 | [NIST SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final), [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | 1,300,000 iterations | L |\n\nWe are discussing to have a list of password-based KDFs which would mostly the same list of mechanisms and the same required parameters. One difference is that \"bcrypt\" is not a KDF. Can avoid the duplication?\n\n* By stating that approved password-based KDFs can be used as approved passwording hashing methods?\n* By merging the two lists and noting that bcrypt is not usable as password-based KDF?\n",
+      "createdAt": "2025-05-05T21:18:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2852363450",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qA7cP",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@anonymous-31, In addition to my previous comment, I would:\n\n* strongly consider using two different tables for \"normal KDFs\" and \"password-based KDFs\" because you would not want to use one where your would have to use the other;\n* Consider removing \"MD5-based KDFs\" and \"SHA-1-based KDFs\" entries. The latter is in contradiction to the fact the PBKDF2-HMAC-SHA-1 is listed as legacy.\n\n",
+      "createdAt": "2025-05-05T21:22:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3021#issuecomment-2852370191",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-22T13:22:23Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABy9sfPQ",
+      "name": "AppendixV",
+      "description": "Appendix with crypto details",
+      "color": "540616"
+    }
+  ],
+  "number": 3021,
+  "state": "CLOSED",
+  "title": "Clarify list of KDFs in the appendix",
+  "url": "https://github.com/OWASP/ASVS/issues/3021"
+}

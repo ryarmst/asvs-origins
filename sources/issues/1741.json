@@ -1,0 +1,550 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "The current ASVS items under category 2 don't explicitly address user enumeration vulnerabilities that arise from different responses given by the application during authentication attempts (e.g., \"This user doesn't exist\" vs. \"Incorrect password\").\r\n\r\n**Proposed Change**\r\nAdd a new ASVS item under category 2 that explicitly addresses user enumeration during the authentication process.\r\n\r\nDraft for the new ASVS item:\r\n\r\n**2.X.X Verify that the application provides generic error messages during the authentication process to prevent user enumeration vulnerabilities. Regardless of the authentication failure reason, responses such as \"Invalid username or password\" should be used.**\r\n\r\n**Justification**\r\n\r\nUser enumeration vulnerabilities allow attackers to determine if a username or email is registered with the service. This vulnerability can provide attackers with a starting point for brute force attacks, phishing campaigns, and other malicious activities targeting valid users. Addressing this in the ASVS will raise awareness among developers and security auditors about this often-overlooked vulnerability.\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5n7EwN",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What risk or attack scenario you would like to take down with the requirement?",
+      "createdAt": "2023-10-02T18:30:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1743539213",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5n7GwG",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The primary risk that we are addressing with this requirement is the potential for an attacker to enumerate and identify valid usernames or user IDs within the application. This presents multiple concerns:\r\n\r\n**Phishing and Social Engineering:** Armed with a list of valid usernames or emails, an attacker can craft more convincing phishing campaigns. By targeting actual users of a service, the success rate of phishing attempts can increase.\r\n\r\n**Data Leakage:** In some scenarios, the very knowledge of a specific individual being a user of a certain application can be considered sensitive information. For example, being able to confirm that a particular email address is registered on a healthcare or financial site might leak personal data about that individual's affiliations or activities.\r\n\r\n**Chaining Vulnerabilities:** User enumeration, while seemingly benign on its own, can be a part of a larger chain of vulnerabilities. An attacker leveraging multiple vulnerabilities can potentially cause more significant harm when they have knowledge of valid users.",
+      "createdAt": "2023-10-02T18:33:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1743547398",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5n7Nnm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me basically the only reasonable point is the \"data leakage\" example. Phising campaigns (in general) feels a bit more out of ASVS scope.\r\n\r\nNowadays it's widespread solution that username is email address, and there is plenty of ways to figure them out in general. Against mass-requests there are anti-automation rules.\r\n\r\nIf there is self-registration functionality and there is free form of choosing username - how do you provide the service without letting users know, that certain username is taken?\r\n\r\nIf username is an email address, maybe there is possibility to send some abstract message that \"Check your email for activation\".\r\n\r\n(Genral feedback) I would like to see more precise and technical examples, \"may cause more harm\" does not carry any information for me.",
+      "createdAt": "2023-10-02T18:47:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1743575526",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5n7Rsx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Vision from my side: I don't see it as requirement for improving authentication (proposed 2.X.X).\r\n\r\nOnly value here is information leakage (8.(1 or 3).X) - the fact that certain user/email is using the application. The problem is, you can not always hide it - maybe usernames or emails are diplayed somewhere by business logic rules - which also means we can not require hiding it for everyone and for every case.\r\n\r\nTo watch it as information leakage, I think it also covers other pointed out scenarios like phising, as this acticity just using the information leakage but it's not vector against the application itself.",
+      "createdAt": "2023-10-02T18:59:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1743592241",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oeH6M",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @ImanSharaf, just a reminder to always search for issues before you open new ones :)\r\n\r\nIn this case, [I gave an opinion](https://github.com/OWASP/ASVS/issues/659#issuecomment-509275376) similar to what @elarlang wrote above.\r\n\r\nAs @elarlang wrote above, I agree that this could be a data leakage/information disclosure issue where being able to discover the existence of a single user in an application (e.g. abortion clinic website) would be considered a significant breach of confidentiality/privacy. \r\n\r\nCan you think of a relevant requirement text?",
+      "createdAt": "2023-10-09T10:13:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1752727180",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5of2Hv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth - before requirement text, we should finding agreement and understanding, is it actually reachable. Like my comments here: https://github.com/OWASP/ASVS/issues/1741#issuecomment-1743575526",
+      "createdAt": "2023-10-09T15:00:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1753178607",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pGVFn",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree with @elarlang on this one. Knowing someone's username is not really an attack vector or a vulnerability on its own. We had extensive discussions with colleagues and clients before and this is usually not an issue we report on a pentest as a finding unless we were able to chain multiple vulnerabilities (which are more impactful than username enumeration) that could lead to a user account being compromised. The rationality was anyone could figure out your username/email if it is let's say firstname.lastname@domain.org, so that doesn't really stop an attacker to enumerate users. What stops them are other controls behind that. And actually, some systems out there design it that way to prevent frustration from users whenever registering for a new account if there are generic error messages it gets confusing. \r\n\r\nI feel like if ever we would like to focus on improving the authentication mechanisms, we should focus on other controls (such as account lockout to deter brute force attacks, enforcing MFA, etc). ",
+      "createdAt": "2023-10-15T04:19:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1763266919",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pGVvZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Counterpoint:\n\nMany financial sites at the enterprise management level do not allow you to pick a username, they choose one for you that is password like, a great defense against credential stuffing.\n\nAlso, sites like PG&E here in California allow you to shut down your email address as a username and select one yourself.\n\nThese controls are for a reason and help stave off credential stuffing.\n\nUsername unumeration is classified as an AuthN level attack. ",
+      "createdAt": "2023-10-15T04:38:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1763269593",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pGeEP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, to the only defense against username-password authentication is to not use only username-password for authentication.\r\n\r\nFor comparison for Jim - if in Estonia you want log in to a internet bank or to some government related sites, you can not use username-password combination anywhere.\r\n\r\nIn general I agree, that if an attacker knows the username, it makes attacker's life easier, but I it's not trivial to build a requirement to require hiding it for everyone and for every case.\r\n\r\nEmail address as username is too widespread solution. Or Jim want to say, that authentication to Gmail is problematic as you use your email address as username?",
+      "createdAt": "2023-10-15T07:20:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1763303695",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pGebA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "All I am saying is those services that stop or prevent username harvesting by using obscure/non-public usernames, give users a chance to not use an email address, do not display usernames and have a non-username display name, or assign password like usernames, or use biometrics for the username…\r\n\r\n…are more secure than those who do not.\r\n\r\nDevelopers should be considering these options.",
+      "createdAt": "2023-10-15T07:27:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1763305152",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pGg4D",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Developers should be considering these options.\r\n\r\nYes, developers (or security analyst) **should consider** this as option. But at the moment I can not see the material for requirement, what everyone **must do**.",
+      "createdAt": "2023-10-15T08:16:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1763315203",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pJfJ1",
+      "author": {
+        "login": "belalena"
+      },
+      "authorAssociation": "NONE",
+      "body": "We have ASVS Requirement:\r\n2.2.8. Verify that all failed authentication challenges respond in the same average response time.\r\nThis requirement emphasizes consistent response times in the event of failed authentication to avoid revealing a real user's login.\r\n\r\nSimultaneously, there's a recommendation in the Authentication Cheat Sheet, which advises displaying a generic error message in different authentication scenarios, even when:\r\n\r\n-The user ID or password is incorrect.\r\n-The account doesn't exist.\r\n-The account is locked or disabled.\r\n\r\nBUT the current conversation is mostly about not wanting to use a standard message... \r\nTo deal with it, I see two options:\r\n\r\n1. Create a matching requirement about generic message.\r\n2. Think about removing the requirement (2.2.8) and the recommendation from the Cheat Sheet, which could be causing the conflict.\r\n\r\nDoes this make sense?",
+      "createdAt": "2023-10-16T09:37:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764094581",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pJmhb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> BUT the current conversation is mostly about not wanting to use a standard message...\r\n\r\nCurrent issue is not limited to username leakage from error messages, but in general - application should hide is some user registered there or not. Idea is nice but taking into account widespread solution to use email address as user-name, makes it hard to provide good and \"fits for all\" requirement for that.",
+      "createdAt": "2023-10-16T09:55:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764124763",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pJ0Hp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe I provide context with some parallel issue.\r\n\r\nLet's say application keeps files in public folder, those are accessible with HTTP request but actually require authorization. For the folder is available directory listing.\r\n\r\nWe have requirement for folder listing, as unintended information leakage:\r\n\r\n  * V14.3.4 Verify that directory browsing is disabled unless deliberately desired.\r\n\r\nIf we disable folder listing, we don't fix authorization problem for accessing files. It just closes one (main) source of information which files are there, but the problem in the application still exists.\r\n\r\nThe same is with username enumeration **from authentication perspective** - practically hiding usernames won't compensate problems with authentication. At the same time, it does not make sense to make attackers life easier and do not reveal information which is not intended to be public.\r\n\r\nIf to use example of V14.3.4, maybe something like (from information leakage perspective):\r\n\r\n  * V8.X.X - Verify that application does not reveal information about registered users to the application (such as name, username, email address) unless it is public information and accepted business logic decision.",
+      "createdAt": "2023-10-16T10:30:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764180457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pJ1Pg",
+      "author": {
+        "login": "belalena"
+      },
+      "authorAssociation": "NONE",
+      "body": "Definitely! The very first message in this issue is about potential leakage of information if some user is registered in a system or not through the error messages. \r\n\r\nSome potential places where the disclosure of whether a user is registered or not may occur:\r\n1. The response code (for instance 200, 403) \r\n2. The error message (Your password is not correct, Login is not correct)\r\n3. The response time (amount of time differs if user exists or not)\r\n\r\n\r\nFor the 3d one we have 2.2.8 requirement.\r\n\r\nWhat about 1st and 2d? \r\n\r\nWhat if we add them to 2.2.8?\r\n\r\n2.2.8. Verify that all failed authentication challenges respond in the same way: \r\n- HTTP code,\r\n- average response time,\r\n- error message.\r\n",
+      "createdAt": "2023-10-16T10:33:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764185056",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pJ5HG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree it makes sense to change 2.2.8 to cover more cases.\r\n\r\nBut now we kind of have 2 parallel topics: to hide the fact that this user is registered in the application at all and to hide what went wrong during authentication (2.2.8 improvement).",
+      "createdAt": "2023-10-16T10:43:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764200902",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pLLTj",
+      "author": {
+        "login": "belalena"
+      },
+      "authorAssociation": "NONE",
+      "body": "I can't think of any other reason to have 2.2.8 other than to hide the fact that a user with that login is already registered.\r\nHowever, I also understand why it's challenging to implement a similar requirement during the registration of a new user.\r\n\r\nIn my view, 2.2.8. (after extending) would cover it for applications without a self-registration.\r\nBut to achieve this, the same requirements should be developed for Forgotten Password function (or adding Forgotten Password functionality to 2.2.8). For instance:\r\n2.X.X. Verify that Forgotten Password functionality responds in the same way whether it's requested for an existing user or a non-existing user:\r\n- HTTP code,\r\n- average response time,\r\n- error message.\r\n\r\nV8.X.X sounds good for me. It would help highlighting the problem of information leakage during registration in self-registration applications, among other ways of revealing of user information.",
+      "createdAt": "2023-10-16T13:55:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764537571",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pMUUR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In ASVS v3.0.1 there was requirement:\r\n_V2.18 Verify that information enumeration is not possible via login, password reset, or forgot account functionality._\r\n\r\n",
+      "createdAt": "2023-10-16T16:20:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764836625",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pXYF2",
+      "author": {
+        "login": "belalena"
+      },
+      "authorAssociation": "NONE",
+      "body": "Since requirement 2.18 was removed due to deprecation (#236), I suggest removing requirement 2.2.8 as it makes no sense apart from 2.18",
+      "createdAt": "2023-10-18T06:17:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1767735670",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pXqpV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good investigation :) I agree, it does not make sense or give meaningful impact from authentication point of view and this is the argument from NIST.\r\n\r\nHere I watch it as information leakage, which can be used against authentication attacks, but where mentioned (NIST, #236) MFA need to take away the attack vector.",
+      "createdAt": "2023-10-18T07:12:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1767811669",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5py3zW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that not using email as an email address is probably more of a \"should do\" rather than a \"must do\" so it isn't really relevant for ASVS.\r\n\r\nI can only really repeat my comment from above: https://github.com/OWASP/ASVS/issues/1741#issuecomment-1752727180\r\n\r\n> I agree that this could be a data leakage/information disclosure issue where being able to discover the existence of a single user in an application (e.g. abortion clinic website) would be considered a significant breach of confidentiality/privacy. \r\n\r\nOther than that, I don't think we need requirements for this.",
+      "createdAt": "2023-10-23T10:59:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1774943446",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qFIPx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Other than that, I don't think we need requirements for this.\r\n\r\nbut we already have requirement for that and I agreed (https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764200902) it can be finetuned like @belalena  proposed in https://github.com/OWASP/ASVS/issues/1741#issuecomment-1764185056 to cover it more widely than written at the moment.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.2.8** | [ADDED] Verify that all failed authentication challenges respond in the same average response time. | | ✓ | ✓ | | |\r\n\r\nOther option is to delete it. Or is there any other good reason to have 2.2.8?",
+      "createdAt": "2023-10-25T17:22:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1779729393",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qiHRV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I think I understand better now.\r\n\r\nWhat if we were to expand 2.2.8 and bump it up to L3 as I think it is a hard requirement \r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.2.8** | [ADDED] Verify that valid users cannot be deduced from failed authentication challenges such as based on error messages, HTTP response codes or different response times. Registration and forgot password functionality should also have this protection. | | | ✓ | | |",
+      "createdAt": "2023-10-31T14:26:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1787327573",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x1yxu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ImanSharaf @belalena do you have any comments on the requirement proposal in the [previous comment](https://github.com/OWASP/ASVS/issues/1741#issuecomment-1787327573)?",
+      "createdAt": "2024-01-25T11:03:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1909927022",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x10WV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just a note that in the proposed requirement text, there is no closing bracket for the opening one.",
+      "createdAt": "2024-01-25T11:08:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1909933461",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x2bbF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks I fixed that bracket",
+      "createdAt": "2024-01-25T12:20:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1910093509",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yLZ25",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth all good!",
+      "createdAt": "2024-01-29T21:20:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1915592121",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yNtUJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "By content it's V8 requirement. Should we keep it in V2 together with authentication requirements, or should we move it to V8?",
+      "createdAt": "2024-01-30T07:02:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1916196105",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yqY5S",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we should keep it as V2 because not everything in the requirement is strictly error related",
+      "createdAt": "2024-02-02T12:32:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1923714642",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yqZjV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V8 is sensitive data. The fact that the user is registered to a site, can be considered as sensitive information.",
+      "createdAt": "2024-02-02T12:34:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1923717333",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yqmoN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sorry, I got confused with V7 😂😂.\r\n\r\nNevertheless I think it should stay with AuthN because it is quite specific ",
+      "createdAt": "2024-02-02T13:09:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1741#issuecomment-1923770893",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-10-02T18:23:41Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1741,
+  "state": "CLOSED",
+  "title": "Add Specific ASVS Item Addressing User Enumeration Vulnerabilities",
+  "url": "https://github.com/OWASP/ASVS/issues/1741"
+}

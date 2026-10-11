@@ -11,18 +11,18 @@ OWASP/ASVS tracker. This repository curates provenance around that discussion.
 
 ## Status
 
-Milestone 0: schemas, validators, and a seed corpus transcribed from the
-seven requirement-history reports in
-[asvs-issue-analyze](https://github.com/tghosth/asvs-issue-analyze).
-
-No LLM enrichment yet. No public site yet.
+Milestone 3: static site and local editor. Every requirement has an origin
+note. Public pages hide rejected artifacts. Use
+[docs/review.md](docs/review.md) to run the app and add human notes.
 
 ## Repository layout
 
 - `schema/` — JSON Schema (draft 2020-12) for requirements, issues, and pull requests
 - `sources/` — raw ASVS tables and GitHub issue snapshots (regenerable)
 - `data/` — curated corpus (git-tracked, reviewed)
-- `pipeline/` — Python ingest, extract, validation, and later LLM passes
+- `pipeline/` — Python ingest, extract, validation, LLM passes, and site indexes
+- `web/` — SvelteKit static site and local editor
+- `build/` — derived indexes and candidate links (gitignored)
 - `docs/adr/` — architecture decisions
 
 ## Dual license
@@ -71,6 +71,118 @@ Run tests.
 .venv/bin/pytest
 ```
 
+## Ingest and extract (M1)
+
+Refresh the requirement tables from the CSVs in `sources/asvs/`. Existing
+authored records keep their slug, uid, lineage events, and summaries.
+
+```
+.venv/bin/python -m pipeline.ingest.sync_asvs
+```
+
+Mirror the issue archive from a local
+[asvs-issue-analyze](https://github.com/tghosth/asvs-issue-analyze) checkout
+(defaults to the path used on this machine):
+
+```
+.venv/bin/python -m pipeline.ingest.sync_issues
+```
+
+Clone or update OWASP/ASVS under `sources/git-cache/ASVS` (gitignored):
+
+```
+.venv/bin/python -m pipeline.ingest.sync_git
+```
+
+Or run all three:
+
+```
+.venv/bin/python -m pipeline.ingest
+```
+
+Extract git lineage (skips authored/reviewed records) and scan issues for
+requirement IDs.
+
+```
+.venv/bin/python -m pipeline.extract
+```
+
+`--resume` skips records that already have complete lineage, after an interrupted run.
+
+```
+.venv/bin/python -m pipeline.extract --resume
+```
+
+Build derived indexes under `build/index/`:
+
+```
+.venv/bin/python -m pipeline.build.index
+```
+
+## LLM enrichment (M2)
+
+Pass A triages issues, Pass B summarizes requirement-bearing threads, Pass C
+writes origin/evolution summaries for a chapter. Artifacts are `llm` and
+`unreviewed`. Human `accepted` records are never overwritten.
+
+Set `ASVS_ORIGINS_LLM_API_KEY` or `OPENAI_API_KEY` (OpenAI-compatible
+`/v1/chat/completions`). Optional: `ASVS_ORIGINS_LLM_BASE_URL`,
+`ASVS_ORIGINS_LLM_MODEL`.
+
+```
+.venv/bin/python -m pipeline.llm --chapter V9
+```
+
+The V9 pilot in this repo was produced with the session provider (no vendor
+API). Re-run that path with:
+
+```
+.venv/bin/python scripts/run_m2_v9_session.py
+```
+
+Print a maintainer queue (optional; the site does not use it):
+
+```
+.venv/bin/python -m pipeline.llm.queue --chapter V9
+```
+
+Fill origin and evolution notes for every requirement from mapping + git
+lineage. Authored records and existing summaries are left alone.
+
+```
+.venv/bin/python -m pipeline.enrich
+```
+
+## Web app (M3)
+
+Read-only site (rebuilds indexes, then serves http://127.0.0.1:5173):
+
+```
+npm --prefix web install
+```
+
+```
+npm --prefix web run dev
+```
+
+Local editor (writes `data/` when `DEV_EDIT=1`). Set your GitHub login in
+`web/.env` first. See [docs/review.md](docs/review.md). Open a requirement,
+then Enrich from sources.
+
+```
+cp web/.env.example web/.env
+```
+
+```
+npm --prefix web run edit
+```
+
+Production static build (output `web/build/`):
+
+```
+npm --prefix web run build
+```
+
 ## Seed records
 
 M0 includes authored JSON for:
@@ -88,13 +200,15 @@ the seed itself:
 
 ## Provenance
 
-Every authored block is `human`, `llm`, or `llm_reviewed`. The public UI will
-badge those as Human, AI, or AI-reviewed. There is no project rule about which
-model to use. Pipeline metadata may still record a model id and prompt version
-so regenerations stay idempotent; that metadata is not a vendor endorsement.
+Every authored block is `human`, `llm`, `llm_reviewed`, or `deterministic`.
+The public UI will badge the first three as Human, AI, or AI-reviewed.
+`deterministic` is for mechanical extractors (git pickaxe, mapping, ID
+scans). There is no project rule about which model to use. Pipeline metadata
+may still record a model id and prompt version so regenerations stay
+idempotent; that metadata is not a vendor endorsement.
 
 ## What comes next
 
-1. M1 — import all 345 requirements, sync the issue archive, port lineage extraction
-2. M2 — LLM passes on chapter V9, then human review
-3. M3 — public read-only site with legacy ID redirects
+1. Human notes on controls you care about, from the local editor
+2. M4 — LLM backfill of remaining issue threads where mapping+git is not enough
+3. M5 — daily source sync

@@ -1,0 +1,152 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "About\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **51.5.5** | [ADDED] Verify that, if specific authentication strength, methods or recentness is required, the relying party (RP) verifies that the presented ID-token satisfies these constraints (using the 'acr', 'amr' and 'auth_time' claims respectively). | 2 |\n\nI would suggest making it a L1 requirement.\n\nLet's assume this requirement is not in place in your application A which is using Google (for example) as an OP.\n\nI can register a new application B acting as a OIDC client on Google's OP. A user logins in my application and my server obtains an ID token for this used. Then I could use this ID token to get a session on the user's behalf on application A.\n\nThis assumes that A is accepting the implicit or hybrid flows which are accepted to L1 applications.\n\nIn think this is pretty bad and is not so much different from not verifying the user password…\n\nI think this should definitely be L1.\n\nFollow-up of PR #2648\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6hHHMF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for arguments and an example scenario.\n\nI still think that it is L2 (it is not a 1st layer attack scenario without preconditions), and if we need to change something to L1 to solve described problem, then I prefer to use the pre-condition requirement 51.4.5 for that.",
+      "createdAt": "2025-03-06T07:08:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2702996229",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6hdLP_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - let's try to find solution here as well.\n\nFirst, I think that 51.5.5 is not candidate for L1, as described scenario contained preconditions and it is not a first layer of defense issue.\n\nSo the question here is, should 51.4.5 be L1 to address the scenario you described?\n> V51.4.5 Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) must no longer be used.\n\nBased on RFC9700 we can require do not use password grant, but not yet implicit flow.\n\nhttps://www.rfc-editor.org/rfc/rfc9700.html#section-2.4\n> The resource owner password credentials grant [[RFC6749](https://www.rfc-editor.org/rfc/rfc9700.html#RFC6749)] MUST NOT be used.\n\nhttps://www.rfc-editor.org/rfc/rfc9700.html#section-2.1.2\n\n> In order to avoid these issues, clients SHOULD NOT use the implicit grant (response type token) or other response types issuing access tokens in the authorization response, unless access token injection in the authorization response is prevented and the aforementioned token leakage vectors are mitigated.\n\nBut, from OAuth 2.1 both will be removed anyway...\n\nhttps://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12#section-10\n\n> The Resource Owner Password Credentials grant is omitted from this specification as per Section 2.4 of [[I-D.ietf-oauth-security-topics](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29)]\n\n> The Implicit grant (response_type=token) is omitted from this specification as per Section 2.1.2 of [[I-D.ietf-oauth-security-topics](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-29)]\n\nSo I'm ok to make V51.4.5 as L1 requirement to address the given scenario (ping @tghosth)\n\n",
+      "createdAt": "2025-03-09T10:15:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2708780031",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6hnzIV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is the attack scenario where disallowed grants are used? Surely there are other prerequisites for an attack to be successful? This does not feel like L1 to me.",
+      "createdAt": "2025-03-10T19:05:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2711564821",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6hn-nQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would watch it as using a component with a known vulnerability. By principle, if tokens are transferred as part of URL, it is against some other requirements. With password grants it is more questionable in 1st party situation, but for 3rd party situation it is leaking credentials to 3rd party.\n\nIt is not a pure and clear choice for L1, but to allow \"disabled in spec\" methods for L1 feels worse.",
+      "createdAt": "2025-03-10T19:26:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2711611856",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iLz5k",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussed with @elarlang that the flows include significant leakage vulnerabilities which would be considered serious enough to be L1.",
+      "createdAt": "2025-03-13T11:55:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2721005156",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6iL1uu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2685 to resolve it",
+      "createdAt": "2025-03-13T11:59:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2672#issuecomment-2721012654",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-03-05T20:34:34Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2672,
+  "state": "CLOSED",
+  "title": "Decrease level of 51.5.5 (ID token audience validation) > Pivoted to discuss 15.4.5",
+  "url": "https://github.com/OWASP/ASVS/issues/2672"
+}

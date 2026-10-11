@@ -1,0 +1,358 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Some requirement(s) should require the usage of forward secrecy whenever it makes sense.\r\n\r\nsee https://github.com/OWASP/ASVS/pull/2212#issuecomment-2451664978\r\n\r\nPossible impact:\r\n\r\n* Key exchange (ephemeral DH vs. RSA and static DH)\r\n* mTLS client authentication using static client DH keypair (is it still relevant?)\r\n* TLS session resumption (with TLS before 1.3)",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6SoLeP",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I did address this with https://github.com/OWASP/ASVS/issues/2252\r\n\r\nDo you think we need to clarify further @randomstuff ",
+      "createdAt": "2024-11-06T15:06:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2460006287",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SqfHm",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  Both RSA and DHE do support PFS \r\n\r\nCan you clarify (or provide reference) when you say that RSA supports PFS? Maybe we are not talking about the same thing?",
+      "createdAt": "2024-11-06T19:33:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2460611046",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SrDMy",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My point is that we should have explicit requirements about forward secrecy which is currently not mentioned explicitly at all.\r\n\r\nProposed generic requirement:\r\n\r\n> 9.2.X Verify than for all communications using an encrypted protocols (TLS, SSH) the communication provides forward secrecy with respect to the long term private keys when communicating with modern clients. Non-forward secret communication might still be supported only for compatibility with old client which do not support it and if such compatibility is required.\r\n\r\nThis generic requirement could be specialized into more specific requirement about TLS (?). Proposed requirement about forward secrecy with respect to the client private key\r\n\r\n> 9.4.X Verify than for all communications using TLS provides forward secrecy with respect to server private key when communicating with modern clients. Key exchanges such as RSA transport, static diffie-hellman, static ECDH key exchanges must not be used for when communicating with modern clients.\r\n\r\nSome questions/comments:\r\n\r\n* Is 9.4.X redundant with existing requirement such as 9.4.1? (\"latest recommended cipher suites\")\r\n* I would consider a requirement about forward secrecy with respect to the client private key in TLS (i.e. rsa_fixed_dh, dss_fixed_dh). I don't know if this has been used in practice and I don't believe this has been used much anyway.\r\n* I'm not including requirements about forward secrecy with TLS PSK as this is quite niche (outside of TLS 1.3 session resumption).\r\n* Before TLS 1.3 and when using TLS 1.3 with psk_ke, there is no forward secrecy with respect to the session secret. This might need to be mitigated. More generally, there are considerations wrt TLS sessions secrets which might need to be included.\r\n",
+      "createdAt": "2024-11-06T20:54:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2460758834",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sv6Ce",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Should we enforce the use of ephemeral key exchange methods, such as ephemeral Diffie-Hellman (DHE) or Elliptic Curve Diffie-Hellman (ECDHE)?\r\nIt can ensure that session keys are unique per session, preserving forward secrecy. In contrast, static key exchanges, like RSA or static Diffie-Hellman, do not provide forward secrecy and are therefore less secure.",
+      "createdAt": "2024-11-07T11:48:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2462032030",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SxZv6",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ImanSharaf, I think the requirement should focus on the goal which is to provide forward secrecy. In practice, this is typically achieved using DHE but could be achieved using other schemes (triple diffie hellman, [some RSA based schemes](https://crypto.stackexchange.com/questions/18424/is-perfect-forward-secrecy-achieved-with-rsa), etc.).",
+      "createdAt": "2024-11-07T14:47:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2462424058",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TFtYT",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "See #2252",
+      "createdAt": "2024-11-11T10:10:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2467747347",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6URyxQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff what are the next steps on this issue?",
+      "createdAt": "2024-11-20T07:16:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2487692368",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UYfsY",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposition:\r\n\r\n> 9.2.X Verify that communications using in-transit encryption (for example using TLS, SSH, IPsec, QUIC), the encryption protocol provides forward secrecy. This can be achieved using an ephemeral Diffie-Hellman key exchange.\r\n\r\nSomewhat more verbose (but possibly more precise) wording:\r\n\r\n> 9.2.X Verify than for all communications using in-transit encryption (for example using TLS, SSH, IPsec, QUIC), the communication cannot be decrypted with any persistent secret (forward secrecy). This can be achieved using an ephemeral Diffie-Hellman key exchange.\r\n\r\nQuestion: Any need for an exception for compatibility with old legacy external clients? (\"[…] when communicating with up-to date clients […] Communication with external legacy clients which do not support forward secrecy can be used if such compatibility is required.\")\r\n\r\nQuestion: Add some hints about suitable TLS ciphersuites in appendix?\r\n\r\nQuestion: Do we need to discuss about the impact of session resumption with respect to forward secrecy?",
+      "createdAt": "2024-11-20T20:07:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2489449240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UmjYa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My questions:\r\n\r\n- Does offering TLS 1.3 mean that an app automatically complies with this requirement?\r\n- If not, can the dev choose specific cipher suites to comply with this requirement?\r\n- If not, what do they need to do?\r\n- What does someone need to do if they also offer TLS 1.2?\r\n\r\n\r\n> Question: Add some hints about suitable TLS ciphersuites in appendix?\r\n\r\nOpen to suggestions but that would be a separate issue on the appendix. I don't think it is critical.\r\n\r\n> Question: Do we need to discuss about the impact of session resumption with respect to forward secrecy?\r\n\r\nDoes it alter the requirement?\r\n",
+      "createdAt": "2024-11-22T08:13:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2493134362",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UmjaE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff ",
+      "createdAt": "2024-11-22T08:14:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2493134468",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Uq8m7",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Question: Do we need to discuss about the impact of session resumption with respect to forward secrecy?\r\n> \r\n> Does it alter the requirement?\r\n\r\nShort answer: It's complicated. I'd say we can include the requirement as is. Id needed, we can talk about session resumption in another issue.\r\n\r\nLong answer below:\r\n\r\nPossibly, somewhat.\r\n\r\nExplanation: The secrets stored by the TLS server for session resumption can typically be used to break the encryption of the resumed TLS session. If these are persisted (and [replicated in order to allow the session to work on different instances of the TLS termination server](https://timtaubert.de/blog/2014/11/the-sad-state-of-server-side-tls-session-resumption-implementations/#:~:text=Session%20Resumption%20with%20multiple%20servers)), this may compromise forward secrecy.\r\n\r\nSee for reference : https://timtaubert.de/blog/2014/11/the-sad-state-of-server-side-tls-session-resumption-implementations/\r\n\r\nNote: This is [fixed in TLS 1.3](https://timtaubert.de/blog/2017/02/the-future-of-session-resumption/) when if a Diffie-Hellman key exchange is done as part of the session resumption (`psk_dhe_ke`).\r\n\r\nSo for this proposed requirement:\r\n\r\n> 9.2.X Verify than for all communications using in-transit encryption (for example using TLS, SSH, IPsec, QUIC), the communication cannot be decrypted with **any persistent secret** (forward secrecy). This can be achieved using an ephemeral Diffie-Hellman key exchange.\r\n\r\ncould be interpreted as implying that session secrets must be not persisted.\r\n",
+      "createdAt": "2024-11-22T17:01:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2494286267",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Uxu6Y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so how about my other questions @randomstuff :\r\n\r\n\r\n* Does offering TLS 1.3 mean that an app automatically complies with this requirement?\r\n* If not, can the dev choose specific cipher suites to comply with this requirement?\r\n* If not, what do they need to do?\r\n* What does someone need to do if they also offer TLS 1.2?\r\n",
+      "createdAt": "2024-11-24T15:30:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2496065176",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ux72H",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Summary of forward secrecy support depending on TLS versions and ciphersuites:\r\n\r\n||TLS|Ciphersuites|Forward secrecy?|\r\n|-|---|---|---|\r\n|A|1.3|-|yes\r\n|B|1.2|`TLS_DHE_*`, `TLS_ECDHE_*`|yes\r\n|C|1.2|`TLS_RSA_*`, `TLS_DH_*`, `TLS_ECDH_*`|no\r\n\r\n(Assuming the DH contributions are really ephemeral. And if we skip the question of session resumption. If we skip the exotic ciphersuites such as PSK, etc.)\r\n\r\nWe have two options for this proposed requirement:\r\n\r\n1. the current proposed requirement says \"always use forward secrecy\";\r\n2. another option would be \"use forward secrecy with compatible clients (but keep less secure option for compatibility with old external legacy clients)\"\r\n\r\n**Option 1: always use forward secrecy** → This mean you would have to disable the ciphersuites in (C).\r\n\r\n**Option 2: support forward secrecy** → this means that at least (B) must be supported. This should work out of the box on modern systems unless:\r\n\r\n* you use a manual and broken ciphersuite configuration (which only enables old ciphersuites);\r\n* or, I think, if you use a RSA certificate without `digitalSignature` key usage (but I don't believe this should happen).",
+      "createdAt": "2024-11-24T17:18:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2496118151",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ux72i",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "[Mozilla SSL server configuration](https://ssl-config.mozilla.org/) has three modes:\r\n\r\n* modern → TLS 1.3 only, forward secret only\r\n* intermediate → intermediate → support for TLS 1.2 with DHE and ECDHE only (foward secret ciphersuites only)\r\n* old (\"Compatible with a number of very old clients, and should be used only as a last resort\")  → enables legacy ciphersuite which don't support forward secrecy.\r\n\r\nSo the question is. Can we require the usage of an \"intermediate or higher\" level (→ option  1)?\r\n\r\nIf I look at several servers:\r\n\r\n* [https://www.google.com](https://www.ssllabs.com/ssltest/analyze.html?d=www.google.com&s=142.250.189.4&hideResults=on&ignoreMismatch=on) still allows legacy ciphersuites\r\n* [https://github.com](https://www.ssllabs.com/ssltest/analyze.html?d=github.com&hideResults=on) still allows legacy  ciphersuites\r\n* Two bank websites → forward secrecy only\r\n* All apps I have configured recently follow the intermediate configuration and therefore only support forward secrecy. I have not had any recent complaints/brokeness about this.\r\n* My ISP → forward secrecy only\r\n* Wikiepdia → forward secrecy only",
+      "createdAt": "2024-11-24T17:18:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2496118178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyBBZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I would suggest the following:\r\n\r\n[9.4.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x17-V9-Communications.md#v94-general-tls-security-guidance)\r\n_[MODIFIED, MOVED FROM 9.1.2] Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred. For L3 applications, only cipher suites which support forward secrecy should supported._\r\n\r\nwhat do you think @randomstuff ",
+      "createdAt": "2024-11-24T17:56:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2496139353",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UyMfI",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [MODIFIED, MOVED FROM 9.1.2] Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred.\r\n\r\n\"latest recommended cipher suites are enabled\" is somewhat vague but maybe that's the point.\r\n\r\nMoreover, this wording seems to be (implicitly) about TLS (\"ciphersuites\") but we might want it to apply to other protocols as well.\r\n\r\n> For L3 applications, only cipher suites which support forward secrecy should supported.\r\n\r\nIs the \"should\" instead of \"must\" intentional here? Not that I am against saying \"should\" here.\r\n\r\nI'd want to focus more on forward-secrecy as an explicit goal.",
+      "createdAt": "2024-11-24T19:30:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2496186312",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U21gg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \"latest recommended cipher suites are enabled\" is somewhat vague but maybe that's the point.\r\n\r\nYes as this guidance changes.\r\n\r\n> Moreover, this wording seems to be (implicitly) about TLS (\"ciphersuites\") but we might want it to apply to other protocols as well.\r\n\r\nSeems like TLS is probably the vast majority of cases so I prefer to include it there.\r\n\r\n> Is the \"should\" instead of \"must\" intentional here? Not that I am against saying \"should\" here.\r\n\r\nAgree it should be a little clearer:\r\n\r\n[9.4.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x17-V9-Communications.md#v94-general-tls-security-guidance)\r\n_[MODIFIED, MOVED FROM 9.1.2] Verify that only the latest recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must only support cipher suites which provide forward secrecy._",
+      "createdAt": "2024-11-25T09:29:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2497402912",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U6opv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Seems like TLS is probably the vast majority of cases so I prefer to include it there.\r\n\r\nWouldn't it make sense to have (also) general requirement about this?\r\n",
+      "createdAt": "2024-11-25T15:53:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2498398831",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U6o5O",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(musing)\r\n\r\nThe forward secrecy requirement could apply to these web-compatible flows as well (which are not completely niche):\r\n\r\n- WebRTC /AV streams (which use SRTP)\r\n- WebRTC data streams (which use **D**TLS)\r\n\r\nMore generally some of the transport security requirements might apply to WebRTC. There is not so much we can do about for browser-to-browser communications but for browser-to-server WebRTC, it might be relevant.\r\n\r\n(If this does make sense, this should belong to the WeRTC appendix, though.)",
+      "createdAt": "2024-11-25T15:54:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2498399822",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6U8xQY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Wouldn't it make sense to have (also) general requirement about this?\r\n\r\nIn theory but I see the other examples as a lot more niche and I'd rather focus on the main relevant example.\r\n\r\nFor WebRTC, we have a guy who did those requirements so maybe open a separate issue and I will ping him :)",
+      "createdAt": "2024-11-25T20:22:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2498958360",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WYzU5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "opened #2439 to resolve",
+      "createdAt": "2024-12-06T12:10:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2215#issuecomment-2523084089",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-11-02T11:37:54Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvdMg",
+      "name": "V12 (prev V9)",
+      "description": "",
+      "color": "BB73F6"
+    }
+  ],
+  "number": 2215,
+  "state": "CLOSED",
+  "title": "V6 - Discuss forward secrecy",
+  "url": "https://github.com/OWASP/ASVS/issues/2215"
+}

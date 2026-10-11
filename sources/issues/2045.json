@@ -1,0 +1,160 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "It is suggested to modify 51.3.1 and split in two verifications, one for all levels and one for L3 only, since sender-constrained access tokens are only a requirement in security profiles like FAPI and it is uncommon for L2 application to implement this.  \r\n\r\n## V51.4 Resource Server\r\n\r\nVerify that if that if the client sends an sender-constrained access token, using Mutual TLS for OAuth 2 or OAuth 2 DPoP, then the Resource Server must verify accordingly (proof-of-possession). (L1, L2, L3)\r\n\r\nVerify that all Resource Servers requests requires sender-constrained access token validation using Mutual TLS for OAuth 2 or OAuth 2 DPoP. (L3)\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6MFvno",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is the security risk to solve or attack to take down with those requirements? By current wording, those are resource server functionality testing.",
+      "createdAt": "2024-09-13T21:34:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2045#issuecomment-2350316008",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MWbS2",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The sender-constrained access tokens  mitigates the risk with \"token theft\", where an attacker is able to get a valid token, perhaps from logs or leaked in some way to other services (where the attacker have access), see e g https://www.rfc-editor.org/rfc/rfc8705.html#name-introduction\r\n\r\n> Binding an access token to the client's certificate prevents the use of stolen access tokens or replay of access tokens by unauthorized parties. \r\n\r\nMaybe it is better to use that, something like this, perhaps a bit long?\r\n\r\n> Verify that the Resource Server prevents the use of stolen access tokens or replay of access tokens (from unauthorized parties) by requiring sender-constrained access tokens, given that client resource requests are made using either Mutual TLS for OAuth 2 or OAuth 2 DPoP. Note that for L3 sender-constrained tokens should be required, while L1 and L2 can support only Bearer tokens.\r\n  ",
+      "createdAt": "2024-09-17T06:49:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2045#issuecomment-2354689206",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MWhxO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It covers both initially proposed requirements?\r\n\r\nI think the last \"Note\" part is not necessary, if the requirement is made for \"Level 3\", it gives that meaning anyway.",
+      "createdAt": "2024-09-17T07:06:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2045#issuecomment-2354715726",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MtEBS",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, this could be for L3 only, then it could be written as:\r\n\r\n> Verify that the Resource Server prevents the use of stolen access tokens or replay of access tokens (from unauthorized parties) by requiring sender-constrained access tokens, either Mutual TLS for OAuth 2 or OAuth 2 DPoP.",
+      "createdAt": "2024-09-19T10:34:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2045#issuecomment-2360623186",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OwI_V",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Currently, we have 51.4.1 as a Level 1 requirement.\r\n\r\n> V51.4.1 Verify that resource servers implement sender-constrained access token mechanisms to mitigate token replay risks. This is achieved by mandating Mutual TLS for OAuth 2.0 or OAuth Demonstration of Proof of Possession (DPoP), using the client secret provided at client registration.\r\n\r\nThe initial proposal was to split it, but the latest proposal is to replace it with one level 3 requirement:\r\n> Verify that the Resource Server prevents the use of stolen access tokens or replay of access tokens (from unauthorized parties) by requiring sender-constrained access tokens, either Mutual TLS for OAuth 2 or OAuth 2 DPoP.\r\n\r\n@TobiasAhnoff  - do I understand it correctly?\r\n\r\nping @randomstuff for opinions and feedback",
+      "createdAt": "2024-10-05T08:46:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2045#issuecomment-2394984405",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PNUV2",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> do I understand it correctly?\r\n\r\nYes!",
+      "createdAt": "2024-10-09T15:18:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2045#issuecomment-2402633078",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PVcj8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is is updated now via #2135\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.4.1** | [ADDED] Verify that the resource server prevents the use of stolen access tokens or replay of access tokens (from unauthorized parties) by requiring sender-constrained access tokens, either Mutual TLS for OAuth 2 or OAuth 2 Demonstration of Proof of Possession (DPoP). | | | ✓ |",
+      "createdAt": "2024-10-10T10:53:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2045#issuecomment-2404763900",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-31T15:18:12Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2045,
+  "state": "CLOSED",
+  "title": "V51 OAuth: Add resource server verifications (modify 51.4.1)",
+  "url": "https://github.com/OWASP/ASVS/issues/2045"
+}

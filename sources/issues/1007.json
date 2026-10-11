@@ -1,0 +1,47 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4NDE1MDIw",
+    "is_bot": false,
+    "login": "wet-certitude",
+    "name": ""
+  },
+  "body": "I am a bit unclear on the requirement [2.10.1](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v210-service-authentication).\r\n\r\n> Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access.\r\n\r\nI am not exactly sure what an \"intra-service secret\" would be. Does \"service\" refer to the whole application? In this case, I assume this would be service accounts like database accounts etc. If \"service\" is meant to be e.g. a microservice (a single container in an application), I don't understand it (\"inter-service secret\" would make more sense in that case).\r\n\r\nAssuming the former, what would be an acceptable authenticator for services? Assuming an application that communicates with a Postgres DB, how should authentication be implemented? Passwords and storing a private key for an TLS cert are not allowed, as these are, I assume, unchanging. What would constitute a non-non-changing credential?\r\n\r\nFor L3 a HSM is required to store these secrets. Does that mean that e.g. TLS crypto operations for authenticating against another service are supposed to be offloaded to an HSM (e.g. the application uses a TLS client certificate stored in an HSM to authenticate against the Postgres DB)? In that case, where should the credentials for accessing the HSM be stored (for HSMs with a network interface)? Or is an internal HSM (e.g. PCI Express card) required? Simply storing the secret in an HSM an retrieving it in my opinion does not make any sense (the HSM can only properly protect secrets when the whole crypto operation is offloaded to it, e.g. the HSM can protect a private key by taking on all the decryption/signature operations an never revealing the actual private key).",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTUwMDcyMA==",
+      "author": {
+        "login": "wet-certitude"
+      },
+      "authorAssociation": "NONE",
+      "body": "I just figured that there are several ways to interpret that sentence:\r\n\r\n---\r\n* Intra-service secrets may not rely on unchanging credentials, such as:\r\n  * passwords\r\n  * API keys\r\n  * shared accounts with privileged access\r\n\r\nI.e. \"shared accounts with privileged access\" is an example of an unchanging credential.\r\n\r\n---\r\n* Intra-service secrets may not rely on:\r\n  * unchanging credentials such as passwords or API keys \r\n  * shared accounts with privileged access\r\n\r\nI.e. both \"unchanging credentials such as passwords, API keys\" and \"shared accounts with privileged access\" are independent and both prohibited. \r\n\r\n---\r\n* Intra-service secrets may not rely on unchanging credentials, such as:\r\n  * passwords\r\n  * API keys\r\n  * shared accounts\r\n* IF THEY HAVE privileged access\r\n\r\n---\r\nI suspect the last interpretation is correct, as it makes the most sense for me (you wouldn't want intra-service secrets to have privileged access, though the \"unchanging\" is still sort of unclear).\r\n\r\n(I'm not a grammar expert, maybe there is a definitively correct interpretation)",
+      "createdAt": "2021-05-27T09:55:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1007#issuecomment-849500720",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Njm-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is a duplicate of https://github.com/OWASP/ASVS/issues/1032 :)",
+      "createdAt": "2021-09-24T02:45:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1007#issuecomment-926300606",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-05-27T08:33:30Z",
+  "labels": [],
+  "number": 1007,
+  "state": "CLOSED",
+  "title": "Clarification for 2.10.1",
+  "url": "https://github.com/OWASP/ASVS/issues/1007"
+}

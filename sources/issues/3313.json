@@ -1,0 +1,121 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUxODQ4NDg=",
+    "is_bot": false,
+    "login": "macdonaldr93",
+    "name": "Ryan Macdonald"
+  },
+  "body": "[V6.5 General Multi-factor authentication requirements (as of time of this issue)](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x15-V6-Authentication.md#v65-general-multi-factor-authentication-requirements):\n\nThis may seem pedantic, but what are the storage requirements for email OTP? Given the word \"password\" is in the name, I'd assume it's subject to the same requirements as a password. However, the code is short-lived and this may not be a requirement. Hashing it forces a couple of behaviours that I think are good. For example, you wouldn't be able to resend the code, you'd have to issue a new if the user can receive the first.\n\nI'd love to get guidance from OWASP on this one. Thanks!\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7Y9SK_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "An email OTP is definitely an authentication secret, so I’d treat it with “password-like” care: short TTL, single use, no logging, and no long-term plaintext storage.\n\nHashing OTPs is still useful, but not for the same reason as passwords. The number of possible codes is often tiny (like 1M for a 6-digit code, 100M for a 8-digit code), so a DB attacker can brute-force any hash instantly.\n\nIn practice, I’d:\n\n* Generate a random OTP with sufficient entropy behind the scenes.\n* Consider 8 digit codes or more.\n* Store only a Argon2id or HMAC hash plus expiration date and attempt counter.\n* Invalidate on success or too many tries.\n* On “resend,” generate a new one and overwrite the old record.\n\nThat gives you good hygiene without pretending that OTP hashes give you the same kind of offline protection as real password hashes.\n",
+      "createdAt": "2025-12-11T03:43:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3313#issuecomment-3639943871",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Y_czC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the fact that it is timelimited and has a relatively small number of options is why we don't mention specific security requirements.\n\n> For example, you wouldn't be able to resend the code, you'd have to issue a new if the user can receive the first.\n\nThis is indeed a cool side effect although if I was building this I would probably want to think a bit about the potential threat scenarios before implementation.",
+      "createdAt": "2025-12-11T06:56:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3313#issuecomment-3640511682",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ZZe3A",
+      "author": {
+        "login": "macdonaldr93"
+      },
+      "authorAssociation": "NONE",
+      "body": "That all makes sense to me and thanks for the response! This is really helpful. \n\nIf you don't mind clarifying a couple of points for me:\n\n> Hashing OTPs is still useful, but not for the same reason as passwords.\n\nWhat are the reasons it's still useful? Just want to make sure I'm not misinterpreting. I assume it's still useful because storing any kind of password in plain-text isn't advisable. Are there other reasons?\n\n> Store only a Argon2id or HMAC hash plus expiration date and attempt counter\n\nDo you recommend Argon2id or HMAC hash for any particular reason? Is bcrypt valid?\n\n> I think the fact that it is timelimited and has a relatively small number of options is why we don't mention specific security requirements.\n\nThat makes sense to me. I got into a lengthy debate about hashing the one-time password with some colleagues. For me, the simple fact that \"one-time password\" is still a form of password makes it subject to OWASP recommendations around passwords, like not storing it in plain-text. But, given the short-lived nature of it, we _could_ store it plain-text and this is typically what we've seen from past companies.\n\nI think it would be helpful to add something to the [Multifactor Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html). It's pedantic, but I think that can often be the nature of our work as software developers.",
+      "createdAt": "2025-12-12T16:46:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3313#issuecomment-3647335872",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ZzlSF",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> What are the reasons it's still useful? Just want to make sure I'm not misinterpreting. I assume it's still useful because storing any kind of password in plain-text isn't advisable. Are there other reasons?\n\nHashing OTPs is useful to prevent short-term leakage or misuse during their brief validity period. It's about protecting the OTP if it's exposed momentarily, rather than long-term secure storage like passwords.\n\n> Do you recommend Argon2id or HMAC hash for any particular reason? Is bcrypt valid?\n\nArgon2id is the standard for password and secret storage in a one way (expensive) fashion. In addition, I would also HMAC the hash if I had a good key management mechanism in place. bcrypt is valid in replacing Argon2id, but Argon2id is a more secure and more modern algorithm.\n\n> I think it would be helpful to add something to the [Multifactor Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html). It's pedantic, but I think that can often be the nature of our work as software developers.\n\nWe take PR's! Care to help? :)",
+      "createdAt": "2025-12-15T07:44:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3313#issuecomment-3654177925",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Z6AjE",
+      "author": {
+        "login": "macdonaldr93"
+      },
+      "authorAssociation": "NONE",
+      "body": "Great, thanks for the added context.\n\n> We take PR's! Care to help? :)\n\n100% 🙌  It hadn't crossed my mind that I could open a PR. I'll leave this issue open and reference it for the PR.",
+      "createdAt": "2025-12-15T14:13:52Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3313#issuecomment-3655862468",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Z8YS8",
+      "author": {
+        "login": "macdonaldr93"
+      },
+      "authorAssociation": "NONE",
+      "body": "Closing this in favour of https://github.com/OWASP/CheatSheetSeries/issues/1930",
+      "createdAt": "2025-12-15T16:15:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3313#issuecomment-3656484028",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-12-10T14:13:36Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 3313,
+  "state": "CLOSED",
+  "title": "Clarification: v5: V6.5 unclear storage requirements for email OTP",
+  "url": "https://github.com/OWASP/ASVS/issues/3313"
+}

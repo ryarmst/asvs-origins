@@ -39,10 +39,15 @@ def schema_registry() -> Registry:
     return registry
 
 
+_VALIDATORS: dict[str, Draft202012Validator] = {}
+
+
 def validator_for(kind: str) -> Draft202012Validator:
-    filename = SCHEMA_FILES[kind]
-    schema = load_json(SCHEMA_DIR / filename)
-    return Draft202012Validator(schema, registry=schema_registry())
+    if kind not in _VALIDATORS:
+        filename = SCHEMA_FILES[kind]
+        schema = load_json(SCHEMA_DIR / filename)
+        _VALIDATORS[kind] = Draft202012Validator(schema, registry=schema_registry())
+    return _VALIDATORS[kind]
 
 
 def iter_data_files() -> list[tuple[str, Path]]:
@@ -62,17 +67,22 @@ def iter_data_files() -> list[tuple[str, Path]]:
     return files
 
 
+def validate_instance(kind: str, instance: dict, rel: str) -> list[str]:
+    errors: list[str] = []
+    for error in validator_for(kind).iter_errors(instance):
+        location = "/".join(str(part) for part in error.absolute_path) or "<root>"
+        errors.append(f"{rel}:{location}: {error.message}")
+    return errors
+
+
 def validate_all() -> list[str]:
     errors: list[str] = []
     files = iter_data_files()
     if not files:
         return ["no corpus files found under data/"]
-    validators = {kind: validator_for(kind) for kind in SCHEMA_FILES}
     for kind, path in files:
         instance = load_json(path)
-        for error in validators[kind].iter_errors(instance):
-            location = "/".join(str(part) for part in error.absolute_path) or "<root>"
-            errors.append(f"{path.relative_to(ROOT)}:{location}: {error.message}")
+        errors.extend(validate_instance(kind, instance, str(path.relative_to(ROOT))))
     return errors
 
 

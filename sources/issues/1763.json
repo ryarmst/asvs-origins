@@ -1,0 +1,388 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "There seems to be too much going on in this requirement, I think it needs to be trimmed down or split up or something....\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---:| :---: | :---: | :---: |\r\n| **2.2.1** (Current) | [MODIFIED] Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. More than 5 failed authentication attempts per hour for a single account should trigger some sort of reaction or alert. | ✓ | ✓ | ✓ | 307 | 5.2.2 / 5.1.1.2 / 5.1.4.2 / 5.1.5.2 |\r\n| **2.2.1** v4.0.3 | Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. Verify that no more than 100 failed attempts per hour is possible on a single account. | ✓ | ✓ | ✓ | 307 | 5.2.2 / 5.1.1.2 / 5.1.4.2 / 5.1.5.2 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5p6dG6",
+      "author": {
+        "login": "belalena"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'm glad to see this requirement being discussed and refined. I want to share some ideas about it.\r\n\r\n1. The part \"Such controls include blocking the most common breached passwords\" is covered by the following requirements:\r\n2.1.7\t[MODIFIED, SPLIT TO 2.1.14] Verify that passwords submitted during account registration or password change are checked against an available set of, at least, the top 3000 passwords. (C6)\r\n2.1.14\t[ADDED, SPLIT FROM 2.1.7, LEVEL L1 > L3] Verify that passwords submitted during account registration or password changes are checked against a set of breached username and password pairs. (C6)\r\nI assume it should be removed from 2.2.1\r\n\r\n\r\n2. For the part about IP address restrictions - it required to utilize the real IP only for L2. But the current requirement is L1.\r\n1.14.8\t[ADDED] Verify that the application is able to discern and utilizes the user's true IP address to provide for sensitive functions, including rate limiting and logging.\t\t✓\t✓\t348\r\nSeems it should be moved to a new requirement and be required for A2 and A3  \r\n\r\n3. For about rate limiting, ever increasing delays between attempts,\r\nDoes it mean per user or per IP, or in a different manner? \r\n\r\n4. More than 5 failed authentication attempts per hour for a single account should trigger some sort of reaction or alert.\r\n\"Some sort of\" :) doesn't it sound too blurred to be a requirement?  A clear response should be defined as it's not possible to assess if the requirement is covered or not.\r\n\r\n\r\n5. Regarding Soft lockouts \r\nConsider the scenario where all users, including administrators, are locked out. \r\nIs it sufficient to rely on automated unlocking after a specific period, or should there be a requirement for manual admin intervention?\r\nWhat about Admin's account? Is it reasonable to expect a separate requirement to specify the need of a reliable workaround mechanism to unlock Admin, especially if unlocking is possible only by Admin.\r\nWhile it's understood that the choice depends on the specific application and its security needs, why not to split it at least to L1, L2 and L3? For instance:\r\n- L1: No lockout.\r\n- L2: A lockout with automated unlocking mechanisms after some time.\r\n- L3: A lockout with manual unlocking by administrators + a reliable workaround mechanism to unlock Admin\r\n",
+      "createdAt": "2023-10-24T10:20:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-1776931258",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p6gIU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.2.9** | [ADDED, SPLIT FROM 2.2.4] Verify that multi-factor authentication is required, that is, the application uses either a multi-factor authenticator or a combination of single-factor authenticators. | | ✓ | ✓ | 308 | 4.2.1 |\r\n\r\nIt all should be reviewed with knowledge, that we require MFA (from level 2):\r\n* in the past - if you guessed someones password, you got access to the application\r\n* now - if you guess someones password, you just know the password for the application (one of this person password) but MFA requirement must give attacker away from accessing the application\r\n\r\nThis should put everything to different perspective.",
+      "createdAt": "2023-10-24T10:29:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-1776943636",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p6sg3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I provide my views and understandings.\r\n\r\n> 1. The part \"Such controls include blocking the most common breached passwords\" is covered by the following requirements: 2.1.7, 2.1.14\r\n\r\nWe need to watch it separately - 2.1.7 and 2.1.14 blocks users to use it, which makes it even more suspicious, when someone start to use those \"can not be used\" passwords for guessing. So it makes sense to block them.\r\n\r\n\r\n> 2. For the part about IP address restrictions - it required to utilize the real IP only for L2. But the current requirement is L1.\r\n\r\nL2 for 1.14.8 is taken based on \"blackbox\" logic, that for being able verify the correct IP, verifier probably need more access than just blackbox test.\r\n\r\nWith guessing password - it needs to block repeatitive attempts from one source (IP). The side effect here can be, that if source IP is taken incorrectly, it blocks too much.\r\n\r\n\r\n> 3. For about rate limiting, ever increasing delays between attempts,\r\n\r\nPersonally I'm not sure that this ever increasing is actually needed. The point for the requirement is to take down online guessing vector, if it is already few attempts per time X, it is too slow to cause the damage. If an attacker is really into it, he/she can find another IP for next few attempts.\r\n\r\nThe question itself is valid and I asked the same last time, when current 2.2.1 was developed: https://github.com/OWASP/ASVS/issues/906#issuecomment-1110603500\r\n\r\n> 4. some sort of alert\r\n\r\nWe have requirements to cover this part, like:\r\n\r\n* V8.1.4 Verify the application can detect and alert on abnormal numbers of requests, such as by IP, user, total per hour or day, or whatever makes sense for the application.\r\n* V11.1.7 Verify that the application monitors for unusual events or activity from a business logic perspective. For example, attempts to perform actions out of order or actions which a normal user would never attempt.\r\n* V11.1.8 Verify that the application has configurable alerting when automated attacks or unusual activity is detected.\r\n\r\n(related issue https://github.com/OWASP/ASVS/issues/1272)\r\n\r\n\r\n> Consider the scenario where all users, including administrators, are locked out.\r\n\r\nThere should be strong authentication for unlocking.\r\n\r\nAlso we have requirement like:\r\n\r\n* V4.3.1 [MODIFIED] Verify administrative interfaces can only be logically accessed from trusted endpoints or locations. For example, restricting access to bastion or jump hosts, trusted admin workstations or endpoints (e.g., device authentication), administrative LANs, etc.\r\n\r\n\r\n> L3: A lockout with manual unlocking by administrators + a reliable workaround mechanism to unlock Admin\r\n\r\nIf there is way to lockout accounts, it's easy to lockout entire userbase. I don't think it is a good idea. Basically the requirement itself is against this idea:\r\n> **Verify that anti-automation controls are effective at mitigating** breached credential testing, brute force, and **account lockout attacks**\r\n\r\nFor lockouts we need to keep in mind MFA point (https://github.com/OWASP/ASVS/issues/1763#issuecomment-1776943636) - even if attacker is able to guess the password, it still do not provide access to the application.\r\n\r\n",
+      "createdAt": "2023-10-24T11:05:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-1776994359",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p7YJy",
+      "author": {
+        "login": "belalena"
+      },
+      "authorAssociation": "NONE",
+      "body": "> We need to watch it separately - 2.1.7 and 2.1.14 blocks users to use it, which makes it even more suspicious, when someone start to use those \"can not be used\" passwords for guessing. So it makes sense to block them.\r\n\r\nI have some doubts about it.  There are situations to consider, like when a user forgets their password and attempts to guess from a list of their commonly used passwords (even though using the same password for multiple apps isn't secure, some users still do it).\r\nOr there might be cases where the app updates the list of breached passwords or introduces this list for the first time\r\n\r\n> There should be strong authentication for unlocking.\r\nAlso we have requirement like:\r\nV4.3.1 [MODIFIED] Verify administrative interfaces can only be logically accessed from trusted endpoints or locations. For example, restricting access to bastion or jump hosts, trusted admin workstations or endpoints (e.g., device authentication), administrative LANs, etc.\r\n\r\nIt's great to have this requirement in place. When the requirement is met in the app, it ensures that there's no chance to block the admin account. However, what if, in the process of achieving 100% coverage, this requirement isn't met, and a mechanism for blocking accounts is developed?  In that case, it could be a good idea to include a comment about adding a workaround for admin account.\r\nIt's mostly the comments about L1 where MFA is not required. \r\n\r\n\r\n> For lockouts we need to keep in mind MFA point (https://github.com/OWASP/ASVS/issues/1763#issuecomment-1776943636) - even if attacker is able to guess the password, it still do not provide access to the application.\r\n\r\nMFA is still not required for L1 applications.",
+      "createdAt": "2023-10-24T13:08:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-1777173106",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PJRKE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I reviewed the useful thoughts from @belalena and @elarlang.\r\n\r\nYou can skip to the **tl;dr** below\r\n\r\n---\r\n\r\nMy rough thoughts were as follows:\r\n\r\n* Blocking the most common breached password seems out of place. Elar says it is a good signal for detecting attacks but I think that is a little too detailed for the standard.\r\n* IP address restrictions - again too prescriptive and raises a big can of worms about shared IPs.\r\n* Rate limiting concept is good but too much detail will cause confusion\r\n* \"_Some sort of response_\" - yeah this sounds bad (I wrote it) Elar points out that we are already covering this elsewhere\r\n* I would rather not touch lockouts at all.\r\n\r\nLong story short I hate this requirement, it is far too long and far too specific in a way that I don't think is helpful for implementation.\r\n\r\nThe original point from NIST was for rate limiting. This current requirement spills into some specific requirements that I want to get rid of and also adaptive responses which NIST does include but I would prefer to rely on the other monitoring controls discussed [here](https://github.com/OWASP/ASVS/issues/1272) for this aspect.\r\n\r\nI think we need to have some sort of requirement for this as it is an important area but it needs to be shorter and less prescriptive.\r\n\r\n---\r\n\r\n**tl;dr**\r\n\r\nAs such, I would simplify to:\r\n\r\n> [MODIFIED] Verify that the application prevents attacks such as credential stuffing, brute force, and account lockout attacks using rate limiting or other anti-automation and adaptive response controls and that these controls are included in security logging and alerting.\r\n\r\nOpinions @jmanico @elarlang ",
+      "createdAt": "2024-10-09T07:39:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2401571460",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PJef4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Direction is good -  just giving principles without sending the \"cheat sheet content\" in the requirement, but I think there are 2 separate requirements:\r\n* Verify that you have a anti-automation solution for online authentication form.\r\n* Verify that you don't lock out users or have mechanism how to unlock the account (such as using MFA or strong-authentication)",
+      "createdAt": "2024-10-09T08:04:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2401626104",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PJu0H",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is then 2nd one important enough to deserve its own requirement?",
+      "createdAt": "2024-10-09T08:35:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2401692935",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PJvBU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Is then 2nd one important enough to deserve its own requirement?\r\n\r\nyes",
+      "createdAt": "2024-10-09T08:35:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2401693780",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PMkGB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Is then 2nd one important enough to deserve its own requirement?\r\n> \r\n> yes\r\n\r\nSo like:\r\n\r\n_Verify that malicious users cannot lock out legitimate users and admins through excessive incorrect login attempts?_",
+      "createdAt": "2024-10-09T14:00:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2402435457",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PNMPC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's keep the discussion over lockout in a separate issue: https://github.com/OWASP/ASVS/issues/2134 and keep focus here to find the wording for current 2.2.1",
+      "createdAt": "2024-10-09T15:04:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2402599874",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PNSwB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So as I noted [here](https://github.com/OWASP/ASVS/issues/1763#issuecomment-2401571460), I would simplify [2.2.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v22-general-authenticator-security) to:\r\n\r\n> [MODIFIED] Verify that the application prevents attacks such as credential stuffing, brute force, and account lockout attacks using rate limiting or other anti-automation and adaptive response controls and that these controls are included in security logging and alerting.\r\n\r\nOpinions @jmanico @elarlang ",
+      "createdAt": "2024-10-09T15:15:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2402626561",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PNa9j",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Credential stuffing and brute force are attacker actions to do. Account lockout is (maybe bad) developer choice when such attack is detected - I think those should not be put in the list like those are all the same thing. One is cause and other is impact.",
+      "createdAt": "2024-10-09T15:29:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2402660195",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P8Qhe",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Are \r\n\r\n> Credential stuffing and brute force are attacker actions to do. Account lockout is (maybe bad) developer choice when such attack is detected - I think those should not be put in the list like those are all the same thing. One is cause and other is impact.\r\n\r\nOk, check out #2148",
+      "createdAt": "2024-10-15T20:24:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2414938206",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P_kvG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Are\r\nIs there a missing question?\r\n\r\nCurrent proposal:\r\n> Verify that the application prevents attacks such as credential stuffing and password brute force using rate limiting or other anti-automation and adaptive response controls and that these controls are included in security logging and alerting.\r\n\r\nIt is a bit hard to read, 4 times \"and\" in it. Maybe it should be split to different sentences to provide easier reading.\r\n\r\n>  ... and that these controls are included in security logging and alerting.\r\n\r\nHiting some limit is a security event by default and I think it is covered by current 7.2.1 (and it some point is not, it should belong there):\r\n> V7.2.1 Verify that all authentication operations are logged including both successful and unsuccessful attempts. Additional metadata such as type of authentication or factors used should also be collected.",
+      "createdAt": "2024-10-16T06:03:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2415807430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QCljO",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here are two suggestions. \r\n\r\nOne with logging:\r\n\r\n_Verify that the application prevents credential stuffing and password brute-force attacks by using rate limiting, anti-automation measures, or adaptive response controls. Ensure that these security measures are included in the security logging and alerting system._\r\n\r\nOne without logging\r\n\r\n_Verify that the application prevents credential stuffing and password brute-force attacks by implementing rate limiting, anti-automation measures, or adaptive response controls._",
+      "createdAt": "2024-10-16T11:54:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2416597198",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QCqe4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement has\r\n> More than 5 failed authentication attempts per hour for a single account should trigger some sort of reaction or alert.\r\n\r\nWe should keep in mind, that the requirement must be clear for how to test it. If it does not provide clear limits itself, it must ask it to be decided with security decision documentation requirements.",
+      "createdAt": "2024-10-16T12:02:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2416617400",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QDOMd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think maybe I would just simplify my suggestion to:\r\n\r\n> Verify that the application prevents attacks such as credential stuffing and password brute force using rate limiting or other anti-automation and adaptive response controls\r\n\r\nThoughts @elarlang @jmanico ?.\r\n",
+      "createdAt": "2024-10-16T12:54:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2416763677",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QDbD5",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it Josh",
+      "createdAt": "2024-10-16T13:17:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2416816377",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QhKom",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the requirement can still be misinterpreted - I use brackets to highlight it:\r\n\r\n* Verify that the application prevents (attacks such as credential stuffing and (password brute force using rate limiting) or other anti-automation and adaptive response controls).\r\n  * prevents anti-automation and adaptive response controls\r\n \r\nProposal direction:\r\n* Verify that the application uses rate limiting, anti-automation, adaptive response controls, or other defense methods against attacks such as credential stuffing and password brute force.\r\n\r\nBut this one is not PR-ready as well:\r\n* what do we mean by rate-limiting - testability problem: what is the limit? for what the limit applies? (user-account, source ip)\r\n\r\nThis is probably one of the most tested requirements for simple applications, we need to be clear here.",
+      "createdAt": "2024-10-20T05:43:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2424613414",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QrPu1",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think we can be too prescriptive here about the rate limiting. I think the deciding factor is whether it makes the attack impractical or not. @elarlang ",
+      "createdAt": "2024-10-21T17:00:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2427255733",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QrRvS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it is wide opened it can not be implemented and tested. On option is to use the same way as we did with session - decide your limits, document them, implement them.",
+      "createdAt": "2024-10-21T17:02:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2427263954",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qxg5y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok @elarlang so how about:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **1.2.6** | [ADDED, SPLIT FROM 2.2.1] Verify that application documentation defines how controls such as rate limiting, anti-automation, and adaptive response, are used to defend against attacks such as credential stuffing and password brute force. The documentation should make clear how these controls are configured. | ✓ | ✓ | ✓ | 307 | |\r\n| **2.2.1** | [MODIFIED, SPLIT TO 1.2.6] Verify that controls to prevent attacks such as credential stuffing and password brute force are implemented according to the application's security documentation. | ✓ | ✓ | ✓ | 307 | 5.2.2 |",
+      "createdAt": "2024-10-22T10:25:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2428898930",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6SviXn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2319",
+      "createdAt": "2024-11-07T11:00:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1763#issuecomment-2461935079",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-10-22T11:29:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1763,
+  "state": "CLOSED",
+  "title": "2.2.1 seems too busy for a single requirement",
+  "url": "https://github.com/OWASP/ASVS/issues/1763"
+}

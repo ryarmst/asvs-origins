@@ -1,0 +1,707 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nInitial discussion on requirement 3.4.5 in issue #978 . But I would solve it a bit different way and it deserves separate issue, as it is quite big change.\r\n\r\nProblems to solve: if one application is compromised, it should not affect others. Even those are separated on the filesystem or hosting, host, origin or domain name will be the keyword here.\r\n\r\nIf the application uses cookies\r\n* we need to have one application per host/origin and `__Host-` prefix used for session cookies\r\n* OR we need to have one application per eTLD (effective Top Level Domain)\r\n\r\nIf the appication do not use cookies\r\n* we need to have separation for SOP (Same Origin Policy)\r\n\r\nIf this idea develops as new requirement, it drops current 3.4.5.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5FRnej",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> we need to have one application per host/origin\r\n\r\nThis should be \"host\", not origin. Specifically, it should not be allowed to run different applications on different ports. Applications running on different TCP ports would have different origins, but the `__Host-` prefix does not protect cookies on different ports from interfering.\r\n\r\n> we need to have one application per eTLD (effective Top Level Domain)\r\n\r\nWhile this makes sense in respect to cookies, it makes phishing much easier. Checking whether the domain name is legit is easier for online.microsoft.com than for microsoftonline.com.\r\n\r\nI would propose to have a requirement saying \"every application must run on its own (sub)domain\", and not make distinction between cookies or not, and not mention cookie prefixes as it's already a requirement.",
+      "createdAt": "2022-06-21T19:36:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1162246051",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5FTwTD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Applications running on different TCP ports would have different origins\r\n\r\ntechnically possible, never seen in practice for public websites. It is used for internal API's, probably we need to exclude this somehow in the requirement?\r\n\r\n> we need to have one application per eTLD (effective Top Level Domain)\r\n\r\nthis was given as an alternative. If there is just one application per domain, we don't have a lot of other problems and therefore the need to solve them. But I agree, it's easier to leave this option completely out\r\n\r\n> every application must run on its own (sub)domain\r\n\r\nI think host**name** is correct to use here instead of domain or subdomain",
+      "createdAt": "2022-06-22T08:27:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1162806467",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Fkc7d",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Why do we need this requirement?\r\n\r\nIf a site uses cookies - one application (e. g. `one.example.com`) can write cookies to the main domain (eTLD+1) (`.example.com`) and this is the way how it can manipulate other hosts on the same domain (e. g. `other.example.com`). To limit this scenario, we can use `__Host-` (current requirement 3.4.4) for the cookie name and it limits it to \"one cookie with this name for this hostname\". Pre-condition for this is - **there is one application per hostname** (hostname - IP address or full host name (without port)).\r\n\r\nIf a site does not use cookies - uses JWT - if there is a so-called XSS vulnerability in one site, it should not affect any other site. The scope for JavaScript execution is Same-Origin. Pre-condition for this is - **there is one application per origin** (origin - schema + hostname + port).\r\n\r\nIf there are CORS requests in use, there should be only one application in `Access-Control-Allow-Origin` scope (related requirements 14.4.8, 14.5.3). Pre-condition for this is - **there is one application per origin**.",
+      "createdAt": "2022-06-27T10:35:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1167183581",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5HRSDb",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang \r\nDoes this requirement boil down to something like:\r\n\r\n> Verify that multiple, separate applications are not hosted on the same hostname.",
+      "createdAt": "2022-07-26T16:33:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1195712731",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IAD6n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me, yes. I'm a bit concerned, is it clear enough. Like how to define, what is an application? If there is \"public site\", \"self service\" and \"back office\" - are those part of the same application or are those separate applications.",
+      "createdAt": "2022-08-08T11:00:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1207975591",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IPzDP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe the answer is applications with separate session mechanisms should be on different origins?\r\n\r\nIf I understand correctly, the problem is that XSS on 1 app will affect apps 2 and 3 on the same origin which use cookies, even if the cookies/session mechanisms of app 2 and app 3 are different to each other and/or app 1. Is that correct?\r\n\r\nBy that logic, the requirement would be:\r\n> Verify that multiple, separate applications with different session mechanisms are not hosted on the same hostname.\r\n\r\nWhat do you think @elarlang ?\r\n",
+      "createdAt": "2022-08-11T14:53:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1212100815",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IQBq1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Session mechanism does not matter, if many applications are hosted on the same origin - in XSS situation you can force/automate victim browser to do actions in any case.",
+      "createdAt": "2022-08-11T15:40:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1212160693",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IQdtx",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> are those part of the same application or are those separate applications.\r\n\r\nWhat I think @tghosth was trying to say is that https://example.com/a and https://example.com/b are different applications, if the session cookie used for authentication differs between these pages. Pages that use the same authentication method are of the same application and can run on the same host.",
+      "createdAt": "2022-08-11T17:26:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1212275569",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IXl49",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that multiple, separate applications are not hosted on the same hostname.\r\n\r\nI would say it the other way around:\r\n\r\n> Verify that a hostname hosts only a single application.\r\n\r\nI think this should be a level 1 requirement. Should it go under 3.4? Or perhaps in chapter 14? I couldn't find a specific CWE, but [CWE - CWE-668: Exposure of Resource to Wrong Sphere (4.8)](https://cwe.mitre.org/data/definitions/668.html) seems applicable.\r\n\r\n\r\n",
+      "createdAt": "2022-08-13T11:47:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1214144061",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IYPzp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For category - personally I would like to have separate (sub)category for all SOP, CORS, CSRF related requirements.",
+      "createdAt": "2022-08-14T09:03:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1214315753",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KQPYT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What I think @tghosth was trying to say is that https://example.com/a and https://example.com/b are different applications, if the session cookie used for authentication differs between these pages. Pages that use the same authentication method are of the same application and can run on the same host.\r\n\r\nYes that is what I meant, if they have the same session mechanism then they can be on the same origin. On the other hand, maybe the point here is to reduce co-location of applications in general regardless of session mechanism so maybe:\r\n\r\n> Verify that separate applications are not hosted on the same hostname to reduce the blast radius of origin based attacks.\r\n\r\n\r\nWhat do we think?",
+      "createdAt": "2022-09-13T18:02:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1245771283",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KXbsu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok to move on with requirement text.\r\n\r\nWith category we need to wait the outcome from #1230",
+      "createdAt": "2022-09-15T06:49:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1247656750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KXqGA",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think a requirement could be sufficiently clear without explicitly defining what an application is. I think it's sufficiently clear for most people what an application is, but defining it exactly in a one-sentence requirement can be pretty hard.\r\n\r\nI can see some exceptions to this. For example, a website without authentication which hosts multiple JavaScript games could be fine.\r\n\r\n> blast radius\r\n\r\nI would prefer something less metaphorical.\r\n\r\n> are not hosted\r\n\r\nI would prefer a positive recommendation instead of a negative one.",
+      "createdAt": "2022-09-15T07:50:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1247715712",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5MpZ5E",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord good points, how about:\r\n\r\n`Verify that separate applications are hosted on different hostnames to reduce the risk of origin based attacks which impact every application on the same hostname`",
+      "createdAt": "2022-10-20T17:42:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1285922372",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Mpl4c",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do we really need this last part? _\"to reduce the risk of origin based attacks which impact every application on the same hostname\"_\r\n\r\nWhat is \"Origin based attack\"? If I need to ask this question, I assume there are lot of others asking this question as well.\r\n\r\nThis phrase is confusing - \"origin based attacks\" (Origin: schema + hostname + port) vs hostname.\r\n\r\n\"separate applications\" - can be confusing as well.\r\n\r\nI we can not make detailed version bulletproof, I would like to move on with simple and more abstract requirement, like just:\r\n* _Verify that only one application is hosted on the hostname._ (or per hostname?)\r\n* _Verify that there are no other applications hosted on the same hostname._ (Yes, it's negative requirement, but for me it's more clear).",
+      "createdAt": "2022-10-20T18:28:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1285971484",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5NITLS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I still think it is important to include a reason. How about:\r\n\r\n`Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\".`",
+      "createdAt": "2022-10-27T20:20:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1294021330",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5NKNUK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I still think it is important to include a reason. How about:\r\n> \r\n> `Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\".`\r\n\r\nIt fits JavaScript-related problems, but does not fit with cookie-related problems - there is the keyword hostname. See \r\nhttps://github.com/OWASP/ASVS/issues/1299#issuecomment-1167183581",
+      "createdAt": "2022-10-28T06:30:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1294521610",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5NVRYD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, so how about:\r\n\r\n`Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\" and the hostname restrictions on cookies.`",
+      "createdAt": "2022-10-31T17:24:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1297421827",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5NVhhq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current proposal:\r\n* Category: waits outcome from #1230 \r\n* Requirement: _Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\" and the hostname restrictions on cookies._\r\n* Level 1\r\n* [CWE-668: Exposure of Resource to Wrong Sphere (4.8)](https://cwe.mitre.org/data/definitions/668.html)",
+      "createdAt": "2022-10-31T18:19:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1297487978",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Nwad4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I added \"Big decision\" label - as this potential new requirement will affect a lot of applications and architecture decisions.",
+      "createdAt": "2022-11-05T12:25:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1304536952",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hKkUR",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "hi @jmanico \r\n\r\nDo you think the following requirement change is appropriate and sensible? It is quite sweeping but seems to add a lot of value against attacks which can cross application boundaries.\r\n\r\nOld requirement:\r\n\r\n## V3.4 Cookie-based Session Management\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.4.5** | [GRAMMAR] Verify that if the application is published under a domain name with other applications that set or use session cookies that might disclose the session cookies, it sets the path attribute in cookie-based session tokens using the most precise path possible. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 16 | 7.1.1 |\r\n\r\nNew requirement (might change it to be in a different section)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **3.4.5** | [MODIFIED] Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\" and the hostname restrictions on cookies. | ✓ | ✓ | ✓ | 16 | 7.1.1 |\r\n",
+      "createdAt": "2023-07-11T05:28:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1630160145",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hPqVv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I’m not sure I fully understand this one but the change does seem reasonable, I'm just not 100% certain of the technical details here.",
+      "createdAt": "2023-07-11T20:54:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1631495535",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5iAy-7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico basically we are forcing companies to only ever host a single application on a single hostname. For example, if a company had two applications with different login/session mechanisms, they could not host them on:\r\n\r\n* https://www.example.com/app1\r\n* https://www.example.com/app2 \r\n \r\nbut rather they would have to do something like:\r\n\r\n* https://app1.example.com/ \r\n* https://app1.example.com/\r\n\r\nTo me this sounds reasonable but quite strict/drastic which is why I wanted to get your thoughts as well",
+      "createdAt": "2023-07-20T18:12:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1644375995",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5iCl1h",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This seems reasonable to me. Origin isolation is important!\n",
+      "createdAt": "2023-07-21T00:56:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1644846433",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ik_MQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ok @elarlang, what do you think about #1701?",
+      "createdAt": "2023-07-27T15:34:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1653863184",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ilh-G",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There are quite many problems - V1 is not anymore v4.0.* style architecture category, but more documentation and decision category. This new requirement is something what you need to check from the implementation, so it does not belong there.\r\n\r\nAdditionally, it's not anymore session specific requirement, as it's also related same-origin isolation for javascript execution.\r\n\r\nAlso, it's not a modification of the current 3.4.5, but it deprecates it.\r\n\r\nAs temporary solution, we can just add new requirement to V3.4 (3.4.7) with label `ADDED` and delete 3.4.5 (I'll think about suitable label).",
+      "createdAt": "2023-07-27T16:59:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1654005638",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5imCi5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Or, let's just create a new category \"Client-Side\" or with a better title and start adding related requirements there. https://github.com/OWASP/ASVS/issues/1299#issuecomment-1297487978\r\n\r\nRelated to https://github.com/OWASP/ASVS/issues/1230",
+      "createdAt": "2023-07-27T18:05:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1654139065",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ipkFV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Great idea, Elar.\n",
+      "createdAt": "2023-07-28T05:49:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1655062869",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5i-SHT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So @elarlang this feels like an architecture level requirement, there is an implementation but the requirement is at the very heart of the application is built (and it would be hard to retro fit this back onto an existing application.) That is why I moved it to V1. Do you disagree?",
+      "createdAt": "2023-08-01T14:55:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1660494291",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5i_Fli",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I disagree. V1 it's logical for v4.0.3 but not for v5.0 - for v5.0 V1 is \"documentation requirements\".\r\n\r\nIt is architecture requirement, like proposed here 10 months ago: https://github.com/OWASP/ASVS/issues/1230#issuecomment-1287381350\r\n\r\nNew category \"Client-Side\" (or Browser side) and subcategory \"Architecture\".",
+      "createdAt": "2023-08-01T16:39:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1660705122",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5jLM8s",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do you remember where we defined V1 for v5.0?",
+      "createdAt": "2023-08-03T12:19:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1663881004",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5jLREr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "https://github.com/OWASP/ASVS/issues/1063",
+      "createdAt": "2023-08-03T12:29:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1663897899",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l1pCp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Assuming it doesn't go in V1, what is the argument for putting it in client side? Because the protection is implemented at the client side? ",
+      "createdAt": "2023-09-06T15:05:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1708560553",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l2RHl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's mostly Same-Origin or Same-Site policy, it's all for client side configuration and defense against client-side attacks.",
+      "createdAt": "2023-09-06T16:34:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1708724709",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5odx_U",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so I am comfortable for this to go into the client side section so now we just need a client side section :)",
+      "createdAt": "2023-10-09T09:26:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1752637396",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rfv5u",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This was the latest recommended text:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **X.X.X** | [MODIFIED, MOVED FROM 3.4.5] Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\" and the hostname restrictions on cookies. | ✓ | ✓ | ✓ | 16 |",
+      "createdAt": "2023-11-09T09:41:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1803484782",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rgjgX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just to note here - it will be with tag `ADDED` (see https://github.com/OWASP/ASVS/issues/1299#issuecomment-1654005638)\r\n\r\nand CWE-16 is general category which CWE itself recommend to not link.",
+      "createdAt": "2023-11-09T11:57:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1803696151",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sIqfJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang did you add this to your browser requirements draft?",
+      "createdAt": "2023-11-16T10:53:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1814210505",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sJJmG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, this is the cornerstone for all that:\r\nhttps://github.com/elarlang/ASVS/blob/asvs-1230-attacks-via-browser/5.0/en/0x50-V50-attacks-via-browser.md#v501-site-isolation-architecture",
+      "createdAt": "2023-11-16T12:22:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1814337926",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tgi2A",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Prep for PR...\r\n> Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\" and the hostname restrictions on cookies.\r\n\r\nOne may read as it is all for cookies...\r\n\r\n> Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by (the \"same origin policy\" and the hostname restrictions) on cookies.\r\n\r\nBut how to improve that? When using SOP definition from [MDN](https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy), the idea should be something like:\r\n\r\n> Verify that separate applications are hosted on different hostnames so as to benefit from the **restrictions** provided by the \"**same-origin** policy\" **how document or script loaded by one origin can interact with a resource from another origin** and the hostname restrictions on cookies.\r\n\r\nNote: \"same origin policy\" will be changed to \"same-origin policy\".",
+      "createdAt": "2023-12-02T20:35:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1837247872",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5umzd0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Suggested final wording for V50:\r\n\r\n> Verify that separate applications are hosted on different hostnames so as to benefit from the restrictions provided by the \"same-origin policy\" including how documents or scripts loaded by one origin can interact with resources from another origin and hostname restrictions on cookies.",
+      "createdAt": "2023-12-14T11:22:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1855666036",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vPQNf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement is now merged to the new \"Web Frontend Security\" category, via https://github.com/OWASP/ASVS/commit/fb0113371191592787feeeecbc722973db903bfc\r\n\r\n## V50.1 Site Isolation Architecture\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.1.1** | [ADDED, DEPRECATES 3.4.5] Verify that separate applications are hosted on different hostnames to benefit from the restrictions provided by the \"same-origin policy\" including how documents or scripts loaded by one origin can interact with resources from another origin and hostname restrictions on cookies. | ✓ | ✓ | ✓ | 668 |",
+      "createdAt": "2023-12-21T13:42:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1866269535",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-06-21T18:24:27Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 1299,
+  "state": "CLOSED",
+  "title": "new requirement - one application per hostname (and remove current 3.4.5)",
+  "url": "https://github.com/OWASP/ASVS/issues/1299"
+}

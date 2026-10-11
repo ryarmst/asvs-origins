@@ -1,0 +1,335 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "access_token (also id_token) JWT may contain relatively sensitive information, such as person's full name, SSN, email, phone, address, etc.\r\n\r\nAt the same time, those are sent via URL parameters - that means JWT content is logged everywhere to access logs, browser history etc.\r\n\r\nIf we could put all this information as plain text to URL parameters, everyone would understand, it's nonsense to send information like a person's full name, SSN, email, phone, and address as URL parameters. If it is inside JWT, it's the same, just base64 encoded.\r\n\r\nI know, there is OAuth `response_mode=query`, and I know there is OIDC logout `id_token_hint` - this is actually one reason to address this problem. The problem exists for both when the browser communicates directly with the authorization server or IdP.\r\n\r\nAt the moment we have requirements:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.1** | Verify that the application does not log credentials or payment details. Session tokens should only be stored in logs in an irreversible, hashed form. | ✓ | ✓ | ✓ | 532 |\r\n| **8.2.2** | [MODIFIED, MERGED FROM 3.2.3] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the exception of session tokens which should be stored in either cookies or sessionStorage. | ✓ | ✓ | ✓ | 922 |\r\n| **8.3.1** | [MODIFIED, MERGED FROM 3.1.1, 13.1.3] Verify that sensitive data is only sent to the server in the HTTP message body or headers and that the URL and query string do not contain sensitive information, such as an API key or session token. | ✓ | ✓ | ✓ | 598 |\r\n\r\nBased on 8.3.1 - JWT, containing data about the user, must not sent in a URL parameter anyway.\r\n\r\n7.1.1 and 8.2.2, as access_token is not a session token (although massively used as such), I recommend putting special spotlight on JWT (or abstractly \"encoded data, such as in JWT\") and mentioning them in 7.1.1 and 8.2.2\r\n\r\nVisualized:<br>\r\n![sensitive_information](https://github.com/OWASP/ASVS/assets/47597707/d75a2b16-058c-4384-b215-15f6b7a23a54)\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM57RbPJ",
+      "author": {
+        "login": "EnigmaRosa"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I feel like \r\n\r\n> If we could put all this information as plain text to URL parameters, everyone would understand, it's nonsense to send information like a person's full name, SSN, email, phone, and address as URL parameters. If it is inside JWT, it's the same, just base64 encoded.\r\n\r\nis obvious to those using the ASVS, unless I'm mistaken. Is the clarifying language proposed that necessary? (this is a genuine question - are there ASVS users who would need to be reminded about JWTs?)",
+      "createdAt": "2024-04-21T18:55:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2068165577",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM57THpF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is the danger when you know the topic and you going to assume, that \"this is so basic, everyone must know it\" (it's good to teach web application security to developers, it gives a reality check).\r\n\r\n> I know, there is OAuth response_mode=query, and I know there is OIDC logout id_token_hint - **this is actually one reason to address this problem**. The problem exists for both when the browser communicates directly with the authorization server or IdP.\r\n\r\nI'm pretty sure OAuth and OIDC developers also know what is JWT, but it is still carried from one party to another in the URL parameter.\r\n\r\nIn short, yes, I think it requires special attention (otherwise I would not have opened the issue). The issue is open to collecting opinions from others, and I got yours, thank you :)",
+      "createdAt": "2024-04-22T06:45:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2068609605",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM58ktbk",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First, I love the meme. I do prefer the [Geordi La'Forge version](https://imgflip.com/memegenerator/190791700/Geordi-Drake) though 🤣\r\n\r\nSecondly, I think that @EnigmaRosa is correct that people should really know the risks of storing a JWT and the fact that this is sensitive data. However, I can see how this specific case might slip through the cracks.\r\n\r\nIt sounds like a subtle clarification in one of the requirements should be sufficient. \r\n\r\n@elarlang do you have a specific proposal?",
+      "createdAt": "2024-05-02T09:23:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2089998052",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM58k1eT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Suitable requirement is 8.3.1, also related 8.3.5.\r\n\r\nMaybe a special mention in the chapter text is enough, something like \"Just encoding sensitive data (classical solution base64, including as JWT) is the same as sending it as plain text.\"",
+      "createdAt": "2024-05-02T09:41:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2090030995",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM58k4hl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can you open a PR on V8 and I will take it out of V7 for now?",
+      "createdAt": "2024-05-02T09:48:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2090043493",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Lqn70",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good thread, I suggest:\r\n\r\n8.2.2 | [MODIFIED, MERGED FROM 3.2.3] Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, cookies) as well as any use of JSON Web Tokens (JWT) does not contain sensitive data, with the exception of session information or identifiers.\r\n-- | --\r\n\r\nI do not think we need to modify 7.1.1",
+      "createdAt": "2024-09-11T10:06:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2343206644",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LvBP-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "JWT is just an example of encoded data that potentially contains sensitive information.\r\n\r\nThe problem exists everywhere, where sensitive information is mentioned - URL, cache, client-side storage, etc.\r\n\r\nThinking more about it, maybe it can be probably solved only by the definition via documentation requirements. So one option is to \"inject\" it to 1.8.1 or 1.8.2, but when watching those did not have any idea how to solve it.",
+      "createdAt": "2024-09-11T18:11:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2344358910",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L_-XV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am not sure what the proposed change here is",
+      "createdAt": "2024-09-13T12:09:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2348803541",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAF6S",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I keep it open till we have sorted out related stuff from tokens and OAuth topics.",
+      "createdAt": "2024-09-13T12:25:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2348834450",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKCI5",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "In #2046 I suggested \r\n\r\n> Verify that if the ID Token is sent to the front channel or a public client they should be encrypted or not contain any sensitive user data.\r\n\r\nI think it is included in this discussion (and can be closed as a duplicate) \r\n\r\n> Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, cookies) as well as any use of JSON Web Tokens (JWT) does not contain sensitive data, with the exception of session information or identifiers.\r\n\r\nOne more thing to note here, is that in example the .NET framework \"by default\" stores sensitive data (ID, access and refresh tokens) in encrypted cookies. So perhaps change to  \"with the exception of encrypted session information or session identifiers\"?",
+      "createdAt": "2024-09-15T07:44:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2351440441",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MkwfV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so for the encoding problem, maybe we need to specify in 1.8.1\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.8.1** | [MODIFIED, MERGED FROM 8.3.4, LEVEL L2 > L1] Verify that all sensitive data created and processed by the application has been identified and classified into protection levels, and ensure that a policy is in place on how to deal with sensitive data. **It is important that this includes sensitive data that is being encoded in a recoverable form such as Base64, especially JWTs**. | ✓ | ✓ | ✓ | 213 |",
+      "createdAt": "2024-09-18T13:16:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2358446037",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mkwq2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang agreed with that as well.\r\n\r\nAnyone with any other comments?",
+      "createdAt": "2024-09-18T13:16:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2358446774",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mk1W7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder in 4 days @tghosth to open a PR",
+      "createdAt": "2024-09-18T13:24:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2358465979",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mk1Yy",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nSunday, September 22, 2024 12:00 AM (GMT+02:00)\r\n> in @tghosth to open a PR",
+      "createdAt": "2024-09-18T13:24:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2358466098",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MmGWu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It is important that this includes sensitive data that is being encoded in a recoverable form such as Base64, especially JWTs.\r\n\r\nI propose update:\r\n> Note that this includes sensitive data that is being encoded in a recoverable form such as Base64, including JWTs.\r\n",
+      "createdAt": "2024-09-18T15:32:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2358797742",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MnmwV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "As a side note note JWT’s are not Base64 encoded. They are Base64url encoded, a different form of encoding that standard Base64 encoding.\r\n\r\nIt’s a small thing and you can disregard it if you don’t think it matters.\r\n",
+      "createdAt": "2024-09-18T18:56:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2359192597",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MqrCT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Update to be technically correct\r\n> Note that this includes sensitive data that is being encoded in a recoverable form such as Base64 and JWT.\r\n\r\n",
+      "createdAt": "2024-09-19T05:17:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2359996563",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M_CSZ",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1919#issuecomment-2358465979) @tghosth\n> in @tghosth to open a PR",
+      "createdAt": "2024-09-21T22:00:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2365334681",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE3Wd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2106",
+      "createdAt": "2024-09-22T16:31:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1919#issuecomment-2366862749",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-03-26T13:03:49Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    }
+  ],
+  "number": 1919,
+  "state": "CLOSED",
+  "title": "encoded sensitive data (such as JWT) should not be logged",
+  "url": "https://github.com/OWASP/ASVS/issues/1919"
+}

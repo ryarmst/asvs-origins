@@ -1,0 +1,434 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "<!---\nBEFORE YOU OPEN AN ISSUE:\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\n- Please search the issues in case your question has been discussed before.\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\n- When you reference requirements, please include them as a link, similarly to this:\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\n\nOTHER NOTES:\n- Please do not open a pull request without first opening an associated issue.\n- Please carry out all discussion in the associated issue only.\n-->\n> 1.3.1 Verify that all untrusted HTML input from WYSIWYG editors or similar is sanitized using a well‑known and secure HTML sanitization library or framework feature.\n\n\n* Sanitization should be done on the server side, not just the client side. This important point is missing from the requirement.\n* Even “**secure**” well-known libraries can have vulnerabilities.\n* The term “**well-known**” is subjective. It’s better to recommend libraries with a proven security track record and active maintenance.\n* The security a sanitization library provides depends heavily on how it’s configured,default settings may not be safe or suitable for every use case.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM69wc6B",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Sanitization should be done on the server side, not just the client side.\n\nI agree, but client side is much more important. Client slide sanitizers can use native browser features, server side sanitizers cannot. I think client side, the spot right before you display that data, is more critical. Server-side HTML sanitizers have a bad security history overall.\n\n> default settings may not be safe or suitable for every use case.\n\nDefault settings on DOMPurify are safe from injection. This is the most critical library in this space.\n\n> well‑known and secure HTML sanitization library \n\nI agree well-known is unclear. We're looking for libraries that are used by many and have a good security history.\n\n\n",
+      "createdAt": "2025-08-13T12:11:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3183595137",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-K4x-",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I agree, but client side is much more important. Client slide sanitizers can use native browser features, server side sanitizers cannot. I think client side, the spot right before you display that data, is more critical. Server-side HTML sanitizers have a bad security history overall.\n\nServer-side sanitization is mandatory as the source of truth. Client-side sanitization is a useful defense-in-depth measure, but never “more important.”\n\n> Default settings on DOMPurify are safe from injection. This is the most critical library in this space.\n\nDOMPurify defaults are robust, but not universally sufficient. Security depends on contextual escaping + correct configuration.\n\n> I agree well-known is unclear. We're looking for libraries that are used by many and have a good security history.\n\nIt's good to add the name of Dompurify or other listed on cheatsheet project.\n",
+      "createdAt": "2025-08-15T03:47:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3190525054",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-uy8T",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> DOMPurify defaults are robust, but not universally sufficient. Security depends on contextual escaping + correct configuration.\n\nThe defaults do stop injection. You may want to limit where media can be loaded from, but the default policy - for a long time now - does stop injection much better than server-side HTML sanitizers. It's because DOMPurify uses native  browser features to sanitize, something server-side sanitizers cannot do. Angular uses the same native browser features to sanitize HTML.\n\n",
+      "createdAt": "2025-08-19T09:18:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3199938323",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Da--Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement was taken from v4.0.3 close to as it was and the second part of the requirement (_using a well‑known and secure HTML sanitization library or framework feature._) is non-actionable \"noise\" that does not add anything useful to the requirement. This part should be removed.\n\nThe main point for the requirement:\nIf from untrusted input HTML content is accepted and that is used to be rendered later, it must be sanitized to contain only allow-listed HTML tags and attributes when using the content.\n\nHow someone implements it, what libraries they are using, is not our/ASVS business to say. We only say the security principle that must be followed.\n\nFor this requirement, I would not touch the client-side or server-side topic, the principle to achieve is the same. Also note that HTML content is often used on the server side in emails, html to pdf libraries etc.\n\nIf there is a special need to say something about browser-side sanitization, it should be a special case and belong to the \"V3 Web Frontend Security\" chapter. Also, at the moment, it (potential new requirement) could be a breaking change. I don't see the material for it at the moment.",
+      "createdAt": "2025-09-11T07:00:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3278630808",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7D_P6R",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Thanks @elarlang, fair clarification.\n\nI agree with you that ASVS should focus on the principle that untrusted HTML must be sanitized against an allow-list of safe tags and attributes and not prescribe which libraries or frameworks people use.\n\nThat said, the reason I’ve been bringing up DOMPurify and client-side sanitization is because in practice, we’ve seen that server-side HTML sanitizers have a much weaker track record, while client-side approaches (DOMPurify, Angular, etc.) leverage native browser APIs and have shown much more resilience against injection. I don’t think ASVS should mandate libraries, but I do think it’s fair to highlight that there are differences in classes of implementation strategies.\n\nI’m fine with trimming out the “well-known library” language since it's subjective. We could instead phrase it simply as:\n\n_Verify that all untrusted HTML input from WYSIWYG editors or similar is sanitized to contain only an allow-listed set of tags and attributes before rendering._\n\nAnd I think capturing the nuance about browser-side sanitizers, as part of the V3 section text, is a good idea.",
+      "createdAt": "2025-09-13T11:40:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3288137361",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7E7M3w",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> For this requirement, I would not touch the client-side or server-side topic, the principle to achieve is the same. Also note that HTML content is often used on the server side in emails, html to pdf libraries etc.\n\nHow is the principle to achieve the same?\n\nIs application security more important, or is client-side data sanitization more important, especially when that data is stored on the server side?",
+      "createdAt": "2025-09-17T17:00:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3303853552",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7E7kII",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": ">  the second part of the requirement (using a well‑known and secure HTML sanitization library or framework feature.) is non-actionable \"noise\" that does not add anything useful to the requirement.\n\nsome of the other requirements the word 'libraries/library' is used, Are some of these considered “noise,” and is any correction required?",
+      "createdAt": "2025-09-17T17:31:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3303948808",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qFIGt",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> How is the principle to achieve the same?\n> Is application security more important, or is client-side data sanitization more important, especially when that data is stored on the server side?\n\nI don't think it matters, as noted above it applies to both.\n\n> The second part of the requirement (using a well‑known and secure HTML sanitization library or framework feature.) is non-actionable \"noise\" that does not add anything useful to the requirement.\n\nIt exists here because this is a specific topic where something like DOMPurify is particularly relevant and therefore was worth mentioning. \n\n---\n\nOveralI, I don't think anything needs to change here",
+      "createdAt": "2026-02-19T13:11:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-3927212461",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vU_31",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I don't think it matters, as noted above it applies to both.\n\nHow does it not matter? If the server does not sanitize, client-side enforcement is meaningless. because security standards recommends **never trust client-side enforcement for security controls**. Please refer to this reference [CWE-602](https://cwe.mitre.org/data/definitions/602.html)\n\n\nIn the requirement it's good to use these words **server-side enforcement/sanitization**, **secure configuration**, instead of well-known library - “**approved cryptographic library**” , “**actively maintained library**” , “**framework-provided control**”.",
+      "createdAt": "2026-03-07T02:14:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4015259125",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vh6T5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ajayojha regarding the server-side enforcement point, the principle that security controls must be applied at a trusted service layer (and not rely on client-side enforcement) is a general one that applies across the whole standard. Rather than repeating it in individual requirements, I think we should add a note in the chapter paragraph text to make it clear that all encoding, sanitization, and other input handling controls are expected to be applied at a trusted service layer. This way the principle is visible without needing to state it in every requirement.\n\nOn the \"well-known\" wording, if @jmanico, @elarlang, and yourself really think it makes a difference, I can change this to \"trusted\" which is a more meaningful and less subjective term. The updated requirement would be:\n\n\"_Verify that all untrusted HTML input from WYSIWYG editors or similar is sanitized using a trusted and secure HTML sanitization library or framework feature._\"",
+      "createdAt": "2026-03-08T08:31:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4018644217",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7viVDb",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth  Good suggestion about placing the trusted service layer principle in the chapter paragraph.\n\nI would like to share an additional practical perspective on how development teams may interpret this requirement.\n\nOn a practical level, there is a high chance that developers assume WYSIWYG editors already perform sufficient sanitization and may skip server-side enforcement. In practice, this is a common misunderstanding, especially when the editor library provides client-side sanitization. Even if the principle is defined at the chapter level, it would help if the requirement wording at least hinted that this control is expected to be enforced at the trusted service layer.\n\n",
+      "createdAt": "2026-03-08T09:51:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4018753755",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vokJJ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> \"Verify that all untrusted HTML input from WYSIWYG editors or similar is sanitized using a trusted and secure HTML sanitization library or framework feature.\"\n\nI would suggest only a small addition.\n\n**_Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized using a trusted, secure HTML sanitization library or framework feature._**\n\nI think the client side control in the case is the most critical. Server-side HTML sanitizers have a poor security history because they cannot rely on certain (very effective) browser features for sanitization. I think if we wanted to call out server side sanitization, I'd make it a separate control.",
+      "createdAt": "2026-03-09T00:32:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4020388425",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vsqiQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So we have reached from the current requirement:\n> Verify that all untrusted HTML input from WYSIWYG editors or similar is sanitized using a well-known and secure HTML sanitization library or framework feature.\n\nTo proposal:\n> Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized using a trusted, secure HTML sanitization library or framework feature.\n\nWhich both are problematic from the requirement subject point of view - the requirement must define what security principle must be achieved.\n\nAt the moment, it basically just asks to use a well-known/trusted secure HTML sanitization library or framework feature, but it does not describe what must be achieved by using this tool. From the security and common-sense perspective, using a ready-made tool can be a recommendation, not a requirement - it does not make sense to reinvent the wheel, but if it is done and done correctly, the requirement must be satisfied. And with the current version or the latest proposal, it is not.\n\nAdditionally, libraries/frameworks/tools are often configurable, and one can use a configuration that makes this insecure. At the same time, the \"required tool\" is used, which kind of makes the requirement satisfied, but in reality, it is not.",
+      "createdAt": "2026-03-09T06:30:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4021463184",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vsyF3",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> > \"Verify that all untrusted HTML input from WYSIWYG editors or similar is sanitized using a trusted and secure HTML sanitization library or framework feature.\"\n> \n> I would suggest only a small addition.\n> \n> **_Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized using a trusted, secure HTML sanitization library or framework feature._**\n> \n> I think the client side control in the case is the most critical. Server-side HTML sanitizers have a poor security history because they cannot rely on certain (very effective) browser features for sanitization. I think if we wanted to call out server side sanitization, I'd make it a separate control.\n\nIam not sure the statement that server-side HTML sanitizers have a poor security history is entirely accurate. The security challenges with HTML sanitization largely come from the complexity of HTML parsing and evolving browser behaviors rather than whether the sanitizer runs client-side or server-side. Mature server-side libraries such as OWASP Java HTML Sanitizer or Bleach are widely used in production systems.\nClient-side sanitization can certainly be effective, but relying on it as the primary control may still conflict with the principle that security controls should be enforced at a trusted service layer.",
+      "createdAt": "2026-03-09T06:39:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4021494135",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vt1wH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The client-side, as a not-trusted service layer in this context, is a bit questionable.\n\nSolution a: WYSIWYG editor > **sanitization on the client-side** > stored on the server side > served on the client-side\n\nSolution b: WYSIWYG editor > (optional) sanitization on the client-side > stored on the server side > **sanitization on the client side** > served on the client-side\n\nSolution \"a\" is problematic, solution \"b\" is ok - both are on the client-side.\n",
+      "createdAt": "2026-03-09T07:39:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4021771271",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vuEgl",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> The client-side, as a not-trusted service layer in this context, is a bit questionable.\n> \n> Solution a: WYSIWYG editor > **sanitization on the client-side** > stored on the server side > served on the client-side\n> \n> Solution b: WYSIWYG editor > (optional) sanitization on the client-side > stored on the server side > **sanitization on the client side** > served on the client-side\n> \n> Solution \"a\" is problematic, solution \"b\" is ok - both are on the client-side.\n\nSo whats your final conclusion on the proposal,  as solution b is ok for you?",
+      "createdAt": "2026-03-09T07:52:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4021831717",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vuWx2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So whats your final conclusion on the proposal, as solution b is ok for you?\n\nIf the context is to show the user-input from WYSIWYG back to the user-interface, then I'm not able to provide an attack vector against this solution just because it is done on the client side. So, I can accept this solution as secure.\n\nBut I need to clarify this a bit as well. As I mentioned in [my previous comment](https://github.com/OWASP/ASVS/issues/3231#issuecomment-3278630808), the input from the WYSIWYG may end up in different places, such as in the HTML emails, HTML to PDF  solutions etc, so as a last step, I would use \"sanitization before using\" (instead of limiting it to sanitization on the client-side).",
+      "createdAt": "2026-03-09T08:08:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4021906550",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vu-Xn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Reviewing full thread. I think the proposal to go was already set in https://github.com/OWASP/ASVS/issues/3231#issuecomment-3288137361 which took my comment into account:\n\nSo the proposal is:\n> Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized to contain only an allow-listed set of tags and attributes before rendering.\n\nI would also say it is a non-breaking change.\n\nedit - to not require that it must be done only before rendering:\n> Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized to contain only an allow-listed set of tags and attributes before **storing or** before rendering.",
+      "createdAt": "2026-03-09T08:37:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4022068711",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vw2OV",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> So the proposal is:\n\n> Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized to contain only an allow-listed set of tags and attributes before rendering.\n\n1. allow-listed tags can be **script**, will this be fine. **Secure configuratio**n would be better instead **allow-listed tags** words\n3. allowed-listed tags and attributes - I think HTML sanitization problems often occur in attribute values, not just the attribute names.\n4. before rendering - feels slightly narrow.",
+      "createdAt": "2026-03-09T09:57:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4022559637",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vw_CB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> allow-listed tags can be script, will this be fine. Secure configuration would be better instead allow-listed tags words\n\nWe can not list safe tags for the application. For some, using an `<img>`  is also not safe.\n\nIn the \"SVG  requirement\" 1.3.4 we use phrase \"_to contain only tags and attributes (such as draw graphics) **that are safe for the application**, e.g., do not contain scripts and foreignObject._ So one option is to use something like this here as well.\n\nUsing \"_Secure configuration_\" is vague - it does not describe what is the correct solution.\n\n> allowed-listed tags and attributes - I think HTML sanitization problems often occur in attribute values, not just the attribute names.\n\nIt says \"attributes\" and not limiting it to \"attribute names\".\n\n> before rendering - feels slightly narrow.\n\nI already had updated proposal that contains \"before stroring or rendering\".\n",
+      "createdAt": "2026-03-09T10:04:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4022595713",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vxw6J",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Using \"Secure configuration\" is vague - it does not describe what is the correct solution.\n\nOk noted, if proposal says \"allow-listed attributes or tags,\" a developer might just write ALLOWED_ATTR: ['src']. Without the value validation step, an attacker could still use &lt;img src=\"x\" onerror=\"alert(1)\"> if the sanitization policy is not configured to restrict unsafe attribute values.that is separate than the allowed-list of attribites\n\n\n> It says \"attributes\" and not limiting it to \"attribute names\".\n\nWhile the term attribute may technically include both the name and value, but this is not understandable to every dev, for attribute value value validation in each sanitization library have separate configuration.",
+      "createdAt": "2026-03-09T10:38:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4022800009",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vyKmG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> a developer might just write ALLOWED_ATTR: ['src']. Without the value validation step, an attacker could still use `<img src=\"x\" onerror=\"alert(1)\">` if the sanitization policy is not configured to restrict unsafe attribute values.that is separate than the allowed-list of attribites\n\nIf the requirement says to use allowed attributes and the configuration defines `ALLOWED_ATTR: ['src']`, how the input `<img src=\"x\" onerror=\"alert(1)\">` can be valid and pass those?",
+      "createdAt": "2026-03-09T10:58:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4022905222",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vzDZ3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To cover all the points, it may become something like:\n> Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized before storing or before rendering to contain only an allow-listed set of tags, attributes, and attribute values. Allow-list configuration must take into account what is safe for the application and for each use (for example, it may require different rules for client-side and server-side rendering to be safe). Additionally, it may need to validate attribute values (for example, a src attribute value uses a expected path or URL).",
+      "createdAt": "2026-03-09T11:38:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4023137911",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wbKp9",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> how the input `<img src=\"x\" onerror=\"alert(1)\">` can be valid and pass those?\n\nYou have already addressed this concern in your last comment, so I don’t think a further response is necessary.",
+      "createdAt": "2026-03-10T18:43:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4033653373",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wbQGi",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> To cover all the points, it may become something like:\n> \n> > Verify that all untrusted HTML input from WYSIWYG editors or similar sources is sanitized before storing or before rendering to contain only an allow-listed set of tags, attributes, and attribute values. Allow-list configuration must take into account what is safe for the application and for each use (for example, it may require different rules for client-side and server-side rendering to be safe). Additionally, it may need to validate attribute values (for example, a src attribute value uses a expected path or URL).\n\nThis feels a bit long and not well structured, as it mixes several concepts into a single statement.",
+      "createdAt": "2026-03-10T18:47:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4033675682",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wbljw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, the point was to cover all points. As I'm not a native speaker, I don't push too much into finetuning the final wording. Just trying to set the concept correct, and then others can help with wordsmithing.\n\nIt means ping @tghosth ",
+      "createdAt": "2026-03-10T19:04:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3231#issuecomment-4033763568",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-08-08T02:32:00Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3231,
+  "state": "OPEN",
+  "title": "Clarification: 1.3.1 WYSIWYG",
+  "url": "https://github.com/OWASP/ASVS/issues/3231"
+}

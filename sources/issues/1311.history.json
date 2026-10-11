@@ -1,0 +1,436 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-1372344598",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "I really like this idea @tw2as. \r\n\r\nFor your L1 control, is \"should be checked with CSP validators and be as strict as possible.\" practical/testable?",
+          "recorded_at": "2023-01-05T15:12:58Z"
+        },
+        {
+          "body": "I really like this idea @tw2as. \r\n\r\nFor you L1 control, is \"should be checked with CSP validators and be as strict as possible.\" practical/testable?",
+          "recorded_at": "2023-01-05T15:12:53Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-1375350144",
+      "author": "tw2as",
+      "previous_versions": [
+        {
+          "body": "@tghosth - it's testable as it requires verification of the CSP response header.\r\n@jmanico - it's a good point to include Nonce although it's important that it's generated every time and it's generated with crypto secure generator.\r\n\r\nI understand the point that we don't want to include external tools (I guess it more suitable for Cheat Sheet). I propose the following:\r\n\r\n- From Level 1: _Verify that a Content Security Policy (CSP) response header is in place which helps mitigate impact for XSS attacks like HTML, DOM, JSON, and JavaScript injection vulnerabilities and it does not contain 'unsafe-eval' value._\r\n- From Level 2: _Verify that a Content Security Policy (CSP) response header does not contain 'unsafe-inline' value in 'script-src' directive or if it contains 'unsafe-inline' it also must contain a 'nonce' value (which makes 'unsafe-inline' only work with older browsers for compatibility)_ \r\n- From Level 2: _If Content Security Policy (CSP) response header contains a 'nonce' value, verify that it was generated on every load with a cryptographically secure pseudo-random number generator (CSPRNG)._\r\n\r\n\r\n\r\nI am not sure if forcing strict-dynamic over allow-list is nesesery. @jmanico if you think so that it's a case of adding the following:\r\n- _Verify that a Content Security Policy (CSP) response header contains 'strict-dynamic' value if it loads scripts from external domains._\r\n\r\n",
+          "recorded_at": "2023-01-09T09:52:00Z"
+        },
+        {
+          "body": "@tghosth - it's testable as it requires verification of the CSP response header.\r\n@jmanico - it's a good point to include Nonce although it's important that it's generated every time and it's generated with crypto secure generator.\r\n\r\nI understand the point that we don't want to include external tools (I guess it more suitable for Cheat Sheet). I propose the following:\r\n```\r\nFrom Level 1: Verify that a Content Security Policy (CSP) response header is in place which helps mitigate impact for XSS attacks like HTML, DOM, JSON, and JavaScript injection vulnerabilities and it does not contain 'unsafe-eval' value.\r\n\r\nFrom Level 2: Verify that a Content Security Policy (CSP) response header does not contain 'unsafe-inline' value in 'script-src' directive or if it contains 'unsafe-inline' it also must contain a 'nonce' value (which makes 'unsafe-inline' only work with older browsers for compatibility) \r\n\r\nFrom Level 2: If Content Security Policy (CSP) response header contains a 'nonce' value, verify that it was generated on every load with a cryptographically secure pseudo-random number generator (CSPRNG).\r\n```\r\n\r\nI am not sure if forcing strict-dynamic over allow-list is nesesery. @jmanico if you think so that it's a case of adding the following:\r\n```\r\nVerify that a Content Security Policy (CSP) response header contains 'strict-dynamic' value if it loads scripts from external domains.\r\n```\r\n\r\n",
+          "recorded_at": "2023-01-09T09:50:24Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-1910038329",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Ok, I think that being too prescriptive here is a problem. But we also need to specify a goal for the CSP other than just adding a header.\r\n\r\nThe [current text](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x50-V50-Web-Frontend-Security.md#v502-browser-security-mechanism-headers) is:\r\n\r\n> [MODIFIED, MOVED FROM 14.4.3] Verify that a Content Security Policy (CSP) response header is in place that helps mitigate impact for XSS attacks like HTML, DOM, CSS, JSON, and JavaScript injection vulnerabilities.\r\n\r\nThis is a relevant statement from @elarlang above:\r\n\r\n> Basically we just need to sent the message, at via browser, (in HTML or JavaScript; injection or execution situation - it should not be possible to do any communication for loading resources or send requests which are not valid based on application needs.\r\n\r\nWe need to set out the goals for the CSP and maybe have separate requirements for the different aspects which CSP can help with.\r\n\r\nDefault disallow should be in place",
+          "recorded_at": "2024-01-25T11:59:26Z"
+        },
+        {
+          "body": "Ok, I think that being too prescriptive here is a problem. But we also need to specify a goal for the CSP other than just adding a header.\r\n\r\nThe [current text](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x50-V50-Web-Frontend-Security.md#v502-browser-security-mechanism-headers) is:\r\n\r\n> [MODIFIED, MOVED FROM 14.4.3] Verify that a Content Security Policy (CSP) response header is in place that helps mitigate impact for XSS attacks like HTML, DOM, CSS, JSON, and JavaScript injection vulnerabilities.\r\n\r\nThis is a relevant statement from @elarlang above:\r\n\r\n> Basically we just need to sent the message, at via browser, (in HTML or JavaScript; injection or execution situation - it should not be possible to do any communication for loading resources or send requests which are not valid based on application needs.\r\n\r\nWe need to set out the goals for the CSP and maybe have separate requirements for the different aspects which CSP can help with.",
+          "recorded_at": "2024-01-25T11:58:45Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2096290367",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Just keeping this thread up to date with our latest thinking, I think we need a CSP requirement, (even PCI 4.0 has that now). I think we need to keep the implementation side relatively abstract and refer to external resources but we need to be clear about the goals of the CSP.",
+          "recorded_at": "2024-05-06T15:22:11Z"
+        },
+        {
+          "body": "Just keeping this thread up to date with our latest thinking, I think we need a CSP requirement, (even PCI 4.0 has that now). I think we need to keep the implementation side relatively abstract and refer to external resources but we need to be clear about he goals of the CSP.",
+          "recorded_at": "2024-05-06T15:22:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2107564410",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Based on my comments https://github.com/OWASP/ASVS/issues/1311#issuecomment-1369842654 and https://github.com/OWASP/ASVS/issues/1311#issuecomment-1372370316, it should be something like:\r\n\r\n> Verify that the Content-Security-Policy header defines fetch, document, and navigation directives based on application needs, without allowing the browser to communicate any other resource and deny everything by default.\r\n\r\nNote, that \"**the** Content-Security-Policy\" header is not correct as multiple Content-Security-Policy are allowed.\r\n\r\nedit: discussion on the proposal is moved to issue https://github.com/OWASP/ASVS/issues/1958",
+          "recorded_at": "2024-05-14T20:13:43Z"
+        },
+        {
+          "body": "Based on my comments https://github.com/OWASP/ASVS/issues/1311#issuecomment-1369842654 and https://github.com/OWASP/ASVS/issues/1311#issuecomment-1372370316, it should be something like:\r\n\r\n> Verify that the Content-Security-Policy header defines fetch, document, and navigation directives based on application needs, without allowing the browser to communicate any other resource and deny everything by default.\r\n\r\nNote, that \"**the** Content-Security-Policy\" header is not correct as multiple Content-Security-Policy are allowed.",
+          "recorded_at": "2024-05-13T13:20:49Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2107702595",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I have addressed my view on hidden requirements, for example here: https://github.com/OWASP/ASVS/issues/1311#issuecomment-1374939469\r\n\r\n> I still stand for my previously linked comment and we should not say anything about script-src in CSP, because this is \"hidden client-side architecture requirement in CSP\"\r\n\r\n... and here https://github.com/OWASP/ASVS/issues/1311#issuecomment-1377853036\r\n\r\n> If we are going to disallow <script>javascript here</script> tag from HTML via CSP, it's an hidden requirement and forces to change building HTML and JavaScript part differently (not using any inline script tags). I don't say it's wrong thing to ask, I say, it's wrong place to ask it. Especially when it's forced via external tool and in ASVS requirement you don't have basically any hint on this.\r\n\r\nWhatever is \"strongly advised\" is not a requirement and should not belong to a requirement. It's a recommendation and can be presented as such - we have a separate recommendation paragraph now.\r\n\r\nedit: discussion on the proposal is moved to issue https://github.com/OWASP/ASVS/issues/1958",
+          "recorded_at": "2024-05-14T20:13:57Z"
+        },
+        {
+          "body": "I have addressed my view on hidden requirements, for example here: https://github.com/OWASP/ASVS/issues/1311#issuecomment-1374939469\r\n\r\n> I still stand for my previously linked comment and we should not say anything about script-src in CSP, because this is \"hidden client-side architecture requirement in CSP\"\r\n\r\n... and here https://github.com/OWASP/ASVS/issues/1311#issuecomment-1377853036\r\n\r\n> If we are going to disallow <script>javascript here</script> tag from HTML via CSP, it's an hidden requirement and forces to change building HTML and JavaScript part differently (not using any inline script tags). I don't say it's wrong thing to ask, I say, it's wrong place to ask it. Especially when it's forced via external tool and in ASVS requirement you don't have basically any hint on this.\r\n\r\nWhatever is \"strongly advised\" is not a requirement and should not belong to a requirement. It's a recommendation and can be presented as such - we have a separate recommendation paragraph now.",
+          "recorded_at": "2024-05-13T14:18:23Z"
+        },
+        {
+          "body": "I have addressed my view on hidden requirements, for example here: https://github.com/OWASP/ASVS/issues/1311#issuecomment-1374939469\r\n\r\n> I still stand for my previously linked comment and we should not say anything about script-src in CSP, because this is \"hidden client-side architecture requirement in CSP\"\r\n\r\n... and here https://github.com/OWASP/ASVS/issues/1311#issuecomment-1377853036\r\n\r\n> If we are going to disallow <script>javascript here</script> tag from HTML via CSP, it's an hidden requirement and forces to change building HTML and JavaScript part differently (not using any inline script tags). I don't say it's wrong thing to ask, I say, it's wrong place to ask it. Especially when it's forced via external tool and in ASVS requirement you don't have basically any hint on this.\r\n\r\nWhatever is \"strongly advised\" is not a requirement and should not belong to a requirement. It's recommendation and can be presenter as such - we have separate recommendation paragraph now.",
+          "recorded_at": "2024-05-13T14:17:24Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2108139236",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I tried to conduct recommendation for that, but ended up with a monster. But hopefully usable for a starter and discussion:\r\n\r\n> To be able to get benefits from the Content-Security-Policy header fetch directive for script and style for disallowing using inline tags and eval for an attacker, the application should not use inline tags for script and style and should not allow 'unsafe-inline' and 'unsafe-eval' for script and style.\r\n\r\nAnd then we should create another recommendation for using nonces instead of allow-lists.\r\n\r\nedit: discussion on the proposal is moved to issue https://github.com/OWASP/ASVS/issues/1958",
+          "recorded_at": "2024-05-14T20:14:18Z"
+        },
+        {
+          "body": "I tried to conduct recommendation for that, but ended up with a monster. But hopefully usable for a starter and discussion:\r\n\r\n> To be able to get benefits from the Content-Security-Policy header fetch directive for script and style for disallowing using inline tags and eval for an attacker, the application should not use inline tags for script and style and should not allow 'unsafe-inline' and 'unsafe-eval' for script and style.\r\n\r\nAnd then we should create another recommendation for using nonces instead of allow-lists.",
+          "recorded_at": "2024-05-14T08:25:20Z"
+        },
+        {
+          "body": "I tried to conduct recommendation for that, but ended up with a monster. But hopefully usable for a starter and discussion:\r\n\r\n> To be able to get benefits from the Content-Security-Policy header fetch directive for script and style for disallowing using inline tags and eval for an attacker, the application should not use inline tags for script and style and should not allow 'unsafe-inline' and 'unsafe-eval' for script and style.\r\n\r\nAnd then we should create another recommendation for using nonces instead of allow-listes.",
+          "recorded_at": "2024-05-13T16:21:52Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2109862545",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> Inline scripts and styles can be secured using nonces or hashes, so completely advising against inline scripts is not needed in my opinion.\r\n\r\nWell, I confused myself here :) To save time for @Sjord to explain, I'll do it myself.\r\n\r\nAt first, I thought you meant SRI, but I rechecked the part and verified (for myself), that the `integrity` parameter is usable, only when the browser is going to fetch external resources.\r\n\r\nProof-of-concept: https://h2ck3r.eu/sri.html - integrity is made for `alert(1)`, but `alert(2)` is also executed.\r\n\r\nThe same is said here: https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity#using_subresource_integrity\r\n\r\nAt the same time, I'm not sure it should be that way, and found one interesting related issue to be open:\r\nhttps://github.com/w3c/webappsec-subresource-integrity/issues/44\r\n\r\nWhat @Sjord probably meant, was using hashes for the `Content-Security-Policy`, and for illustration, I made proof-of-concept for this as well:\r\nhttps://h2ck3r.eu/csp-hash/\r\n\r\nFor serving the response, HTTP response header is set:\r\n```http\r\nContent-Security-Policy: script-src 'sha256-GHqmE7my6OF2QBoGTnGw0BKjE4T56LeeVuMeNPRvLWU='\r\n```\r\n\r\nHTML document itself:\r\n```html\r\n<html>\r\n<script>alert(3);</script>\r\n<script>alert(4);</script>\r\n</html>\r\n```\r\n\r\nOnly `alert(3)` is executed, because `alert(4)` is not allowed by `script-src` as the hash is not listed there.\r\n\r\nedit: discussion on the proposal is moved to issue https://github.com/OWASP/ASVS/issues/1958",
+          "recorded_at": "2024-05-14T20:15:58Z"
+        },
+        {
+          "body": "> Inline scripts and styles can be secured using nonces or hashes, so completely advising against inline scripts is not needed in my opinion.\r\n\r\nWell, I confused myself here :) To save time for @Sjord to explain, I'll do it myself.\r\n\r\nAt first, I thought you meant SRI, but I rechecked the part and verified (for myself), that the `integrity` parameter is usable, only when the browser is going to fetch external resources.\r\n\r\nProof-of-concept: https://h2ck3r.eu/sri.html - integrity is made for `alert(1)`, but `alert(2)` is also executed.\r\n\r\nThe same is said here: https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity#using_subresource_integrity\r\n\r\nAt the same time, I'm not sure it should be that way, and found one interesting related issue to be open:\r\nhttps://github.com/w3c/webappsec-subresource-integrity/issues/44\r\n\r\nWhat @Sjord probably meant, was using hashes for the `Content-Security-Policy`, and for illustration, I made proof-of-concept for this as well:\r\nhttps://h2ck3r.eu/csp-hash/\r\n\r\nFor serving the response, HTTP response header is set:\r\n```http\r\nContent-Security-Policy: script-src 'sha256-GHqmE7my6OF2QBoGTnGw0BKjE4T56LeeVuMeNPRvLWU='\r\n```\r\n\r\nHTML document itself:\r\n```html\r\n<html>\r\n<script>alert(3);</script>\r\n<script>alert(4);</script>\r\n</html>\r\n```\r\n\r\nOnly `alert(3)` is executed, because `alert(4)` is not allowed by `script-src` as the hash is not listed there.",
+          "recorded_at": "2024-05-14T10:39:26Z"
+        },
+        {
+          "body": "> Inline scripts and styles can be secured using nonces or hashes, so completely advising against inline scripts is not needed in my opinion.\r\n\r\nWell, I confused myself here :) To save time for @Sjord to explain, I'll do it myself.\r\n\r\nAt first, I thought you meant SRI, but I rechecked the part and verified (for myself), that the `integrity` parameter is usable, only when the browser is going to fetch external resources.\r\n\r\nProof-of-concept: https://h2ck3r.eu/sri.html - integrity is made for `alert(1)`, but `alert(2)` is also executed.\r\n\r\nThe same is said here: https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity#using_subresource_integrity\r\n\r\nAt the same time, I'm not sure it should be that way, and found one interesting related issue to be open:\r\nhttps://github.com/w3c/webappsec-subresource-integrity/issues/44\r\n\r\nWhat @Sjord probably meant, was using hashes for the `Content-Security-Policy`, and for illustration, I made proof-of-concept for this as well:\r\nhttps://h2ck3r.eu/csp-hash/\r\n\r\nFor service the response, HTTP response header is set:\r\n```http\r\nContent-Security-Policy: script-src 'sha256-GHqmE7my6OF2QBoGTnGw0BKjE4T56LeeVuMeNPRvLWU='\r\n```\r\n\r\nHTML document itself:\r\n```html\r\n<html>\r\n<script>alert(3);</script>\r\n<script>alert(4);</script>\r\n</html>\r\n```\r\n\r\nOnly `alert(3)` is executed, because `alert(4)` is not allowed by `script-src` as the hash is not listed there.",
+          "recorded_at": "2024-05-14T10:38:01Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2109941439",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "My first proposal (https://github.com/OWASP/ASVS/issues/1311#issuecomment-2107564410) addressed only communication with external parties, but it does not cover the document integrity part, which is addressed by the `unsafe-inline` topic.\r\n\r\nInstead of saying \"Do not use 'unsafe-inline'\" we should try to explain the goal of the restriction.\r\n\r\nIn case there is an HTML injection vulnerability, disallowing using inline scripts should make the attacker's life more interesting.\r\n\r\nIn case there is a JavaScript injection in an inline script (between `<script> .. </script>` tags in an HTML document), an attacker can do a successful attack without communicating with any external party. Note, that also the `nonce` for the `<script>` tag does not help in this case.\r\n\r\nIf to go for the requirement direction (instead of recommendation), it should carry ideas:\r\n\r\nVerify that\r\n\r\n  * the application does not use inline scripts and styles in HTML documents and has not allowed using those in the Content-Security-Policy header\r\n  * OR all inline styles and scripts integrity are covered by checksum hashes in the Content-Security-Policy header\r\n\r\n.. now, how to make it twice shorter :)\r\n\r\nFeels like a level 3 requirement.\r\n\r\nFor the chapter, maybe this requirement should be together with \"SRI\" requirement and the current \"V50.6 External Resource Integrity\" to be renamed to \"V50.6 Resource Integrity\".\r\n\r\nping @Sjord @tw2as @tghosth - your ideas?\r\n\r\nedit: discussion on the proposal is moved to issue https://github.com/OWASP/ASVS/issues/1958",
+          "recorded_at": "2024-05-14T20:16:13Z"
+        },
+        {
+          "body": "My first proposal (https://github.com/OWASP/ASVS/issues/1311#issuecomment-2107564410) addressed only communication with external parties, but it does not cover the document integrity part, which is addressed by the `unsafe-inline` topic.\r\n\r\nInstead of saying \"Do not use 'unsafe-inline'\" we should try to explain the goal of the restriction.\r\n\r\nIn case there is an HTML injection vulnerability, disallowing using inline scripts should make the attacker's life more interesting.\r\n\r\nIn case there is a JavaScript injection in an inline script (between `<script> .. </script>` tags in an HTML document), an attacker can do a successful attack without communicating with any external party. Note, that also the `nonce` for the `<script>` tag does not help in this case.\r\n\r\nIf to go for the requirement direction (instead of recommendation), it should carry ideas:\r\n\r\nVerify that\r\n\r\n  * the application does not use inline scripts and styles in HTML documents and has not allowed using those in the Content-Security-Policy header\r\n  * OR all inline styles and scripts integrity are covered by checksum hashes in the Content-Security-Policy header\r\n\r\n.. now, how to make it twice shorter :)\r\n\r\nFeels like a level 3 requirement.\r\n\r\nFor the chapter, maybe this requirement should be together with \"SRI\" requirement and the current \"V50.6 External Resource Integrity\" to be renamed to \"V50.6 Resource Integrity\".\r\n\r\nping @Sjord @tw2as @tghosth - your ideas?",
+          "recorded_at": "2024-05-14T11:18:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2110706002",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Elar, if you have nothing positive to say then I suggest you do not say anything.\r\n\r\n",
+          "recorded_at": "2024-05-14T21:04:25Z"
+        },
+        {
+          "body": "Elar, if you have nothing positive to say then I suggest you do not say \nanything.\n\n",
+          "recorded_at": "2024-05-14T16:57:44Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2110709790",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Please note, there is a lot of solid science and study showing the Strict-CSP is by far the most effective. It's a lot more detailed and nuanced that what the discussion has provided, this is why I dropped the full text for those who wish to dig deeper.\r\n",
+          "recorded_at": "2024-05-14T19:16:48Z"
+        },
+        {
+          "body": "Please note, there is a lot of solid science and study showing the \nStrict-CSP is by far the most effective. It's a lot more detailed and \nnuanced that what the discussion has provided, this is why I dropped the \nfull text for those who wish to dig deeper.\n",
+          "recorded_at": "2024-05-14T16:59:19Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2110728865",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I'm pretty sure, all who contributing here, know those things anyway. What we need here is help with recommendations, wordings, dividing different directives to different topics and risk-levels. Not just noise.\r\n\r\n> Elar, if you have nothing positive to say then I suggest you do not say anything.\r\n\r\nI described the need here and repeated time-wasting problems from issue to issue. If one listens, I don't need to repeat them.",
+          "recorded_at": "2024-05-14T17:18:32Z"
+        },
+        {
+          "body": "I'm pretty sure, all who contributing here, know those things anyway. What we need here is help with recommendations, wordings, diving different directives to different topics and risk-levels. Not just noise.\r\n\r\n> Elar, if you have nothing positive to say then I suggest you do not say anything.\r\n\r\nI described the need here and repeated time-wasting problems from issue to issue. If one listens, I don't need to repeat them.",
+          "recorded_at": "2024-05-14T17:09:20Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2110973524",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I disagree Elar. I think your comments are downright abusive and it needs to stop. All comments are welcome here. If you do not like what I am saying then please stop reading my comments and stop making negative comments. We need adults here and respectful communication even when you disagree. All technical comments should be acceptable from the community, including my own.\r\n\r\n",
+          "recorded_at": "2024-05-14T19:16:15Z"
+        },
+        {
+          "body": "I disagree Elar. I think your comments are downright abusive and it needs to stop. All comments are welcome here. If you do not like what I am saying then please stop reading my comments and stop making negative comments. **Grow up.** We need adults here and all comments should be acceptable from the community, including my own.\r\n\r\n",
+          "recorded_at": "2024-05-14T19:15:34Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2110976893",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "PS @elarlang I am the one who started this thread suggesting strict-CSP policies. And now I clearly defined what that is. It's a good thing. ",
+          "recorded_at": "2024-05-14T19:17:55Z"
+        },
+        {
+          "body": "PS @elarlang I am the only who started this thread suggesting strict-CSP policies. And now I clearly defined what that is. It's a good thing.",
+          "recorded_at": "2024-05-14T19:17:41Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2111018861",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> I disagree Elar. I think your comments are downright abusive and it needs to stop.\r\n\r\nThis is not true, and it is pure demagogy. In another issue, you said that I didn't understand the topic, the same in the email, but at the end, you were the one, who did not read the issue (again) and failed to understand the topic. The summary is here: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2103948623\r\n\r\nHere, yes, you started the issue. The discussion here has been developing to the place, where it is.\r\n\r\nFrom issue to issue you throw in comments, without reading and analyzing, what has been said before, causing noise in the issue, and then no one wants to dig through all the comments that are there.\r\n\r\nIf you think after all that behavior, that I'm the one who needs to change, then the result is quite simple - one of us will not continue as leader for ASVS.",
+          "recorded_at": "2024-05-14T20:27:10Z"
+        },
+        {
+          "body": "> I disagree Elar. I think your comments are downright abusive and it needs to stop.\r\n\r\nThis is not true, and it is pure demagogy. In another issue, you said that I didn't understand the topic, the same in the email, but at the end, you were the one, who did not read the issue (again) and failed to understand the topic. Here, yes, you started the issue. The discussion here has been developing to the place, where it is.\r\n\r\nFrom issue to issue you throw in comments, without reading and analyzing, what has been said before, causing noise in the issue, and then no one wants to dig through all the comments that are there.\r\n\r\nIf you think after all that behavior, that I'm the one who needs to change, then the result is quite simple - one of us will not continue as leader for ASVS.",
+          "recorded_at": "2024-05-14T19:45:26Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2111178719",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "I think specifying the use of the Strict CSP approach may ambiguous as there are different definitions/understandings of what the requirements are. For example, Google's definition [here](https://csp.withgoogle.com/docs/strict-csp.html) is at odds with the definition above. Notably, (as one example) it includes the use of `unsafe-inline` which is ignored when nonces are supported (as such, I don't think it's necessarily appropriate to prohibit `unsafe-inline` as a possible source when used alongside a strict policy).\r\n\r\nIf I am understanding correctly, I agree with @elarlang's direction abstracting from the specific directives/policies. \r\n\r\nI think an allow-list approach would be appropriate requirement for initial level(s), but for L3 I think a more strict approach may be appropriate (as @jmanico noted, there is sufficient evidence on the allow-list approach failing due to insecure implementations). Here is a rough effort at generalizing these:\r\n\r\n1. A CSP should ensure the browser only loads/executes trusted content or content from trusted sources.\r\n2. A CSP should ensure the browser only loads/executes trusted content. \r\n\r\n",
+          "recorded_at": "2024-05-14T21:35:53Z"
+        },
+        {
+          "body": "I think specifying the use of the Strict CSP approach may ambiguous as there are different definitions/understandings of what the requirements are. For example, Google's definition [here](https://csp.withgoogle.com/docs/strict-csp.html) is at odds with the definition above. Notably, (as one example) it includes the use of `unsafe-inline` which is ignored when nonces are supported (as such, I don't think it's necessarily appropriate to prohibit `unsafe-inline` as a possible source when used alongside a strict policy).\r\n\r\nIf I am understanding correctly, I agree @elarlang's direction abstracting from the specific directives/policies. \r\n\r\nI think an allow-list approach would be appropriate requirement for initial level(s), but for L3 I think a more strict approach may be appropriate (as @jmanico noted, there is sufficient evidence on the allow-list approach failing due to insecure implementations). Here is a rough effort at generalizing these:\r\n\r\n1. A CSP should ensure the browser only loads/executes trusted content or content from trusted sources.\r\n2. A CSP should ensure the browser only loads/executes trusted content. \r\n\r\n",
+          "recorded_at": "2024-05-14T21:35:23Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2124662066",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "@tghosth on your questions:\r\n\r\n- A full nonce/hash based approach may be too much of a burden for L2, so I would ask: is the effort required to implement an allow-list based approach appropriate for L2 and worth the benefits? Despite the existing evidence of widespread bypasses for this approach in practice, it can be effective depending on the implementation. One of the problems here is how to determine whether an allow-list based approach is sufficiently secure for a given application, but I think this is out of the scope of ASVS requirements. I think perhaps there may even be value in encouraging adoption/implementation, even if the stated requirements are not strict. On that point, perhaps a reasonable requirement for L1 would simply be the implementation of a CSP that defines permitted resources with no specific requirements for how to achieve it. However, as @Sjord noted, implementing any reasonably secure policy may be infeasible for many existing applications and CSP is ultimately a defense in depth mechanism for this use case (restriction of content/resources). I have encountered applications vulnerable to XSS that could not be exploited due to an effective allow-list implementation. I have never encountered an application using `unsafe-inline` that could not be exploited (if there was a XSS vector). \r\n- I do not feel strongly either way. They could be combined-as with inline references to L2 vs. L3 requirements, but I think the question of what the core requirements are for each level is best answered by ASVS experts on whether these requirements align in general with L2 and L3 in terms of benefit/effort. \r\n- I think other CSP use cases are better handled by vector-specific requirements (as noted by @elarlang and as in v4.0.3). I will also comment on #1958",
+          "recorded_at": "2024-05-22T12:23:35Z"
+        },
+        {
+          "body": "@tghosth on your questions:\r\n\r\n- A full nonce/hash based approach may be too much of a burden for L2, so I would ask: is the effort required to implement an allow-list based approach appropriate for L2 and worth the benefits? Despite the existing evidence of widespread bypasses for this approach in practice, it can be effective depending on the implementation. One of the problems here is how to determine whether an allow-list based approach is sufficiently secure for a given application, but I think this is out of the scope of ASVS requirements. I think perhaps there may even be value in encouraging adoption/implementation, even if the stated requirements are not strict. On that point, perhaps a reasonable requirement for L1 would simply be the implementation of a CSP that defines permitted resources with no specific requirements for how to achieve it. However, as @Sjord noted, implementing any reasonably secure policy may be infeasible for many existing applications and CSP is ultimately a defense in depth mechanism for this use case (restriction of content/resources). I have encountered applications vulnerable to XSS that could not be exploited due to an effective allow-list implementation. I have never encountered an application using `unsafe-inline` that could not be exploited (if there was a XSS vector). \r\n- I do not feel strongly either way. They could be combined-as with inline references to L2 vs. L3 requirements, but I think the question of what the core requirements are for each level is best answered by ASVS experts on whether these requirements align in general with L2 and L3 in terms of benefit/effort. \r\n- I think other CSP use cases are better handled by vector-specific requirements (as noted by @elarlang and as in v4.0.3). I will also comment on #1958 ",
+          "recorded_at": "2024-05-22T12:23:12Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2147009806",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Here is the research on CSP bypasses and similar.\r\n\r\nhttps://speakerdeck.com/lweichselbaum/csp-a-successful-mess-between-hardening-and-mitigation?slide=16\r\nand\r\nhttps://speakerdeck.com/mikispag/defense-in-depth-techniques-for-modern-web-applications-and-googles-journey-with-csp-michele-spagnuolo-and-lukas-weichselbaum\r\n\r\n.. even with a strict allow list, bypasses include:\r\n1) JSONP endpoints\r\n2) BASE tag jumping\r\n3) Object-tag injection\r\nand more\r\n\r\n![Screenshot 2024-06-04 at 11 10 12 AM](https://github.com/OWASP/ASVS/assets/531465/10a71e7e-a339-4601-959b-e0c638c36279)\r\n",
+          "recorded_at": "2024-06-04T09:11:19Z"
+        },
+        {
+          "body": "Here is the research on CSP bypasses and similar.\r\n\r\nhttps://speakerdeck.com/lweichselbaum/csp-a-successful-mess-between-hardening-and-mitigation?slide=16\r\nand\r\nhttps://speakerdeck.com/mikispag/defense-in-depth-techniques-for-modern-web-applications-and-googles-journey-with-csp-michele-spagnuolo-and-lukas-weichselbaum\r\n\r\n.. even with a strict allow list, bypasses include:\r\n1) JSONP endpoints\r\n2) BASE tag jumping\r\n3) Object-tag injection\r\nand more\r\n\r\n![Screenshot 2024-06-04 at 11 10 12 AM](https://github.com/OWASP/ASVS/assets/531465/10a71e7e-a339-4601-959b-e0c638c36279)\r\n",
+          "recorded_at": "2024-06-04T09:10:53Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2154899063",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "This is from one of the CSP standard body members:\n\n\"It's true that CSP isn't suited to prevent data exfil. E.g. it's trivial to use navigation to extract data and there's nothing you can do with CSP to prevent this. \n\nOnce the attacker has script execution it's game over. So the primary goal is to prevent that from happening. \n\nI'm not sure if there's an official w3c stance on it, but indirectly this position is confirmed by consensus of deprecating the navigate-to CSP directive. \n\niirc we also had a slide on this in our 2019 locomocosec talk\"",
+          "recorded_at": "2024-06-07T13:56:12Z"
+        },
+        {
+          "body": "This is from one of the CSP standard body members:\n\n\"It's true that CSP isn't suited to prevent data exfil. E.g. it's trivial to use navigation to extract data and there's nothing you can do with CSP to prevent this. \n\nOnce the attacker has script execution it's game over. So the primary goal is to prevent that from happening. \nI'm not sure if there's an official w3c stance on it, but indirectly this position is confirmed by consensus of deprecating the navigate-to CSP directive. \n\niirc we also had a slide on this in our 2019 locomocosec talk\"",
+          "recorded_at": "2024-06-07T13:55:57Z"
+        },
+        {
+          "body": "This is from one of the CSP standard body members:\n\n\"It's true that CSP isn't suited to prevent data exfil. E.g. it's trivial to use navigation to extract data and there's nothing you can do with CSP to prevent this. \n\nOnce the attacker has script execution it's game over. So the primary goal is to prevent that from happening. \nI'm not sure if there's an official w3c stance on it, but indirectly this position is confirmed by consensus of deprecating the navigate-to CSP directive. \niirc we also had a slide on this in our 2019 locomocosec talk\"",
+          "recorded_at": "2024-06-07T13:55:37Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2461972889",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "I have a new set of proposals with a couple options. I removed implementation details while still trying to capture the goal/outcome. If it's not clear enough, implementation specifics can be added. For example, for L3: \"This can be accomplished using CSP-nonces and/or CSP-hashes\".\r\n\r\nOption 1: Single requirement that specifies special L3 requirement.\r\nOption 2: Split reqs into L1/L2 and L3.\r\n\r\nAll in one:\r\n\r\n> Verify for all pages that a Content Security Policy (CSP) is implemented to ensure the browser only loads/executes explicitly trusted content or content from trusted sources. For L3 applications, the policy must be strict to prevent the loading or execution of any content or resource that has not been specifically permitted.\r\n\r\n\r\nL1/L2:\r\n\r\n> Verify for all pages that a Content Security Policy (CSP) is implemented to ensure the browser only loads/executes explicitly trusted content or content from trusted sources. \r\n\r\nL3:\r\n\r\n> Verify for all pages that a strict Content Security Policy (CSP) is implemented to ensure the browser will not load/execute any content or resource that has not been explicitly permitted. \r\n\r\n",
+          "recorded_at": "2024-11-07T11:17:55Z"
+        },
+        {
+          "body": "I have a new set of proposals with a couple options. I removed implementation details while still trying to capture the goal/outcome. If it's not clear enough, implementation specifics can be added. For example, for L3: \"This can be accomplished using CSP-nonces and/or CSP-hashes\".\r\n\r\nOption 1: Single requirement that specifies special L3 requirement.\r\nOption 2: Split reqs into L1/L2 and L3.\r\n\r\nAll in one:\r\n\r\n> Verify for all pages that a Content Security Policy (CSP) is implemented to ensure the browser only loads/executes explicitly trusted content or content from trusted sources. For L3 applications, the policy must be strict to prevent the loading or execution of any unintended resources.\r\n\r\n\r\nL1/L2:\r\n\r\n> Verify for all pages that a Content Security Policy (CSP) is implemented to ensure the browser only loads/executes explicitly trusted content or content from trusted sources. \r\n\r\nL3:\r\n\r\n> Verify for all pages that a strict Content Security Policy (CSP) is implemented to ensure the browser will not load/execute any content or resource that has not been explicitly permitted. \r\n\r\n",
+          "recorded_at": "2024-11-07T11:17:20Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2462083904",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "Reformulating based on feedback, including:\r\n- Clarifying the attack to mitigate\r\n- Specifying the specific CSP mechanisms that are permissible\r\n- Removing L1 requirement to due coming changes to the levels\r\n- Distinguishing between the outcome/goal from L2->L3\r\n\r\nL2:\r\n\r\n> Verify that a Content Security Policy (CSP) is implemented for all HTTP responses to ensure the browser only loads/executes explicitly trusted content or content from trusted sources in order to limit JavaScript execution resulting from XSS and related attacks. This can be accomplished using one or a combination of allow-lists, nonces, and hashes. \r\n\r\nL3:\r\n\r\n> Verify that a strict Content Security Policy (CSP) is implemented for all HTTP responses to ensure the browser will not load/execute any content or resource that has not been explicitly permitted in order to prevent any JavaScript execution resulting from XSS and related attacks. The exclusive use of nonces or hashes is required.\r\n",
+          "recorded_at": "2024-11-07T12:14:40Z"
+        },
+        {
+          "body": "Reformulating based on feedback, including:\r\n- Clarifying the attack to mitigate\r\n- Specifying the specific CSP mechanisms that are permissible\r\n- Removing L1 requirement to due coming changes to the levels\r\n- Distinguishing between the outcome/goal from L2->L3\r\n\r\nL2:\r\n\r\n> Verify that a Content Security Policy (CSP) is implemented for all pages to ensure the browser only loads/executes explicitly trusted content or content from trusted sources in order to limit JavaScript execution resulting from XSS and related attacks. This can be accomplished using one or a combination of allow-lists, nonces, and hashes. \r\n\r\nL3:\r\n\r\n> Verify that a strict Content Security Policy (CSP) is implemented for all pages to ensure the browser will not load/execute any content or resource that has not been explicitly permitted in order to prevent any JavaScript execution resulting from XSS and related attacks. The exclusive use of nonces or hashes is required.\r\n",
+          "recorded_at": "2024-11-07T12:13:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2462103186",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "Reformulating:\r\n- Single requirement\r\n\r\n> Verify that every HTTP response contains a Content-Security-Policy response header field which defines all directives required to ensure the browser only loads and executes trusted content or resources in order to limit execution of malicious JavaScript. L3 applications must use a combination of nonces or hashes such as when following \"Strict CSP\", but L2 applications may use allow-lists if needed.\r\n\r\n",
+          "recorded_at": "2024-11-07T14:31:08Z"
+        },
+        {
+          "body": "Reformulating:\r\n- Single requirement\r\n\r\n>Verify that a Content Security Policy (CSP) is implemented for all HTTP responses to ensure the browser only loads/executes trusted content or resources in order to limit JavaScript execution resulting from XSS and related attacks. L3 applications must use a combination of nonces or hashes only, but L2 applications may use allow-lists if needed. \r\n\r\n",
+          "recorded_at": "2024-11-07T12:22:55Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2462443747",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reducing the risk of malicious JavaScript. For L3, define a per-response policy with nonces or hashes with object-src and base-uri set to 'none'. For L2, allowlists and a global policy may be used._",
+          "recorded_at": "2024-11-07T15:08:58Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reducing the risk of malicious JavaScript. For L3, define a per-response policy with nonces or hashes with object-src and base-uri set to 'none'. For L2, allowlists and a global policy may be used if needed._",
+          "recorded_at": "2024-11-07T15:08:19Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to limit the browser to trusted content only, reducing the risk of malicious JavaScript. For L3, define a per-response policy with nonces or hashes with object-src and base-uri set to 'none'. For L2, allowlists and a global policy may be used if needed._",
+          "recorded_at": "2024-11-07T15:07:58Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\nVerify that every HTTP response includes a Content-Security-Policy (CSP) header field to limit the browser to trusted content only, reducing the risk of malicious JavaScript. For L3, define a per-response policy with nonces or hashes with object-src and base-uri set to 'none'. For L2, allowlists and a global policy may be used if needed._",
+          "recorded_at": "2024-11-07T15:07:48Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\nVerify that every HTTP response includes a Content-Security-Policy (CSP) header field to limit the browser to trusted content only, reducing the risk of malicious JavaScript. For L3, CSP should use nonces or hashes with object-src and base-uri set to 'none'. For L2, allowlists and a global policy may be used if needed._",
+          "recorded_at": "2024-11-07T15:06:33Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\nVerify that every HTTP response includes a Content-Security-Policy (CSP) header field to limit the browser to trusted content only, reducing the risk of malicious JavaScript. For Level 3, CSP should use nonces or hashes with object-src and base-uri set to 'none'. For Level 2, allowlists and a global policy may be used if needed._",
+          "recorded_at": "2024-11-07T15:05:44Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Ensure that every HTTP response includes a Content-Security-Policy (CSP) header field to limit the browser to trusted content only, reducing the risk of malicious JavaScript. For Level 3, CSP should use nonces or hashes with object-src and base-uri set to 'none'. For Level 2, allowlists and a global policy may be used if needed._",
+          "recorded_at": "2024-11-07T15:04:54Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Ensure that every HTTP response includes a Content-Security-Policy (CSP) header to limit the browser to trusted content only, reducing the risk of malicious JavaScript. For Level 3, CSP should use nonces or hashes with object-src and base-uri set to 'none'. For Level 2, allowlists and a global policy may be used if needed._",
+          "recorded_at": "2024-11-07T15:04:47Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field that defines directives necessary to restrict the browser to loading and executing only trusted content and resources, reducing the risk of executing malicious JavaScript. For Level 3 applications, CSP must use a combination of nonces or hashes to enforce per-response policies, with both object-src and base-uri set to 'none'. For Level 2 applications, allowlists and a global policy may be used if required._",
+          "recorded_at": "2024-11-07T15:03:54Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header that defines directives necessary to restrict the browser to loading and executing only trusted content and resources, reducing the risk of executing malicious JavaScript. For Level 3 applications, CSP must use a combination of nonces or hashes to enforce per-response policies, with both object-src and base-uri set to 'none'. For Level 2 applications, allowlists and a global policy may be used if required._",
+          "recorded_at": "2024-11-07T15:01:52Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) that defines directives necessary to restrict the browser to loading and executing only trusted content and resources, reducing the risk of executing malicious JavaScript. For Level 3 applications, CSP must use a combination of nonces or hashes to enforce per-response policies, with both object-src and base-uri set to 'none'. For Level 2 applications, allowlists and a global policy may be used if required._",
+          "recorded_at": "2024-11-07T15:01:05Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) response header that defines directives necessary to restrict the browser to loading and executing only trusted content and resources, reducing the risk of executing malicious JavaScript. For Level 3 applications, CSP must use a combination of nonces or hashes to enforce per-response policies, with both object-src and base-uri set to 'none'. For Level 2 applications, allowlists and a global policy may be used if required._",
+          "recorded_at": "2024-11-07T15:00:39Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header that defines directives necessary to restrict the browser to loading and executing only trusted content and resources, reducing the risk of executing malicious JavaScript. For Level 3 applications, CSP must use a combination of nonces or hashes to enforce per-response policies, with both object-src and base-uri set to 'none'. For Level 2 applications, allowlists and a global policy may be used if required._",
+          "recorded_at": "2024-11-07T14:58:12Z"
+        },
+        {
+          "body": "_Verify that every HTTP response includes a Content-Security-Policy (CSP) header that defines directives necessary to restrict the browser to loading and executing only trusted content and resources, reducing the risk of executing malicious JavaScript. For Level 3 applications, CSP must use a combination of nonces or hashes to enforce per-response policies, with both object-src and base-uri set to 'none'. For Level 2 applications, allowlists and a global policy may be used if required._",
+          "recorded_at": "2024-11-07T14:56:10Z"
+        },
+        {
+          "body": "_Verify that every HTTP response includes a Content-Security-Policy (CSP) header that defines directives necessary to restrict the browser to loading and executing only trusted content and resources, thereby reducing the risk of executing malicious JavaScript. For Level 3 applications, CSP must use a combination of nonces or hashes to enforce per-response policies, with both object-src and base-uri set to 'none'. For Level 2 applications, allowlists and a global policy may be used if required._",
+          "recorded_at": "2024-11-07T14:55:45Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2462480924",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "For L2 application, allowlists and a global policy may be used, for L3 a per-response policy with nonces or hashes with object-src and base-uri set to 'none' must be defined. ",
+          "recorded_at": "2024-11-07T15:11:03Z"
+        },
+        {
+          "body": "For L2, allowlists and a global policy may be used,. for L3 a per-response policy with nonces or hashes with object-src and base-uri set to 'none' must be defined. ",
+          "recorded_at": "2024-11-07T15:10:29Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1311#issuecomment-2462485081",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Taking Elar into consideration.\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reduce the risk of malicious JavaScript. For L2, allowlists and a global policy may be used. For L3, a per-response policy with nonces or hashes, and object-src and base-uri set to 'none,' must be defined. _",
+          "recorded_at": "2024-11-07T15:13:40Z"
+        },
+        {
+          "body": "Taking Elar into consideration.\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reduce the risk of malicious JavaScript. For L2, allowlists and a global policy may be used. For L3, a per-response policy with nonces or hashes, and object-src and base-uri set to 'none,' must be defined.. _",
+          "recorded_at": "2024-11-07T15:13:30Z"
+        },
+        {
+          "body": "Taking Elar into consideration.\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reduce the risk of malicious JavaScript. For L2, allowlists and a global policy may be used. For L3, a per-response policy with nonces or hashes with object-src and base-uri set to 'none' must be defined. _",
+          "recorded_at": "2024-11-07T15:12:50Z"
+        },
+        {
+          "body": "Taking Elar into consideration.\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reducing the risk of malicious JavaScript. For L2, allowlists and a global policy may be used. For L3, a per-response policy with nonces or hashes with object-src and base-uri set to 'none' must be defined. _",
+          "recorded_at": "2024-11-07T15:12:00Z"
+        },
+        {
+          "body": "Minor wordsmithing:\r\n\r\n_Verify that every HTTP response includes a Content-Security-Policy (CSP) header field to reducing the risk of malicious JavaScript. For L2, allowlists and a global policy may be used. For L3, a per-response policy with nonces or hashes with object-src and base-uri set to 'none' must be defined. _",
+          "recorded_at": "2024-11-07T15:11:43Z"
+        }
+      ]
+    }
+  ]
+}

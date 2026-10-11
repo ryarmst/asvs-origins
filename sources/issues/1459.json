@@ -1,0 +1,171 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "I think 14.4.1 should be 3 requirements:\r\n* All have content type\r\n* Specify safe encoding\r\n* Actual content type must match header\r\n\r\nIt currently is this:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.4.1** | Verify that every HTTP response contains a Content-Type header. Also specify a safe character set (e.g., UTF-8, ISO-8859-1) if the content types are text/*, /+xml and application/xml. Content must match with the provided Content-Type header. | ✓ | ✓ | ✓ | 173 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5RA8BB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just for linking previous issues on the topic:\r\n* https://github.com/OWASP/ASVS/issues/788\r\n* https://github.com/OWASP/ASVS/issues/900",
+      "createdAt": "2022-12-20T11:14:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1359200321",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RBMZG",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest two: one requiring a safe content type and a second that goes over the text issue..",
+      "createdAt": "2022-12-20T12:09:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1359267398",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RBYEa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "from test-case perspective I would use 2 requirements but a bit differently than Jim proposed:\r\n* Verify that every HTTP response contains a Content-Type header. Also specify a safe character set (e.g., UTF-8, ISO-8859-1) if the content types are text/*, /+xml and application/xml.\r\n* Verify that served content match with the provided Content-Type header.\r\n  * do we need to limit it to \"when served inline\" == \"not served as attachment\"?",
+      "createdAt": "2022-12-20T12:57:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1359315226",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RBY1a",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so neither of you think that just having a content type header on each request should be it's own requirement?",
+      "createdAt": "2022-12-20T13:00:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1359318362",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RBaNz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Actually, I like this requirement like it is.\r\n\r\nIf we have separate requirement \"just have a content-type header\" in response. What is the point?\r\n\r\nDo you verify that it is ok and satisfied requirement, when the value or charset does not make any sense or it does not match with actual content?\r\n\r\nI think it's one validation (yes, with 3 steps), can not watch each item separately.",
+      "createdAt": "2022-12-20T13:06:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1359324019",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RBapy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hmm, it bothers me having a requirement that you could fail for at least two different reasons when we could make it simpler...",
+      "createdAt": "2022-12-20T13:07:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1359325810",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mYMy8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have taken this opportunity to revisit the information about content types in 14.4.1.\r\n\r\n* @jason-invision pointed to [RFC-2046](https://tools.ietf.org/html/rfc2046#section-4.1.2) in [this comment](https://github.com/OWASP/ASVS/issues/710#issuecomment-584793932) to come up with the `text/*`, `*/*+xml` and `application/xml` types \r\n* @elarlang did some good analysis [in this issue](https://github.com/OWASP/ASVS/issues/788) to clarify the types required,\r\n* `text/*` is clearly indicated in the original [RFC-2046](https://tools.ietf.org/html/rfc2046#section-4.1.2).\r\n* `*/xml` is \"strongly recommended\" by  [RFC-2376](https://datatracker.ietf.org/doc/html/rfc2376#section-3.1).\r\n* `*/*+xml` there are loads of these but seems like charset is needed for them.\r\n\r\nGoing back to the original requirement, I think two requirements is right but I would do them different to @elarlang \r\n\r\n> Verify that every HTTP response contains a Content-Type header which matches the actual content of the response.\r\n\r\n> Verify that if a response specifies a Content-Type of \"text/\\*\", \"\\*/\\*+xml\" and \"\\*/xml\", it also specifies a safe character set (e.g., UTF-8, ISO-8859-1) with the charset parameter.\r\n\r\n@elarlang @jmanico what do you think?",
+      "createdAt": "2023-09-13T13:17:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1717619900",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mYOnB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I still prefer this as one requirement (https://github.com/OWASP/ASVS/issues/1459#issuecomment-1359324019), can live with separate ones.",
+      "createdAt": "2023-09-13T13:22:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1717627329",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nGNrd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1728 to resolve",
+      "createdAt": "2023-09-21T14:20:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1459#issuecomment-1729682141",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-12-20T10:50:44Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1459,
+  "state": "CLOSED",
+  "title": "14.4.1 should be 3 requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/1459"
+}

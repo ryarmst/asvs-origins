@@ -1,0 +1,618 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **15.3.4** | Verify that the application is able to discern and utilizes the user's true IP address to provide for sensitive functions, including rate limiting and logging. | 2 | v5.0.be-10.4.6 |\n\nOriginally discussed in #1389\n\nI think the requirement should contain the message, that \"all the middleware components need to transfer user true IP address to the application\", as explained here https://github.com/OWASP/ASVS/issues/1389#issuecomment-1716291242\n\nAlso, not sure and did not reanalyze why we have put this into \"V15 Secure Coding Architecture\", as it is more configuration area to solve.\n\nIt feels that it should be moved to some middleware or proxying topic (depends on outcome from https://github.com/OWASP/ASVS/issues/3040#issuecomment-2831907157) or to \"V13.2 Backend Communication Configuration\"\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6pB40b",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@elarlang sometimes it's difficult to propagate the users true IP address. Can we possibly suggest \"propagate the users true IP address **_or_** propagate the users identity?\" (JWT)\n\nBecause IP preservation is so brittle and context-dependent, I think it’s safer for the standard to encourage IP and/or identity propagation (short-lived, signed JWT or mTLS workload ID).\n\nHere are a few reasons why it's (sometimes) so challenging to propigate IP addresses.\n\n**1. Reverse proxies and load balancers rewrite the source address**\nThe first hop (AWS ALB, NGINX, HAProxy, Envoy, Cloud Load Balancer, etc.) terminates the TCP connection and performs source-NAT. The browser’s IP is replaced by the proxy’s, with the former shuffled into X-Forwarded-For, Forwarded, or the PROXY protocol header.\n\n**2. Kubernetes service NAT and overlay networks**\nkube-proxy (iptables/IPVS) and CNI overlays such as Calico or Cilium add an extra layer of NAT so that packets can find their way back to the right pod. The application container therefore sees the node IP, not the client’s.\n\n**3. Service-mesh sidecars (Istio, Linkerd, Consul Connect)**\nSide-cars terminate the outer TLS session and open a fresh, mTLS-protected hop to the next pod. Two sockets mean two separate 5-tuples, so the original address is gone unless the mesh writes it into a header or token.\n\n**4. Multiple TLS termination layers**\nEdge TLS, mesh mTLS, and sometimes internal service-level TLS each break the TCP connection and start a new one—again discarding the previous source address unless you explicitly copy it forward.\n\n**5. Header scrubbing by security appliances**\nWAFs, L7 firewalls, API gateways, and DDoS mitigations often strip or truncate forwarding headers to prevent header spoofing. If the chain is broken at any hop, downstream services get an incomplete or empty list.\n\n**6. Protocol transitions drop hop-by-hop metadata**\nWhen HTTP/1.1 is upgraded to gRPC, WebSocket, or an event-bus, hop-by-hop headers such as X-Forwarded-For are not automatically preserved. Unless your bridge code copies them, they vanish.\n\n**7. Unsupported or disabled PROXY protocol**\nTCP-only back-ends (databases, SMTP relays, some queuing systems) can receive the client address via PROXY-v1/v2, but that requires both client and server support. If it’s off, the listener only sees the last hop.\n\n**8. CDN or edge network obfuscation**\nCloudFront, Akamai, Cloudflare, and similar CDNs may mask the user’s last-mile IPv6/IPv4 address for privacy or because they multiplex many clients over a single edge node. They usually provide a proprietary header instead.\n\n**9. Asynchronous hand-offs break the transport envelope**\nWhen requests are converted to queue messages, SNS/SQS topics, Kafka records, or serverless invocations, the network metadata is typically not part of the payload unless you copy it manually.\n\n**10. Client-side anonymity or spoofing tools**\nEven if you succeed in propagating the address, users can be behind carrier-grade NAT, corporate proxies, VPNs, Tor, or malicious middleware that rewrites or randomizes the source IP. Relying on the address for identity is therefore fragile.\n\n\n\n\n\n\n",
+      "createdAt": "2025-04-28T16:37:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2835844379",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pCcR4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 1. Reverse proxies and load balancers rewrite the source address\n\nThis is precisely the problem to solve - the proxy must send the IP address to the application in a separate header on that situation.\n\nAnd the application part - it must read the end-user IP from the extra header, not using proxy's own IP as the client IP.",
+      "createdAt": "2025-04-28T17:33:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2835989624",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pChTQ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree, it's just really hard to do in certain architectures. 10 especially concerns me.\n\n**10. Client-side anonymity or spoofing tools**\nEven if you succeed in propagating the address, users can be behind carrier-grade NAT, corporate proxies, VPNs, Tor, or malicious middleware that rewrites or randomizes the source IP. Relying on the address for identity is therefore fragile.\n\nI think _Verify that the application is able to discern and utilizes the user's true IP address to provide for sensitive functions, including rate limiting and logging_ carries (a little bit) of the wrong message. We never want to use an IP address for a lot of sensitive functions like identity or access control and similar. And sometimes we cannot rely on a user having the same IP address even within one session, like when they are behind certain corporate firewalls or VPN's.",
+      "createdAt": "2025-04-28T17:42:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2836010192",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pIQHI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this is in V15 because it didn't really fit anywhere else. I am not convinced that 13.2 is a great fit either.\n\nFor wording, how about:\n\n\"_Verify that all proxying and middleware components in use pass the user's true IP address to the application to be used for functionality including rate limiting and logging._\"",
+      "createdAt": "2025-04-29T05:35:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2837512648",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQO0V",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "That is better Josh, but I still have several concerns.\n\n- Using an IP address for login throttling can block more than you think, like when when thousands of users (all employees of a Fortune-500 or large organization behind a proxy) present the same public IP. A single malicious actor can cause an entire population to be blocked.\n- There is also IPv6 address space explosion - there are 18 quintillion addresses; IP heuristics no longer work.\n- Treating an IP as “personal data” under GDPR or monitoring specific ranges may trigger regulatory requirements.\n\nSo I'm just saying there are so many exceptions to this requirement. IP addresses are really just **_very low-confidence abuse-control signals_**. I think we want to drop this requirement. Real throttling is much more complex.\n\n\n\n",
+      "createdAt": "2025-04-29T17:02:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2839604501",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQidz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The point for the requirement is not how and why IP is used, the point is - technically, a proxy needs to forward the true IP to the application, and the application must be able to pick the correct IP value from the forwarded request.\n\nIs the IP sensitive or how it must be handled, is covered by V14 area.",
+      "createdAt": "2025-04-29T17:31:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2839684979",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQl5-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree that proxies can forward the originating IP, it's reasonable. \n\nBut I do not think we should frame this as an important security requirement. In fact, I think we should state that we should never use an IP address for security decisions.\n\n- Identity vs. telemetry. Client-IP is volatile (NAT, CGNAT, VPN, mobile hand-offs) and trivially spoofed in X-Forwarded-For. It’s unreliable for any authentication, authorization, or rate-limiting decisions.\n- Header trust boundary. If we do accept a forwarded IP, the app must first verify that the header was injected by a trusted proxy; otherwise an attacker can set it themselves and bypass controls. \n- Better primitives exist. Cryptographically-bound tokens (e.g., signed JWTs or mTLS client certs) carry a stable user or service identity across tiers without the privacy and spoofing issues inherent to IP addresses.\n\nSo I suggest we change the requirement to:\n\n_15.3.4 Verify that applications must not rely on client IP address for authentication, authorization, or other security decisions. If client IP is logged or used for analytics, ensure the header comes from a trusted proxy._",
+      "createdAt": "2025-04-29T17:38:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2839699070",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pVDGA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Jim, how sure are you that your proposal reflects reality, that is in use in practice in the entire world?\n\n> .. trivially spoofed in X-Forwarded-For. \n\nAgainst that we have a requirement:\n> V4.2.2 Verify that any HTTP header field used by the application and set by an intermediary layer, such as a load balancer, a web proxy, or a backend-for-frontend service, cannot be overridden by the end-user. Example headers might include X-Real-IP, X-Forwarded-*, or X-User-ID.",
+      "createdAt": "2025-04-30T05:43:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2840867200",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pVTqS",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  we should never use an IP address for security decisions.\n\nYes, the IP address should not be used for authorization.\n\nIt it still useful to use the client's IP address for rate limiting, logging (including post-mortem analysis), and other things  (last connection from \"Whatever, UK\"). In practice, having the client's IP is still useful. *When the user's IP is used*, we should make sure that it's the correct which includes:\n\n* forwarding the IP address from the reverse proxy to the backend servers;\n* making sure that the IP address cannot be spoofed.\n\nwith the caveat that the IP address is of limited used because of VPNs, Tor, etc.\n\nSo I think, this requirement should stay.\n\n> Identity vs. telemetry. Client-IP is volatile (NAT, CGNAT, VPN, mobile hand-offs) and trivially spoofed in X-Forwarded-For\n\nIt *used* to be easily spoofable by X-Forwarded-For [years ago](https://www.gabriel.urdhr.fr/2018/11/22/south-park-ip-address-spoofing/) but I think nowadays it is usually not easily spoofable. The last times I tried to bypass regional restrictions using `X-Forwarded-For` and friends, I did not succeed. 😄\n\nFrameworks and reverse proxies have support for protecting this and only trusting this kind of headers when they come from trusted sources (which may come with caveats). Nowadays, it *should not* be spoofable by X-Forwarded-For. ",
+      "createdAt": "2025-04-30T06:27:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2840935058",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pXEcF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To summarise perspectives here, whilst I think that you correctly highlight some challenges @jmanico, we are not prescriptively requiring how IP is used but rather making sure that it is available and correct. I think the data protection aspects are a relevant but we do have a data protection chapter for that.\n\nI think maybe we could soften the requirement to:\n\n\"_Verify that all proxying and middleware components in use pass the user's true IP address to the application, if it is to be used for functionality including rate limiting and logging._\"\n\nThis is clearer that we are not being opinionated either way in this requirement, we are just focusing on accuracy.",
+      "createdAt": "2025-04-30T09:39:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2841396997",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pXEi3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Does anyone have a better idea for section?",
+      "createdAt": "2025-04-30T09:39:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2841397431",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pXuH8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Subtle fix\n\n\"_Verify that, if the application uses user IP addresses for functionality such as rate limiting or logging, it does this based on the user's actual IP address and that all proxying and middleware components correctly forward this to the application._\"\n\nLeave in the same section.",
+      "createdAt": "2025-04-30T10:43:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2841567740",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pcBhc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Jim, how sure are you that your proposal reflects reality, that is in use in practice in the entire world?\n> \n> > .. trivially spoofed in X-Forwarded-For.\n> \n> Against that we have a requirement:\n> \n> > V4.2.2 Verify that any HTTP header field used by the application and set by an intermediary layer, such as a load balancer, a web proxy, or a backend-for-frontend service, cannot be overridden by the end-user. Example headers might include X-Real-IP, X-Forwarded-*, or X-User-ID.\n\nIf I am using a proxy then all headers are easily spoofed.",
+      "createdAt": "2025-04-30T17:12:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842695772",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pcC-P",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this requirement (that was already merged) sends the wrong message about using IP for security for any reason. I just wanted to put my position here for when we re-address this after the 5.0 release.",
+      "createdAt": "2025-04-30T17:13:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842701711",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pcMmp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Here are some important keywords to keep in mind: context and scope.\n\n> If I am using a proxy then all headers are easily spoofed.\n\nAnd you can not defend against that? With the requirement we have proposed?\n\nMerged requirement:\n> 15.3.4 Verify that, if the application uses user IP addresses for functionality such as rate limiting or logging, it does this based on the user's actual IP address and that all proxying and middleware components correctly forward this to the application.\t\n\n> I think this requirement (that was already merged) sends the wrong message about using IP for security for any reason. I just wanted to put my position here for when we re-address this after the 5.0 release.\n\n3 people have said that the requirement is _not_ about using the IP, but transferring the correct IP to the application. How the application uses it is not the scope nor the goal for this requirement. So, what is the problem to solve with the requirement?",
+      "createdAt": "2025-04-30T17:22:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842741161",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pca16",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Here are some important keywords to keep in mind: context and scope.\n> \n> > If I am using a proxy then all headers are easily spoofed.\n> \n> And you can not defend against that? With the requirement we have proposed?\n> \n> Merged requirement:\n> \n> > 15.3.4 Verify that, if the application uses user IP addresses for functionality such as rate limiting or logging, it does this based on the user's actual IP address and that all proxying and middleware components correctly forward this to the application.\n> \n> > I think this requirement (that was already merged) sends the wrong message about using IP for security for any reason. I just wanted to put my position here for when we re-address this after the 5.0 release.\n> \n> 3 people have said that the requirement is _not_ about using the IP, but transferring the correct IP to the application. How the application uses it is not the scope nor the goal for this requirement. So, what is the problem to solve with the requirement?\n\nI’m agree that if an application consumes the client IP - it should receive the right one through a trusted proxy chain (hence V4.2.2).\n\nMy concern is about the message here: history shows people routinely lift ASVS text directly into policy. A requirement that highlights IP for ‘sensitive functions’ can be (and often is) interpreted as a green light to use it for authN/authZ or hard rate limits, despite its volatility (NAT, IPv6 privacy extensions, mobile hand-offs) and spoof-ability (see [OWASP IP-spoofing page](https://owasp.org/www-community/pages/attacks/ip_spoofing_via_http_headers)).\n\nCan we split this into two checks?\n\nForwarding accuracy: “Verify that proxy and middleware components forward the originating IP in a trustworthy header (RFC 7239/X-Forwarded-For) and that the app only trusts headers injected by approved hops.”\n\nUsage caution: “Verify that client IP is not relied upon as a primary authentication, authorization, or irreversible blocking signal (e.g., account lockout); when it is used for telemetry or heuristic rate-limiting, its instability and privacy implications are documented.”\n\nThis separation preserves the need for correct logging while making it more clear that IP alone is a weak factor, consistent with NIST 800-63B’s emphasis on **_account-centric_** rate-limits as opposed to IP rate limits.\n\n",
+      "createdAt": "2025-04-30T17:36:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842799482",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pcd_Z",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I’m agree that if an application consumes the client IP - it should receive the right one through a trusted proxy chain (hence V4.2.2).\n\nThere is \"such as\" in the requirement, I think it is overengineering here at the moment.\n\nNote that we also have a requirement:\n> 8.2.4 Verify that adaptive security controls based on a consumer's environmental and contextual attributes (such as time of day, location, IP address, or device) are implemented for authentication and authorization decisions, as defined in the application's documentation. These controls must be applied when the consumer tries to start a new session and also during an existing session.",
+      "createdAt": "2025-04-30T17:42:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842812377",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pchV9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > 8.2.4 Verify that adaptive security controls based on a consumer's environmental and contextual attributes (such as time of day, location, IP address, or device) are implemented for authentication and authorization decisions, as defined in the application's documentation. These controls must be applied when the consumer tries to start a new session and also during an existing session.\n\nSuggesting the use of IP addresses for AuthN and AuthZ is a terrible idea, as discussed above.\n\nAgain, I'd like to a clear requirement keeping folks away from using IP address for Auth, account locking and similar. NIST states this as well.\n\n",
+      "createdAt": "2025-04-30T17:47:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842826109",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pcnq1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I opened a new issues for 8.2.4 https://github.com/OWASP/ASVS/issues/3071\n\nAnd foe 15.3.4 I'd suggest:\n\n_15.3.4 | Verify that the application is uses the user's true IP address to provide for rate-limiting logging, and that IP address instability and privacy implications are documented. Ensure that client IP addressed are not relied upon as a primary authentication, authorization, or blocking signal (e.g., account lockout);_ \n\n\n",
+      "createdAt": "2025-04-30T17:58:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842852021",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pdGKr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note that I will probably only get to a substantive response on Sunday but I really don't want us to get too opinionated about this sort of thing in the standard ",
+      "createdAt": "2025-04-30T18:50:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842976939",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6peCoj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Note that I will probably only get to a substantive response on Sunday but I really don't want us to get too opinionated about this sort of thing in the standard \n\nWe are already suggesting that IP addresses be used for significant controls. That's fairly opinionated. It's also (strongly) against conventional security advice around using IP addresses for security controls. \n\nI'd be happy to just drop IP address suggestions in the various requirements *or* strongly recommend against using IP addresses for security.\n\nRate limiting and logging are exceptions. But even then they cannot be relied upon.",
+      "createdAt": "2025-04-30T20:38:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2843224611",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6phupF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Last attempt - the scope for this requirement is NOT how the IP address is used, it just requires it to transfer it correctly.\n\nI have explained it in https://github.com/OWASP/ASVS/issues/3048#issuecomment-2839684979, Gabriel explained it in https://github.com/OWASP/ASVS/issues/3048#issuecomment-2840935058, Josh explained it in https://github.com/OWASP/ASVS/issues/3048#issuecomment-2841396997, I explained it again in https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842741161 and https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842812377.\n\nIf there is any other concern to solve, it is not in scope or a problem to solve for this requirement, then it must be handled separately. It is a repetitive problem from issue to issue, and it is far from optimal time usage to move forward towards the release.\n\nFor me, the basis \"IP addresses can be easily spoofed\" is not correct here. We have a separate requirement to address that. Probably \"close to every\" application in the World uses IP addresses one way or another (at least in web server access logs). The message that \"IP addresses can be easily spoofed\" (taking into account, that defense required by another requirement is implemented) does not match with the reality here. If you have different information, please educate the World.\n\n---\n\n> Again, I'd like to a clear requirement keeping folks away from using IP address for Auth, account locking and similar. **NIST states this as well.**\n\nQuotes?\n\nhttps://pages.nist.gov/800-63-4/sp800-63a.html\n\nSection: https://pages.nist.gov/800-63-4/sp800-63a.html#csp-fraud-management\n> 6. CSPs SHOULD implement - but are not limited to - the following fraud checks for their identity proofing processes based on their available identity proofing types, selected technologies, evidence, and user base:\n> * Transaction Analytics – Evaluate anticipated transaction characteristics – such as **IP Addresses**, geolocations, and transaction velocities – ...\n\n---\n\nhttps://pages.nist.gov/800-63-4/sp800-63b.html\n\nSection: https://pages.nist.gov/800-63-4/sp800-63b.html#AAL_SEC4\n\n> At all AALs, pre-authentication checks MAY be used to lower the risk of misauthentication. For example, authentication from an unexpected geolocation or **IP address** block (e.g., a cloud service) might prompt the use of additional risk-based controls.\n\n\nSection: https://pages.nist.gov/800-63-4/sp800-63b.html#throttle\n\n> Additional techniques MAY be used to reduce the likelihood that an attacker will lock the legitimate claimant out due to rate limiting. These include:\n> * Accepting only authentication requests from **IP addresses** from which the subscriber has been successfully authenticated before\n> * Leveraging other risk-based or adaptive authentication techniques to identify user behavior that falls within or outside typical norms (e.g., the use of the claimant’s **IP address**, geolocation, timing of request patterns, or browser metadata)\n\n\nSection: https://pages.nist.gov/800-63-4/sp800-63b.html#binding\n\n> The record created by the CSP SHALL contain the date and time of significant authenticator life cycle events (e.g., binding to the subscriber account, renewal, update, expiration). The record SHOULD include information about the source of the binding (e.g., **IP address**, device identifier) of any device associated with the event.\n\n\nThe summary - there is no place for bluff here.",
+      "createdAt": "2025-05-01T06:27:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2844191301",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6phwQ6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\n> Verify that, if the application uses user IP addresses for functionality such as rate limiting or logging, it does this based on the user's actual IP address and that all proxying and middleware components correctly forward this to the application.\n\nProblem to solve: \"if the application uses\" is an unnecessary limitation. Even if the application logic does not use IP address, middleware need to transfer it correctly for logging.\n\nProposal:\n> Verify that the user's true IP is transferred correctly by all proxying and middleware components, and the application and web server use the correct value for logging and decisions, such as rate limiting.\n\nOr to use Jim's [proposal](https://github.com/OWASP/ASVS/issues/3048#issuecomment-2842799482) as a base:\n> Verify that proxy and middleware components forward the originating IP address in a header field (such as X-Forwarded-For) and that the application and logging in any component only use header fields added by approved hops.\n\n(edit: removed word trustworthy)\n\nping @tghosth @randomstuff ",
+      "createdAt": "2025-05-01T06:34:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2844197946",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pioIE",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm not certain about: “trustworthy header field (such as X-Forwarded-For)” because this header is not intrinsically trustworthy. Take must be taken in order to only trust it when it should be trusted. Otherwise, it could be used for IP address spoofing.\n\nI like the original formulation because it clearly states that if you do not use the IP address at all, you don't care about it. In practice, everyone is using the IP adresse for logging however.\n\nI agree with Jim that we should not promote using the IP address for primary authorization purpose. Maybe we should add a note/warning along this line?\n\n> The client's IP address is usually not a reliable information (as it can easily be changed or spoofed using VPNs, Tor relays or BGP hijacking) and should in general not be used for primary authorization decision.\n",
+      "createdAt": "2025-05-01T09:09:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2844426756",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6piq1t",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In practice, the client's IP address is often used for negative authorization decision:\n\n* Reddit kicks me when I try to anonymously browse it from a VPS IP address;\n* Google's Captcha turns extra paranoid when you are coming from a Tor IP address (you spend 5 minutes filling horrible super slow Captchas and it often ends up failing anyway);\n* many websites won't allow you to create an account at all when your are coming from a Tor IP address;\n* many media content providers will refuse to serve your things based on IP-address based geolocation.",
+      "createdAt": "2025-05-01T09:15:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2844437869",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pivKz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How and why IP is used - is not to goal for this requirement. I don't see any hints from the requirement towards auth* topics.\n\nIf something needs clarification in auth* topic, it should be discussed in that context - here is only configuration + application logic to transfer the IP correctly.",
+      "createdAt": "2025-05-01T09:21:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2844455603",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6plEMz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> How and why IP is used - is not to goal for this requirement. I don't see any hints from the requirement towards auth* topics.\n\nThe requirement is fine, and the points you are making are fair Elar. I think we mostly agree here. I am just asking for more clarification on how you cannot depend on IP for a users true identity as the requirement implies.\n\nThe reason I keep pushing is because \" ...if the application uses user IP addresses...\" _**immediately implies identity.**_ And we need to be careful when we move in this direction. IP addresses are not reliable based on dynamic IP, VPN, corporate firewall and similar. So I would like that to be clarified more. It's not the safest or most reliable signal for a user.\n\nSo perhaps just add this text to the end of the current requirement:\n\n\"Please note that a IP address cannot always reliably identify a user and may change due to various factors such as firewalls, dynamic IP's or VPN use.\"\n\nI think this warning is important. Thank you.",
+      "createdAt": "2025-05-01T15:26:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2845066035",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0muD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have used a combination of @elarlang's and @jmanico's proposals with a short disclaimer about IP addresses:\n\n\"_Verify that all proxying and middleware components transfer the user's true IP address correctly using trusted data fields that cannot be manipulated by the end user. The application and web server can then use this value for logging and security decisions such as rate limiting, taking into account that even the true IP address may not be reliable due to dynamic IPs, VPNs, or corporate firewalls._\"",
+      "createdAt": "2025-05-04T10:46:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2849139587",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p01jS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The application and web server can then use this value...\n\ncan use vs must use\n\nAs I wrote in https://github.com/OWASP/ASVS/issues/3048#issuecomment-2839684979 we need to ask that middleware transfer it correctly and application and web server uses the correct value.\n\n>  ...  for logging and security decisions such as rate limiting, taking into account that even the true IP address may not be reliable due to dynamic IPs, VPNs, or corporate firewalls.\n\nI'm not sure we should mention any usage in this requirement. The focus is only for transfer it correctly. If there is danger to misuse the IP value somewhere, then it must be addressed on that place, not in this requirement.",
+      "createdAt": "2025-05-04T12:46:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2849200338",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1JTX",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm flexible on this requirement so long as the disclaimer is included. The rest of the comments look solid. Thank you both.",
+      "createdAt": "2025-05-04T15:35:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2849281239",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1P48",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So @elarlang do you prefer:\n\n\"_Verify that all proxying and middleware components transfer the user's true IP address correctly using trusted data fields that cannot be manipulated by the end user. The application and web server can then use this value, taking into account that even the true IP address may not be reliable due to dynamic IPs, VPNs, or corporate firewalls._\"\n\n",
+      "createdAt": "2025-05-04T16:44:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2849308220",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1QvH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"If the middleware is used, it must trasnfer the user IP correctly to the application layer AND the application layer or related web server must use correct value, e. g. not logging middleware IP as user IP\".",
+      "createdAt": "2025-05-04T16:52:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2849311687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1RgY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \"If the middleware is used, it must trasnfer the user IP correctly to the application layer AND the application layer or related web server must use correct value, e. g. not logging middleware IP as user IP\".\n\nI don't understand, can you try and prepare an updated proposal that illustrates your point",
+      "createdAt": "2025-05-04T17:00:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2849314840",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p3x_r",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don't understand, can you try and prepare an updated proposal that illustrates your point\n\nWell, I have proposed it in 2 different versions: https://github.com/OWASP/ASVS/issues/3048#issuecomment-2844197946\n\nThe point is, we require middleware to forward the correct IP, but we don't require (\"can use\") the application to use the correct IP forwarded by middleware. So the requirement is satisfied if middleware forwards it, but the application or web server logs middleware's own IP instead ofthe  forwarded user IP.\n\n> I'm flexible on this requirement so long as the disclaimer is included. The rest of the comments look solid. Thank you both.\n\nI think this disclaimer belongs to section text.\n\nIf there is need to clarify, we should talk about \"client's public IP\" instead of \"user's true IP\"? What is \"true IP\" anyway?",
+      "createdAt": "2025-05-05T05:47:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2849972203",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p4qBH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So what about this @elarlang:\n\n\"_Verify that all proxying and middleware components transfer the user's original IP address correctly using trusted data fields that cannot be manipulated by the end user and the application and web server use this correct value for logging and security decisions such as rate limiting, taking into account that even the original IP address may not be reliable due to dynamic IPs, VPNs, or corporate firewalls._\"\n\nI think the disclaimer is small and unobtrusive.\n\n\n",
+      "createdAt": "2025-05-05T07:58:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2850201671",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p8aYB",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I prefer the version proposed by @tghosth ",
+      "createdAt": "2025-05-05T14:25:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3048#issuecomment-2851186177",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-26T07:00:23Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 3048,
+  "state": "CLOSED",
+  "title": "15.3.4 / v5.0.be-10.4.6 update requirement text",
+  "url": "https://github.com/OWASP/ASVS/issues/3048"
+}

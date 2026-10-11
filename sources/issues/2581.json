@@ -1,0 +1,111 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirements:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.1.6** | Verify that password change functionality requires the user's current and new password. | 1 | 620 |\n| **3.7.1** | [MODIFIED] Verify that the application requires re-authentication or secondary verification before allowing highly sensitive transactions or modifications to sensitive account attributes such as authentication settings. | 1 | 306 |\n\nSections:\n\n  * V2.1 Password Security\n  * V3.7 Defenses Against Session Abuse\n\n---\n\nRe-working the requirement levels raised the question - what level is suitable for 3.7.1?\n\n  * \"allowing highly sensitive transactions\" - this is a bit abstract and feels like level 3, session takeover may allow to execute sensitive functionality\n  * \"modifications to sensitive account attributes such as authentication settings\" - probably level 2, session takeover provides vector to take over the related account\n\nSo most likely it makes sense to split 3.7.1.\n\nThen, watching at 2.1.6, it is also a defense against session abuse and it is not related to password security as such, although, from the functionality point of view, it is a logical place to find it. But, we don't have the year 2015 anymore, most likely application provide more authentication details than just asking for a password. 2.1.6 is saying \"for modifying sensitive account attribute (password) require re-authentication (current password)\"\n\nThe proposals/questions to discuss:\n\n  * do we split 3.7.1?\n  * if we split, do we merge \"account mofication\" part and 2.1.6?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6dXtfe",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think it would be easier for a developer to see everything they need for a password reset in one section.\n\nMFA + old/new password, and then a password reset link via a side channel. We can pull other requirements from the OWASP Forgot Password Cheat Sheet. https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html \n\nI also think splitting 3.7.1 is smart, and I'd keep that separate for 'standard transactions' while keeping the auth/password-reset requirements in their own section.",
+      "createdAt": "2025-02-06T16:00:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2581#issuecomment-2640238558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6duiRZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I support splitting but I would rather not get this wrapped up in 2.1.6.\n\nI would suggest something like:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.7.1** | [MODIFIED, SPLIT TO 3.7.3, LEVEL L1 > L2] Verify that the application requires re-authentication before allowing modifications to sensitive account attributes such as authentication settings. | 1 | 306 |\n| **3.7.2** | [MODIFIED, MOVED FROM 3.3.4] Verify that users are able to view and (having re-entered login credentials) terminate any or all currently active sessions. | 2 | |\n| **3.7.3** | [MODIFIED, SPLIT FROM 3.7.1, LEVEL L1 > L3] Verify that the application requires re-authentication or secondary verification before performing highly sensitive transactions or operations. | 3 | 306 |",
+      "createdAt": "2025-02-09T12:41:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2581#issuecomment-2646221913",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dy5GL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it makes sense also to clarify, what the \"authentication settings\" may mean, such as attributes used for authentication or (password) recovery, such as email, phone number, and MFA settings.",
+      "createdAt": "2025-02-10T09:08:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2581#issuecomment-2647363979",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d32WG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **3.7.1** | [MODIFIED, SPLIT TO 3.7.3, LEVEL L1 > L2] Verify that the application requires re-authentication before allowing modifications to sensitive account attributes **which may affect authentication such as email address, phone number, MFA configuration, other information used in account recovery, etc**. | 1 | 306 |\n| **3.7.2** | [MODIFIED, MOVED FROM 3.3.4] Verify that users are able to view and (having re-entered login credentials) terminate any or all currently active sessions. | 2 | |\n| **3.7.3** | [MODIFIED, SPLIT FROM 3.7.1, LEVEL L1 > L3] Verify that the application requires re-authentication or secondary verification before performing highly sensitive transactions or operations. | 3 | 306 |\n\nWhat do you think?",
+      "createdAt": "2025-02-10T16:54:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2581#issuecomment-2648663430",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4De3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2598",
+      "createdAt": "2025-02-10T17:14:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2581#issuecomment-2648717239",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-02-06T15:54:00Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    }
+  ],
+  "number": 2581,
+  "state": "CLOSED",
+  "title": "3.7.1 split for different levels? merge one part to 2.1.6?",
+  "url": "https://github.com/OWASP/ASVS/issues/2581"
+}

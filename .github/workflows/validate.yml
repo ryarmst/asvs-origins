@@ -19,3 +19,14 @@ jobs:
         run: python -m pipeline.validate
       - name: Tests
         run: pytest
+      - name: Build site indexes
+        run: python -m pipeline.build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Typecheck web
+        run: |
+          npm --prefix web ci
+          npm --prefix web run check

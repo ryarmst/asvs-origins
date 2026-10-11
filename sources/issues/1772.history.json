@@ -1,0 +1,51 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2023-10-26T03:44:30Z",
+      "diff": "[2.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#user-content-v21-password-security)\r\n\r\nNeeds to be clarified to consider character encoding - 64 characters has loose interpretation. For example, this symbol [𐍈](https://en.wikipedia.org/wiki/Hwair) is 4 bytes in UTF-8 and can bypass certain string length functions that aren't multi-byte encoding aware (e.g. php's strlen() vs mb_strlen()). This is important because cryptography acts on bytes & is not character encoding aware. This means that 64 𐍈 symbols would be operating on more bytes than 128 \"A\"s. because 64*4 > 128*1. Note that this is different from the concerns in [756] (https://github.com/OWASP/ASVS/issues/756) because it does not reference the character encoding.\r\n\r\nI think the verbiage should be:\r\nVerify that passwords of at least 64 bytes are permitted after character encoding [canonicalization](https://en.wikipedia.org/wiki/Canonicalization).\r\n\r\nSo that it does not contradict the \"printable Unicode character, including emojis\" requirement in 2.1.4"
+    },
+    {
+      "editedAt": "2023-10-26T03:47:47Z",
+      "diff": "[2.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#user-content-v21-password-security)\r\n\r\nNeeds to be clarified to consider character encoding - 64 characters has loose interpretation. For example, this symbol [𐍈](https://en.wikipedia.org/wiki/Hwair) is 4 bytes in UTF-8 and can bypass certain string length functions that aren't multi-byte encoding aware (e.g. php's strlen() vs mb_strlen()). This is important because cryptography acts on bytes & is not character encoding aware. This means that 64 𐍈 symbols would be operating on more bytes than 128 \"A\"s. because 256 > 128. Note that this is different from the concerns in [756] (https://github.com/OWASP/ASVS/issues/756) because it does not reference the character encoding.\r\n\r\nI think the verbiage should be:\r\nVerify that passwords of at least 64 bytes are permitted after character encoding [canonicalization](https://en.wikipedia.org/wiki/Canonicalization).\r\n\r\nSo that it does not contradict the \"printable Unicode character, including emojis\" requirement in 2.1.4"
+    },
+    {
+      "editedAt": "2023-10-26T03:49:02Z",
+      "diff": "[2.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#user-content-v21-password-security)\r\n\r\nNeeds to be clarified to consider character encoding - 64 characters has loose interpretation. For example, this symbol [𐍈](https://en.wikipedia.org/wiki/Hwair) is 4 bytes in UTF-8 and can bypass certain string length functions that aren't multi-byte encoding aware (e.g. php's strlen() vs mb_strlen()). This is important because cryptography acts on bytes & is not character encoding aware. This means that 64 𐍈 symbols would be operating on more bytes than 128 \"A\"s. because 256 > 128. Note that this is different from the concerns in [756] (https://github.com/OWASP/ASVS/issues/756) because it does not reference the character encoding.\r\n\r\nI think the verbiage should be:\r\nVerify that passwords of at least 64 bytes are permitted after appropriate server-side character encoding [canonicalization](https://en.wikipedia.org/wiki/Canonicalization).\r\n\r\nSo that it does not contradict the \"printable Unicode character, including emojis\" requirement in 2.1.4"
+    },
+    {
+      "editedAt": "2023-10-26T03:58:24Z",
+      "diff": "[2.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#user-content-v21-password-security)\r\n\r\nNeeds to be clarified to consider character encoding - 64 characters has loose interpretation. For example, this symbol [𐍈](https://en.wikipedia.org/wiki/Hwair) is 4 bytes in UTF-8 and can bypass certain string length functions that aren't multi-byte encoding aware (e.g. php's strlen() vs mb_strlen()). This is important because cryptography acts on bytes & is not character encoding aware. This means that 64 𐍈 symbols would be operating on more bytes than 128 \"A\"s. because 256 > 128. Note that this is different from the concerns in [756] (https://github.com/OWASP/ASVS/issues/756) because it does not reference the character encoding.\r\n\r\nI think the verbiage should be something along the lines of:\r\nVerify that passwords of at least 64 bytes are permitted after appropriate server-side character encoding [canonicalization](https://en.wikipedia.org/wiki/Canonicalization).\r\n\r\nSo that it does not contradict the \"printable Unicode character, including emojis\" requirement in 2.1.4"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1780434434",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Current requirement:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | Verify that passwords of at least 64 characters are permitted, and that passwords of more than 128 characters are denied. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 521 | 5.1.1.2 |\r\n\r\nFor me the section V2.1 is talking about password, or \"Memorized Secrets\" like NIST calling it, and this is the piece of text what user is using as a secret and entering to the form. Users are entering characters (from user point of view), not bytes. We are not talking about crypto in this chapter. From this point of view, correct way to measure password length is `mb_strlen` - \"logical characters\" for human, not bytes for computer.\r\n\r\nThe issue here describes storing the password, and those requirements are in chapter https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v24-credential-storage",
+          "recorded_at": "2023-10-26T05:31:45Z"
+        },
+        {
+          "body": "Current requirement:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | Verify that passwords of at least 64 characters are permitted, and that passwords of more than 128 characters are denied. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 521 | 5.1.1.2 |\r\n\r\nFor me the section V2.1 is talking about password, or \"Memorized Secrets\" like NIST calling it, and this is the piece of text what user is using as a secret and entering to the form. Users are entering characters, not bytes. We are not talking about crypto in this chapter. From this point of view, correct way to measure password length is `mb_strlen` - \"logical characters\" for human, not bytes for computer.\r\n\r\nThe issue here describes storing the password, and those requirements are in chapter https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v24-credential-storage",
+          "recorded_at": "2023-10-26T05:22:42Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1772#issuecomment-1787187168",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "bcrypt part is covered by 2.4.4:\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.4** | [MODIFIED] Verify that if bcrypt is used, the work factor is a minimum of 10 and password size is limited to 72-bytes due to bcrypt's input limit. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nI think the goal for the requirement 2.1.2 is to disallow short max-length limits for passwords a'la \"your password can not be longer than 16 symbols\".",
+          "recorded_at": "2023-10-31T13:09:02Z"
+        },
+        {
+          "body": "bcrypt part is covered by 2.4.4:\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.4** | [MODIFIED] Verify that if bcrypt is used, the work factor is a minimum of 10 and password size is limited to 72-bytes due to bcrypt's input limit. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nI think the goal for the requirement 2.1.2 is to disallow short max-length limits for passwords a'la your password can not be longer than 16 symbols.",
+          "recorded_at": "2023-10-31T13:08:41Z"
+        }
+      ]
+    }
+  ]
+}

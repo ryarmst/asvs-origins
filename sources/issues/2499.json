@@ -1,0 +1,147 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Proposed requirement by Bart Preneel:\r\n\r\n> 6.5.6 Verify that if the MAC verification fails, the decryption operation is not started, and if that is not possible, no plaintext is released.\r\n\r\nMight be difficult to verify / quite low-level.\r\n\r\nCaveat: This is not compatible with MAC-then-encrypt as still used with some TLS 1.2 ciphersuites. (see #2498).",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6ZKfYI",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If we do add this in I suggest we just add the Caveat to the end of the requirement.\n",
+      "createdAt": "2025-01-03T18:43:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2499#issuecomment-2569664008",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZSDrF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I leave this up to @danielcuthbert's judgement, I am not sure about this one.",
+      "createdAt": "2025-01-05T14:36:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2499#issuecomment-2571647685",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZzHXO",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think that the additions from Bart should have `[ADDED]` in the front, no? \r\n\r\nIn any case, this is a very sound bit of advice, but is going to be mostly left to TLS, SSH, or whatever other libraries are in play. Both of those will reject connections if verification fails, so it's really a design pattern check for anything custom written by a developer. Perhaps you could make en/de-cryption occur with auth failing in something like JWT? \r\n\r\nI think this might need some further digging. ",
+      "createdAt": "2025-01-09T14:12:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2499#issuecomment-2580313550",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Z3Ohg",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Perhaps you could make en/de-cryption occur with auth failing in something like JWT?\r\n\r\nWhen using JWT with encryption, the claims which might be useful for \"routing\" the JWT are expected to be included in the (plaintext) JWT header. So I don't think that this should be required.\r\n\r\nBut actually [JWT tends to uses MAC-or-sign-then-ecnrypt](https://datatracker.ietf.org/doc/html/rfc7519#section-11.2) (when using encryption).\r\n\r\n> While syntactically the signing and encryption operations for Nested JWTs may be applied in any order, if both signing and encryption are necessary, normally producers should sign the message and then encrypt the result (thus encrypting the signature).  This prevents attacks in which the signature is stripped, leaving just an encrypted message, as well as providing privacy for the signer.  Furthermore, signatures over encrypted text are not considered valid in many jurisdictions.\r\n>\r\n> Note that potential concerns about security issues related to the order of signing and encryption operations are already addressed by the underlying JWS and JWE specifications; in particular, <mark>because JWE only supports the use of authenticated encryption algorithms, cryptographic concerns about the potential need to sign after encryption that apply in many contexts do not apply to this specification</mark>.\r\n\r\nNote: they are talking about signature but actually intend to talk about both digital signatures and MAC (AFAIU).\r\n\r\nA MAC *is* verified before decryption of the JWE, however. I *think* it does help mitigate the issues we are intending to mitigate with 6.5.6. @danielcuthbert?",
+      "createdAt": "2025-01-09T22:49:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2499#issuecomment-2581391456",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6arO1i",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Again @randomstuff, do you think this is general enough to include? It seems like another example of a requirement to use if you \"roll your own crypto\"....",
+      "createdAt": "2025-01-16T09:40:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2499#issuecomment-2595024226",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ar96_",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, I agree that it is quite low-level and I am not sure we need to include that level of detail in ASVS (as opposed to \"crypto security verification standard\" :smile:).",
+      "createdAt": "2025-01-16T11:01:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2499#issuecomment-2595217087",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6atxFa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK, I am going to close this then",
+      "createdAt": "2025-01-16T13:29:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2499#issuecomment-2595688794",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-01-02T20:56:41Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB2sOmrg",
+      "name": "Bart Preneel",
+      "description": "Issues raised from a crypto review by Bart Preneel (received via Aram H)",
+      "color": "2988D9"
+    }
+  ],
+  "number": 2499,
+  "state": "CLOSED",
+  "title": "Cryptography - proposed requirement about MAC verification failure",
+  "url": "https://github.com/OWASP/ASVS/issues/2499"
+}

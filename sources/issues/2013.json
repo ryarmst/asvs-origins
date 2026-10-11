@@ -1,0 +1,111 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE5NTk4MzU=",
+    "is_bot": false,
+    "login": "kwwall",
+    "name": "Kevin W. Wall"
+  },
+  "body": "I noticed this while I was reviewing ASVS requirement v4.0.3-14.4.3. I noticed that it had used CWE-1021 (associated with Clickjacking) which, given its Description of:\r\n```\r\nVerify that a Content-Security-Policy response header is in place that helps mitigate\r\nimpact for XSS attacks like HTML, DOM, CSS, JSON, and JavaScript injection vulnerabilities.\r\n```\r\nseems wrong.\r\n\r\nYes, CSP can address Clickjacking via the 'frame-ancestors' directive, but this description explicitly mentioned XSS attacks, so it probably should be  [CWE-80](https://cwe.mitre.org/data/definitions/80.html), or perhaps [CWE-79](https://cwe.mitre.org/data/definitions/79.html) rather than referring to [CWE-1021](https://cwe.mitre.org/data/definitions/1021.html), which covers Clickjacking. That especially seems the case because v4.0.3-14.4.7 (now 50.2.5) already covers CWE-1021.\r\n\r\nSince v.4.0.3-14.4.3 now maps to 50.2.1, I think https://github.com/OWASP/ASVS/blob/master/5.0/en/0x50-V50-Web-Frontend-Security.md?plain=1#L15 needs to have its CWE adjusted. I think it should be CWE-80, but CWE-79 might fix as well. (Or both, but I don't see any that reference multiple CWEs.)\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6IEU7Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that CWE-1021 belongs to the UI redressing requirement (50.2.5), but I don't think CWE-80 or CWE-79 are suitable here as well - CSP is the second layer but mentioned CWE's are more suitable for the actual problem in the code that causes the so-called XSS issue.\r\n\r\nFor now, we have agreed (https://github.com/OWASP/ASVS/issues/1481) to drop the CWE mapping for v5.0 - so if there is no better and clear match for CSP, I propose to have just an empty value.",
+      "createdAt": "2024-08-11T17:41:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2013#issuecomment-2282835672",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IGF2b",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I took a look to find suitable one, but I did not find. Everyone who had it mapped, used not suitable ones as well. So, PR (#2014) for removing the value.",
+      "createdAt": "2024-08-12T07:42:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2013#issuecomment-2283298203",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IKoJc",
+      "author": {
+        "login": "kwwall"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I agree that CWE-1021 belongs to the UI redressing requirement (50.2.5), but I don't think CWE-80 or CWE-79 are suitable here as well - CSP is the second layer but mentioned CWE's are more suitable for the actual problem in the code that causes the so-called XSS issue.\r\n> \r\n> For now, we have agreed (#1481) to drop the CWE mapping for v5.0 - so if there is no better and clear match for CSP, I propose to have just an empty value.\r\n\r\nWhile I understand your perspective, and agree that CSP is really a secondary, defense-in-depth layer to prevent XSS vulnerabilities, if CSP wasn't an effective measure, than OWASP wouldn't be recommending it. Yes, it is a safety net, but if done meticulously, it's a really good safety net. I think we are allowing the perfect to become the enemy of the good here and given that [CWE-79](https://cwe.mitre.org/data/definitions/79.html) doesn't focus on any specific implementation but rather covers a range of approaches, I would argue that using CWE-79 is still better than leaving this blank..\r\n\r\nLet me explain why. We use SAST and DAST tools, which, when they discover an XSS vulnerability, usually include relevant CWE(s). (Many SAST and DAST tools do this by the way.) We'd like a way to track back these vulnerabilities to specific ASVS requirements, but SAST and DAST vendors don't do that that I;m aware of. So instead, we try to do it via CWEs to specific ASVS requirements. That's relatively easy if there is a CWE referenced in a specific ASVS requirement; much harder otherwise. The solution doesn't have to be perfect, just good enough. Referencing the appropriate ASVS requirements in turn helps us point our developers to appropriate unit and integration tests that Dev teams can run as well as specific Dev secure coding training they can use to train to reduce the discovered vulnerabilities. (One could argue that SAST and DAST tools should probably be referencing CAPEC rather than CWEs, but most of them don't and we have to live with what we have.) Anyway, if you want to leave it blank, it's better than leaving it set to CWE-1021 like it was. However, maybe instead I should lobby MITRE to update CWE-79 to and an implementation mitigating that uses CSP.\r\n\r\nSo, bottom line, I'm okay with the action taken, but I feel that we are being too picky about how CWEs are selected and allowing the perfect to become the enemy of the code. Just my $.02.",
+      "createdAt": "2024-08-12T16:48:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2013#issuecomment-2284487260",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IXv3Y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Our aim is to eventually map to CRE and leave the CWE mapping to them :)",
+      "createdAt": "2024-08-14T06:06:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2013#issuecomment-2287926744",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IZfih",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')\" is clearly not matching with Content-Security-Policy.",
+      "createdAt": "2024-08-14T10:21:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2013#issuecomment-2288384161",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-11T17:23:32Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 2013,
+  "state": "CLOSED",
+  "title": "CWE indicated  in requirement 50.2.1 (previously v4.0.3-14.4.3) seems incorrect",
+  "url": "https://github.com/OWASP/ASVS/issues/2013"
+}

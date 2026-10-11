@@ -1,0 +1,410 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "This is an offshoot from #1405\r\n\r\n[My original question](https://github.com/OWASP/ASVS/issues/1405#issuecomment-2336781405):\r\n\r\n> OK, I think the big question here is whether 3rd party library risk is definitely in scope for ASVS v5. We generally consider SSDLC activities and CI/CD processes to be out of scope.\r\n\r\n[Original response](https://github.com/OWASP/ASVS/issues/1405#issuecomment-2347413961) from @meghanjacquot:\r\n\r\n> If we are removing SSDLC as part of scope, then I think we should rethink all of 14.2. It seems like that if those are out of scope, analyzing 3rd party risk could potentially be as well therefore making all of 14.2 out of scope. \r\n> \r\n> Also, removal of 14.1.1 due to the CI/CD emphasis and 14.1.3 due to 3rd party references. \r\n\r\n\r\n[My 2nd response](https://github.com/OWASP/ASVS/issues/1405#issuecomment-2351677174):\r\n\r\n> So, sorry for the flip-flopping but I am thinking more about that this. It feels like 3rd party libraries are an inseparable part of writing the application which makes me think that we cannot ignore them entirely. \r\n> \r\n> I do however think that maybe we want the 14.2.x requirements to be as simple as possible. We previously considered splitting client-side and server-side dependency requirements because of testability but I no longer think that is worth two requirements. I also think that we should not be too prescriptive about the specific solution.\r\n\r\nSo the question at thr moment is:  Which requirements from 14.2.x do you we think should stay/go?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6MY16Z",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The section as it stands\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.2.1** | Verify that all components are up to date, preferably using a dependency checker during build or compile time. | ✓ | ✓ | ✓ | 1026 |\r\n| **14.2.2** | [MOVED TO 14.1.6] | | | | |\r\n| **14.2.3** | [MOVED TO 50.6.1] | | | | |\r\n| **14.2.4** | Verify that third party components come from pre-defined, trusted and continually maintained repositories. | | ✓ | ✓ | 829 |\r\n| **14.2.5** | Verify that a Software Bill of Materials (SBOM) is maintained of all third party libraries in use. | | ✓ | ✓ | |\r\n| **14.2.6** | [MODIFIED, SPLIT TO 14.2.8, LEVEL L2 > L3] Verify that risky third party libraries or those with a history of vulnerabilities are encapsulated such that only required behaviour is available to the application, to reduce attack surface. | | | ✓ | 1061 |\r\n| **14.2.7** | [ADDED] Verify that third party components are sourced separately from internally owned and developed applications to prevent dependency confusion attacks. | ✓ | ✓ | ✓ | 427 |\r\n| **14.2.8** | [ADDED, SPLIT FROM 14.2.6] Verify that risky third party libraries or those with a history of vulnerabilities are sandboxed away from the most sensitive system modules/services so that even if a vulnerability in the library was successfully exploited, the sensitive system modules/services would not be compromised. | | | ✓ | 1061 |\r\n",
+      "createdAt": "2024-09-17T10:54:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2355322521",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MZCEp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "* 14.2.1 - we need components to be up to date, but we don't need to say how it is checked (remove the second part of the requirement)\r\n* 14.2.4 and 14.2.5 can be merged\r\n* 14.2.4 - what is a \"trusted party\" for 3rd party component, and how we can measure the \"continually maintained\" - at the same time, I have used this requirement to report library in use that has known vulnerabilities and no updates for 4 years.\r\n* 14.2.7 - without underestimating the problem, I think it is more about the building (process) the application than the application itself\r\n* 14.2.6, 14.2.8 - we have had this discussion in related issues, but I repeat my question here - how do we measure, what is \"risky\"?\r\n* 14.2.6, 14.2.8 - related discussion https://github.com/OWASP/ASVS/issues/1425\r\n* 14.2.6, 14.2.8 - just as an option - in a way those can be in some separate sandboxing section if needed, I think those are not clear dependency requirements as such.",
+      "createdAt": "2024-09-17T11:11:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2355372329",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MZLyD",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think 14.2.4, 14.2.5 and 14.2.5 are important (with some remarks).\r\n\r\n> 14.2.1 Verify that all components are up to date, preferably using a dependency checker during build or compile time.\r\n\r\nI think \"up to date\" is slightly off the mark (or maybe too vague). From a security point of view,  I don't need to have eg. the latest Angular version and there is not need to rush to do an upgrade in general. What we want to check is that:\r\n\r\n* the dependency does not contain known vulnerabilities (unless we are certain that this vulnerability does not apply in our case);\r\n* the dependency (and the dependency version) is still maintained.\r\n\r\n> Verify that third party components come from pre-defined, trusted and continually maintained repositories.\r\n\r\nI am not sure what \"pre-defined\" means in this context. I would drop \"continually\".\r\n\r\n---\r\n\r\nI am not sure 14.2.6-8 should be kept.\r\n\r\n> Verify that risky third party libraries or those with a history of vulnerabilities are encapsulated such that only required behaviour is available to the application, to reduce attack surface.\r\n>\r\n> [...]\r\n>\r\n> Verify that risky third party libraries or those with a history of vulnerabilities are sandboxed away from the most sensitive system modules/services so that even if a vulnerability in the library was successfully exploited, the sensitive system modules/services would not be compromised\r\n\r\nThis is not really specific to third party dependencies. The same could be said of first-party dependencies and components. Maybe, this should be moved/merged into more general requirements in the \"architecture\" chapter.\r\n",
+      "createdAt": "2024-09-17T11:24:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2355412099",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mpm18",
+      "author": {
+        "login": "meghanjacquot"
+      },
+      "authorAssociation": "NONE",
+      "body": "> * 14.2.1 - we need components to be up to date, but we don't need to say how it is checked (remove the second part of the requirement)\r\n\r\n- Maybe, \r\n14.2.1 - Verify that all components are up to date. If there are third party components, verify that they are continually maintained.\r\n\r\nDepending on how this is verified it really seems like more of a V1, maybe 1.1.\r\n--\r\n\r\n> * 14.2.4 and 14.2.5 can be merged\r\n\r\n14.2.4 - I think this gets covered by 14.2.1 and 14.2.5. If the above updates to 14.2.1 are approved than that would cover things for 14.2.4 and it could be removed.\r\n\r\nQUESTION: 14.2.5 leave as is, but I wonder if it would be better in a different chapter as it is isn't configuration? Maybe moved to V1, in 1.1?\r\n\r\n14.2.6, revise as suggested in #1425](https://github.com/OWASP/ASVS/issues/1425)\r\n\r\n> * 14.2.7 - without underestimating the problem, I think it is more about the building (process) the application than the application itself\r\n\r\nI'm in agreement, 14.2.7 does not seem to be as much something that is related to configuration and I think it should be in a different chapter - likely V1. \r\n\r\n> * 14.2.6, 14.2.8 - we have had this discussion in related issues, but I repeat my question here - how do we measure, what is \"risky\"?\r\n\r\nIf both are at level 3, do we concern ourselves with how whoever is using ASVS is defining risky? I think it goes against the idea of being prescriptive with things. We could have some supplemental material at the end of V14, such as relating to Douglas Hubbard book, https://hubbardresearch.com/risk-management-modeling/ But I also don't want to endorse 1 person's text on something...\r\n\r\n> * 14.2.6, 14.2.8 - just as an option - in a way those can be in some separate sandboxing section if needed, I think those are not clear dependency requirements as such.\r\n\r\nI like the idea of them being in a different section, so either staying in V14, but becoming 14.7 or moving over to V1 if we're looking at it as more of an building thing. \r\n\r\n\r\n",
+      "createdAt": "2024-09-19T01:13:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2359717244",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mqsiq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@meghanjacquot - note that V1 is for documentation requirements **only** and is under clean-up process for everything that are not documentation requirements. Most likely all requirements from V1 will end up as separate section into the related category. In short, moving thing to V1 is not a solution here till those are not clear documentation requirements. 14.2.5 can be only theoretical candidate from those.",
+      "createdAt": "2024-09-19T05:22:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2360002730",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mqxbx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "**14.2.1**\r\n\r\n> Verify that all components are up to date. If there are third party components, verify that they are continually maintained.\r\n\r\n* I agree with comments (@Sjord https://github.com/OWASP/ASVS/issues/1405#issuecomment-1398188918 + @randomstuff https://github.com/OWASP/ASVS/issues/2088#issuecomment-2355412099), that we don't need to require up to date components, but components without known vulnerabilities.\r\n* As we are in the \"Dependency\" section and talking about components and up to date, then I feel that the special mention for \"if the 3rd party component is used\" does not give anything extra\r\n\r\n**14.2.4**\r\n\r\n> 14.2.4 - I think this gets covered by 14.2.1 and 14.2.5. If the above updates to 14.2.1 are approved than that would cover things for 14.2.4 and it could be removed.\r\n\r\n14.2.1 is something you check from the program code (based on 14.2.5 information) and 14.2.5 is somehting you check from your documentation, although it can be made as technical solution.\r\n\r\n14.2.4 to check, that the source for third party solution is trusted and continually maintained you check from 3rd party documentations, based on information from 14.2.5. So I think it can be and should be merged to 14.2.5.\r\n\r\n**14.2.5**\r\n\r\nIt can be technical solution, it can be documentation or both. For this I can understand the logic to propose moving to V1, but I'm not really sure about it.\r\n\r\nedit: thinking more about it - as a security decision to make (which component to use) and document, before implementing, 14.2.5 belongs by content to current V1.\r\n",
+      "createdAt": "2024-09-19T05:40:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2360022769",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M1aya",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> 14.2.6, 14.2.8 - we have had this discussion in related issues, but I repeat my question here - how do we measure, what is \"risky\"?\r\n\r\nI think there are plenty of ways to measure this. You can take a look at Snyk's database on a certain libraries and look at the recent security history. Are they continually finding and fixing critical vulnerabilities? That's a bad sign. Was critical vulnerabilities part of the past but less so in the future? That implies they are getting better. Do they have a security list? Do they respond to issues quickly? There are plenty of ways to look up a libraries history in github and snyk and get solid metrics on how \"risky\" they overall software process is.",
+      "createdAt": "2024-09-20T04:48:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2362813594",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M1cCh",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> 14.2.1 Verify that all components are up to date. If there are third party components, verify that they are continually maintained.\r\n\r\nBe careful here. The more you skip non-security updates you run into two problems:\r\n\r\na) You miss non published security fixes. I am in the middle on a research project that shows that this is a significant problem for some of the top 500 ilbraries and will publish that report next year.\r\n\r\nb) The more you skip non-security updates, the more difficult it will be to update that library when a real security updates shows up. This is the \"updatability\" of a library which gets more and more challenging over time as you skip updates.\r\n\r\nBy the same token, the cost of keeping everything up to date is painful. I would like requirement to stay and acknowledge both sides of this issue.\r\n\r\n**_14.2.1 Verify that all components are up to date. While updating libraries, particularly for non-security reasons, can be costly and resource-intensive, it is still important to stay current. Non-published security vulnerabilities and other hidden issues may only surface in future versions, and keeping components up to date ensures compatibility and ease of future updates, preventing technical debt._**",
+      "createdAt": "2024-09-20T04:52:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2362818721",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M1y3W",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">> 14.2.6, 14.2.8 - we have had this discussion in related issues, but I repeat my question here - how do we measure, what is \"risky\"?\r\n\r\n> I think there are plenty of ways to measure this. You can take a look at Snyk's database on a certain libraries and look at the recent security history. Are they continually finding and fixing critical vulnerabilities? That's a bad sign. Was critical vulnerabilities part of the past but less so in the future? That implies they are getting better. Do they have a security list? Do they respond to issues quickly? There are plenty of ways to look up a libraries history in github and snyk and get solid metrics on how \"risky\" they overall software process is.\r\n\r\nAnd if you find it risky, you could use it in a level 3 application as one component?\r\n\r\n> You miss non published security fixes.\r\n\r\nThis is the understandable risk with this wording. At the same time, being quickly up to date is not risk free as well.\r\n\r\nAnother question is, what up to date means - let's take an example from PHP: https://www.php.net/supported-versions.php\r\n\r\nIf you use latest 8.1.* - are you up to date, as this version gets critical security fixes only?\r\n\r\nIf you use latest 8.2.* - are you up to date, as there is also newer version (8.3)?\r\n\r\n> This is the \"updatability\"\r\n\r\nOne should understand, that ability to update and being up to date are different things.\r\n\r\nI don't think we should go with this educative text in the requirement.",
+      "createdAt": "2024-09-20T06:15:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2362912214",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M2PxG",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I used the beefier text just to explain my point in this thread (as opposed to several different threads) before the final decision was made. Thank you for hearing me out.",
+      "createdAt": "2024-09-20T07:36:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2363030598",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M6M75",
+      "author": {
+        "login": "meghanjacquot"
+      },
+      "authorAssociation": "NONE",
+      "body": "> @meghanjacquot - note that V1 is for documentation requirements **only** and is under clean-up process for everything that are not documentation requirements. Most likely all requirements from V1 will end up as separate section into the related category. In short, moving thing to V1 is not a solution here till those are not clear documentation requirements. 14.2.5 can be only theoretical candidate from those.\r\n\r\nAhh, so would the idea be to leave things that might go into a future section in V14 for now with the idea being that those will be revised after V1 is revised? \r\n\r\n",
+      "createdAt": "2024-09-20T16:10:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2364067577",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M7EA_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Ahh, so would the idea be to leave things that might go into a future section in V14 for now with the idea being that those will be revised after V1 is revised?\r\n\r\nNo need to wait, we can sort things out to \"correct baskets\". For example, I think 14.2.4 and 14.2.5 should me merged and moved to V1.14.",
+      "createdAt": "2024-09-20T18:26:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2364293183",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PpCme",
+      "author": {
+        "login": "meghanjacquot"
+      },
+      "authorAssociation": "NONE",
+      "body": "> * 14.2.1 - we need components to be up to date, but we don't need to say how it is checked (remove the second part of the requirement)\r\n\r\n14.2.1 Verify that components are up to date.\r\n\r\n> * 14.2.4 and 14.2.5 can be merged\r\n\r\nMerge 14.2.4 and 14.2.5\r\n\r\nSuggestion: \"Verify that a Software Bill of Materials (SBOM) is maintained and that all third party components come from pre-defined, trusted and continually maintained repositories.\"\r\n\r\n> * 14.2.7 - without underestimating the problem, I think it is more about the building (process) the application than the application itself\r\n\r\nGiven this thought process, what do you think of moving 14.2.7 to 14.1.X?\r\n\r\n> * 14.2.6, 14.2.8 - just as an option - in a way those can be in some separate sandboxing section if needed, I think those are not clear dependency requirements as such.\r\n\r\nI think keeping this in 14.2 makes sense. They flow well with the rest of the material in 14.2\r\n\r\nPlease share any thoughts or ideas for these @elarlang @jmanico @tghosth - thank you! \r\n\r\n",
+      "createdAt": "2024-10-14T04:03:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2409900446",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P3EEj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "14.2.4 and 14.2.5 look very different for me. A SBOM is about maintaining component documentation continuously. Using trusted repositories to get third party components is very different from the SBOM document. SBOM does not guarantee you are using trusted repositories.",
+      "createdAt": "2024-10-15T11:03:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2413576483",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P3FSL",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would suggest merging 14.2.4 and 14.2.7 - those are both about using trusted repositories. My suggestion:\r\n\r\n_Verify that third-party components are sourced from predefined, trusted, and continually maintained repositories, and are managed separately from internally owned and developed applications to prevent dependency confusion attacks._",
+      "createdAt": "2024-10-15T11:05:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2413581451",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P5yYU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 14.2.4 and 14.2.5 look very different for me. A SBOM is about maintaining component documentation continuously. Using trusted repositories to get third party components is very different from the SBOM document. SBOM does not guarantee you are using trusted repositories.\r\n\r\nI disagree. During maintaining the SBOM is exactly good thing to validate, are sources trusted and maintained. SBOM (14.2.5) is result of activity from current 14.2.4\r\n\r\n> I would suggest merging 14.2.4 and 14.2.7 - those are both about using trusted repositories.\r\n\r\n~~I disagree. 14.2.4 is to define, from where you take external components. 14.2.7 is to define where you keep those external components on your side.~~\r\n\r\nEDIT: I misinterpreted the requirement 14.2.7, I agree with the merge proposal, will be handled in #2167\r\n",
+      "createdAt": "2024-10-15T15:23:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2414290452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6P6eEM",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I disagree. During maintaining the SBOM is exactly good thing to validate, are sources trusted and maintained. SBOM (14.2.5) is result of activity from current 14.2.4\r\n\r\nThe SBOM standard does not require that you list the source or download URI of the library. It's optional metadata that is often not included. The SBOM standard includes Component Name, Version, Component Type, License Information, Supplier Information, Component Hashes, Dependency Relationships, Unique Identifiers and Author information. \r\n\r\n**_It's not a reliable reference to understand the repository the library came from. That information would typically be tracked in package management or supply chain management systems, not directly in the SBOM itself._**",
+      "createdAt": "2024-10-15T16:19:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2414469388",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QBI1x",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And if the SBOM does not require it, it means, it is not allowed and not a logical thing to do?\r\n\r\nFrom that \"getting stuck into the SBOM declaration\", I would say, that SBOM is just one, but not the only, option to handle inventory of 3rd party libraries in use and I propose to turn back to the requirement version we had in v4.0.2:\r\n> V14.2.5 Verify that an inventory catalog is maintained of all third party libraries in use.\r\n\r\nWe can add there \"using SBOM\" as an example how to achieve it and it can contain current 14.2.4 really well.",
+      "createdAt": "2024-10-16T09:19:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2416217457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QCrj_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> And if the SBOM does not require it, it means, it is not allowed and not a logical thing to do?\r\n\r\nNot at all. I am just saying that an SBOM is not a reliable reference to understand the repository the library came from. That's just the nature of SBOM's and it's not their job.",
+      "createdAt": "2024-10-16T12:04:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2416621823",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QigjZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From the issue goal point of view \"So the question at thr moment is: Which requirements from 14.2.x do you we think should stay/go?\" I would say, that we did not find any out of scope requirements and we can close this issue.\r\n\r\nFor each requirement update/merge side-topics I opened a separate issue - here, it is not followable anymore, what is the latest proposal for some requirements:\r\n  * #2164\r\n  * #2165\r\n  * #2166\r\n  * #2167",
+      "createdAt": "2024-10-20T13:35:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2424965337",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QoWht",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note, each requirement got a separate issue, but in general - dependency is more program code topic than pure configuration. So general recommendation is to move section V14.2 \"dependency\" to V10.\r\n\r\nV10 itself will be with more wide topic, with focus \"how to organize program code and checks from program code\"",
+      "createdAt": "2024-10-21T12:11:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2426497133",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QwtQt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V10 definition is moved here https://github.com/OWASP/ASVS/issues/2173",
+      "createdAt": "2024-10-22T08:59:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2428687405",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RGbTX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Status update: V10 scope is widened.\r\n\r\nAt the moment it seems, that in the \"Dependency\" section we have only current 14.2.1 and probably also current 14.2.7 (#2167).\r\n\r\nIf there is only one requirement, we need to think what is the suitable section in V10 for current 14.2.1. If there are at least 2, then I propose to move 14.2 Dependency to 10.6 Dependency.",
+      "createdAt": "2024-10-24T06:09:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2434381015",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RQtof",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With issue #2166 requirements 14.2.6 and 14.2.7 (previously 14.2.8) will be merged and moved to the V10 area, or will be binned.\r\n\r\nThe rest of the V14.2 is cleaned up, close.",
+      "createdAt": "2024-10-25T07:21:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2088#issuecomment-2437077535",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-17T10:36:51Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    }
+  ],
+  "number": 2088,
+  "state": "CLOSED",
+  "title": "Are parts of 14.2.x section out of scope for ASVS?",
+  "url": "https://github.com/OWASP/ASVS/issues/2088"
+}

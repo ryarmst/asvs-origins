@@ -1,0 +1,111 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2022-12-22T20:14:38Z",
+      "diff": "Hi,\r\nIn [V5.3 Output Encoding and Injection Prevention](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v53-output-encoding-and-injection-prevention) I would have expected to see something about formula injection.\r\nFor example, when a server of summer camps website genrates xlsx file with students' attendace data, last name of one the students could be something like \"=HYPERLINK(url, student's last name)\" or \"=cmd|' /C...\".\r\nThere are explanations about this attack here: [CSV_Injection](https://owasp.org/www-community/attacks/CSV_Injection).\r\nDoes it appear elsewhere in the standard?\r\nThanks,\r\nRafael,\r\n"
+    },
+    {
+      "editedAt": "2022-12-22T21:00:43Z",
+      "diff": "Hi,\r\nIn [V5.3 Output Encoding and Injection Prevention](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v53-output-encoding-and-injection-prevention) I would have expected to see something about formula injection.\r\nFor example, when a server of summer camps website genrates xlsx file with students' attendace data, last name of one the students could be something like \"=HYPERLINK(url, student's last name)\" or \"=cmd|' /C...\".\r\nThere are explanations about this attack here: [CSV_Injection](https://owasp.org/www-community/attacks/CSV_Injection).\r\nDoes it appear elsewhere in the standard?\r\nThanks,\r\nRafael,\r\nEdit: Thanks to Haim Mitrany who informed me about this vulnerability."
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1469#issuecomment-1363353494",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "(edited)\r\nActually, maybe we need to cover 2 problems:\r\n* CSV injection - if value contains \"cell separator symbol\" and part of the value will be in different cells when you open the file\r\n  * CSV as **Comma** Separated Values is a bit misleading here, as this separator can be also `;`, `\\t` (tab) or ` ` (space)\r\n* Formula injection - when content of the cell is executed as formula\r\n\r\nFormula Injection may work also in xls, xlsx, odf, Google Spreadsheet etc.\r\n\r\n[CWE-1236](https://cwe.mitre.org/data/definitions/1236.html): Improper Neutralization of Formula Elements in a CSV File\r\n\r\n",
+          "recorded_at": "2022-12-27T20:03:49Z"
+        },
+        {
+          "body": "(edited)\r\nActually, maybe we need to cover 2 problems:\r\n* CSV injection - if value contains \"cell separator symbol\" and part of the value will be in different cells when you open the file\r\n  * CSV as **Comma** Separated Values is a bit misleading here, as this separator can be also `;`, `\\t` (tab) or ` ` (space)\r\n* Formula injection - when content of the cell is executed as formula\r\n\r\nFormula Injection may work also in xls, xlsx, odf, Google Spreadsheet etc.\r\n\r\n",
+          "recorded_at": "2022-12-22T21:26:16Z"
+        },
+        {
+          "body": "Also note, for the requirement we should avoid the name CSV injection as it is misleading - is not only related to CSV, it works in xls, xlsx, odf, Google Spreadsheet etc.\r\n\r\nDefense method is escaping.",
+          "recorded_at": "2022-12-22T21:19:20Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1469#issuecomment-1366654168",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "2 linked problems that probably need to be solved together because the mitigation for formula injection requires the mitigation for CSV injection to also be applied in order to be effective.\r\n\r\nSuggest single new requirement",
+          "recorded_at": "2022-12-28T13:28:49Z"
+        },
+        {
+          "body": "2 linked problems that probably need to be solved together because the mitigation for formula injection requires the mitigation for CSV injection to also be applied in order to be effective.",
+          "recorded_at": "2022-12-28T13:28:15Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1469#issuecomment-1366789575",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> I understand from your comment that we need to finish the discussion here before doing the pull request.\r\n\r\nYes, in general it would be nice to do that way - then there is readable discussion in related issue and arguments, why some change was made to the document. Discussion over PR's are hard to follow. But take it as note for the smoother life in the future :)\r\n\r\nLet's try to finalize the requirement text now and/or wait feedback from others.",
+          "recorded_at": "2022-12-28T17:07:04Z"
+        },
+        {
+          "body": "> I understand from your comment that we need to finish the discussion here before doing the pull request.\r\n\r\nYes, in general it would be nice to do that way - then there is readable discussion in related issue and arguments, why some change was made to the document. Discussion over PR's are hard to follow. But take it as not for the smoother life in the future :)\r\n\r\nLet's try to finalize the requirement text now and/or wait feedback from others.",
+          "recorded_at": "2022-12-28T17:06:46Z"
+        },
+        {
+          "body": "> I understand from your comment that we need to finish the discussion here before doing the pull request.\r\n\r\nYes, in general it would be nice to do that way - then there is readable discussion readable in relate issue and arguments, why some change was made to the document. Discussion over PR's are hard to follow. But take it as not for the smoother life in the future :)\r\n\r\nLet's try to finalize the requirement text now and/or wait feedback from others.",
+          "recorded_at": "2022-12-28T16:54:17Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1469#issuecomment-1366836146",
+      "author": "RafaelGreen1",
+      "previous_versions": [
+        {
+          "body": "@elarlang\r\nHere https://owasp.org/www-community/attacks/CSV_Injection, they say that CSV Injection  is known as Formula Injection.\r\nI understand you would classify usage of the field separator to start a new cell as CSV injection and usage of '=' or '@' at the beginning of the cell as formula injection. \r\n\r\nHere is the new suggestion (based on your comments):\r\n\r\nVerify that the application protects against CSV/Formula injection in generated spreadsheet documents\r\n(such as csv, xls, xlsx, odf etc) by following the next two steps:\r\n1. Verify that the cell separator, line separator and quotes are properly handled (filtered or escaped).\r\n2. Verify that cell values are not executed as formula unless intended by the application by \r\n prepending the cell field with a single quote or ensure that the cell doesn't begin with one of the characters '=', '+', '-', '@'.",
+          "recorded_at": "2022-12-28T18:27:41Z"
+        },
+        {
+          "body": "@elarlang\r\nHere https://owasp.org/www-community/attacks/CSV_Injection, they say that CSV Injection  is known as Formula Injection.\r\nI understand you would classify usage of the field separator to start a new cell as CSV injection and usage of '=' or '@' at the beginning of the cell as formula injection. \r\n\r\nThis is the new suggestion (based on your comments)\r\n\r\nVerify that the application protects against CSV/Formula injection in generated spreadsheet documents\r\n(such as csv, xls, xlsx, odf etc) by following the next two steps:\r\n1. Verify that the cell separator, line separator and quotes are properly handled (filtered or escaped).\r\n2. Verify that cell values are not executed as formula unless intended by the application by \r\n prepending the cell field with a single quote or ensure that the cell doesn't begin with one of the characters '=', '+', '-', '@'.",
+          "recorded_at": "2022-12-28T18:25:27Z"
+        },
+        {
+          "body": "@elarlang\r\nHere https://owasp.org/www-community/attacks/CSV_Injection, they say that CSV Injection  known as Formula Injection.\r\nI understand you would classify usage of the field separator to start a new cell as CSV injection and usage of '=' or '@' at the beginning of the cell as formula injection. \r\n\r\nThis is the new suggestion (based on your comments)\r\n\r\nVerify that the application protects against CSV/Formula injection in generated spreadsheet documents\r\n(such as csv, xls, xlsx, odf etc) by following the next two steps:\r\n1. Verify that the cell separator, line separator and quotes are properly handled (filtered or escaped).\r\n2. Verify that cell values are not executed as formula unless intended by the application by \r\n prepending the cell field with a single quote or ensure that the cell doesn't begin with one of the characters '=', '+', '-', '@'.",
+          "recorded_at": "2022-12-28T18:17:47Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1469#issuecomment-1566092087",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "@elarlang problem is that the escaping rules for CSVs are too complicated to reproduce in full. Also seems unlikely that this RFC will significantly change in the near future. I think we have to accept that people are going to have to refer to external resources in order to actually apply fixes.\r\n\r\nAs such, I stand by my wording above (reproduced below). Any other thoughts @elarlang / @jmanico?\r\n\r\n> Verify that the application follows the escaping rules defined in RFC4180 2.6 and 2.7 when exporting CSV files. After that (and when exporting other spreadsheet formats such as xls, xlsx, odf) it should also escape special characters including '=', '+', '-', '@' '\\t' (tab) and '\\00' (null character) using a single quote, if they are the first character in a field. These mechanisms should prevent Formula Injection.\r\n",
+          "recorded_at": "2023-05-28T11:15:22Z"
+        },
+        {
+          "body": "@elarlang problem is that the escaping rules for CSVs are too complicated to reproduce in full. Also seems unlikely that this RFC will significantly change in the near future. I think we have to accept that people are going to have to refer to external resources in order to actually apply fixes.\r\n\r\nAs such, I stand by my wording above. Any other thoughts @elarlang ",
+          "recorded_at": "2023-05-28T11:14:19Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1469#issuecomment-1709873678",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Opened #1709 to resolve this @elarlang",
+          "recorded_at": "2023-09-07T10:04:17Z"
+        },
+        {
+          "body": "Opened #1709 to resolve this @elarlank",
+          "recorded_at": "2023-09-07T10:04:09Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/3247#issuecomment-3927708773",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "The gadget chain point is valid — a broad allowlist (e.g. \"allow all classes in our application's packages\") can still be vulnerable to chaining attacks through classes that individually appear safe. However, I think the current requirement does already accommodate this through the \"such as\" framing — the allowlist is given as an example of safe input handling, not as the complete solution.\n\nThat said, I agree the wording could be stronger to make clear what \"safe\" actually looks like in practice. A loose allowlist is not enough and we could be clearer about that.\n\nAs Jim says, the ideal is to avoid native/binary deserialization of untrusted data and use safer formats like JSON. But since we can't require that universally (there are legitimate use cases for native serialization), I'd suggest we tighten the guidance for cases where it is used.\n\n**Proposed wording:**\n\n> Verify that deserialization of untrusted data enforces safe input handling, such as using a strict allowlist limited to the specific object types expected for that functionality, combined with limits on object depth and graph size, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input.\n\nThe key changes:\n- **\"strict allowlist limited to the specific object types expected for that functionality\"** — makes clear this means a narrow, scoped allowlist, not a broad one\n- **\"combined with limits on object depth and graph size\"** — captures the structural controls needed to mitigate both gadget chains and DoS (e.g. hash collision attacks on deserialized collections), expressed in language-agnostic terms\n\nOn the \"what is insecure\" question: this was discussed extensively in #2846. The intent is mechanisms where the **programming language or framework documentation explicitly warns they are insecure** (e.g. .NET BinaryFormatter's deprecation warnings, PHP `unserialize()` warnings). This is a deliberately narrow, objective definition — you don't need continuous security research, you need to read your framework's documentation. The section introductory text explains this.",
+          "recorded_at": "2026-02-19T14:39:24Z"
+        },
+        {
+          "body": "I agree the wording could be stronger to make clear what \"safe\" actually looks like in practice. A loose allowlist is not enough and we could be clearer about that.\n\nAs Jim says, the ideal is to avoid native/binary deserialization of untrusted data and use safer formats like JSON. But since we can't require that universally (there are legitimate use cases for native serialization), I'd suggest we tighten the guidance for cases where it is used.\n\n**Proposed wording:**\n\n\"_Verify that deserialization of untrusted data enforces safe input handling, such as using a strict allowlist limited to the specific object types expected for that functionality combined with limits on object depth and graph size, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input._\"\n\nThe key changes:\n- **\"strict allowlist limited to the specific object types expected for that functionality\"** — makes clear this means a narrow, scoped allowlist, not a broad one\n- **\"combined with limits on object depth and graph size\"** — captures the structural controls needed to mitigate both gadget chains and DoS (e.g. hash collision attacks on deserialized collections), expressed in language-agnostic terms.",
+          "recorded_at": "2026-02-19T14:40:20Z"
+        }
+      ]
+    }
+  ]
+}

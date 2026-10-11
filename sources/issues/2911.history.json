@@ -1,0 +1,56 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2784274520",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "As a side note @elarlang this is really only a L3 problem at best. This is all centered around the debate of wether to use /dev/urandom vs /dev/random. There are tons of articles to read on this to get deeper into the debate.\n\nFor most systems /dev/urandom (which never blocks) is random enough. Even for security purposes. \n\nThis is very debatable, especially when you consider the advances of random number generation in modern *nix systems.",
+          "recorded_at": "2025-04-07T18:57:56Z"
+        },
+        {
+          "body": "As a side note @elarlang this is really only a L3 problem at best. This is all centered around the debate of wether to use /dev/urandom vs /dev/random. There are tons of articles to read on this to get deeper into the debate.\n\nFor most systems /dev/random is random enough. Even for security purposes.\n\nThis is very debatable, especially when you consider the advances of random number generation in modern *nix systems.",
+          "recorded_at": "2025-04-07T18:56:57Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2784647780",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> For most systems /dev/urandom (which never blocks) is random enough. Even for security purposes.\n\nI am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nIf we keep this requirement as is stands, the question is how is the layperson-tester (laytester?) supposed to verify that anyway? He may try to load the system for cryptographic operations and it could lead to:\n\n1. performance degradation → you have found a potential DoS vulnerability (which is already covered in other requirements);\n2. there is no performance degradation but maybe you there is degradation of the quality of the generated random values but as a layperson-tester will have a very hard time trying to prove one way of the other (unless the generator is doing something very stupid).\n\nThe only solution would be try to verify anything meaningful would be to do a real cryptographic analysis of the random generator which is quite a expert thing to do.",
+          "recorded_at": "2025-04-07T22:12:25Z"
+        },
+        {
+          "body": "> For most systems /dev/urandom (which never blocks) is random enough. Even for security purposes.\n\nI am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nIf we keep this requirement as is stands, the question is how is the layperson-tester (laytester?) supposed to verify that anyway? He may try to load the system for cryptographic operations and it could lead to:\n\n1. performance degradation → you have found a potential DoS vulnerability (which is already covered in other requirements);\n2. there is no performance degradation but maybe you there is degradation of the quality of the generated random values but as a layperson-tester will have a very hard time trying to prove one way of the other (unless the generator is doing very stupid).\n\nThe only solution would be try to verify anything meaningful would be to do a real cryptographic analysis of the random generator which is quite a expert thing to do.",
+          "recorded_at": "2025-04-07T21:17:27Z"
+        },
+        {
+          "body": "> For most systems /dev/urandom (which never blocks) is random enough. Even for security purposes.\n\nI am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nIf we have this requirement, the question is how is the layperson-tester (laytester?) supposed to verify that anyway? He may try to load the system for cryptographic operations and it could lead to:\n\n1. performance degradation → you have found a potential DoS vulnerability (which is already covered in other requirements);\n2. there is no performance degradation but maybe you there is degradation of the quality of the generated random values but as a layperson-tester will have a very hard time trying to prove one way of the other (unless the generator is doing very stupid).\n\nThe only solution would be try to verify anything meaningful would be to do a real cryptographic analysis of the random generator which is quite a expert thing to do.",
+          "recorded_at": "2025-04-07T21:16:48Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2911#issuecomment-2784658898",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "> I am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nI hear that a lot too and I am inclined to go that route too. Here is the other side of that coin to consider:\n\n**1. Pre-seeding or initialization attacks**\nHistorically, /dev/urandom could be read before it had sufficient entropy early in boot (on Linux systems < 5.x). \n\n- If you're on older kernels or embedded devices, /dev/urandom may not be safe early at boot.\n\n**2. Manual CSPRNG implementation**\nIf a developer thinks “I’ll just seed my own PRNG with urandom and call it cryptographic,” that’s dangerous unless done exactly right. You’re better off relying on vetted CSPRNGs like:\n\n- ChaCha20-DRBG (used in libsodium)\n- AES-CTR DRBG (used in Java SecureRandom with proper config)\n- BLAKE3 as a strong hash-based entropy expansion tool\n\n**3. Post-quantum and forward secrecy considerations**\nRelying only on ephemeral /dev/urandom-seeded values without forward secrecy or rekeying won’t help you against future quantum threats. For session keys and long-term secrets, you should:\n\n- Regularly rekey (e.g., via HKDF, DRBG reseed, etc.)\n- Consider quantum-safe key agreement protocols (e.g., Kyber)\n\n**4. Lack of auditing or compliance**\nIn regulated environments (e.g., FIPS, PCI DSS, etc.), just saying \"I use /dev/urandom\" is insufficient. You may need:\n\n- FIPS-validated DRBGs (e.g., NIST SP 800-90A compliant)\n- Entropy source validation and logging\n\n",
+          "recorded_at": "2025-04-07T21:50:54Z"
+        },
+        {
+          "body": "> I am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nI hear that a lot too and I am inclined to go that route too. Here is the other side of that coin to consider:\n\n**1. Pre-seeding or initialization attacks**\nHistorically, /dev/urandom could be read before it had sufficient entropy early in boot (on Linux systems < 5.x). Modern systems often block reads until entropy is sufficient (e.g., via getrandom() syscall), but:\n\n- If you're on older kernels or embedded devices, /dev/urandom may not be safe early at boot.\n\n**2. Manual CSPRNG implementation**\nIf a developer thinks “I’ll just seed my own PRNG with urandom and call it cryptographic,” that’s dangerous unless done exactly right. You’re better off relying on vetted CSPRNGs like:\n\n- ChaCha20-DRBG (used in libsodium)\n- AES-CTR DRBG (used in Java SecureRandom with proper config)\n- BLAKE3 as a strong hash-based entropy expansion tool\n\n**3. Post-quantum and forward secrecy considerations**\nRelying only on ephemeral /dev/urandom-seeded values without forward secrecy or rekeying won’t help you against future quantum threats. For session keys and long-term secrets, you should:\n\n- Regularly rekey (e.g., via HKDF, DRBG reseed, etc.)\n- Consider quantum-safe key agreement protocols (e.g., Kyber)\n\n**4. Lack of auditing or compliance**\nIn regulated environments (e.g., FIPS, PCI DSS, etc.), just saying \"I use /dev/urandom\" is insufficient. You may need:\n\n- FIPS-validated DRBGs (e.g., NIST SP 800-90A compliant)\n- Entropy source validation and logging\n\n",
+          "recorded_at": "2025-04-07T21:23:44Z"
+        },
+        {
+          "body": "> I am in no way expert in this topic. My understanding was that the current state of this topic was \"you can just use urandom (or whatever your OS provides) and you be fine\".\n\nI hear that a lot too and I am inclined to go that route too. Here is the other side of that coin to consider:\n\n**1. Pre-seeding or initialization attacks**\nHistorically, /dev/urandom could be read before it had sufficient entropy early in boot (on Linux systems < 5.x). Modern systems often block reads until entropy is sufficient (e.g., via getrandom() syscall), but:\n\n- If you're on older kernels or embedded devices, /dev/urandom may not be safe early at boot.\n\n**2. Manual CSPRNG implementation**\nIf a developer thinks “I’ll just seed my own PRNG with urandom and call it cryptographic,” that’s dangerous unless done exactly right. You’re better off relying on vetted CSPRNGs like:\n\n- ChaCha20-DRBG (used in libsodium)\n- AES-CTR DRBG (used in Java SecureRandom with proper config)\n- BLAKE3 as a strong hash-based entropy expansion tool\n\n**3. Post-quantum and forward secrecy considerations**\nRelying only on ephemeral /dev/urandom-seeded values without forward secrecy or rekeying won’t help you against future quantum threats. For session keys and long-term secrets, you should:\n\n- Regularly rekey (e.g., via HKDF, DRBG reseed, etc.)\n- Consider quantum-safe key agreement protocols (e.g., Kyber, SIKE* pre-quantum-failure)\n\n**4. Lack of auditing or compliance**\nIn regulated environments (e.g., FIPS, PCI DSS, etc.), just saying \"I use /dev/urandom\" is insufficient. You may need:\n\n- FIPS-validated DRBGs (e.g., NIST SP 800-90A compliant)\n- Entropy source validation and logging\n\n",
+          "recorded_at": "2025-04-07T21:22:56Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Summary: The list of allowed FFDH groups in the appendix do not include standard FFDH groups for TLS.\n\nThe current draft says has a list of Diffie-Hellman (DH) groups saying:\n\n> The following groups are approved and MUST be used for implementations of Diffie-Hellman KEX.\n\nHowever:\n\n* the listed Finite Field Diffie Hellman (FFDH) groups are not the ones recommended to be used in TLS;\n* different protocols might want to use different FFDH groups.\n\nOptions:\n\n1. remove explicit list of FFDH groups and include a restriction based on the size instead;\n2. add the TLSv1.3 FFDH groups found in RFC7919.\n\nMoreover \"MUST\" should be changed into a \"can\" if we want to support DH outside of the TLS handshake.\n\nDetails after this.\n\n***\n\nThe current draft lists Finite Field Diffie Hellman (FFDH) groups coming from the [IKE RFC](https://www.rfc-editor.org/rfc/rfc3526) such as \"2048-bit MODP Group\". This one is defined as:\n\n> This group is assigned id 14.\n>\n> This prime is: 2^2048 - 2^1984 - 1 + 2^64 * { [2^1918 pi] + 124476 }\n>\n> Its hexadecimal value is:\n>\n> ~~~\n> FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1\n> 29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD\n> EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245\n> E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED\n> EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D\n> C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F\n> 83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D\n> 670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B\n> E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9\n> DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510\n> 15728E5A 8AACAA68 FFFFFFFF FFFFFFFF\n> ~~~\n> \n>    The generator is: 2.\n\nHowever since [RFC7919](https://www.rfc-editor.org/rfc/rfc7919.html), a number a FFDH groups to be used in TLS are defined. For example, this RFC defines the [ffdhe2048](https://datatracker.ietf.org/doc/html/rfc7919#appendix-A.1) group as:\n\n> The 2048-bit group has registry value 256 and is calculated from the following formula:\n> \n> The modulus is:\n> \n> p = 2^2048 - 2^1984 + {[2^1918 * e] + 560316 } * 2^64 - 1\n> \n> The hexadecimal representation of p is:\n> \n> ~~~\n> FFFFFFFF FFFFFFFF ADF85458 A2BB4A9A AFDC5620 273D3CF1\n> D8B9C583 CE2D3695 A9E13641 146433FB CC939DCE 249B3EF9\n> 7D2FE363 630C75D8 F681B202 AEC4617A D3DF1ED5 D5FD6561\n> 2433F51F 5F066ED0 85636555 3DED1AF3 B557135E 7F57C935\n> 984F0C70 E0E68B77 E2A689DA F3EFE872 1DF158A1 36ADE735\n> 30ACCA4F 483A797A BC0AB182 B324FB61 D108A94B B2C8E3FB\n >B96ADAB7 60D7F468 1D4F42A3 DE394DF4 AE56EDE7 6372BB19\n> 0B07A7C8 EE0A6D70 9E02FCE1 CDF7E2EC C03404CD 28342F61\n> 9172FE9C E98583FF 8E4F1232 EEF28183 C3FE3B1B 4C6FAD73\n> 3BB5FCBC 2EC22005 C58EF183 7D1683B2 C6F34A26 C1B2EFFA\n> 886B4238 61285C97 FFFFFFFF FFFFFFFF\n> ~~~\n> \n> The generator is: g = 2\n\nThese are not the same group. As a consequence, the sanctioned 2048bit group for TLS is not the one mentioned in the current ASVS draft. Note that in TLS v1.3, only the [defined groups](https://www.iana.org/assignments/tls-parameters/tls-parameters.xhtml#tls-parameters-8) can be used in TLS 1.3.\n\nMoreover the RFC further argues than using the same groups for TLS as the ones in IKE [may not desirable](https://www.rfc-editor.org/rfc/rfc7919.html#section-8.5):\n\n> Other lists of named finite field Diffie-Hellman groups [[STRONGSWAN-IKE](https://www.rfc-editor.org/rfc/rfc7919.html#ref-STRONGSWAN-IKE)] exist.  This document chooses to not reuse them for several reasons:\n>\n> *  <mark>Using the same groups in multiple protocols increases the value for an attacker with the resources to crack any single group</mark>.\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6W4aFp",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Options:\r\n>1. remove explicit list of FFDH groups and include a restriction based on the size instead;\r\n>2. add the FFDH groups found in RFC7919.\r\n>Moreover \"MUST\" should be changed into a \"can\" if we want to support DH outside of the TLS handshake.\r\n\r\nWe have gone for the former option - RFC3526 is over 20 years old, and RFC7919 is the thick end of a decade old. As we have tried to modernise enterprise cryptography we omitted many things, and this is one of the more contentious ones, I suspect. \r\n\r\nMy vote would be to follow option 1 - FFDH is cool maths, but it's probably time to move on as we simplify options whilst hurtling towards PQC.",
+      "createdAt": "2024-12-10T11:54:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2407#issuecomment-2531369321",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bo9t8",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> My vote would be to follow option 1 - FFDH is cool maths, but it's probably time to move on as we simplify options whilst hurtling towards PQC.\n\n@unprovable, Are you suggesting to disapprove all FFDH groups altogether?\n\nAfter rereading this issue, I'm wondering if we should not just align the list of FFDH groups with RFC7919 for the time being. See #2374.",
+      "createdAt": "2025-01-23T23:16:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2407#issuecomment-2611207036",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kynT_",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do we really need this part of the appendix (especially the part about FFDH)? Are we not going to deep in the details for an *application* standard ?\n\nI see two options:\n\n* remove this part altogether;\n* align the presentation with the NIST document (references below).\n\nSome example of wording from different sources:\n\n* https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf#page=143\n* https://cyber.gouv.fr/sites/default/files/2021/03/anssi-guide-selection_crypto-1.0.pdf (page 31)\n\n@unprovable and @danielcuthbert, any feedback on this?",
+      "createdAt": "2025-03-30T20:27:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2407#issuecomment-2764731647",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oKlk4",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'll make a PR to align this part with [NIST.SP.800-56A R3](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-56Ar3.pdf#page=143), unless someone comes forward with another proposition.",
+      "createdAt": "2025-04-22T13:32:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2407#issuecomment-2821347640",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ueYTI",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Resolved through #3051 ",
+      "createdAt": "2025-06-01T13:02:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2407#issuecomment-2927199432",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-24T21:31:04Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABy9sfPQ",
+      "name": "AppendixV",
+      "description": "Appendix with crypto details",
+      "color": "540616"
+    }
+  ],
+  "number": 2407,
+  "state": "CLOSED",
+  "title": "Crypto Appendix - Listed allowed FFDH groups do not include standard FFDH groups for TLS",
+  "url": "https://github.com/OWASP/ASVS/issues/2407"
+}

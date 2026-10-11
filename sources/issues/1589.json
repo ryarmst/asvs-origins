@@ -1,0 +1,1538 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "[5.3.1](https://appsecg.host/5.3) | Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, URL parameters, HTTP headers, SMTP, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara). (C4)\r\n-- | --\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5YL53w",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Point from @ImanSharaf https://github.com/OWASP/ASVS/issues/1561#issuecomment-1474479240\r\n\r\n> Thank you for your response and for pointing out that ASVS 5.3.1 does technically cover CRLF Injection in HTTP headers. However, I would like to express my concern that the current wording of 5.3.1 might not explicitly highlight the importance of testing for CRLF Injection attacks. As a result, testers might inadvertently overlook this specific attack vector when performing security assessments.",
+      "createdAt": "2023-03-22T12:50:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-1479515632",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5YQXev",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We also should address CSS related issue with this: https://github.com/OWASP/ASVS/issues/1558",
+      "createdAt": "2023-03-23T06:52:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-1480685487",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5YQbv9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(updated 2023-03-29, 2023-03-30)\r\n\r\nAs the Pandora box is opened...\r\n\r\nWe still need to have abstract requirement to cover all not listed syntaxes:\r\n> Verify that output encoding is relevant for the interpreter and context required. \r\n\r\n\r\nSeparate requirements:\r\n* HTML values, HTML attributes\r\n  * can we add here XML values and XML attributes and split up XMl encoding and XPath sanitize from https://github.com/OWASP/ASVS/issues/1556\r\n  * the problem here is, \"HTML attributes\" should be \"HTML attribute values\". For HTML attributes encoding is not helpful and validation against allow-list and/or sanitation need to be used.\r\n* JavaScript - for JavaScript is available escaping or encoding, both should be covered\r\n  * Maybe we can merge it to current 5.3.3 (need to rethink DOM XSS part from there)\r\n* URL encoding\r\n* HTTP headers\r\n  * Should it be separate requirement or also URL encoding?\r\n  * Should it cover CRLF injection or it should be also separate requirement?\r\n    * there was issue #1561\r\n    * and in HTTP/2 context it is covered by current _V14.6.3 Verify that a full CRLF (\\r\\n) sequence is neutralized inside a HTTP/2 header._\r\n  * Should it cover converting cookies (missing at the moment)?\r\n  * Should it cover encoding filename for content-disposition field (https://github.com/OWASP/ASVS/issues/1390)\r\n* SMTP - is there such thing like \"SMTP encoding?\" or we actually should name it Content-Transfer-Encoding?\r\n\r\nI did not cover from 5.3.1 - do we need to mention it?\r\n> especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara).\r\n\r\nCSS - (for some reason it is missing from issue description but actually exists in bleeding edge version) - As there is no such thing like CSS encoding, we need to use input validation and/or sanitize when using userinput in CSS. Should be covered via #1558\r\n",
+      "createdAt": "2023-03-23T07:13:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-1480702973",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZSQG1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Note: CSS encoding is a thing, it's a native JS function. CSS.escape for example.",
+      "createdAt": "2023-04-05T18:42:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-1497956789",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5z_OPu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that we should split out this requirement as @elarlang has set out above, the treatment should either be **one or more** of the following:\r\n\r\n- Create new requirement if the particular context does not already have a requirement \r\n- Reference this issue and what is needed if there is already a related open issue (such as with _HTML values, HTML attributes_)\r\n- Make sure that each requirement (existing or new) correctly captures the fix that is needed (encoding, escaping, sanitizing, sandboxing, etc)\r\n- (Don't move existing requirements around yet)\r\n- Make sure that an individual requirement is not mixing different treatments or contexts, e.g. we may want to split out SMTP and IMAP.",
+      "createdAt": "2024-02-15T11:57:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-1945953262",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM562o_H",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have started to write those requirements many times.. but those still feel like duplicates. So, there is a turn-around in my proposal, and it is also more aligned with the goals to make fewer requirements to the ASVS and provide \"requirement per principle\", not \"requirement per principle per syntax/technology\". We don't have separate requirements for \"use authorization correctly in framework x\" and \"use authorization correctly in framework y\", so we also should not have separate requirements for \"use encoding correctly for HTML\" and \"use encoding correctly for URL\".\r\n\r\nThe more I watch the current requirement, the more I think it's ok. Just need to shorten it a bit.\r\n\r\n> Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, URL parameters, HTTP headers, **and** SMTP.~~, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara). (C4)~~\r\n\r\nThe list of examples can be fine-tuned. Splitting the requirement per syntax makes it more like a checklist, and this is a testing guide area.",
+      "createdAt": "2024-04-17T12:26:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2061144007",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM562zU2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For brainstorming - to cover entire chapters 5.2 and 5.3, it's enough to have a requirement:\r\n> Verify that the application builds commands and documents without data used and can not change the command and document structure by using relevant defense for the syntax and context required, such as parametrization, encoding, escaping, or sanitization.\r\n\r\nWhere we can put the line between \"too detailed\" vs \"too abstract\".",
+      "createdAt": "2024-04-17T12:50:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2061186358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM565D1p",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> CSS - (for some reason it is missing from issue description but actually exists in bleeding edge version) - As there is no such thing like CSS encoding, we need to use input validation and/or sanitize when using userinput in CSS. Should be covered via #1558\r\n\r\nCSS encoding does exist in native javascript and other languages meant to escape CSS Variables. See: https://developer.mozilla.org/en-US/docs/Web/API/CSS/escape_static",
+      "createdAt": "2024-04-17T17:01:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2061778281",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM565PI6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Jim, you already said that (https://github.com/OWASP/ASVS/issues/1589#issuecomment-1497956789). Just please, (re)read and learn the issues before commenting :)",
+      "createdAt": "2024-04-17T17:26:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2061824570",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56-XvK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Jim, you already said that ([#1589 (comment)](https://github.com/OWASP/ASVS/issues/1589#issuecomment-1497956789)). Just please, (re)read and learn the issues before commenting :)\r\n\r\nUnderstood and will do.",
+      "createdAt": "2024-04-18T07:07:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2063170506",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM57IjQA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My a bit updated proposal:\r\n\r\n> Verify that output encoding is relevant for the interpreter and context required, such as encoding value for HTML value, HTML attribute, JavaScript, URL parameter, HTTP header, or SMTP.",
+      "createdAt": "2024-04-19T06:20:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2065839104",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM57P1uI",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it Elar.",
+      "createdAt": "2024-04-20T18:26:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2067749768",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM57Qeby",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I am not sure I completely understood your draft, does my rephrasing make sense:\r\n\r\n> Verify that output encoding is relevant for the interpreter and context required, such as encoding **the relevant characters** for HTML **elements**, HTML attribute, JavaScript, URL parameter, HTTP header, or SMTP.\r\n",
+      "createdAt": "2024-04-21T05:50:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2067916530",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM57TB-Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It makes again the requirement longer, but should we mention also the goal for the requirement? That it is not possible to manipulate the output command or document structure?",
+      "createdAt": "2024-04-22T06:28:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2068586392",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM58RNSe",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we can probably explain the goal in the section text intro. I think trying to include here is a little too complicated.",
+      "createdAt": "2024-04-30T10:02:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2084885662",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM58kAk2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There is some singular/plural inconsistency which I didn't pick up on before and I will fix.\r\n\r\nDo we still want to include SMTP here? Do we mention SMTP anywhere else that we could rely on instead as it feels a little out of place.",
+      "createdAt": "2024-05-02T07:40:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2089814326",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM58kic5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Do we still want to include SMTP here? Do we mention SMTP anywhere else that we could rely on instead as it feels a little out of place.\r\n\r\nI prefer to not include SMTP here. The point is to cover principles, not to list all possible encodings in the world, otherwise, we are soon back to the problem that we tried to solve first.",
+      "createdAt": "2024-05-02T09:03:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2089953081",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM58kt-o",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do we mention SMTP somewhere else that we can rely on?",
+      "createdAt": "2024-05-02T09:24:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2090000296",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM58uD7j",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "SMTP in mentioned in 5.2.3:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.3** | Verify that the application sanitizes user input before passing to mail systems to protect against SMTP or IMAP injection. | ✓ | ✓ | ✓ | 147 |\r\n",
+      "createdAt": "2024-05-03T07:20:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2092449507",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM580X2A",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Output encoding and validating a SMTP url for a UI to stop XSS is a different control than encoding SMTP for a email server. One stops XSS, another stops email injection.",
+      "createdAt": "2024-05-04T10:02:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2094103936",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5806jx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Output encoding and validating a SMTP url for a UI to stop XSS is a different control than encoding SMTP for a email server. One stops XSS, another stops email injection.\r\n\r\nWhatever the syntax or interpretator, the generated command or document must not be manipulatable.\r\n\r\nSee my comment here: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2068586392",
+      "createdAt": "2024-05-04T15:03:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2094246129",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM583Bzq",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar, when addressing different attacks (e.g., XSS vs. Email Server Injection) that require different controls (e.g., Output UI encoding vs. proper use of email server APIs and email server encoding), I suggest we have different requirements.\r\n\r\nSo I personally like how things are currently in both 5.2.3 (SMTP/IMAP injection) and 5.3.1 (XSS Defense). This level of detail in 5.3.1 is helpful, IMO.",
+      "createdAt": "2024-05-05T12:56:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2094800106",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM583NBo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I can not understand what are you talking about. We have separate requirements for sanitization and for encoding. What is the problem you are trying to solve or the recommendations to provide?",
+      "createdAt": "2024-05-05T15:12:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2094846056",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM583PkJ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "All I am saying is that I like the detail of 5.3.1",
+      "createdAt": "2024-05-05T15:45:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2094856457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM583SO9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Output encoding and validating a SMTP url for a UI to stop XSS is a different control than encoding SMTP for a email server. One stops XSS, another stops email injection.\r\n\r\n@jmanico I think you are referring to `mailto:` links in an HTML file, is that correct?",
+      "createdAt": "2024-05-05T16:23:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2094867389",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM59ULxm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico if you are talking about `mailto:` links, do you think that is covered as \"URL parameters\" in the suggestion below?\r\n\r\n> [MODIFIED] Verify that output encoding is relevant for the interpreter and context required, such as encoding the relevant characters for HTML elements, HTML attributes, JavaScript, URL parameters and HTTP headers. ",
+      "createdAt": "2024-05-09T10:59:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102443110",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VH2i",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Even an encoded URL still fires XSS if your validation is weak and does not validate the scheme. JavaScript URL’s even when encoded cause XSS in the attribute context. This is why url validation is more crucial than encoding when it comes to untrusted URl’s.\r\n \r\nThis is less a problem of mailto  since typically the dev’s do:\r\n\r\nURL = “mailto:” + untrustedemail.\r\n\r\nDoes this help and make sense who encoding is not encourage for URL’s?\r\n\r\n",
+      "createdAt": "2024-05-09T13:42:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102689186",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VVxf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With encoding you just make sure that you can not manipulate the document or command structure.\r\n\r\nURL, when displayed in an HTML document (e.g. as `href` or `src` attribute value) requires validation, sanitization and URL encoding. It is all a different requirement and a different topic.\r\n\r\nIn other words - requirement 5.3.1 is not an \"all-in-one defense against every possibility for XSS\" but just \"You need to use encoding correctly according to the context\".",
+      "createdAt": "2024-05-09T14:14:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102746207",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VdEb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "*Sanitization is not required and URL encoding is not the right encoding \n*when putting untrusted URL's in HTML documents.\n\nWhen placing a untrusted URL in the content of a HTML attribute you only \nneed 2 controls.\n\n1) Validation to ensure the URL is a legal URL and is not a Javascript: \nData: or other dangerous URL.\n\n2) Encoding in the content of use. If you put a URL in a src or href \nattribute then you want to do HTML attribute/HTML Entity encoding, not \nURL encoding.\n\nI think we need a clear requirement for this. Untrusted URL's causing \nXSS is a big problem.\n\nI have mentioned this several times Elar, and you continue to state this \ndefense incorrectly. I mean that with respect, I know this is challenging.\n\n- Jim\n",
+      "createdAt": "2024-05-09T14:29:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102776091",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VgX5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> URL, when displayed in an HTML document (e.g. as href or src attribute value) requires validation, sanitization and URL encoding. It is all a different requirement and a different topic.\r\n\r\nAnd when I say in first order, you need validation, you just ignore it?\r\n\r\n> I think we need a clear requirement for this. Untrusted URL's causing. XSS is a big problem.\r\n\r\nThis IS separate topic. _I have said it several times_, and you continue to talk about it.\r\n\r\nWe have requirement 5.1.5 for that.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.5** | [MODIFIED, SPLIT TO 50.7.1] Verify that the application will only automatically redirect the user to a different URL directly from an application URL where the destination appears on an allow list. | ✓ | ✓ | ✓ | 601 |\r\n\r\nThe topic here is 5.3.1. It is for encoding in general.",
+      "createdAt": "2024-05-09T14:35:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102789625",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59Vivg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And technically, it is not correct (in the context of building URL dynamically by the application):\r\n\r\n> 2) Encoding in the content of use. If you put a URL in a src or href\r\nattribute then you want to do HTML attribute/HTML Entity encoding, not\r\nURL encoding.\r\n\r\nWhen you build a URL, it must be in the correct URL encoding anyway. When displaying it in a `src` or `href` attribute value, you need to convert the value for HTML **additionally**. If you had the URL in the correct URL encoding, you have only the `&` sign to convert.",
+      "createdAt": "2024-05-09T14:41:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102799328",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VkvX",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar, 5.1.5 does not address my concern at all. Allow-list validation is a good control but it's not always acceptable for applications handling  untrusted URL's.\r\n\r\nFor example, a social media page may ask you to enter in your homepage as part of your user profile that is rendered in a anchor tag's href attribute. In that case, we would need to validate that the URL is valid, and the protocol is only HTTPS. Allow-list validation will not work for those kind of use cases.\r\n\r\nAnd then when you add the URL to a HTML attribute, you need to HTML entity encode.\r\n\r\nAgain, 5.1.5 does not cover this use case.\r\n\r\nAnd even though we are discussing encoding, my point is that encoding of URL's in a HTML attribute content is not a sufficient control to stop XSS.\r\n\r\nI keep bringing this up because I am politely concerned how you are discussing this and feel you are missing the point of how proper defense of untrusted URL's needs to be handled. And this workflow when done wrong causes 1/3 of real world XSS from Googles research.\r\n\r\n",
+      "createdAt": "2024-05-09T14:45:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102807511",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VlZC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Building a URL dynamically is an entirely different issue. If you put untrusted data in the PATH of a URL you need to base64url encode like the JWT standard suggests. URL encoding is only safe for URL construction when placing data in a querystring parameter.",
+      "createdAt": "2024-05-09T14:47:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102810178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VnL1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Why you address the URL topic here as the problem of the requirement 5.3.1?\r\n\r\n> And even though we are discussing encoding, my point is that encoding of URL's in a HTML attribute content is not a sufficient control to stop XSS.\r\n\r\nWe are not covering \"all the possible XSS here\". Already said that, many times. If you have a specific problem of handling URLs. please open a separate issue and stay on topic here.",
+      "createdAt": "2024-05-09T14:51:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102817525",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59Vn90",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I am absolutely on topic here. Please contribute to the conversation positively or hold your comments.",
+      "createdAt": "2024-05-09T14:52:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102820724",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VrI5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I am absolutely on topic here. Please contribute to the conversation positively or hold your comments.\r\n\r\nEasy to point fingers, but... Did you read the issue?  Does the defense you propose or address, requires encoding something?",
+      "createdAt": "2024-05-09T14:59:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102833721",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59Vr3r",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yes I did read the issue. I do not think you understand how complex this issue is. I am trying to help and would appreciate it if you focus on the positive aspects of what I am trying to say.",
+      "createdAt": "2024-05-09T15:01:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102836715",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VsRW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Does the defense you propose or address, requires encoding something?",
+      "createdAt": "2024-05-09T15:02:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102838358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VuNu",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yes.\r\n\r\n- If you are placing untrusted data in a URL of a querystring parameter, you need to URL encode so the URL is valid.\r\n- If you are placing untrusted data in the path of a URL REST-style you need to base64url encode to avoid path traversal.\r\n- If you are placing an untrusted URL in an attribute (like src or href), you need to encode in the context of display (typically HTML entity encoding) but you also need to validate that the protocol of the URL is not dangerous since even encoded Javascript url's will still cause XSS.\r\n\r\n",
+      "createdAt": "2024-05-09T15:06:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102846318",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59Vvib",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And which one of them is not covered by 5.3.1 + 5.1.4/5.1.5?",
+      "createdAt": "2024-05-09T15:09:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102851739",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VxQt",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "These two.\r\n\r\n- If you are placing untrusted data in the path of a URL REST-style you need to base64url encode to avoid path traversal.\r\n- If you are placing an untrusted URL in an attribute (like src or href), you need to encode in the context of display (typically HTML entity encoding) but you also need to validate that the protocol of the URL is not dangerous since even encoded Javascript url's will still cause XSS.",
+      "createdAt": "2024-05-09T15:13:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102858797",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59VyEA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Please note when placing an untrusted URL in an HTML document, it is one of the only cases when encoding will not stop XSS and is a very special case. It's a common React bypass and is a huge problem from what I see when it comes to googles research. This is why we need a special requirement to discuss this issue which I will add a new issue on later today.",
+      "createdAt": "2024-05-09T15:14:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102862080",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59Vy7S",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If you are placing untrusted data in the path of a URL REST-style you need to base64url encode to avoid path traversal.\r\n\r\nI'll argue, that you can do it with correct URL encoding. Anyway, it's still encoding and context.\r\n\r\n> If you are placing an untrusted URL in an attribute (like src or href), you need to encode in the context of display (typically HTML entity encoding) but you also need to validate that the protocol of the URL is not dangerous since even encoded Javascript url's will still cause XSS.\r\n\r\nFirst part is still encoding, second part is validation and out of scope of this issue.",
+      "createdAt": "2024-05-09T15:16:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102865618",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59V2dO",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If you schedule time with me, I will demonstrate to you how if you are URL encoding data that you put in path of a URL it still causes path traverasal in browser and another contexts. I have clear evidence showing that what I am stating is true.\r\n\r\nCalendly.com/manicode\r\n\r\nThis is why the JWT standard uses URL safe encoding coding (base64url) and not URL or other encoding when placing JWT’s in a URL.\r\n",
+      "createdAt": "2024-05-09T15:24:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102880078",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59V3XJ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> First part is still encoding, second part is validation and out of scope of this issue.\r\n\r\nThese defenses needs to be done together like we see in Angular. I’ll add a new requirement that merges these defenses. Encoding alone is not helpful or secure when placing URL’s in HTML so the requirement is not helpful from a defensive POV.\r\n",
+      "createdAt": "2024-05-09T15:26:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102883785",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59V33s",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It is still encoding and context. \r\n\r\n20+ comments later, I still can not understand, what is your problem statement or proposal for the latest requirement proposal (https://github.com/OWASP/ASVS/issues/1589#issuecomment-2067916530):\r\n> Verify that output encoding is relevant for the interpreter and context required, such as encoding the relevant characters for HTML elements, HTML attribute, JavaScript, URL parameter, HTTP header, or SMTP.\r\n",
+      "createdAt": "2024-05-09T15:27:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102885868",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59V6lP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Let me try again.\r\n\r\n> Verify that output encoding is relevant for the interpreter and context required, such as encoding the relevant characters for HTML elements, HTML attribute, JavaScript, URL parameter, HTTP header, or SMTP\r\n\r\nThis requirement only mentioned url parameters and implies url encoding only. The issue around URL’s is much larger and encoding is not a complete defense like it is for other types of data. URL’s are a special case where encoding still leads to path traversal or XSS if you only url encode or skip URL validation. I am happy to give you a few demos to show this to you. \r\n",
+      "createdAt": "2024-05-09T15:32:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102896975",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59WCrK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "No one ever said that you can only use one requirement to have complete defense.\r\n\r\nCan you show me proof of concept (edit: context \"path traversal\", no need to show mailto, javascript and data schemes here), when URL-encoding is not enough for displaying data in any part of the URL?\r\nCan you point to the Google research you mentioned?",
+      "createdAt": "2024-05-09T15:47:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102930122",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59W4eA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I am not saying that the encoding URL requirements are not a complete defense. I am saying that the requirements around URL encoding are both incomplete and incorrect.\r\n\r\nThe main demo I will email you (a link to my private server) in basically this kind of code in markup.\r\n\r\n`<a href=\"https://somesite.com/data/\" + URLEncode(request.getParameter('param'))\">link</a>`\r\n\r\nI reached out to my contacts at Google and will get you a good article on Javascript URL's ASAP.\r\n",
+      "createdAt": "2024-05-09T17:54:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2103150464",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59Yaq2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This requirement is primarily about contextual encoding. Regardless of the previous comments, the way its worded now it's primarily an XSS defense requirement.\n\nMy proposal is that we remove the URL parameter from this requirement. And then we add new requirements that address the complexities of URL handling, validation and encoding that I have addressed above.\n\nIf developers apply this requirement as is, it's incorrect and will lead to security vulnerabilities. This is a very complicated issue (URL handling). This basic requirement is absolutely the wrong path IMO and would like someone other than Elar who actually understands the complexities of URL handling to weigh into this conversation, please.",
+      "createdAt": "2024-05-09T22:33:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2103552694",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59YnYI",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here is the Google research I mentioned.\n\nhttps://speakerdeck.com/lweichselbaum/csp-a-successful-mess-between-hardening-and-mitigation",
+      "createdAt": "2024-05-09T23:34:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2103604744",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM59Z7VP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "## The scope\r\n\r\nThe goal for the requirement is written https://github.com/OWASP/ASVS/issues/1589#issuecomment-2068586392\r\n\r\n> That it is not possible to manipulate the output command or document structure?\r\n\r\n[CWE-116](https://cwe.mitre.org/data/definitions/116.html) \"Improper Encoding or Escaping of Output\" descibes it also in understandable way:\r\n\r\n> The product prepares a structured message for communication with another component, but encoding or escaping of the data is either missing or done incorrectly. As a result, the intended structure of the message is not preserved.\r\n\r\n\r\nSo, it is all about keeping the structure for dynamically built document. I pointed it out, for example here: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2094246129\r\n\r\nI also pointed out many times, that the goal for the requirement is not to cover all XSS topic:\r\n\r\nhttps://github.com/OWASP/ASVS/issues/1589#issuecomment-2102746207\r\n\r\n> In other words - requirement 5.3.1 is not an \"all-in-one defense against every possibility for XSS\" but just \"You need to use encoding correctly according to the context\".\r\n\r\nhttps://github.com/OWASP/ASVS/issues/1589#issuecomment-2102817525\r\n\r\n> We are not covering \"all the possible XSS here\". Already said that, many times. If you have a specific problem of handling URLs. please open a separate issue and stay on topic here.\r\n\r\n... and that using another schemes than https just requires input validation, which means that all javascript, data, mailto and other scemes are off-topic here. Including the Google CSP-related presentation.\r\n\r\nThe requirement is valid for any encoding situation - HTML, JSON, hex, base64, base64uri. Encoding is not only needed against \"XSS\" attacks in the browser, it is used everywhere, where there is some encoding involved.\r\n\r\nIf after tens of comments and tens of emails one does not read what is written and keeps pushing their agenda, I call it something seriously disrespectful thing to do. What is the chance to find agreement, if one is talking about one thing and another \"fighting against it\" with another topic? The chance is 0.\r\n\r\n\r\n## Path traversal\r\n\r\nPath traversal in URL context is valid topic, and defense against that is URL encoding.\r\n\r\nThe proof-of-concept Jim sent me via email, was carrying the idea that URLs like `https://h2ck3r.eu/legit/../cs.png` work as path traversal even, when partially URL-encoded, (and claims therefore URL encoding is not enough), such as:\r\n```\r\nhttps://h2ck3r.eu/legit/..%2fcs.png\r\n```\r\n\r\nAlthough it was working on Jim's environment, it does not work for example on the Apache web server. I say, that in Jim's environment, it is incorrect URL handling in place because there is unnecessary URL decoding used and this causes the path traversal issue for the correctly encoded path part.\r\n\r\nIt is a widespread problem when an application sends part of the URL to an API.\r\n\r\n\r\n## The \"call out\"\r\n\r\n> This basic requirement is absolutely the wrong path IMO and would like **someone other than Elar who actually understands the complexities of URL handling** to weigh into this conversation, please.\r\n\r\nTo call me out with sentense, that I don't understand the complexity of URL handling, is just... another \"not that nice thing to do\". Especially in the context of ignoring the scope, saying technically incorrect things and without understanding, that presented \"proof-of-concept\" presents vulnerability in the own environment, because of doing encoding/decoding incorrectly.\r\n\r\nI'm confident to say that I know a thing or two about encoding, about URL's and about problems with handling URL's. For that exact reason I was passionate to have requirement in ASVS:\r\n\r\n> V5.6.1 Verify that input is decoded or unescaped into a canonical form only once and that this is done before processing the input further, for example it is not performed after input validation or sanitization.\r\n\r\nIronically, Jim did not see the need for the requirement in the first place (https://github.com/OWASP/ASVS/issues/1590#issuecomment-1937769043).\r\n\r\nWhen making your next move - keep in mind, that in real life, there is no revert or rollback available.\r\n\r\nAnything else? Any more examples to analyze?\r\n\r\nFrom email:\r\n> I can show you many other examples of this if needed.",
+      "createdAt": "2024-05-10T06:24:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2103948623",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM590Rav",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Elar: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2068586392\r\n\r\n>> It makes again the requirement longer, but should we mention also the goal for the requirement? That it is not possible to manipulate the output command or document structure?\r\n\r\nJosh: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2084885662\r\n\r\n> I think we can probably explain the goal in the section text intro. I think trying to include here is a little too complicated.\r\n\r\n@tghosth - after the lengthy \"discussion\" here, I'm more than convinced, we need to mention it in the requirement text.\r\n\r\nIt also addresses better CRLF injection and whatever other encoding related issue - preserve the message structure.\r\nhttps://github.com/OWASP/ASVS/issues/1589#issuecomment-1479515632 / https://github.com/OWASP/ASVS/issues/1561",
+      "createdAt": "2024-05-14T18:26:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2110854831",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM591ZRI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's make future-decisions easier: @jmanico - do you admit, that you were wrong?",
+      "createdAt": "2024-05-14T21:11:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111149128",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM591axe",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The requirement concerned output encoding, and then someone started talking about CSP, which is a very different issue. But I try my best to embrace all comments. When it comes to encoding, URLs are very special and need their own requirements, so my focus is to fix the \"URL parameter\" part of this requirement.",
+      "createdAt": "2024-05-14T21:16:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111155294",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM591c3z",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With quick recheck I would say, that the first comment on CSP is from you.\r\n\r\nAnd you did not still realize, that your understanding of the URL encoding/decoding is/was wrong? Instead of re-analyzing, testing and re-testing, that your statements are technically correct, you say that I'm the one who can not understand the topic? Doing so, you are surprised to have certain feedback?",
+      "createdAt": "2024-05-14T21:22:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111163891",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5913Pp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I’m very certain that my understanding of URL handling is correct. I even showed you a demo were URL encoding in a path leads to path reversal in certain aspects of the web pipeline. This is why the JWT standard uses base64URL encoding so you can safely place JWT data on a path. There are certain server side URL parsers that have the same problem.\r\n\r\nHandling URLs is very challenging and I’ve described it several times already. If you’d like, I’m happy to go through it again with you.\r\n\r\nThe way that we address URL parameters in this requirement minimizes the complexity of URL based encoding needs.\r\n\r\nOn a different topic there’s a reason why GO templates will both URL encode a URL query string parsmeter and then attribute encode the full URL if you place it in a src attribute. Sometimes you need to double encode. URL handling is extremely complicated and I don’t want to simplify the issue. I want to explain in requirements why it’s so complicated.",
+      "createdAt": "2024-05-14T22:49:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111271913",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM593X1m",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just wow.\r\n\r\n>  I even showed you a demo were URL encoding in a path leads to path reversal in certain aspects of the web pipeline. \r\n\r\nAre you just ignoring the \"path traversal\" part from my longer comment? I provided you description there, why your demo is NOT correct.\r\n\r\nLet me ask it again then, if in an HTML document, there is:\r\n```\r\n<img src=\"https://domain/one/..%2ftwo%2fthree.png\">\r\n```\r\n\r\nWhat is the URL browser is going to ask and what is the file, server is going to serve?",
+      "createdAt": "2024-05-15T06:17:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111667558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM593rZY",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is just one of many examples. Many server-side URL parsers and processers still allow path traversal when you put untrusted data in a path with URL encoding. It's just an unsafe practice overall. \r\n\r\nMy server is not Apache, and I agree the problem is not universal but it is widespread. This is why the JWT standard went for base64url encoding - for universal defense. \r\n\r\nSo yes I read your argument but I do not agree with it just because you cannot get my demo to work on Apache.  It does work elsewhere like I have shown you.",
+      "createdAt": "2024-05-15T07:09:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111747672",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM593vH6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I do not agree with it just because you cannot get my demo to work on Apache\r\n\r\nThis is epic facepalm, Jim. You just prove again and again, that you can not understand the need for URI encoding.\r\n\r\nIf your application unnecessarily decodes the URL and causes path traversal issues because of that, the problem is in your application. The path part was correctly URL-encoded to avoid path traversal.\r\n\r\n> ..., and I agree the problem is not universal but it is widespread. \r\n\r\nDo you realize, that if the problem could be with the URL-encoding part, it could be universal? But it is not... Just connect the dots.\r\n\r\n> This is just one of many examples.\r\n\r\nCan you give me 3 more examples, please.\r\n\r\n> Many server-side URL parsers and processers still allow path traversal when you put untrusted data in a path with URL encoding. It's just an unsafe practice overall.\r\n\r\nIf the server side component causes the problem, it must be fixed there. From this requirement the URL encoding part is done correctly. For that reason I recommended to change in https://github.com/OWASP/ASVS/issues/1590#issuecomment-2103953573\r\n\r\n\r\n... and you did not answer my question, what will be the URL? :)",
+      "createdAt": "2024-05-15T07:18:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111762938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-Aq-f",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you can not back up your sentences with proof-of-concepts and fail to admit your mistakes, you should stay away from it.\r\n\r\nI ask clear questions and would like to see clear answers, not some bubbles.\r\n\r\n\r\n## Question 1\r\n\r\nQuestion from: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111667558\r\n\r\nI asked a clear question, but instead of answering it, you did not respond with a clear answer.\r\n\r\nIf there is a URL:\r\n```\r\n<img src=\"https://domain/one/..%2ftwo%2fthree.png\">\r\n```\r\n\r\nYou claim (https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111271913) to certainly know the URL encoding, it should be simple for you. Let the World see your knowledge.\r\n\r\n> I’m very certain that my understanding of URL handling is correct.\r\n\r\n\r\nAnwers options:\r\n\r\n  * Option A: Should application serve the file (like you said):\r\n  ```\r\n  https://domain/two/three.png\r\n  ```\r\n  * Option B: Should application serve the file (like I said):\r\n  ```\r\n  https://domain/one/..%2ftwo%2fthree.png\r\n  ```\r\n\r\n\r\n## Question 2\r\n\r\nQuote from: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2102858797\r\n\r\n> If you are placing untrusted data in the path of a URL REST-style you need to base64url encode to avoid path traversal.\r\n\r\nDo you (now, finally) agree, that saing \"URL-encoding path data is not enough against path traversal in the URL\" is technically incorrect?\r\n",
+      "createdAt": "2024-05-16T06:08:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2114105247",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-ArIl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Explanation for others, why I \"keep going\": In a place like an argument-based discussion for implementing security requirements, there is no place for bluff or demagogy. It causes direct quality issues to the standard and, additionally, kills motivation for other volunteers to waste time with this behavior. So, sorry for the noise, but this is the reason, why I just don't leave it like that - if a person comes and throws sh*t towards me/others, there is a response for that.",
+      "createdAt": "2024-05-16T06:08:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2114105893",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-Dn57",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Do you (now, finally) agree, that saing \"URL-encoding path data is not enough against path traversal in the URL\" is technically incorrect?\n\nAbsolutely not. I already demonstrated to you how url encoding causes path traversal on some servers. URL encoding is absolutely not a universally safe way to add untrusted data to a path. No way.",
+      "createdAt": "2024-05-16T10:48:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2114879099",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-DqjP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Option B: Should application serve the file (like I said):\r\nhttps://domain/one/..%2ftwo%2fthree.png\n\r\nThe fact is that some servers, some popular servers, will indeed serve this content and url encoding will not stop the path from changing.\n\r\nThis is why as an educator I unfortunately cannot teach that url encoding is a good way to add data to a REST path. I got called out by a student who demonstrated to me how he was still hit with path traversal (I believe) on IIS and other servers.\n\r\nThis is why I changed my course content. I was given clear evidence that url encoding on a path is not a universally safe defense! It was embarrassing, I used to teach url encoding for years! So Elar I am not trying to hurt or offend you. I’m trying to come up with security rules that are universally safe. URL encoding is not universally safe when it comes to this situation.",
+      "createdAt": "2024-05-16T10:54:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2114889935",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-D-sT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Gents, I would really like to get this discussion back on track.\r\n\r\nHaving read through, it seems like we are all in agreement that encoding for a document (such for an HTML response, HTTP response headers, other document generation) needs to be done correctly based on context, e.g. whatever goes into an HTML attribute has to be encoded correctly for an HTML attribute, be it a URL or whatever.\r\n\r\nSeparately, there is a complicated discussion going on regarding the safe creation of URLs. I would like to separate out this discussion into #1961 as I believe it is complicated enough to merit it's own requirement. Feel free to copy relevant points from here into there. \r\n\r\n@jmanico on that basis, can we proceed with the following wording for this requirement plus the outcome of #1961.\r\n\r\n> Verify that output encoding is relevant for the interpreter and context required, such as encoding the relevant characters for HTML elements, HTML attribute, JavaScript, URL parameter or HTTP header, to avoid changing the document structure or functionality.",
+      "createdAt": "2024-05-16T11:27:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2114972435",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-EbDr",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "With respect, I’d like to remove URL parameters from this requirement and handle that in a separate series of requirements around URL handling. \r\n\r\nDepending on what you’re doing with a URL you need to do different kinds of encoding as discussed. And sometimes encoding will not provide safety.\r\n",
+      "createdAt": "2024-05-16T12:13:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2115088619",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-LECH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The issue is comment-by-comment analyzed by 2 co-leaders and the proposal is the result of that.\r\n\r\nI provide the summary and argumentation for the discussion, although all points are already covered in the comments.\r\n\r\n> Verify that output encoding is relevant for the interpreter and context required, such as encoding the relevant characters for HTML elements, HTML attribute, JavaScript, URL parameter or HTTP header, to avoid changing the document structure ~~or functionality~~.\r\n\r\nIt is important to understand the meaning of the requirement - it is \"to avoid changing the document structure ~~or functionality~~\". Whatever is not talking about this goal, it is not responsibility for this requirement and should stay away from this discussion (validating and using the URL by interpretators).\r\n\r\nThe requirement is also valid for URL parameters or URL paths.\r\n\r\nhttps://datatracker.ietf.org/doc/html/rfc1738\r\n\r\n> All unsafe characters must always be encoded within a URL. For\r\n>   example, the character \"#\" must be encoded within URLs even in\r\n>   systems that do not normally deal with fragment or anchor\r\n>   identifiers, so that if the URL is copied into another system that\r\n>   does use them, it will not be necessary to change the URL encoding.\r\n\r\n\r\nIf we take an URL:\r\n```\r\n<scheme>://<host>:<port>/<path>?<searchpart>\r\n```\r\n\r\nIf building an URL, any part of it must follow correct encoding according to context, to keep the structure - that it is not possible to change URL meaning with special characters (e.g. `/`, `#`, `?` etc).\r\n\r\nIt is offtopic from this requirement point of view, but as it seems to cause confusion, I explain that as well - if an interpreter (web server, API) causes a path traversal issue because it unnecessarily URL-decodes the value and causes security risks like path traversal, then there can be a proposal to base64 encode the value and send this instead.\r\n\r\nIt is a logical value, but the base64 encoded value must be URL encoded, when used in any part of the URL, because it may contain characters, that require URL encoding, such as `/`, `+`, and `=`. For that exact reason, base64uri was invented.\r\n\r\nBut in all given examples, the proposed requirement stays valid - whatever is the logical value to use as part of the URL, it must be correctly URL-encoded. If there is an extra logical security risk to cover for interpreters (which is again another separate topic), it does not make this requirement incorrect.\r\n\r\nAlso worth pointing out - this requirement has been there pretty much as it is, we only shortened it a bit and clarified the meaning.\r\n\r\nI'm confident to say, that the requirement is technically correct and valid, without taking away the possibility that it will be modified if there are new _valid_ arguments to do so.",
+      "createdAt": "2024-05-17T06:20:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2116829319",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-LaV4",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "There are two forms of base 64 encoding. The first is base64 which is not file/url path safe due to the / and + encoding characters. I am suggesting base64url encoding which is indeed one of the only filepath/url safe standards there is.Base64url encoding is safe because it replaces the / and + with filesafe characters and is specially meant for use on a url path for binary or other data.I mean no disrespect here. I’m only commenting because I saw a base64 encoding mentioned which is not path safe.Base64URL | Base64 Standards | Base64base64.guru",
+      "createdAt": "2024-05-17T07:25:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2116920696",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-Ld6_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> There are two forms of base 64 encoding. The first is base64 which is not file/url path safe due to the / and + encoding characters. I am suggesting base64url encoding which is indeed one of the only filepath/url safe standards there is.Base64url encoding is safe because it replaces the / and + with filesafe characters and is specially meant for use on a url path for binary or other data.I mean no disrespect here. I’m only commenting because I saw a base64 encoding mentioned which is not path safe.Base64URL | Base64 Standards | Base64base64.guru\r\n\r\nIt was all covered with\r\n\r\n> It is a logical value, but the base64 encoded value must be URL encoded, when used in any part of the URL, because it may contain characters, that require URL encoding, such as /, +, and =. **For that exact reason, base64uri was invented.**",
+      "createdAt": "2024-05-17T07:35:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2116935359",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-MNQT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I regret not reading your post to completion and will strive to do so in the future.",
+      "createdAt": "2024-05-17T09:26:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2117129235",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-Tvkh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The continued discussion above reinforces for me that we need to move discussion of URLs to a separate requirement as per #1961.\r\n\r\nI am undecided on URL parameter and I might leave this to our next meeting to discuss.\r\n\r\n",
+      "createdAt": "2024-05-19T05:17:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2119104801",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-xP_x",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The agreed wording so far is as follows but we are waiting for the outcome of #1961:\r\n\r\n> Verify that output encoding is relevant for the interpreter and context required, such as encoding the relevant characters for HTML elements, HTML attribute, JavaScript, or HTTP header, to avoid changing the document structure.",
+      "createdAt": "2024-05-23T11:09:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2126839793",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-yK7M",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To be clear with that - it **was not agreed** from my side, that URL parameters should be removed from the requirement. Conditional \"waiting for #1961\" means that it should provide a duplicate to this requirement to cover URL encoding only. \r\n\r\nThis comment is an add-on to my previous comment: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2116829319\r\n\r\n**Encoding** - It is needed against _injection_ attacks, if the document is built dynamically, user input is placed between some limiters, for keeping the document structure.\r\n\r\nIf someone ever reads this issue, here are my arguments. I put numbers to points, then it is easier for me to say, which point was ignored (again) when (not) reading my arguments.\r\n\r\n\r\n## Point 1 - Injection vs Execution.\r\n\r\nInjection - when an attacker can change the dynamically built document structure\r\n\r\n* program-code: `<a href=\"` + userinput + `\">link</a>`\r\n* userinput:\r\n  * `\"><script>evil-code</script>` - HTML injection\r\n  * `\" onclick=\"evil-code\" style=\"over-the-screen` - HTML attribute injection\r\n\r\nExecution - when an attacker can execute malicious code, without manipulating the document structure during building it - so **encoding does not help in this situation**\r\n\r\n* program-code: `<a href=\"` + userinput + `\">link</a>`\r\n* userinput:\r\n  * `javascript:evil-code` - JavaScript execution\r\n\r\nEncoding the user input here is not enough, as it is logical problem - untrusted input reached to HTML attribute and the problem here is, it was not validated.\r\n\r\nAgain, this example is input validation problem, and you can not fix it with any encoding. To say, that \"URL-encoding is not enough because of javascript:\" is just _filtered_. The responsibility for encoding is to keep the document structure. The responsibility for validation is to avoid untrusted data to reach to content execution.\r\n\r\nFor JavaScript code, execution attacks are often caused because of `eval`, applying untrusted data to `innerHTML`, `document.write()` etc. Although (double)encoding may help there, by principle it is an incorrect defense.\r\n\r\nContent execution is also the situation when HTML and JavaScript get executed because of an incorrect `Content-Type` header, let's say `text/html` instead of `application/json`. Instead of encoding the data, you need to just set the correct `Content-Type`.\r\n\r\n\r\n## Point 2 - It is not limited to HTML syntax or document\r\n\r\nThe requirement is as principle, it is valid for every syntax and for every context when user input is used for dynamically built documents and is placed between delimiters.\r\n\r\nJavaScript:\r\n```js\r\nvar x = 'USERINPUT';\r\n```\r\n\r\nYou can use encoding to unicode, e.g. `'` is `\\u0027` (and other alternatives). In this case one option is escaping with the same goal - to keep the document structure.\r\n\r\nJSON (== JavaScript), no one should build it manually:\r\n```js\r\n{\"x\":\"USERINPUT\"}\r\n```\r\n\r\nThe same, as described with JavaScript.\r\n\r\nURL-encoding when building a URL:\r\n```\r\nscheme://hostname/USERINPUT1/?x=USERINPUT2#USERINPUT3\r\n```\r\n\r\nIn any part of the URL, you need to use URL encoding to be sure it does not change the structure of the URL.\r\n\r\nIf the value is something, that is \"URL-safe\" (base64uri encoded value), that does not contain any characters that require URL-encoding, then URL-encoding does not make any changes to the value, but, the URL-encoding should be there anyway.\r\n\r\nWithout URL-encoding this URL-safe part, your defense is relying on the expectation, that this part is always URL-safe, but it is a business logic rule. What if there is a need to send something else to that place that is not URL-safe anymore?\r\n\r\n\r\nHTTP header, classical mistake:\r\n```\r\nContent-Disposition: attachment; filename=\"USERINPUT\"\r\n```\r\n\r\nNote, that expected defense in this case is to sanitize the input for the `filename` attribute and encode it correctly for `filename*` attribute. The point is, encoding is not an HTML document specific problem.\r\n\r\n\r\nYou can add here CSS, XML, \"any plain-text syntax\", ...\r\n\r\n\r\n## Point 3 - It is not limited to XSS\r\n\r\nHowever many times I wrote the goal for the requirement is not avoiding all possible XSS vectors, it's just keeping the document structure in place. It is just an important part of the defense against XSS if certain technologies or syntaxes are involved.\r\n\r\n\r\n## Point 4 - Limiters!\r\n\r\nOften encoding helps **only** when user input goes between some limiter marks, and the point for the encoding is - you should stay between those limiter marks.\r\n\r\n* In HTML document context - `>` and `<`\r\n* In HTML attribute value context - `'` or `\"`\r\n  * Note that, if user input is placed without delimiter marks, encoding does not help, `<input name=x value=USERINPU>`\r\n* JavaScript - `'`, `\"`, or template markers `\\``\r\n\r\nExamples, when encoding does not help:\r\n\r\n* HTML elemenent attriburte name `<input name=x USERINPUT>`\r\n* JavaScript: `var x = USERINPUT;`\r\n* JSON `{USERINPUT:\"value\"}`\r\n\r\nIn those cases, not validated (and if needed, then also sanitized) user input must never reach to this functionality.\r\n\r\n\r\nSo encoding is just one tool with a really precise goal - to keep the structure for dynamically built documents. Whatever is outside of this goal, is out of scope for this requirement AND does not make this requirement incorrect, **including the \"URL parameters\"**.",
+      "createdAt": "2024-05-23T13:14:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2127081164",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-y41r",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "You make a very solid argument. You were outvoted by two other ASVS leads (for now) because:\r\n\r\n1) Even when encoded, JavaScript: URL’s are still dangerous in a webpage. This is a very special case where encoding does not fully provide safety. It’s in fact the only case.\r\n\r\n2) Many web servers have issues with URL encoding in a path that still allows for path traversal.\r\n\r\n3) URL safety is very necessary for defense when it comes to the risks of XSS, open redirect, SSRF and sometimes access control defense.\r\n\r\nEncoding, dynamically building and validating URL’s is extremely challenging for developers and relates to a wide variety of AppSec risk.  This is why they deserve special treatment.",
+      "createdAt": "2024-05-23T14:28:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2127269227",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-zPXI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> You make a very solid argument. You were outvoted by two other ASVS leads (for now) because:\r\n\r\nBy concept, if \"voting\" goes over technically provided arguments, it's the dead-end.\r\n\r\n1) comment is out of scope - the scope is to keep the structure.\r\n2) comment is out of scope - web server handles URL as interpreter, it is another topic\r\n3) comment is out of scope - comment is also against / in conflict the point made\r\n4) each defense method has its own place in the flow, encoding does not replace validation, and validation does not replace encoding. Do not mix them.\r\n\r\nIn conclusion, it does not matter at all, what arguments I provide, you still come \"against\" the points with things, that I just described to be out of scope.",
+      "createdAt": "2024-05-23T15:00:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2127361480",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_xuDN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From my perspective, the removal of \"URL parameter\" relates to the complexity of handling URLs which I believe should be included elsewhere.\r\n\r\nI think there is still a question here related to document structure which we should discuss further.\r\n\r\n",
+      "createdAt": "2024-06-02T07:58:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2143740109",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_x5jK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I’ve been thinking a lot about this and am trying to reduce my concerns to the bare minimum.\r\n\r\nBase64url encoding is not that important to safe document construction. It’s a little important when adding binary data or JWT’s to a url.\r\n\r\nBut validating untrusted URL’s is crucial to safe document construction. URL’s are the only case where encoding will still lead to client side injection and that is such a common successful attack I want it to be addressed a lot more prominently when it comes to document construction.\r\n\r\nSo my bottom line is:\r\n\r\n1) give url validation a very prominent requirement when it comes to document construction. Mentioning url encoding by itself without mentioning validation is dangerous.\r\n2) somehow directly mention base64url encoding when it comes to adding binary data or JWT’s to a url\r\n\r\nI do not think the current requirements address these prominently enough.\r\n",
+      "createdAt": "2024-06-02T10:13:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2143787210",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ARa-z",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think there is still a question here related to document structure which we should discuss further.\r\n\r\nHaving discussed this further with Elar, the direction becomes a little too general because when you start worrying about building HTML attribute names or element names dynamically or building JSON attribute names dynamically you are getting into the territory of allowing the end user to write their own code as well :) This can't be fixed by encoding so we will leave it for now.\r\n\r\n\r\nThis returns us to how to handle this requirement.\r\n\r\nMy current feeling is that the fact that the current 5.3.1 requirement is a little too abstract is one of the things that has led to this long discussion.\r\n\r\nMy current feeling is to have specific requirements which cover the key cases and then a catch-all output encoding for other cases which describes a function's behaviour \"takes user input and builds some other representation or command based upon it\".\r\n\r\nPossible rough splitting for now:\r\n\r\n> Verify that output encoding for an HTTP response/HTML document/XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attribute, JavaScript, or HTTP headers, to avoid changing the message or document structure.\r\n\r\n> Verify that the correct encoding is performed for each context when generating a URL.\r\n\r\n> Verify that the correct encoding is performed for each context in a JSON document.\r\n\r\n",
+      "createdAt": "2024-06-06T11:07:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2152050611",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ASeJ9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here is a detailed list to consider. Some of these are duplicated from other requirements, admittedly.\r\n\r\n**HTML Docs**\r\n- Verify that user-generated content in HTML tags is properly encoded.\r\n- Verify that user-generated content in HTML attributes is properly encoded.\r\n- Verify that data embedded in JavaScript is encoded using a safe method like JSON encoding or JavaScript-specific encoding functions.\r\n- Verify that data in CSS contexts is encoded to avoid CSS Injection.\r\n- Verify that data within JSON documents is properly encoded to prevent injection attacks.\r\n- Verify that the correct encoding is performed for each context when generating a URL.\r\n- Verify that HTTP headers generated from user input are properly validated and encoded.\r\n- Verify that dynamically generated HTML is constructed safely using templates or frameworks that auto-encode outputs.\r\n- Verify that HTML comments do not contain untrusted user input.\r\n\r\n**Email**\r\n- Verify that email content and headers do not include untrusted user input without proper encoding and validation.\r\n\r\n**LDAP**\r\n- Verify that LDAP queries are built using safe methods that separate code from data.\r\n\r\n**Database**\r\n- Verify that SQL queries use parameterized queries or prepared statements.\r\n- Verify that ORM (Object-Relational Mapping) frameworks are used correctly to prevent SQL Injection.\r\n- Verify that stored procedures are designed to accept parameters that use parameterized queries or prepared statements.\r\n\r\n**XML**\r\n- Verify that XML documents use proper encoding to avoid XML Injection.\r\n- Verify that input used in XML parsing is validated and entity expansion is disabled.\r\n\r\n**OS**\r\n- Verify that command-line arguments are properly escaped or use safe API functions.\r\n- Verify that input used in command execution is properly validated and sanitized.\r\n\r\n**Logs**\r\n- Verify that input used in log messages is properly encoded and sanitized.\r\n",
+      "createdAt": "2024-06-06T12:46:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2152325757",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BD40B",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth to draft some requirements that sit in between 1 requirement for all of the above and individual requirements for everyone one of the above.",
+      "createdAt": "2024-06-13T10:40:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2165280001",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6F7j5I",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "| ID | Handled | Category | Requirement | Notes |\r\n|---|---|---|---|---|\r\n| 1 | ✅ | HTML Docs | Verify that user-generated content in HTML tags is properly encoded. | Covered by [5.3.1](https://appsecg.host/5.3). |\r\n| 2 | ✅ | HTML Docs | Verify that user-generated content in HTML attributes is properly encoded. | Covered by [5.3.1](https://appsecg.host/5.3). |\r\n| 3 | ✅ | HTML Docs | Verify that data embedded in JavaScript is encoded using a safe method like JSON encoding or JavaScript-specific encoding functions. | Jim says [below](https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248314485) that this is sufficiently covered in [5.3.1](https://appsecg.host/5.3). |\r\n| 4 | ✅ | HTML Docs | Verify that data in CSS contexts is encoded to avoid CSS Injection. | Mentioned in both [5.3.1](https://appsecg.host/5.3) and [5.2.8](https://appsecg.host/5.2). Opened #1994 to discuss/resolve this. |\r\n| 5 | ✅ | HTML Docs | Verify that data within JSON documents is properly encoded to prevent injection attacks. | Mentioned in [5.3.6](https://appsecg.host/5.3) and discussed in #1555 |\r\n| 6 | ✅ | HTML Docs | Verify that the correct encoding is performed for each context when generating a URL. | Being discussed in #1961 |\r\n| 7 | ✅ | HTML Docs | Verify that HTTP headers generated from user input are properly validated and encoded. | Covered by [5.3.1](https://appsecg.host/5.3). |\r\n| 8 | ✅ | HTML Docs | Verify that dynamically generated HTML is constructed safely using templates or frameworks that auto-encode outputs. | Jim says [below](https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248311422) that this is not sufficiently covered in [5.2.5](https://appsecg.host/5.2) and \"_I think safely building HTML (encoding and similar) and avoiding template injection (avoid server side template assembly) are different controls._\". Opened #1998 to discuss this separately. |\r\n| 9 | ✅  | HTML Docs | Verify that HTML comments do not contain untrusted user input. | Added to [5.3.1](https://appsecg.host/5.3) and tracked by #1997. |\r\n| 10 | ✅ | Email | Verify that email content and headers do not include untrusted user input without proper encoding and validation. | Covered by [5.2.3](https://appsecg.host/5.2). |\r\n| 11 | ✅ | LDAP | Verify that LDAP queries are built using safe methods that separate code from data. | Covered by [5.3.7](https://appsecg.host/5.3) |\r\n| 12 | ✅ | Database | Verify that SQL queries use parameterized queries or prepared statements. | Covered by [5.3.4](https://appsecg.host/5.3). |\r\n| 13 | ✅ | Database | Verify that ORM (Object-Relational Mapping) frameworks are used correctly to prevent SQL Injection. | Covered by [5.3.4](https://appsecg.host/5.3). |\r\n| 14 | ✅ | Database | Verify that stored procedures are designed to accept parameters that use parameterized queries or prepared statements. | Opened #1993 to include this in [5.3.4](https://appsecg.host/5.3). |\r\n| 15 | ✅ | XML | Verify that XML documents use proper encoding to avoid XML Injection. | Covered by [5.3.10](https://appsecg.host/5.3). |\r\n| 16 | ✅ | XML | Verify that input used in XML parsing is validated and entity expansion is disabled. | XXE is covered in [5.3.10](https://appsecg.host/5.3) and schema validation is in [13.3.1](https://appsecg.host/13.3). |\r\n| 17 | ✅ | OS | Verify that command-line arguments are properly escaped or use safe API functions. | Covered in [5.3.8](https://appsecg.host/5.3). |\r\n| 18 | ✅ | OS | Verify that input used in command execution is properly validated and sanitized. | Covered in [5.3.8](https://appsecg.host/5.3). |\r\n| 19 | ✅ | Logs | Verify that input used in log messages is properly encoded and sanitized. | Covered in [7.3.1](https://appsecg.host/7.3). |",
+      "createdAt": "2024-07-24T06:11:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2246983240",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GAoJ-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> \"Verify that data embedded in JavaScript is encoded using a safe method like JSON encoding or JavaScript-specific encoding functions.\" @jmanico do you think this is sufficiently covered in [5.2.5](https://appsecg.host/5.2)?\r\n\r\nPolitely, no. I think safely building HTML (encoding and similar) and avoiding template injection (avoid server side template assembly) are different controls.",
+      "createdAt": "2024-07-24T15:30:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248311422",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GAo51",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> \"Verify that data embedded in JavaScript is encoded using a safe method like JSON encoding or JavaScript-specific encoding functions.\"\t@jmanico do you think this is sufficiently covered in [5.3.1](https://appsecg.host/5.3)?\r\n\r\nYes, for sure.",
+      "createdAt": "2024-07-24T15:31:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248314485",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GAwX7",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think we need both 5.2.8 and 5.3.1\r\n> 5.2.8 | Verify that the application sanitizes, disables, or sandboxes user-supplied scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode, or similar.\r\n-- | --\r\n\r\nThis addresses sanitizing user authored cunks of CSS. Just like untrusted HTML is need to be sanitized.\r\n\r\n> 5.3.1 | [MODIFIED] Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, CSS, URL parameters, HTTP headers, SMTP, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara).\r\n-- | --\r\n\r\nThis addresses adding user controlled data, like a color, into blocks of otherwise static css. Different controls and to some degree different attacks, too.\r\n\r\n",
+      "createdAt": "2024-07-24T15:45:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248345083",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GByii",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I updated the table above.",
+      "createdAt": "2024-07-24T18:04:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248616098",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GB3DS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I merged this in. I added a catch all for any encoding scenarios not covered elsewhere [as I suggested here](https://github.com/OWASP/ASVS/issues/1589#issuecomment-2152050611).\r\n\r\nI don't think this wording is perfect but it has taken too long to spend further on it for now.",
+      "createdAt": "2024-07-24T18:15:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2248634578",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GQ8lr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I merged this in. I added a catch all for any encoding scenarios not covered elsewhere https://github.com/OWASP/ASVS/issues/1589#issuecomment-2152050611.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.3.1** | [MODIFIED] Verify that output encoding for an HTTP response/HTML document/XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, JavaScript, CSS, or HTTP headers, to avoid changing the message or document structure. | ✓ | ✓ | ✓ | 116 |\r\n| **5.3.14** | [ADDED] Verify that output encoding is relevant for the interpreter and context required in any context where a potentially dangerous interpreter, not mentioned above, is being used. | | ✓ | ✓ | |\r\n\r\nI prefer to not have the 5.3.14 and have 5.3.1 to cover all cases.\r\n\r\nThe requirement text must be independent and understandable when watched just a requirement alone - it can not contain \"not mentioned above\".",
+      "createdAt": "2024-07-26T11:45:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2252589419",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GYdmV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'd really rather keep 5.3.1 focused on it's particular area. Would it be better to just change the text to say:\r\n\r\n> [ADDED] Verify that output encoding is relevant for the interpreter and context required in any context where a potentially dangerous interpreter ~, not mentioned above,~ is being used.",
+      "createdAt": "2024-07-28T15:38:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2254559637",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GcxLK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Looks good @tghosth @elarlang ",
+      "createdAt": "2024-07-29T11:30:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2255688394",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IjvE7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Whilst the concept of a catch-all makes sense, having thought about it more, I don't think it adds that much value compared to adding another, potentially confusing requirement.",
+      "createdAt": "2024-08-15T10:55:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2291069243",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IjvNr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We also have 5.2.2 as a sort of catch all for dangerous sinks🙃",
+      "createdAt": "2024-08-15T10:55:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2291069803",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IjvYv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder 7 days @tghosth to remove 5.3.14",
+      "createdAt": "2024-08-15T10:56:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2291070511",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IjvZh",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nThursday, August 22, 2024 12:00 AM (GMT+02:00)\r\n> @tghosth to remove 5.3.14",
+      "createdAt": "2024-08-15T10:56:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2291070561",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JRj_d",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1589#issuecomment-2291070511) @tghosth\n> @tghosth to remove 5.3.14",
+      "createdAt": "2024-08-21T22:01:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2303082461",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JnECx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "5.3.14 should be removed in #2026",
+      "createdAt": "2024-08-25T07:47:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1589#issuecomment-2308718769",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-03-22T12:49:30Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABmzyuzA",
+      "name": "7) PR in non-master branch",
+      "description": "",
+      "color": "BB14B6"
+    }
+  ],
+  "number": 1589,
+  "state": "CLOSED",
+  "title": "5.3.1 has too much going on and should be shortened",
+  "url": "https://github.com/OWASP/ASVS/issues/1589"
+}

@@ -1,0 +1,141 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjU1MDk2MDQ5",
+    "is_bot": false,
+    "login": "Cyber-AppSec",
+    "name": "Cyber-AppSec"
+  },
+  "body": "## Suggest New Security Controls for ASVS 5.0 API and Web Service Security\n\nHello OWASP ASVS Team,\n\nI would like to suggest a few additional security controls for inclusion in OWASP ASVS 5.0. These controls are particularly focused on enhancing API and Web Service security, which is a critical aspect in modern application architectures. These suggestions are based on best practices from the security industry and OWASP guidelines.\n\n### Suggested Controls:\n\n#### V4.6 API Rate Limiting & Abuse Prevention\n- **4.6.1** Verify that all APIs implement rate limiting to restrict the number of requests from a single source within a time window, ensuring that the system does not get overwhelmed by excessive traffic.\n- **4.6.2** Verify that APIs provide proper error messages (e.g., 429 Too Many Requests) when rate limits are exceeded, and that these responses do not reveal sensitive information such as the exact number of requests allowed.\n- **4.6.3** Verify that CAPTCHA or other human-verification mechanisms are used when an API is being accessed repeatedly or in a pattern indicative of automated abuse (e.g., brute-forcing).\n\n#### V4.7 API Security Logging & Monitoring\n- **4.7.1** Verify that APIs log all failed and successful authentication attempts, including the IP addresses, user agents, and timestamps, while ensuring that sensitive information (like passwords) is not logged.\n- **4.7.2** Verify that APIs log all potentially dangerous activities, such as abnormal request patterns, access to sensitive data, or unexpected error conditions.\n- **4.7.3** Verify that logs are regularly reviewed and stored securely for a predefined period to allow for incident response and investigation.\n\n#### V4.8 API Authentication and Authorization Best Practices\n- **4.8.1** Verify that all APIs require strong authentication (e.g., OAuth 2.0, OpenID Connect) for access to sensitive resources.\n- **4.8.2** Verify that sensitive APIs enforce role-based access control (RBAC) or attribute-based access control (ABAC) to ensure users can only access resources they are authorized for.\n- **4.8.3** Verify that APIs properly implement API keys, tokens, and refresh tokens, ensuring tokens are rotated regularly and properly validated.\n\n#### V4.9 API Input Validation and Data Sanitization\n- **4.9.1** Verify that APIs validate all incoming data, including query parameters, body data, and headers, against a strict data type and format policy.\n- **4.9.2** Verify that APIs employ parameterized queries and prepared statements when interacting with databases to avoid SQL injection.\n- **4.9.3** Verify that all incoming data is sanitized to prevent cross-site scripting (XSS), XML external entity (XXE) attacks, and other injection-related vulnerabilities.\n\n#### V4.10 Caching and Sensitive Data Exposure\n- **4.10.1** Verify that sensitive data, such as passwords, session tokens, and personally identifiable information (PII), are never cached in shared caches, including CDNs and intermediary proxy caches.\n- **4.10.2** Verify that APIs are configured to prevent caching of responses containing sensitive data (e.g., HTTP headers with \"Cache-Control: no-store\").\n\n### References:\n- OWASP API Security Top 10: [OWASP API Security Top 10](https://owasp.org/www-project-api-security/)\n- OWASP Rate Limiting Cheat Sheet: [OWASP Rate Limiting Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Rate_Limiting_Cheat_Sheet.html)\n- OWASP Logging Cheat Sheet: [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html)\n- OWASP Authentication Cheat Sheet: [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)\n- OWASP Injection Cheat Sheet: [OWASP Injection Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Injection_Cheat_Sheet.html)\n- OWASP Secure Data Storage Cheat Sheet: [OWASP Secure Data Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secure_Data_Storage_Cheat_Sheet.html)\n\nThese controls are essential in modern API and web service security and I believe they would be valuable additions to the OWASP ASVS 5.0 standard. I would be happy to discuss further if needed.\n\nThank you for considering this suggestion.\n\nThanks,\nSrihari",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6nINIy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi there,\n\na long input, but I feel that one important line from the ASVS document from [API chapter](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V4-API.md) is ignored before giving the feedback:\n\n> **Note that the general authentication, session management, or general input validation concerns from other chapters also apply to APIs so this chapter can not be taken out of context or tested separately.**\n\nI checked all proposals and need to admit, there is no action to take from them at the moment, as they are all covered already. See the details below.\n\nIn general, those requirements feel like someone took requirements from an old version of ASVS, put the word API into them, and now they found the way back. I think I have seen similar proposals in the past.\n\n---\n\n**V4.6 API Rate Limiting & Abuse Prevention**\n\n> **4.6.1** Verify that all APIs implement rate limiting to restrict the number of requests from a single source within a time window, ensuring that the system does not get overwhelmed by excessive traffic.\n\nCovered by:\n* 2.4.1 Verify that anti-automation controls are in place to protect against excessive calls to application functions that could lead to data exfiltration, garbage data creation, quota exhaustion, rate limit breaches, denial of service, or overuse of costly resources.\n\n---\n\n> **4.6.2** Verify that APIs provide proper error messages (e.g., 429 Too Many Requests) when rate limits are exceeded, and that these responses do not reveal sensitive information such as the exact number of requests allowed.\n\nSensitive error messages are covered by:\n* 16.5.1 Verify that a generic message is shown when an unexpected or security sensitive error occurs, which does not expose sensitive internal system data such as stack traces, queries, secret keys, and tokens.\n\n\"proper error message\" can be interpreted a bit differently compared to the example given (\"correct HTTP status code\"), I think it falls into the security area and does not solve or mitigate any security problem.\n\n---\n\n> **4.6.3** Verify that CAPTCHA or other human-verification mechanisms are used when an API is being accessed repeatedly or in a pattern indicative of automated abuse (e.g., brute-forcing).\n\nWhy API should ask for CAPTCHA? It is more of a UI area that needs solving.\n\nIn general it falls to anti-automation area, and is covered by:\n* 2.4.1 Verify that anti-automation controls are in place to protect against excessive calls to application functions that could lead to data exfiltration, garbage data creation, quota exhaustion, rate limit breaches, denial of service, or overuse of costly resources.\n* 2.4.2 Verify that business logic flows require realistic human timing, preventing excessively rapid transaction submissions.\n* 6.3.1\tVerify that controls to prevent attacks such as credential stuffing and password brute force are implemented according to the application's security documentation.\n\n---\n\n**V4.7 API Security Logging & Monitoring**\n\n> **4.7.1** Verify that APIs log all failed and successful authentication attempts, including the IP addresses, user agents, and timestamps, while ensuring that sensitive information (like passwords) is not logged.\n> **4.7.2** Verify that APIs log all potentially dangerous activities, such as abnormal request patterns, access to sensitive data, or unexpected error conditions.\n> **4.7.3** Verify that logs are regularly reviewed and stored securely for a predefined period to allow for incident response and investigation.\n\nHow to verify that logs are \"regularly reviewed\"?\n\nOtherwise it feels like packed requirements that are covered by requirements from chapter \"V16 Security Logging and Error Handling\"\n\n---\n\n**V4.8 API Authentication and Authorization Best Practices**\n\nNote that ASVS is for requirements, best practices are area for Cheat Sheet project.\n\n\n> **4.8.1** Verify that all APIs require strong authentication (e.g., OAuth 2.0, OpenID Connect) for access to sensitive resources.\n\n\"Strong authentication\" is not defined here, but in general we have the topic covered in \"V6 Authentication\".\n\nIn case OAuth and OIDC also must be involved, then detailly covered in the chapter \"V10 OAuth and OIDC\" and also in \"V9 Self-contained Tokens\"\n\n---\n\n> **4.8.2** Verify that sensitive APIs enforce role-based access control (RBAC) or attribute-based access control (ABAC) to ensure users can only access resources they are authorized for.\n\nWe don't force any pattern to be used, because we can not say that this is the one and only way to solve authorization. It is a recommendation or \"just a one way to do things\".\n\nAuthorization in general is covered in \"V8 Authorization\"\n\n---\n\n> **4.8.3** Verify that APIs properly implement API keys, tokens, and refresh tokens, ensuring tokens are rotated regularly and properly validated.\n\nThe requirement is a bit abstract and covers huge area, we have probbaly tens of requirement to cover this requirement.\n\n---\n\n**V4.9 API Input Validation and Data Sanitization**\n\n> **4.9.1** Verify that APIs validate all incoming data, including query parameters, body data, and headers, against a strict data type and format policy.\n\nCovered by requirements in \"V2.2 Input Validation\"\n\n---\n\n> **4.9.2** Verify that APIs employ parameterized queries and prepared statements when interacting with databases to avoid SQL injection.\n\nCovered by:\n* 1.2.4 Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection and other database injection attacks. This is also relevant when writing stored procedures.\n\n---\n\n> **4.9.3** Verify that all incoming data is sanitized to prevent cross-site scripting (XSS), XML external entity (XXE) attacks, and other injection-related vulnerabilities.\n\nI don't have any good words to say about this requirement :)\n\nFor only XSS we have 5+ requirements, and some of them are not \"and other injection-related vulnerabilities\".\n\nBut all the mentioned topics are covered.\n\n---\n\n**V4.10 Caching and Sensitive Data Exposure**\n\n> **4.10.1** Verify that sensitive data, such as passwords, session tokens, and personally identifiable information (PII), are never cached in shared caches, including CDNs and intermediary proxy caches.\n\nHard to see how the CDN fits to this list.\n\nOtherwise those are covered in \"V14 Data Protection\"\n\n---\n\n> **4.10.2** Verify that APIs are configured to prevent caching of responses containing sensitive data (e.g., HTTP headers with \"Cache-Control: no-store\").\n\nCovered by:\n* 14.3.2 Verify that the application sets sufficient anti-caching HTTP response header fields (i.e., Cache-Control: no-store) so that sensitive data is not cached in browsers.",
+      "createdAt": "2025-04-15T06:22:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2969#issuecomment-2803946034",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nWGRP",
+      "author": {
+        "login": "Cyber-AppSec"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for taking the time to provide such a thorough and detailed review — I really appreciate the thoughtful breakdown.\n\nYou're absolutely right that most of the proposed areas *are technically covered* across different ASVS chapters — and the line in the API section about not being taken out of context is crucial.\n\nThat said, my intent with this proposal wasn't to reintroduce older requirements with \"API\" appended but my motivation for the suggestions comes not from gaps in ASVS itself and from **practical implementation challenges I've observed repeatedly in the field** over the last few years, especially with engineering and AppSec teams trying to secure modern API-first and microservice architectures. **Teams often struggle to interpret how the generic ASVS controls apply in the context of APIs**\n\nIn particular, I’ve found:\n\n- Security teams often *don’t know which controls from other chapters apply* to APIs, or how.\n- Developers miss security controls when reviewing API interfaces because the guidance isn't **centralized or contextualized**.\n- Controls like rate-limiting, API-specific logging, and caching misconfigurations tend to fall through the cracks because they are **distributed across different sections** (e.g., logging in V16, rate limiting in V2), and are *not API-tailored in their expression*.\n\nSo perhaps the more useful contribution is not a new category, but rather a **\"mapping annex\"** or **\"implementation guidance\"** that links common API security concerns (e.g., rate limiting, GraphQL abuse, JWT storage) with the relevant ASVS requirements — helping bridge the gap between existing guidance and its application in API-heavy environments.\n\nWould the ASVS team be open to a contribution in that form — something that *augments*, rather than overlaps with, the current structure?\n\nHappy to help draft or iterate on this if there’s interest.\n\nThanks again!\n\n",
+      "createdAt": "2025-04-15T21:40:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2969#issuecomment-2807587919",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nY7Bl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> That said, my intent with this proposal wasn't to reintroduce older requirements with \"API\" appended but my motivation for the suggestions comes not from gaps in ASVS itself and from practical implementation challenges I've observed repeatedly in the field\n\nThe scope for ASVS is limited to security verification requirements, principles, and \"what must be done\". We can not mix strong requirements with recommendations, and we can not go to the implementation suggestion area, because there can be different solutions to achieve that. In the big picture, it feels like you are talking about a material for the cheat sheet project.\n\n> Teams often struggle to interpret how the generic ASVS controls apply in the context of APIs.\n\n> Security teams often don’t know which controls from other chapters apply to APIs, or how.\n\nIn my opinion, API's are not that special when it comes to ASVS requirements. Just the input data is in a different format and there are some extra HTTP headers expected, but in general, most of the ASVS requirements are applied to APIs. It would be naive and dangerous to have some seriously shortened subset of requirements only in focus and ignore a lot of requirements by doing so.\n\n> So perhaps the more useful contribution is not a new category, but rather a \"mapping annex\" or \"implementation guidance\" \n\nAbout mapping - first, we removed all mapping from the ASVS to keep it clean, only for requirements. Because whatever changes we would like to make to mapping, it could cause a new release - keeping everything potentially separate gives more dynamic development options. The question is - who should do it?\n\nThe danger with mapping is - there are also gray areas - if to map \"this you need for API-s\" and \"this you don't need for API-s\", then there will always be someone who claims, that \"but this is not correct in my case\".\n\nFor an implementation guide, there is no need or point for ASVS to duplicate the OWASP Cheat Sheet project. Such guidance belongs there.",
+      "createdAt": "2025-04-16T05:18:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2969#issuecomment-2808328293",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6neyY5",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Thank you for taking the time to provide such a thorough and detailed review — I really appreciate the thoughtful breakdown.\n> \n> You're absolutely right that most of the proposed areas *are technically covered* across different ASVS chapters — and the line in the API section about not being taken out of context is crucial.\n> \n> That said, my intent with this proposal wasn't to reintroduce older requirements with \"API\" appended but my motivation for the suggestions comes not from gaps in ASVS itself and from **practical implementation challenges I've observed repeatedly in the field** over the last few years, especially with engineering and AppSec teams trying to secure modern API-first and microservice architectures. **Teams often struggle to interpret how the generic ASVS controls apply in the context of APIs**\n> \n> In particular, I’ve found:\n> \n> - Security teams often *don’t know which controls from other chapters apply* to APIs, or how.\n> - Developers miss security controls when reviewing API interfaces because the guidance isn't **centralized or contextualized**.\n> - Controls like rate-limiting, API-specific logging, and caching misconfigurations tend to fall through the cracks because they are **distributed across different sections** (e.g., logging in V16, rate limiting in V2), and are *not API-tailored in their expression*.\n> \n> So perhaps the more useful contribution is not a new category, but rather a **\"mapping annex\"** or **\"implementation guidance\"** that links common API security concerns (e.g., rate limiting, GraphQL abuse, JWT storage) with the relevant ASVS requirements — helping bridge the gap between existing guidance and its application in API-heavy environments.\n> \n> Would the ASVS team be open to a contribution in that form — something that *augments*, rather than overlaps with, the current structure?\n> \n> Happy to help draft or iterate on this if there’s interest.\n> \n> Thanks again!\n\nThe short answer is yes. Mapping different taxonomies to ASVS is a great idea. We removed such mapping from the core of ASVS but as an external publication I think this is a great idea. It helps people who are looking at different lists and taxonomies to learn about ASVS.\n\nIf you publish this on you own let us know and I'd be happy to help promote it.\n\nDoes this work for you?\n\nThank you so kindly for contributing your knowledge to this project!",
+      "createdAt": "2025-04-16T14:59:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2969#issuecomment-2809865785",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nlDrS",
+      "author": {
+        "login": "Cyber-AppSec"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi Jim,\n\nThank you for the positive feedback! I completely understand the decision to remove such mappings from the core of ASVS, and I’m excited to take this forward as an external publication. I agree that it can be valuable for people looking at different security frameworks to learn how they relate to ASVS.\n\nI will move forward with publishing the mapping on GitHub.  I’ll keep you posted once the first version is up — and would love to hear your thoughts on how we might structure or share it in a way that complements the OWASP ecosystem. If there's anything you’d like to see included (or avoided), happy to collaborate and align with your vision! I really appreciate your offer to help promote it.\n\nThanks again for the opportunity to contribute!\n\nThanks,\nSrihari",
+      "createdAt": "2025-04-17T01:44:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2969#issuecomment-2811509458",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nmTC5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for reaching out, I hope it is more clear what the ASVS and what it is not, and that you find suitable presentation for your content.\n\nFrom this issue perspective I think we are all clear and can close this out.",
+      "createdAt": "2025-04-17T05:50:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2969#issuecomment-2811834553",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-15T02:26:57Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 2969,
+  "state": "CLOSED",
+  "title": "Suggest New Security Controls for ASVS 5.0 API and Web Service Security",
+  "url": "https://github.com/OWASP/ASVS/issues/2969"
+}

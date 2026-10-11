@@ -1,0 +1,170 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjcxMzU4OA==",
+    "is_bot": false,
+    "login": "atluxity",
+    "name": "Hans-Petter Fjeld"
+  },
+  "body": "Hey,\r\n\r\nI was wondering about the 2.5.4 requirement, and I consulted the references. Nothing about this is written in the NIST SP800-63b linked. The reference goes to  \"5.1.1.2 Memorized Secret Verifiers\" and the CWE is just to the category \"Configuration\".\r\n\r\nThe 2.5.4 point seem to originate from this commit: https://github.com/OWASP/ASVS/commit/6298456976626a1853f296f5c892f78c3b5379ec#diff-0c2b5e7455e2813c723b067180f2b89432476e3fffc7e5d1e69b8da70e3efec4R180\r\n\r\nAnd I was unable to find any discussion about its creation.\r\n\r\nI cannot find that the existence of a share or default account like \"admin\" is a vulnerability AS LONG as the account is protected properly.\r\n\r\nIt is easy to say that the application is more secure without the account than with, but you can say that about any account. If this is found to be reasonable, please provide some more mention about why this requirement exists somewhere and point to an actual reference in NIST or similar framework.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5L6zpf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.5.4** | Verify shared or default accounts are not present (e.g. \"root\", \"admin\", or \"sa\"). | ✓ | ✓ | ✓ | 16 | 5.1.1.2 / A.3 |\r\n\r\nJust first things which comes to my mind\r\n* Shared account - it's not possible to track to individual, who actually did what.\r\n* Default account - it's most likely have known credentials and it's easy target, like admin:123456 or other classic bad examples.\r\n\r\nIn both cases, I consider password as breached - I'm not the only one who knows the password for this username.\r\n\r\nIf I \"read between lines\" correctly, then maybe confusing part here in the requirement is the word \"account\" - as one may interpret it as \"username\" and other \"username + password\".",
+      "createdAt": "2022-10-10T19:07:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1273707103",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5L64v_",
+      "author": {
+        "login": "atluxity"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yeah, I get those points.\r\n\r\nBut there is a difference between \"verify not present\" and \"do not use shared account when audit-logs are required\".\r\nI know of secure systems where they call these shared account \"break the glass\" accounts, and is intended only to be used in emergency recovery and will have the password written down somewhere it requires two people to unlock it. Some will argue it is a \"shared\" account. It is certainly not a personal account. It's existence should not be seen as a vulnerability. There are ways to do this correct and there are ways to do this wrong, as with a lot of things.\r\n\r\nThere is a difference between \"verify not present\" and \"ensure proper credentials\".\r\nI think credential complexity is handled elsewhere in the requirements.\r\n",
+      "createdAt": "2022-10-10T19:31:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1273727999",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5L8bzY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First - I oppose the issue title - I think this requirement is reasonable. We must not allow default username+password combinations to be present.\r\n\r\n\"Break the class\" or other recovery/emergency solutions do not fit to this requirement for my taste.\r\n\r\nI think this \"ensure proper credentials\" is more confusing than current solution.\r\n\r\nI'll wait feedback from others.",
+      "createdAt": "2022-10-11T06:10:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1274133720",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5L-Hp5",
+      "author": {
+        "login": "atluxity"
+      },
+      "authorAssociation": "NONE",
+      "body": "Are there any other framework that includes such requirements? I was unable to find it in NIST SP800-63b and unable to map this to a CWE.\r\n\r\n",
+      "createdAt": "2022-10-11T12:04:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1274575481",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Mp3Dc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To have a requirement in ASVS we don't need to have it anywhere else - if it makes sense, then it makes sense.\r\n\r\nI already answered my interpretation on NIST SP 800-63B - if to translate \"shared account\" as breached passwords, then it's covered.\r\n\r\nNot everything is mapped or mappable to CWE as well, things are moving forward and some things are outdated. For example - [CWE-262: Not Using Password Aging](https://cwe.mitre.org/data/definitions/262.html) is completely opposite to (v5.0) _V2.1.10 Verify that the application does not require periodic credential rotation._",
+      "createdAt": "2022-10-20T19:34:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1286041820",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5NFM5E",
+      "author": {
+        "login": "atluxity"
+      },
+      "authorAssociation": "NONE",
+      "body": "In a lot of applications it is not possible to remove the default user, particularly when using another party, like ldap or AD, as source of accounts. \"Not present\" is the part I object to. \"disabled, removed or secured\" would be better. It would allow for mitigating measures, while \"not present\" is a requirement with little flexibility.",
+      "createdAt": "2022-10-27T08:57:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1293209156",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5OCfpl",
+      "author": {
+        "login": "mgargiullo"
+      },
+      "authorAssociation": "NONE",
+      "body": "> \"Not present\" is the part I object to. \"disabled, removed or secured\" would be better. It would allow for mitigating measures, while \"not present\" is a requirement with little flexibility.\r\n\r\nI like this.  Maybe \"Not Utilized\" instead of \"Not Present\" and add the \"disabled, removed or secured\" qualifier.\r\n\r\nAlong this vein, should we ensure a complimentary req in 7.x that states something like \"Alert on, or at the minimum log, login events for default or shared accounts.\"?\r\n\r\nAt least then, if a break-glass account is used, it is recorded and ideally generates an alert.",
+      "createdAt": "2022-11-09T19:50:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1309276773",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5YH_OB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This will be handled in #1188 and the logging point in #1577",
+      "createdAt": "2023-03-21T19:47:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1395#issuecomment-1478488961",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-10-10T13:57:37Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1395,
+  "state": "CLOSED",
+  "title": "2.5.4 \"Verify shared or default accounts are not present\" - not reasonable",
+  "url": "https://github.com/OWASP/ASVS/issues/1395"
+}

@@ -1,0 +1,530 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "As discussed in https://github.com/OWASP/ASVS/discussions/3193, I am opening this issue to formally track the proposal related to Database Queries.\n\nFollowing the discussion, here is the final proposal:\n\n\n### 1.2.4: Database Queries\n**The Statement**: \"Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection...\"\n**Why it needs explanation**: This rule is excellent, but developers often assume that simply using an ORM makes them immune. They fail to understand that injecting user input into methods that construct the query structure itself reintroduces SQL injection.\n**Recommendation**: The explanation should explicitly state: \" **Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, or entity frameworks. Additionally, ensure that any user input used to construct or modify the structure of a query (e.g., table names, field names, ORDER BY clauses) is validated against a strict allow-list.**\"\n\n\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6xRb6D",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is an excellent suggestion.",
+      "createdAt": "2025-06-15T15:57:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2974137987",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6xYaG6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this issue has raised an interesting point which is that this requirement jumps directly to implementation suggestions (ORM, parameterization, etc) rather than focusing on security goals.\n\n@ajayojha do you think you could reword the requirement to be goal focused but still mention the example solutions and also the fact that not every solution might work in every situation.\n\n",
+      "createdAt": "2025-06-16T10:17:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2975965626",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6xZ10M",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for the feedback, here is the revised proposal:\n\n**Verify that the application protects against query injection by ensuring that user-controlled input is treated strictly as data, not as executable query logic. Use parameterized statements when input is used as data in query. If user input influences the structure of the query (such as table names, column names, or sort order), validate it against a strict allow-list.**",
+      "createdAt": "2025-06-16T12:05:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2976341260",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6xciLz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What do you think about:\n\n\"_Verify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by treating potentially untrusted content as data, and not as executable query logic . This could involve only including using this content in parameterized queries, using strongly-typed ORM queries, or where this cannot be done, using a strict allow-list for data such as table names, column names, or sort order._\"\n",
+      "createdAt": "2025-06-16T15:14:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2977047283",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6xe_RH",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "This is a fantastic, and it perfectly captures the core principles. \n\nI have taken your proposed structure and just polished the flow slightly.\n\n\"_Verify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by ensuring that untrusted input is treated strictly as data, not as executable query logic. Acceptable techniques include the use of parameterized queries, strongly-typed ORM methods, and, where dynamic query elements are necessary (such as table names, column names, or sort order), validating input against a strict allow-list._\"\n\n\nAgain, I am in full agreement with the technical substance of your proposal. This is purely a suggestion to make the final text as polished as possible. I am happy to proceed with whichever version the team prefers.",
+      "createdAt": "2025-06-16T18:42:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2977690695",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6x2nkY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What we have at the moment.\n\nRequirement:\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **1.2.4** | Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from SQL Injection and other database injection attacks. This is also relevant when writing stored procedures. | 1 |\n\nText under the section:\n> Note: Using parameterized queries or escaping SQL is not always sufficient. Query parts such as table and column names (including \"ORDER BY\" column names) cannot be escaped. Including escaped user-supplied data in these fields results in failed queries or SQL injection.\n\nBefore we merge any changes, we need to have agreement and confirmation, do we track changes made in the requirements.\n\n---\n\nWith any version of proposals here, I feel it tolerates too much dynamic query building and using input validation as a defense here.",
+      "createdAt": "2025-06-18T11:52:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2983885080",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6x3gni",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> With any version of proposals here, I feel it tolerates too much dynamic query building and using input validation as a defense here.\n\nThe point of this work is, if you have user driven table names or similar, you often NEED to do validation (or a look up map of some kind) since not all variables can be parameterized. It's a very astute and accurate point.",
+      "createdAt": "2025-06-18T13:00:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2984118754",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6x3ozJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > With any version of proposals here, I feel it tolerates too much dynamic query building and using input validation as a defense here.\n> \n> The point of this work is, if you have user driven table names or similar, you often NEED to do validation (or a look up map of some kind) since not all variables can be parameterized. It's a very astute and accurate point.\n\nYou kind of opposing here, but this is what I said in https://github.com/OWASP/ASVS/discussions/3193.",
+      "createdAt": "2025-06-18T13:09:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2984152265",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6x578t",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > > With any version of proposals here, I feel it tolerates too much dynamic query building and using input validation as a defense here.\n> > \n> > \n> > The point of this work is, if you have user driven table names or similar, you often NEED to do validation (or a look up map of some kind) since not all variables can be parameterized. It's a very astute and accurate point.\n> \n> You kind of opposing here, but this is what I said in [#3193](https://github.com/OWASP/ASVS/discussions/3193).\n\nI see your quote in comment 3193 \"String concat is often used for the parameters that can not be bound, such as order by. In this case, allow-list validation must be in place\" which is a nice comment and we agree. This is exactly why I like the original posters modification. I think we should accept this change, it's an important distinction for any query parameterization like system for multiple injection types.",
+      "createdAt": "2025-06-18T15:42:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2984754989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yE4o0",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Note: Using parameterized queries or escaping SQL is not always sufficient. Query parts such as table and column names (including \"ORDER BY\" column names) cannot be escaped. Including escaped user-supplied data in these fields results in failed queries or SQL injection.\n\nThis note should be removed, as we have covered in the main requirement. if you have different opinion on this please share",
+      "createdAt": "2025-06-19T10:46:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2987625012",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yTtYo",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@tghosth I will make changes in the requirement content after your confirmation, which proposal we should go with, waiting for your inputs to proceed further.",
+      "createdAt": "2025-06-20T12:57:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2991511080",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yULCY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Context for the situation, here and for other issues.\n\nASVS is volunteer-based, and it took a lot of resources to get ASVS v5.0 out. Now there is a need to recover a bit from that intense period, which was not made smooth for us either.\n\nChanges to the existing requirements are not high-priority tasks, as the next release is not knocking on the door, and it will not have an immediate effect. There are higher priority tasks at the moment to handle, and as said, resource is limited for that.\n\nAs I mentioned before, as a precondition to make changes into the requirement, we need to decide whether we track changes again, and if we do, what is the process for that, and who is responsible for tracking all those - it is quite a huge job.\n\nThe current requirement can have a wording change, but current proposals require some work. All the pieces are in the document already at the moment (just as a note), so it is more a positioning question than a fix.\n\nIn short, I kindly ask you to keep in mind the general situation and not reach to the demanding state.",
+      "createdAt": "2025-06-20T13:23:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2991632536",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yZU8k",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for sharing the broader context regarding priorities and bandwidth — I absolutely respect the time and effort that goes into maintaining a project like ASVS.\n\nHowever, I want to respectfully but clearly address a few points:\n\n> “The current requirement can have a wording change, but current proposals require some work. All the pieces are in the document already at the moment (just as a note), so it is more a positioning question than a fix.”\n\n* With due respect, this is not just a matter of **positioning**. The current wording of 1.2.4 has caused real-world confusion among developers and architects — including in environments where high-stakes security decisions are made. The fact that so many contributors, including yourself in earlier comments, acknowledged the nuance of injection via dynamic query structure proves this is a meaningful clarification, not just rewording. This is a **fundamental vulnerability fix** in terms of clarity and guidance, not simply a rephrasing of existing, diffuse information. \n This issue wasn’t created to demand changes but to propose a pragmatic improvement that’s already received multiple endorsements. I believe it’s well within the spirit of ASVS to evolve based on community feedback — and I’ve made every effort to engage in that spirit.\n\n* I understand and support deferring implementation until the next release or larger wording pass, As a maintainer of open source libraries under the MIT license, which see millions of downloads each year, I can relate to the challenges of maintaining consistency while also adapting based on community input. But implying that this concern is not valid, or labeling the conversation as “demanding,” feels misaligned with how this collaborative space should operate.\n\nMy intent here was precisely to foster a discussion with the team and community to reach the best possible conclusion, which is why I deliberately opened this first in the GitHub Discussions section – a non-actionable venue specifically designed for collaborative inquiry and consensus-building – rather than filing a formal GitHub Issue which implies an immediate actionable task.",
+      "createdAt": "2025-06-20T21:32:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2992983844",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ya2ch",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The current wording of 1.2.4 has caused real-world confusion among developers and architects — including in environments where high-stakes security decisions are made.\n\nAre you serious? This requirement **caused** problems? Sorry, but after this kind of statements it's hard to take anything seriously.\n\nTaking into account the knowledge and point of view presented in issues and discussions here, I have reason to think that the real reason may rely somewhere else.\n\nThis is NOT fundamental fix for the requirement, the same information is also presented in the document already.\n\nWe'll discuss the requirement with Josh and come up with a proposal update in the future. There is no need to post another AI-generated overconfidence response for this.",
+      "createdAt": "2025-06-21T07:07:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2993383201",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ybKmR",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I’m disappointed by the tone of your message, especially the suggestion that my statements are not serious or AI-generated simply because they are well-structured and assertive. I’ve engaged in this discussion in good faith, and I would expect the same professional courtesy in return.\n\n**To your question** — yes, I am **SERIOUS** and This is a **fundamental fix** in the context of clarity, safety, and correct application of the standard — which is exactly what ASVS is designed to support. \n\n**Ambiguity = Security Risk**\n\nThe dangerous misconception: It directly attacks the false confidence that \"**ORM = total SQLi immunity.**\", This **false confidence** leads to real-world vulnerable code — especially when developers build dynamic queries (e.g., custom filters, search sorting) using user input.\n\n\n**let me elaborate the statement which you have quoted, the below explanation was the thought while writing the precise statement:**\n\n> The current wording of 1.2.4 has caused real-world confusion among>  developers and architects.\n\nAs a Chief Software Architect, Hands on experience in design the large scale enterprise architecture/security solutions, reviewing the code and discussing with the teams of their challenges. I experienced something like this type of confusion in many cross functional teams. Developers and Architects across industries rely on OWASP ASVS or other security recommendation not just for guidance but as authoritative input, often without cross-verifying assumptions. That’s exactly why precision in language and clarity in intent matter.\n\n> including in environments where high-stakes security decisions are made.\n\nas observed in high-assurance environments, where injection flaws due to ORM misuse have led to real-world vulnerabilities (e.g., documented CVEs in Sequelize, Hibernate, and others).\n\n\n\nIf you disagree with the interpretation or impact, I welcome a technical discussion if you want to discuss on slack with me I don't mind to discuss, the same type of content writing and spirit you will see there as well with quick response, but I am more interested in technical discussion — not personal dismissals.\n\n\n>There is no need to post another AI-generated overconfidence response for this.\n\nThis is not my problem and in open-source community this type of rigid statements or person have no space, if you have problem with the statements that's your problem, I will create a lot of other tickets with positive mindset that community discuss more on technical side. \n",
+      "createdAt": "2025-06-21T08:42:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2993465745",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yb4mb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Are you serious? This requirement caused problems? Sorry, but after this kind of statements it's hard to take anything seriously.\n\nThese kinds of comments are not appropriate @elarlang - please behave more respectfully to our volunteers, even when you disagree.",
+      "createdAt": "2025-06-21T16:11:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2993654171",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6yz7vF",
+      "author": {
+        "login": "karantekwani"
+      },
+      "authorAssociation": "NONE",
+      "body": "> All the pieces are in the document already at the moment (just as a note), so it is more a positioning question than a fix.\n\n@elarlang I have read the 1.2.4 requirement and the attached note in the ASVS v5.0.0 document, but I am still confused with the above quoted comment. Particularly on how the 'requirement + note' solves the proposer's concern.\n \nI have been following this discussion thoroughly, but I’m not able to clearly connect it to ORMs. From what I understand, ASVS added note applies only when writing raw queries and not when ORM is used. It does NOT cover or talk about cases where ORMs can themselves be insecure and introduce SQL injection risks.\n \nWould be great if you share your thoughts on it.\nDisclaimer: This is my first time commenting on any open-source community. Open to feedback!",
+      "createdAt": "2025-06-24T11:27:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-2999958469",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6y2Ana",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> All the pieces are in the document already at the moment (just as a note), so it is more a positioning question than a fix.\n\nSeems that here is context lost in reading - it is about **timing** for the changes to happen as it is not a time-critical fix.\n\nSo there is no need to \"organized fight\" here, I agree that the requirement can be improved, and I have stated that, we will update the requirement.\n\nAll the reasoning is written here:\nhttps://github.com/OWASP/ASVS/issues/3201#issuecomment-2991632536\n\nAlso, as written in https://github.com/OWASP/ASVS/issues/3201#issuecomment-2993383201\n> We'll discuss the requirement with Josh and come up with a proposal update in the future.\n\nThose who are \"disappointed in tone\", or like to point fingers, should carefully analyze their own actions here before further comments. At the moment, it is just a pure irony.",
+      "createdAt": "2025-06-24T13:29:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3000502746",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6y26R6",
+      "author": {
+        "login": "karantekwani"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for clearing my confusion that 1.2.4 requirement will be improved with better clarity on use of ORMs.\n\n>The current requirement can have a wording change, but current proposals require some work. All the pieces are in the document already at the moment (just as a note), so it is more a positioning question than a fix.\n\nI thought you were confident on quoted statement that it’s just a wording change and not a fix.\n\n>\"organized fight\"\n\nI’ve been following this discussion for couple of days as this was pumping in my feeds, and was curious to learn from the community.\n",
+      "createdAt": "2025-06-24T14:29:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3000738938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6y42WR",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Those who are \"disappointed in tone\", or like to point fingers, should carefully analyze their own actions here before further comments. At the moment, it is just a pure irony.\n\nThere is no irony here. The comments from you like \"_Are you serious? This requirement caused problems? Sorry, but after this kind of statements it's hard to take anything seriously._\" are dismissive and disrespectful. Please stop.\n",
+      "createdAt": "2025-06-24T17:09:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3001247121",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67db7i",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would request that everyone keeps comments respectful and on-topic.\n\nMy understanding is that the most recent proposal was:\n\n\"_Verify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by ensuring that untrusted input is treated strictly as data, not as executable query logic. Acceptable techniques include the use of parameterized queries, strongly-typed ORM methods, and, where dynamic query elements are necessary (such as table names, column names, or sort order), validating input against a strict allow-list._\"\n\n@elarlang raised a concern that it was too permissive for dynamic queries. As @jmanico points out, if there is a business requirement for table or column names to be dynamic then parameterization cannot be used.\n\nWe can potentially make the requirement's language stronger on the dynamic query question whilst still allowing it in certain circumstances.\n\nBefore we do that, @karantekwani said \"_From what I understand, ASVS added note applies only when writing raw queries and not when ORM is used. It does NOT cover or talk about cases where ORMs can themselves be insecure and introduce SQL injection risks._\"\n\nORMs can be used insecurely but that generally involves writing dynamic rather than strongly typed queries and I feel like the requirement proposal above covers that. Do you feel differently @karantekwani?",
+      "createdAt": "2025-08-01T16:02:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3145055970",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67dvQJ",
+      "author": {
+        "login": "karantekwani"
+      },
+      "authorAssociation": "NONE",
+      "body": "I’m aligned with the direction here. The requirement proposal you just mentioned clears up my confusion and provides an excellent approach for developers to understand how to use ORMA safely.",
+      "createdAt": "2025-08-01T16:31:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3145135113",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67fYiY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"_Verify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by ensuring that untrusted input is treated strictly as data, not as executable query logic. Acceptable techniques include the use of parameterized queries or strongly-typed ORM methods. Where dynamic query elements are unavoidably necessary (where table names, column names, or sort order have to be set dynamically), validate all input against a strict allow-list._\"\n\n@elarlang do you think this is clearer?",
+      "createdAt": "2025-08-01T19:30:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3145566360",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67p4X-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In the big picture, it is clearer, but some details to improve.\n\n> strongly-typed ORM methods\n\nIs it clear, what it means?\n\n---\n\n> Where dynamic query elements are unavoidably necessary (where table names, column names, or sort order have to be set dynamically), validate all input against a strict allow-list.\n\nI think this needs rebuild - the point of view and avoiding the \"command for developer\" style.\n\nSomething like:\n> SQL keywords (such as table names, column names as order by value) used in dynamically built SQL queries must be validated against an allow-list of values.\n",
+      "createdAt": "2025-08-03T10:12:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3148318206",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67zyDN",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> In the big picture, it is clearer, but some details to improve.\n> \n> > strongly-typed ORM methods\n\nThis is confusing, it's good use the term '**type-safe queries**' instead of **'strongly-typed orm methods**'. In Entity Framework Core, the term \"**strongly typed queries**\" is used, but it is specific to the .NET ecosystem. The term '**type-safe queries**' is applicable across ecosystems (e.g., SQL, HQL, NoSQL, Cypher).\n\n> \n> > Where dynamic query elements are unavoidably necessary (where table names, column names, or sort order have to be set dynamically), validate all input against a strict allow-list.\n> \n> I think this needs rebuild - the point of view and avoiding the \"command for developer\" style.\n> \n> Something like:\n> \n> > SQL keywords (such as table names, column names as order by value) used in dynamically built SQL queries must be validated against an allow-list of values.\n\nI would recommend below statement as the requirement is also cover the non-sql ecosystem as well:\n\n_The user input must be validated against a strict allowlist when before being used to construct dynamic query elements, such as table names, column names, sort keys, or NoSQL field names/operators._\n\n**Updated Requirement Suggestion:**\n\nVerify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by ensuring that untrusted input is treated strictly as data, not as executable query logic. Acceptable techniques include the use of parameterized queries or **type-safe-queries**. **The user input must be validated against a strict allowlist when before being used to construct dynamic query elements, such as table names, column names, sort keys, or NoSQL field names/operators.**\n",
+      "createdAt": "2025-08-04T14:17:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3150913741",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM679VgG",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Just a note. Type-safety does not always provide security. An attacker may control a variable that is a string which could lead to SQLi.\n\nThe reason type-safe query constructors are safe is not because of type-safety, but because the automatically parametrize variables during SQL construction.\n\nBut you are 100% correct in that type-safe query builders like jOOQ, LINA and Prisma usually do project against injection because they parameterize internally.",
+      "createdAt": "2025-08-05T05:51:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3153418246",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69H50g",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So what do we think about:\n\n\"_Verify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by ensuring that untrusted input is treated strictly as data, not as executable query logic. Preferred techniques include the direct use of parameterized queries or achieving this through type-safe queries. Where dynamic query elements are unavoidably necessary (where table names, column names, sort keys, or NoSQL field names/operators have to be set dynamically), all input must be validated against a strict allow-list._\"",
+      "createdAt": "2025-08-10T23:30:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3172965664",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69iAkf",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> So what do we think about:\n> \n> \"_Verify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by ensuring that untrusted input is treated strictly as data, not as executable query logic. Preferred techniques include the direct use of parameterized queries or achieving this through type-safe queries. Where dynamic query elements are unavoidably necessary (where table names, column names, sort keys, or NoSQL field names/operators have to be set dynamically), all input must be validated against a strict allow-list._\"\n\nPerfect.",
+      "createdAt": "2025-08-12T15:20:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3179809055",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-FQfA",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Preferred\n\n@tghosth  Do you think the word “**preferred**” is the right fit for ASVS requirements, or is it good to stick to the standard wording like “**must**” or something else as per asvs context?",
+      "createdAt": "2025-08-14T16:18:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3189049280",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DHdYm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Wherever possible, our intention was to use [rfc2119](https://datatracker.ietf.org/doc/html/rfc2119) wording.\n\nI think you raise an interesting point in that maybe wherever we using words like ideally or preferred, we should try and standardise on something like should or recommended, which is what that RFC suggests.\n\nTherefore this requirement would change to: \n\n\"_Verify that the application protects data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) against injection attacks by ensuring that untrusted input is treated strictly as data, not as executable query logic. Recommended techniques include the direct use of parameterized queries or achieving this through type-safe queries. Where dynamic query elements are unavoidably necessary (where table names, column names, sort keys, or NoSQL field names/operators have to be set dynamically), all input must be validated against a strict allow-list._\"\n\nWhat do you think?",
+      "createdAt": "2025-09-10T06:38:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3273512486",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DytT-",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Perfect.",
+      "createdAt": "2025-09-12T11:11:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3201#issuecomment-3284849918",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-06-15T04:44:36Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAACYnQLAA",
+      "name": "requires change control",
+      "description": "",
+      "color": "aaaaaa"
+    }
+  ],
+  "number": 3201,
+  "state": "OPEN",
+  "title": "Enhance ASVS V1.2.4 to address misinterpretation of ORM safety regarding dynamic queries",
+  "url": "https://github.com/OWASP/ASVS/issues/3201"
+}

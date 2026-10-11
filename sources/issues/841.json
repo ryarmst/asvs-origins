@@ -1,0 +1,502 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQwMDI3NjU=",
+    "is_bot": false,
+    "login": "csfreak92",
+    "name": "Ralph Andalis"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nASVS 4.0 - 2.1.7 verification requirement is:\r\n\r\n`Verify that passwords submitted during account registration, login, and password change are checked against a set of breached passwords either locally (such as the top 1,000 or 10,000 most common passwords which match the system's password policy) or using an external API. If using an API a zero knowledge proof or other mechanism should be used to ensure that the plain text password is not sent or used in verifying the breach status of the password. If the password is breached, the application must require the user to set a new non-breached password.`\r\n\r\nI propose an improvement here for this control is to remove `checking of passwords during login against a set of breached passwords`. It makes more sense to leave only `registration` and `password change` modules where checking of passwords against a set of breached passwords since that is the only time a password will be checked with the system's password policy. This eliminates the redundant checking every time the user logs in. If the user has set a weak password (common examples are `Password1` or `12345678` during password selection (either through `registration` or `password change` modules), then every time he logs in with that password this would always return a negative result if the system has a set of breached passwords like SecList's common passwords: (https://github.com/danielmiessler/SecLists/tree/master/Passwords/Common-Credentials). \r\n\r\nI do not see the relevance of always checking the login of someone's password if the mechanism to check its strength has accepted the weak or breached password. Thoughts on this suggestion please? \r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5MzMzMjc4MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't agree with this proposal.\r\n\r\nRequirement for periodical password changing is removed now and pre-condition for this is that password is checked against leakages. If user have been using some password really long time and this password is leaked, then it makes sense to check it after every login (not only when account was created). Leakages are the first source of data for dictionary attacks, it's not smart to ignore that check.",
+      "createdAt": "2020-09-16T11:01:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-693332780",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5MzM2NTM2NA==",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm with @elarlang here, what we are trying to do is better protect the user and the application from password stuffing attacks, which is now an increasingly common (and effective) tactic. ",
+      "createdAt": "2020-09-16T12:13:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-693365364",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5MzQ4MzAzNA==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If the intention of having a check every time a user logs in is for leaked credentials, then does checking it against top 1,000 or common 10,000 passwords sufficient? It may not even be enough. Now that you pointed it, I do agree that it is not smart to ignore this check. While I have no solid answer to my question too, but I'm thinking if those numbers are good against preventing credential stuffing attacks. ",
+      "createdAt": "2020-09-16T15:29:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-693483034",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5MzUzNTg5Ng==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's not limited to use only 1,000 or  10,000 passwords, I would point out here phrase _\"or using an external API\"_. \r\n\r\nIf someone start testing with password from top 1,000 list, then you can block this IP because users can not have those passwords by rules (users can not set those as passwords) - so it can be only bad intent.\r\n\r\nBut if there some leakage like have been from LinkedIn, then attackers may not test multiple passwords at all - they probably use more targeted approach to check, do some user use the same password like exists in a leakage.",
+      "createdAt": "2020-09-16T16:59:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-693535896",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5Mzc1ODc3Ng==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with the proposal. NIST 800-63 suggests blocking against common passwords that would typically fit your policy during registration and change password events not during authentication events. Jim Fenton the standard author suggests the list of blocked common passwords that would typically fit your policy should be anywhere from 50,000 to 150,000 common passwords long.\n\nAnd FWIW I am verifying my claim with the NIST author and will return here ASAP.\n\n--\nJim Manico\n@Manicode\n\n\n> On Sep 16, 2020, at 6:59 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> It's not limited to use only 1,000 or 10,000 passwords, I would point out here phrase \"or using an external API\".\n> \n> If someone start testing with password from top 1,000 list, then you can block this IP because users can not have those passwords by rules (users can not set those as passwords) - so it can be only bad intent.\n> \n> But if there some leakage like have been from LinkedIn, then attackers may not test multiple passwords at all - they probably user more targeted approach to check, do some user use the same password like exists in a leakage.\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-09-17T01:49:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-693758776",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5NDE5NDI3MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This comment is verbatim from Jim Fenton the author of NIST 800-63.\n\n***\n\nFirst part: That's correct, we just need to make sure that the \nacceptable passwords aren't common. No point in checking during login \nevents because those won't be valid anyway.\n\nSecond part: I'd like not to make such a specific recommendation. SP \n800-63B doesn't make one either. The list should be long enough that \nit's sufficient for online attacks, but for offline attacks I'd prefer \nif they used better storage hygiene. My favorite is to do the normal \nsalted iterated hashing they should be doing anyway, and then taking the \nresult and running an additional hashing or encryption step with a key \nthat is stored separately (in an HSM, or just a separate machine \naccessible only to the verifier). I'd not recommend that verifiers use \nextremely large blocklists like Have I Been Pwned because they are \nlikely to frustrate the user trying to come up with something truly \nunique. And frustrated users take shortcuts that overall degrade security.\n\nI did do a presentation at PasswordsCon several years ago that expressed \nthe opinion that a blocklist of 100k entries is a good size, but that's \nreally more of an order-of-magnitude guess than a specific recommendation.\n\n***\n\nOn 9/16/20 3:49 PM, Jim Manico wrote:\n> I agree with the proposal. NIST 800-63 suggests blocking against \n> common passwords that would typically fit your policy during \n> registration and change password events not during authentication \n> events. Jim Fenton the standard author suggests the list of blocked \n> common passwords that would typically fit your policy should be \n> anywhere from 50,000 to 150,000 common passwords long.\n>\n> And FWIW I am verifying my claim with the NIST author and will return \n> here ASAP.\n>\n> --\n> Jim Manico\n> @Manicode\n>\n>\n>> On Sep 16, 2020, at 6:59 AM, Elar Lang <notifications@github.com> wrote:\n>>\n>> ﻿\n>>\n>> It's not limited to use only 1,000 or 10,000 passwords, I would point \n>> out here phrase /\"or using an external API\"/.\n>>\n>> If someone start testing with password from top 1,000 list, then you \n>> can block this IP because users can not have those passwords by rules \n>> (users can not set those as passwords) - so it can be only bad intent.\n>>\n>> But if there some leakage like have been from LinkedIn, then \n>> attackers may not test multiple passwords at all - they probably user \n>> more targeted approach to check, do some user use the same password \n>> like exists in a leakage.\n>>\n>> —\n>> You are receiving this because you are subscribed to this thread.\n>> Reply to this email directly, view it on GitHub \n>> <https://github.com/OWASP/ASVS/issues/841#issuecomment-693535896>, or \n>> unsubscribe \n>> <https://github.com/notifications/unsubscribe-auth/AAEBYCNV2LRCCV45WK3KBETSGDVIJANCNFSM4ROC362Q>.\n>>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-09-17T12:22:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-694194271",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5NDcxMDYxNA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If we want to be ready for scenario \"password leakage from one site gives access to another site\" without expecting that all users are good and use unique password for every site, then only option to do it is to check against breaches. And for me it really makes sense to do it.\r\n\r\nYes, users MAY be frustrated when choosing their unique password, but this can be also alarming and educational for them - \"oh, wow, this password have been leaked, where else I have been using it\".",
+      "createdAt": "2020-09-18T07:39:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-694710614",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY5NDg5Njg3MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed, but it’s not needed during login time. You basically need to take three steps...\n\n1) during registration verify username/password with public breaches securely\n\n2) during change password verify username/password with public breaches securely\n\n(these two are often expensive operations which is why we would like to avoid doing the check during login, so...)\n\n3) When there is major 3rd party breach of username/passwords, lock your effected users and force them into a password change\n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On Sep 17, 2020, at 9:39 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> If we want to be ready for scenario \"password leakage from one site gives access to another site\" without expecting that all users are good and use unique password for every site, then only option to do it is to check against breaches. And for me it really makes sense to do it.\n> \n> Yes, users MAY be frustrated when choosing their unique password, but this can be also alarming and educational for them - \"oh, wow, this password have been leaked, where else I have been using it\".\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-09-18T14:19:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-694896870",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5MTkwMzUyMA==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, I agree with points 1 and 2 that you wrote, however how do we propose to monitor for the third point - `locking all users and forcing them a password change in the event of a major 3rd party breach`? Is there an elegant solution for the third point? ",
+      "createdAt": "2021-03-06T09:40:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-791903520",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc1MzA5NA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Most of my clients just do a search on username and look for a username match and that's it. And there is no elegant solution which is why I suggest only matching on username. PR time?",
+      "createdAt": "2021-03-12T21:01:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-797753094",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODQ4MjA1OA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is the change I'm going to fight against and loudly :)\r\n\r\nOnly thing here which may need improvement - the word \"login\" does not describe, should it be successful or not, but the point for requirement is: if someones password is leaked and it's used to login to the application, then after successful authentication account should be locked and some account activation should be triggered (like activation link to e-mail).",
+      "createdAt": "2021-03-13T15:01:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-798482058",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODQ4NTI3MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with the original comment. It is not performance friendly or reasonable to do this control at login. The standard defense which is SP800-63 approved is:\r\n\r\n1) check at password CHANGE or password ADD time (new registration)\r\n2) React to major breaches by locking effected accounts\r\n\r\nEvery login requiring checks against a 11+ billion account database is not reasonable.\r\n\r\nSo +1 for the OP's suggestion.",
+      "createdAt": "2021-03-13T15:05:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-798485271",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDkzOTI4Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Could we get new proposal in the issue before they are going to PR? Merge first, discuss later is not really effective way. Please read comments in PR template. (https://raw.githubusercontent.com/OWASP/ASVS/master/.github/pull_request_template.md)\r\n\r\nLatest commit:\r\nhttps://github.com/OWASP/ASVS/pull/925/commits/d1c91524e1f990691b2c160e87a7a4b096d9ec8a\r\n\r\nNow entire password security is standing that application have working mechanism to check against breaches:\r\n* If user created account long time ago and as we don't have password periodical change rule anymore, most-likely users will never change it. So if password was not checked on registration against leakage, it will be never checked again.\r\n* If you have already existing user-base and you want to implement this rule, it does not give any effect.\r\n* To be able to force users to reset their password, application must be able check based on username or email? How to match accounts in application and in leakage? I think it's not realistic.\r\n* To force entire user-base to change password every time when there is some leakage, is not nice for users at all. If users have unique passwords for every site, they are not affected by the leakage but need to change their password anyway? Not user-friendly and hard to imagine that someone could implement it.\r\n* What is \"major\" leakage? Not clear.\r\n\r\nProblem is only for leaked passwords and the goal should be to avoid using leaked passwords. At the moment I my opinion you create more new problems than you solve.\r\n\r\nNot PR ready.",
+      "createdAt": "2021-03-17T09:37:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-800939283",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk3NDY3Nw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Main argument against \"check leakage on login\" is that it may cause some Denial of Service vector and in general I agree with that concern.\r\n\r\nFirst - you should check leakage after successful login, not before.\r\n\r\nHow many users you have? How many times per day/week/month they log in?\r\n\r\nIf I need to develop password check against leakage today what I could do:\r\n\r\n  * use \"last time password checked from leakage\" for password field\r\n  * use \"last known leakage\" time in general\r\n\r\nIf user authenticates, you need to check password from leakage, if:\r\n\r\n  * \"last known leakage\" time is later than \"last time password checked from leakage\"\r\n  * \"last time password checked from leakage\" is older than <debatable amount of time here>\r\n  \r\nif password is found from leakage, log the situation and call \"account recovery scenario\" - it may be an attacker who used leaked password and may now take account over with known/correct password.\r\n\r\nAnd obviously you need to check password from leakages (and set value for \"last time password checked from leakage\") when users sets or changes the password.",
+      "createdAt": "2021-03-17T10:33:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-800974677",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk3NjA1Mw==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps we can split this up into several requirements:\r\n\r\n1. Users should not be able to set easy passwords, so check against top-1000 on register and password change.\r\n2. Users should not be able to set any breached password, so check against API on register and password change.\r\n3. Users should not be able to authenticate with any breached password, even if they created their password before it was breached, so check against API on login.\r\n\r\nWe can make these L1, L2, L3 requirements.",
+      "createdAt": "2021-03-17T10:36:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-800976053",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk3Nzc2Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And ofcourse, agree with split: https://github.com/OWASP/ASVS/issues/683#issuecomment-539387178 Recommendation nr 3.\r\n\r\n(I try to split this monster issue in near future to smaller pieces)",
+      "createdAt": "2021-03-17T10:38:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-800977763",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk3OTg2OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @elarlang in the face of difficult conversation and being ignored for many months, you still persisted in order to help this standard. You have no idea how much respect I have for you and how much I appreciate your participation.\r\n\r\nThank you very much.",
+      "createdAt": "2021-03-17T10:42:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-800979869",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk4MTUxNA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "PR has been merged! Nice work! I'm closing this out but please re-open if I did it in haste!\r\n\r\nAnd thanks for the PR @csfreak92 :)",
+      "createdAt": "2021-03-17T10:45:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-800981514",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDk4Mjk5Nw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar, I missed your earlier comments and am re-opening to make sure your comments are considered. I did accept the PR but can continue to modify after more discussion.",
+      "createdAt": "2021-03-17T10:47:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-800982997",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40qUJj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The leader team had an extensive discussion on this.\r\n\r\nIt was decided to simplify and split the requirements (2.1.7, 2.1.14).\r\n\r\nReal-world experience shows that the top 3000 are sufficient for 2.1.7.\r\n\r\n2.1.14 is non-trivial because it requires the company to acquire a database of this information which is why it is level 3.",
+      "createdAt": "2021-07-20T15:58:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-883507811",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM40qUOh",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Closing this, thank you for the good discussions",
+      "createdAt": "2021-07-20T15:59:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-883508129",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40sEJp",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> The leader team had an extensive discussion on this. It was decided ...\r\n\r\nCan you summarize the arguments from that discussion? Why did you decide on the current solution? The requirements state that passwords should be checked, not that they should be denied. Is that intentional? What is meant by \"an available set\"? Any recommendations on which set to use? Why top 3000 passwords? What real-world experience was used? In 2.1.14, what if the password is breached but doesn't belong to the username? Is the username even relevant? There currently is no requirement for checking for breached passwords on login. Did you consider that in your discussion?\r\n\r\nI think it's important to document the rationale for requirements, so that it's possible to interpret and modify them later. Furthermore, I feel a bit left out if in the decision process, if the leader group decides things without explanation.",
+      "createdAt": "2021-07-21T07:42:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-883966569",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40sKSU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm reopening the issue because I think those arguments should be provided for everyone, probably those changes will cause a lot of opened issues without making it clear.\r\n\r\nping @danielcuthbert @jmanico ",
+      "createdAt": "2021-07-21T08:20:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-883991700",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40saor",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Happy to. \r\n\r\nFirstly I think this is a solid discussion and one where there is no real right or wrong approach. The goal should be to stop credential stuffing attacks (or as us older hackers call it, brute-force attacks) against authentication functions. Passwords suck, we all know this, and the more we can do to stop people from choosing known bad passwords (as in passwords included in the ever-growing breach datasets we now have available to us), the better we are. \r\n\r\nWhat we have proposed for 2.1.7 is that during account creation and password changes, the proposed password selected by the user is checked against a data set of known passwords. We don't want to recommend a single commercial/free tool but there are many out there now and the most popular is Troy Hunt's [Haveibeenpwned](https://haveibeenpwned.com/API/v3)\r\n\r\nAs for the top 3000 as a number, it's rare to see such random passwords being used by any of the datasets. The issue we have is that not all passwords are totally random, so to try and balance usability and security and reduce friction, you can limit it to the top 3000 found in say a 12GB password breach [file](https://haveibeenpwned.com/Passwords). The number was based on research I've done for my employer using very large datasets but you might decide you want to test the hash against every single one. \r\n\r\nOn the username aspect, which we added as an L3 check in 2.1.14. This is a harder one to look at implementing and it's one @jmanico was incredibly passionate about adding. \r\n\r\nOn checking a breached password upon login, yes we discussed this in-depth and personally I feel this isn't the best approach. Now one could argue that continual checking of all passwords should be a thing, and yes I'd tend to agree but where it starts to become an issue is the implementation. Will it add delays to the auth process? How would you handle it if say a user's random solid passphrase is indeed leaked, do you redirect them to a new function that tells them this and gets them to change it? I guess there are other compensation controls you could have to stop credential stuffing attacks from being successful such as 2.2.1. \r\n\r\nI know we are keen on hearing from the community if this should actually be a thing? So please comment\r\n\r\n",
+      "createdAt": "2021-07-21T09:57:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-884058667",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40tLxp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I just write down my own opinion here as well - my technical ideas, how I could build breach or stupid password checks, are written above in previous comments.\r\n\r\nThe main goal should be - authentication is not built only asking username and password. If you have at least something valuable in an application, you must have MFA in place. That's it. Breach, stupid passwords etc vectors gone. That's why I \"let it go\" and also closed my own related issue #683 \r\n\r\nI tell it in my Web Application Security training since 2012. Now it's 2021 ...",
+      "createdAt": "2021-07-21T15:01:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-884259945",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40tSi_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree 100%. This is backed up strongly by NIST 800-63. Anytime \nsensitive data, public health or similar is in play, MFA is required. \nPeriod.\n\nDo we have this requirement, strongly, in ASVS? I suggest we make the \nneed to do MFA stronger if it's not already.\n\n",
+      "createdAt": "2021-07-21T15:37:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-884287679",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40tTDI",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "PS: Sjoerd I definitely consider you an ASVS leader based on your \ncontributions and will invite you to these leadership sessions on a \nregular basis.\n\nThe purpose of the leadership session is to resolve issues. We're going \nto keep doing this and I'll be sure to invite you next time. It's a \nhyper-production process, but we will make mistakes. Luckily we are not \npressing silicon, we can fix mistakes easily.\n\n",
+      "createdAt": "2021-07-21T15:40:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-884289736",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40uTRK",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "There is [no change window with \"Have I Been Pwned?\" to anticipate when new breach[es] will be published](https://haveibeenpwned.uservoice.com/forums/275398-general/suggestions/33884371-notification-before-loading-breach-onto-azure) so this Service Level Agreement would need to be defined by OWASP unless it has been defined by NIST already?\r\n\r\nWhat impact would incidents such as [\"Collection 1\"](https://www.idginsiderpro.com/article/3335261/the-politics-of-have-i-been-pwned.html) have on verification or would this be managed under OpenSAMM/BSIMM?\r\n\r\nADDED 23 July 2021\r\n\r\nWill the compromised password file have to bundled to application or is it acceptable to reuse a web API in light of [continued attacks against k-anonymity](https://arxiv.org/abs/1905.13737)?\r\n\r\nIs [zxcvbn](https://dropbox.tech/security/zxcvbn-realistic-password-strength-estimation) a possible reference implementation too?",
+      "createdAt": "2021-07-21T23:04:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-884552778",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43eRZW",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> As for the top 3000 as a number, it's rare to see such random passwords being used by any of the datasets. The issue we have is that not all passwords are totally random, so to try and balance usability and security and reduce friction, you can limit it to the top 3000 found in say a 12GB password breach [file](https://haveibeenpwned.com/Passwords). The number was based on research I've done for my employer using very large datasets but you might decide you want to test the hash against every single one.\r\n\r\nI have put forth to @jmanico that we reuse [PwnedPasswordsTop100k.txt from NCSC UK](https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere#:~:text=PwnedPasswordsTop100k.txt) for #1055 due to the following:\r\n- There are a number of unresolved issues with the dataset proposed by @danielcuthbert such as https://twitter.com/TychoTithonus/status/1218912123117391874\r\n- The level of effort and cost to load 3K rows is almost the same as 100K rows.\r\n\r\nPlease let me know if you want me to update PR #1061 to include 2.17 also?\r\n\r\n\r\n\r\n\r\n\r\n  \r\n\r\n\r\n\r\n\r\n",
+      "createdAt": "2021-09-30T01:47:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-930682454",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44F5VK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is a lingering conversation and I am closing it for now. Please re-open with a straight forward issue if needed.",
+      "createdAt": "2021-10-12T14:32:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/841#issuecomment-941069642",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-09-16T02:27:22Z",
+  "labels": [],
+  "number": 841,
+  "state": "CLOSED",
+  "title": "[For Improvement] Removal of checking of passwords during login against a set of breached passwords for 2.1.7",
+  "url": "https://github.com/OWASP/ASVS/issues/841"
+}

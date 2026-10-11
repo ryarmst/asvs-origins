@@ -1,0 +1,54 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "We don't currently have a requirement for password salt length but only \"parameter settings configured based on current guidance\". Should be include a requirement about password salt size (entropy)?\n\nNotes:\n\n* PBKF2 recommends at least 8 bytes;\n* argon2 recommends at least 16 bytes for password hashing;\n* bcrypt requires 16 bytes.\n\n***\n\nWe currently have:\n\n| # | Description | L1 | L2 | L3 | CWE |\n| :---: | :--- | :---: | :---: | :---: | :---: |\n| **6.6.2** | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4, COVERS 2.5.3] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force attacks more challenging. | | ✓ | ✓ | |\n\nWith the list of approved password hash functions:\n\n| Hash Function | Reference | Required Parameter Sets | L1 | L2 | L3 |\n| ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | --|--|--|\n| argon2 | RFC 9106 | Argon2ID: Memory Cost 19MB, Time Cost 2, Parallelism 1 | | ✓ | ✓ |\n| scrypt | RFC 7914 | 2^15 r = 8 p = 1 | | ✓ | ✓ |\n| bcrypt | -- | At least 10 rounds. | | ✓ | ✓ |\n| PBKDF2_SHA512 | [NIST SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final), [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | 210,000 iterations | ✓ | ✓ | ✓ |\n| PBKDF2_SHA256 | [NIST SP 800-132](https://csrc.nist.gov/pubs/sp/800/132/final), [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | 600,000 iterations | ✓ | ✓ | ✓ |\n\nFor *lookup secrets*, we have:\n\n| # | Description | L1 | L2 | L3 | CWE |\n| :---: | :--- | :---: | :---: | :---: | :---: |\n| **2.6.2** | [MODIFIED, SPLIT TO 2.6.4] Verify that, when being stored in the application's back-end, lookup secrets with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a <mark>32-bit random salt</mark>. A standard hash function can be used if the secret has 112 bits of entropy or more. | | ✓ | ✓ | 330 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6aztoc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest no, just use the right password storage algorithm and implementation and salting is already handled. \n\nThe only things developers typically need to worry about is to make sure the salt for each password is unique. Not random, unique.\n\nI would totally support a requirement ensuring uniqueness, most libraries just make the salt random which is not necessarily unique, so devs should check if a given salt is in use for another password.",
+      "createdAt": "2025-01-17T01:31:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2535#issuecomment-2597247516",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bBh_V",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we are deliberately trying to not be too detailed in 6.6.2, rather encouraging people to use a resource like the password storage cheatsheet.\n\n2.6.2 is something slightly different which is why it is like that.\n\nI would suggest closing this for now.",
+      "createdAt": "2025-01-19T13:49:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2535#issuecomment-2600869845",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-01-17T00:20:36Z",
+  "labels": [],
+  "number": 2535,
+  "state": "CLOSED",
+  "title": "Requirement for password salt entropy",
+  "url": "https://github.com/OWASP/ASVS/issues/2535"
+}

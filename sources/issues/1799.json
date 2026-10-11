@@ -1,0 +1,120 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I am writing to discuss the classification of requirement 8.3.1:\r\n\r\n- Verify that sensitive data is only sent to the server in the HTTP message body or headers and that the URL and query string do not contain sensitive information, such as an API key or session token.\r\n\r\nWhile the intent of this requirement is clear and aligns with best practices in information security, I believe its current classification as a Level 1 (L1) requirement may be overly stringent, especially considering common industry practices and practical implementation challenges.\r\n\r\nA particular point of concern is the common industry practice of sending password reset links with codes embedded in the URL. They are pivotal to the security of the password reset process. The requirement, as stated, might lead to a misconception that such practices are non-compliant at the L1 level, potentially causing undue concern or leading organizations to adopt less user-friendly, though more compliant, practices.\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5tgXXA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I can not see any misconception for 8.3.1, also I can not see the hash for the password reset URL as sensitive information **in this context**. The priority for that hash is \"in limited time window\" and \"**one time use**\".\r\n\r\n8.3.1 is addressing the problem, when sensitive information leaks from URL to browser history, to access logs etc. Password reset hash itself does not contain anything sensitive and for the time it was leaked, it is not usable anymore (one-time use).\r\n\r\nBut if anyone feels that it needs to be improved, we can discuss the proposal.\r\n\r\nAre there more examples than the password reset link?\r\n\r\nWhat is the recommendation - to allow sensitive information to be sent via URL? For me, it goes against common sense in the security field.",
+      "createdAt": "2023-12-02T16:51:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1799#issuecomment-1837200832",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xtugT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Wherever possible, URL based codes should be sent as \"fragment\" parameters (after the #) as these are not sent to the server but are still accessible via local JavaScript so that they can be processed. Maybe we just need to clarify this:\r\n\r\n\r\n> Verify that sensitive data is only sent to the server in the HTTP message body or headers and that the URL and query string do not contain sensitive information, such as an API key or session token. **Where sensitive data needs to be contained in a link such as a password reset token, this should be included as a \"fragment\" parameter after the # symbol so that it is not directly transmitted to the server.**\r\n",
+      "createdAt": "2024-01-24T10:09:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1799#issuecomment-1907812371",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xt1xI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Whenever possible...\r\nI don't share this view, I think it is clearly limited for/to SPA solutions.\r\n\r\nContext: One-time-use secrets.\r\n\r\nIf it is not SPA, then it opens an extra attack surface. If it is in the query part of the URL and is sent to the server, the server can immediately process it and the secret is not valid anymore. Yes, it leaks to logs, but the hash itself does not contain anything sensitive (do not put JWTs here) and for the time it is leaked from logs, it is an outdated piece of not useful amount of symbols.\r\n\r\nIf it is not SPA and the secret is sent in the fragment part of the URL, then first entire UI and JavaScript must be loaded to just read the fragment and send it to the backend.",
+      "createdAt": "2024-01-24T10:26:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1799#issuecomment-1907842120",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xuy27",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok but whenever possible doesn't appear in the requirement and I am not giving an option to do something in the query part of the URL in my proposed requirement so I am not sure what the problem is",
+      "createdAt": "2024-01-24T13:09:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1799#issuecomment-1908092347",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x2FCZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Having discussed with @elarlang, I think adding content about the fragment is overcomplicating things.\r\n\r\n@ImanSharaf do you have a specific proposed change to the existing requirement?",
+      "createdAt": "2024-01-25T11:40:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1799#issuecomment-1910001817",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5zOtaq",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can close this.",
+      "createdAt": "2024-02-08T01:45:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1799#issuecomment-1933235882",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-12-01T23:48:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1799,
+  "state": "CLOSED",
+  "title": "Suggestion for Reconsideration of ASVS Requirement 8.3.1 Classification",
+  "url": "https://github.com/OWASP/ASVS/issues/1799"
+}

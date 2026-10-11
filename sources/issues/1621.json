@@ -1,0 +1,120 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "A student suggested that 13.1.1 tells us the problem but needs to tell us better HOW to FIX the problem.\r\n\r\n13.1.1 | Verify that all application components use the same encodings and parsers to avoid parsing attacks that exploit different URI or file parsing behavior that could be used in SSRF and RFI attacks. | ✓ | ✓ | ✓ | 116\r\n-- | -- | -- | -- | -- | --\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5dV-4S",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> but needs to tell us better **HOW to FIX** the problem.\r\n\r\nI think it's clearly said in the requirement:\r\n\r\n> Verify that all application components use the same encodings and parsers\r\n\r\nASVS requirements are saying what must be done, not how exactly to do it (for that you may have cheat sheet series).\r\n\r\nIf there is no recommendations how to improve the wording, I'll just close the issue in the future.",
+      "createdAt": "2023-05-28T09:37:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1621#issuecomment-1566043666",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dvbAD",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "But what type of encoding? Url encoding? Base64 encoding? Base64url encoding? Html entity encoding? JavaScript hex encoding?",
+      "createdAt": "2023-06-01T20:13:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1621#issuecomment-1572712451",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dvfEx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From the issue description I would it's opposite: the requirement says what is the solution but does not describe, what is the problem :)\r\n\r\nAs I understand it - it's second layer of defense, when URL is not validated correctly and reach to functionality which load resource based on that may cause file read or SSRF attack.\r\n\r\nI think the requirement is valid also without \"encoding\" part.\r\n\r\nFirst found example:\r\nhttps://www.blackhat.com/docs/us-17/thursday/us-17-Tsai-A-New-Era-Of-SSRF-Exploiting-URL-Parser-In-Trending-Programming-Languages.pdf\r\n\r\nAs the first level defense must be URI validation, then I'm not sure it should be level 1 requirement, maybe not even level 2. Or I just underestimate how widespread the problem is (I have no idea).",
+      "createdAt": "2023-06-01T20:24:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1621#issuecomment-1572729137",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dvhjV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "(1) If you are redirecting or forwarding or loading a resource and the parameter is a complete url, the answer is url validation and domain validation and more, valid URL’s are still dangerous per SSRF so you need to limit •what • valid url’s are safe\n\n(2) If you are building a rest url and are adding a url fragment to an otherwise static host like:\n\n“Http://site.com/data/“ + data;\n\nThe answer is base64url encoding. rfc 4648. Url encoding is not safe here.\n\n(3) if you are building a url with a static start and then a query string parameter, then url encoding is safe.\n\n“Http://site.com?data=“ + data;\n\nElar, I hope my explanation explains why more detail is needed here.\n",
+      "createdAt": "2023-06-01T20:33:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1621#issuecomment-1572739285",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hFFaV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\r\nRequirement history:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---:| :---: | :---: |\r\n| **13.1.1** | Verify that all application components use the same encodings and parsers to avoid parsing attacks that exploit different URI or file parsing behavior that could be used in SSRF and RFI attacks. | ✓ | ✓ | ✓ | 116 |\r\n| **13.1.1** | Verify that the same encoding is used between the client and the server. | ✓ | ✓ | ✓ | 116 |\r\n\r\nThis was briefly discussed in #513. (There was a suggested CWE change in that issue that was also never actioned.)\r\n\r\nBasically, this is a specific problem about how you parse a URL leading to vulnerabilities like in [this](https://www.youtube.com/watch?v=voTHFdL9S2k) [presentation](https://www.blackhat.com/docs/us-17/thursday/us-17-Tsai-A-New-Era-Of-SSRF-Exploiting-URL-Parser-In-Trending-Programming-Languages.pdf). In principle this sort of issue could apply to any parser but not sure we want to get into this for now.\r\n\r\nThe original complain was that it was not clear what solution was so I have tried to make it clearer here:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---:| :---: | :---: |\r\n| **13.1.1** | [MODIFIED] Verify that URL parsers in all application components operate in a consistent way and use the same character encoding mechanism to avoid encoding differences or different URI or file parsing behavior being exploited in SSRF and RFI attacks. | ✓ | ✓ | ✓ | 175 |\r\n\r\n@jmanico @elarlang what do you think?",
+      "createdAt": "2023-07-10T11:04:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1621#issuecomment-1628722837",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hGMUC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is better.\n\nIf you want to get more specific you want to use URL encoding for URL \nparameters and bast64url encoding for path fragments.\n\n",
+      "createdAt": "2023-07-10T13:52:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1621#issuecomment-1629013250",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-05-04T15:26:55Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1621,
+  "state": "CLOSED",
+  "title": "13.1.1 concern",
+  "url": "https://github.com/OWASP/ASVS/issues/1621"
+}

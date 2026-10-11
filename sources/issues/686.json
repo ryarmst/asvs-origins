@@ -1,0 +1,62 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "> V14.5.3 Verify that the cross-domain resource sharing (CORS) Access-Control-Allow-Origin header uses a strict white-list of trusted domains to match against and does not support the \"null\" origin.\r\n\r\nOften `Origin` request header is just reflected back to `Access-Control-Allow-Origin` response header, but this requirement contains 2 separate problems.\r\n\r\nRecommendation to split requirement to:\r\n\r\n1. validating `Origin` request header - an API must not accept request with Origin \"null\" or with Origin which does not belong to white-list\r\n    - it is diffent from V14.5.2 but it can be merged with it\r\n    - based on that requirement/outcome, server makes decisions\r\n2. building correct `Access-Control-Allow-Origin` response header - user must not be able to control the value for `Access-Control-Allow-Origin` header (or value must be validated against whitelist of accepted domains), because it allows then content reading for browsers with Cross-Origin requests\r\n    - this requirement must belong to subcategory \"V14.4 HTTP Security Headers Requirements\" (which contains requirements for HTTP response headers)\r\n    - based on that requirement/outcome, browser makes decisions\r\n\r\nWhy to keep them separately?\r\n\r\n1. server must not accept request from \"unknown\" Origin, and it's not related (without pre-flight requests) anyhow how `Access-Control-Allow-Origin` is built\r\n2. value for `Access-Control-Allow-Origin` may come from some other user-controlled parameter, not only from `Origin` header.\r\n\r\nAdditional discussion: both requirements may match better with \"V13 API and Web Service Verification Requirements\" category.\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2Mjk4Mzg5MQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Not sure I understand. What do you mean by \"unknown\" origin? It seems like saying \"whitelist\" is a perfectly good catch all, no?",
+      "createdAt": "2019-12-08T19:29:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/686#issuecomment-562983891",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2MzAwMTQxOA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My original idea was to split \"input validation\" (check the `Origin` header) and Response header (use whitelisted `Access-Control-Allow-Origin` requirements. As those two problems are \"close to always\" together, then this requirement itself can stay like it is. Otherwise in practice during pen-test we need to report in practice the same problem twice.\r\n\r\nAs it is API specific (compared to other header validation requirements), then I would like to see it in \"V13 API and Web Service Verification Requirements\" category.",
+      "createdAt": "2019-12-08T22:13:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/686#issuecomment-563001418",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2ODI5NzcwMg==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> As it is API specific (compared to other header validation requirements), then I would like to see it in \"V13 API and Web Service Verification Requirements\" category.\r\n\r\nSo maybe open up a separate issue for that and close this one if you are ok with the current wording. Thanks :)",
+      "createdAt": "2019-12-22T19:47:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/686#issuecomment-568297702",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2019-10-11T09:18:34Z",
+  "labels": [],
+  "number": 686,
+  "state": "CLOSED",
+  "title": "V14.5.3 - split to \"validating Origin request header\" and \"building Access-Control-Allow-Origin response header\" requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/686"
+}

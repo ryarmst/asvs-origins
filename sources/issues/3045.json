@@ -1,0 +1,253 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "When reanalyzing the content of issue #2963, I also rechecked the requirement 16.3.3\n\nAs it stands:\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **16.3.3** | Verify that the application logs attempts to bypass the security controls defined in the design documentation, such as input validation. | 2 | v5.0.be-7.2.3 |\n\nAt the moment it asks to log only \"attempts to bypass the security controls defined in the design documentation\" - in other words: if the security control is not defined in documentation, you don't need to log it?\n\nI think we need to ask for 2 different events to be logged:\n* bypass attempts from security controls (as authentication and authorization have their own separate requirements, we don't need to duplicate that part)\n* Security events defined in the documentation by requirement 16.1.1\n\nAs there are 2 things to ask, the question is, should we do it in one requirement or with separate requirements?\n\n\n* 16.3.3 Verify that the application logs attempts to bypass the security controls, such as input validation, business logic, and anti-automation.\n* [added] Verify that the application logs security events that are defined in the documentation.\n\n---\n\n16.3.5 Verify that the application logs security control failures, such as backend TLS failures.\n\nWe don't have clear requirement to say, that the application must log program code or unexpected errors. Is expected to be covered by 16.3.5 or we need a separate requirement fot this as well?\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6ou_NP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think merging these two ideas is a good idea, but I'm flexible if you prefer them separate.\n\nMaybe L2 is \"documented\" and L3 is all other controls?\n\nOr something like:\n\n_16.3.3 Verify that the application logs attempts to bypass the security controls, such as input validation, business logic, and anti-automation, as well as all security controls defined in the documentation._\n\n... and then it looks like 16.3.5 is redundant or can be rolled into 16.3.3. \n\n_Or maybe 16.3.5 is just edits to say: | **16.3.5** | Verify that the application logs unexpected security errors and failures such as backend TLS failures. | 3 | v5.0.be-7.2.6 |_\n\nI don't know the right direction but the general direction of fleshing these out seems good to me.",
+      "createdAt": "2025-04-25T16:35:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2830889807",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ovDRq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think merging these two ideas is a good idea, but I'm flexible if you prefer them separate.\n\nI don't propose any merging here.\n\n> Maybe L2 is \"documented\" and L3 is all other controls?\n\nI think those are both L2. The level anyway comes from security control it ASVS requires to be implemented - if you require a L3 security control to be implemented you can not expect events to be logged from this from L2. I think current solution is \"self-leveling\".\n\nIf to merge them, then small change:\n> 16.3.3 Verify that the application logs attempts to bypass the security controls, such as input validation, business logic, and anti-automation, as well as all **expected security events defined** in the documentation.\n\n---\n\n16.3.5 is L3 requirement, I think we should have clear requirement to say that unexpected errors in program code are logged as well and from L2.",
+      "createdAt": "2025-04-25T16:43:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2830906474",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ovHDH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I don't have a lot more to say on this, I think the direction you're going in is sensible. I say go to PR when you are ready. You got this. 👍 ",
+      "createdAt": "2025-04-25T16:51:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2830921927",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pFX7D",
+      "author": {
+        "login": "oleksiidov"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang really great point! \nSupport adding requirements on logging security events defined in the documentation. And adding it as a separate L2 requirement as it is separate important case for logging, and this will follow ASVS idea be usable for testing and clear for development. \n\nRegarding 16.3.5, as for me I would clarify this requirement with information that should be logged. This will brings more clarify and usability to it.  ",
+      "createdAt": "2025-04-28T21:29:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2836758211",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pIJw4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> As there are 2 things to ask, the question is, should we do it in one requirement or with separate requirements?\n\nI have been thinking about it more - there are benefits to have those 2 things as a separate requirements, but I think there is overlap between \"security control bypass attempts\" and \"documented security decisions to be logged\" and from that perspective it makes sense to use them in one requirement.\n\nWording proposal:\n> 16.3.3 Verify that the application logs expected security events defined in the documentation and attempts to bypass the security controls, such as input validation, business logic, and anti-automation.",
+      "createdAt": "2025-04-29T05:19:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2837486648",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pINZg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would suggest the following to clarify things slightly:\n\n\"_16.3.3 Verify that the application logs ~~expected~~ **the** security events **that are** defined in the documentation and **also logs** attempts to bypass the security controls, such as input validation, business logic, and anti-automation._\"\n\n",
+      "createdAt": "2025-04-29T05:30:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2837501536",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pIQcw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I opened PR for 16.3.3.\n\n---\n\n> 16.3.5 is L3 requirement, I think we should have clear requirement to say that unexpected errors in program code are logged as well and from L2.\n\nFor 16.3.5 (now 16.3.4) and/or \"log unexpected errors\" should be mentioned somewhere.\n",
+      "createdAt": "2025-04-29T05:36:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2837514032",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pIR0F",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is \"unexpected errors\" truly critical enough from security perspective to be L2 instead of L3?",
+      "createdAt": "2025-04-29T05:39:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2837519621",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pISbB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Is \"unexpected errors\" truly critical enough from security perspective to be L2 instead of L3?\n\nWell yes, if your application does not work, it requires some attention and needs information on what happened.",
+      "createdAt": "2025-04-29T05:41:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2837522113",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pIWtZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yeah but it is another of those things where we don't need to prioritise it in security because it is going to get addressed from a functionality perspective anyway.",
+      "createdAt": "2025-04-29T05:54:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2837539673",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pIXCf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I'd rather not put more weight on L2 just for that\n",
+      "createdAt": "2025-04-29T05:54:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2837541023",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pPYQf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can argue, that logging unexpected errors is L1 thing. If the application can not provide the functionality it is intended to provide, it requires reaction and information to handle it.",
+      "createdAt": "2025-04-29T15:39:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2839381023",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQeyy",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I tend to agree that logging unexpected errors (like errors we get from catch-all exception handling) should be logged at L1/L2 level if we consider broken functionality to be a security issue. This is a rather basic logging need when functionality breaks.\n\n",
+      "createdAt": "2025-04-29T17:28:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2839669938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pXm7q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Elar has convinced me of the importance of noting unexpected errors from a security perspective so we are going to merge this into 16.3.4 and drop to L2.\n\nProposed wording:\n\n\"_Verify that the application logs **unexpected errors and** security control failures such as backend TLS failures._\"",
+      "createdAt": "2025-04-30T10:32:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3045#issuecomment-2841538282",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-25T05:28:37Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABJFMusA",
+      "name": "V16 (prev V7)",
+      "description": "Temporary label for grouping logging related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 3045,
+  "state": "CLOSED",
+  "title": "16.3.3, 16.3.5 security events coverage",
+  "url": "https://github.com/OWASP/ASVS/issues/3045"
+}

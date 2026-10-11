@@ -1,0 +1,1289 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEyNDQwMDU=",
+    "is_bot": false,
+    "login": "sydseter",
+    "name": "Uncle Joe"
+  },
+  "body": "In the 6.3 text we say:\n\n> This section contains general requirements for the security of authentication mechanisms as well as setting out the different expectations for levels including requiring multi-factor for L2 and supporting hardware-based mechanisms for L3, such as standards provided by the Fast IDentity Online (FIDO) Alliance.\n\nAll of the larger IDPs supports hardware-based authentication mechanisms. Simply supporting hardware-based authentication mechanisms does not mean that the users of such authentication systems are more secure. I therefor see little reason why you should make a point of it for L3 unless you **require** the use of hardware-based authentication, that is, unless a clear plan accompanied an exception on how the risks around authentication will be mitigated, taking into account NIST's guidance and research on the topic.. I would rather see that ASVS 5  Level 3 aligned with AAL3 in this regard. \n\nPlease see comment from @tghosth https://github.com/OWASP/ASVS/issues/2925#issuecomment-2792342067\n\n> Clarify in the requirement whether single-factor hardware-based auth is sufficient for L3 or whether multi-factor is still required\n\nPlease read: https://pages.nist.gov/800-63-3-Implementation-Resources/63B/AAL/\n\n> Although two authentication factors are required at AAL3, one combination of authenticators (Hardware Single-Factor OTP Device plus a Single-Factor Cryptographic Software Authenticator plus a Memorized Secret) consists of three authenticators. This combination stems from the fact that the hardware-based Single-Factor OTP Devices do not provide verifier impersonation resistance, so a Single-Factor Cryptographic Software Authenticator can satisfy that requirement. But since both of those authenticators are something you have, a Memorized Secret is required to satisfy the requirement for two different authentication factors.\n\nThis clarifies the need to require MFA for Level 3, but it goes beyond that listing, specifically the 3 requirement necessary to satisfy AAL3.\n\nIn addition to all requirements inherent to AAL2, the following requirements apply to AAL3, to my understanding:\n\n- The use of authenticators must guarantee impersonation resistance\n- The use of authenticators must guarantee compromise resistance\n- The use of authenticators must guarantee authentication intent\n\nIn the interest of aligning ASVS with NIST, it seems reasonable to ensure that these 3 requirements are needed in order to ensure that an application satisfy ASVS Level 3.\n\nThis is consistent with NIST SP800 63b, 2.3.1: https://pages.nist.gov/800-63-4/sp800-63b/aal/#aal3 \n\n> AAL3 authentication SHALL require one of the following authenticator combinations:\n> \n> - Multi-factor cryptographic authentication ([Sec. 3.1.7](https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#mfc))\n> - Single-factor cryptographic authentication ([Sec. 3.1.6](https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#sfc)) used in conjunction with a password ([Sec. 3.1.1](https://pages.nist.gov/800-63-4/sp800-63b/authenticators/#password))\n\nBased on the 3 requirements inherent to AAL3 it is still possible to ask for a waver given that the first 3 requirements are meet if there are compensating controls that guarantees these three. So the following could be added:\n\n_Verify that security decisions based on threat analysis is documented in situations where multi-factor or hardware-based authentication not is achievable or realistic, and that compensating controls that achieve the underlying three formal authenticator assurances (impersonation-, compromise resistance and authentication intent) have been deployed._\n\n\nGiven all of this, the text under V6.3 should be changed from:\n\n**V6.3 General Authentication Security**\nThis section contains general requirements for the security of authentication mechanisms as well as setting out the different expectations for levels including requiring multi-factor for L2 and supporting hardware-based mechanisms for L3, such as standards provided by the Fast IDentity Online (FIDO) Alliance.\n\nto:\n\n**V6.3 General Authentication Security**\nThis section contains general requirements for the security of authentication mechanisms and sets out the different expectations for levels. In particular, enforcing the use of multi-factor authentication (MFA) is required for L2, and requiring hardware-based mechanisms (such as standards provided by the Fast IDentity Online (FIDO) Alliance) is required for L3.\n\nWhilst this is a relatively aggressive stance on MFA, it is critical to raise the bar to protect users. Any attempt to relax these requirements should be accompanied by a clear plan for mitigating the risks around authentication, taking into account NIST's guidance and research on the topic.\n\nNote that at the time of release, NIST SP 800-63 considers email as [not acceptable](https://pages.nist.gov/800-63-FAQ/#q-b11) as an authentication mechanism ([archived copy](https://web.archive.org/web/20250330115328/https://pages.nist.gov/800-63-FAQ/#q-b11)).\n\nThe requirements in this section relate to a variety of sections of [NIST's Guidance](https://pages.nist.gov/800-63-3/sp800-63b.html), including: [§ 4.2.1](https://pages.nist.gov/800-63-3/sp800-63b.html#421-permitted-authenticator-types), [§ 4.3.1](https://pages.nist.gov/800-63-3/sp800-63b.html#431-permitted-authenticator-types), [§ 5.2.2](https://pages.nist.gov/800-63-3/sp800-63b.html#522-rate-limiting-throttling), and [§ 6.1.2](https://pages.nist.gov/800-63-3/sp800-63b.html#-612-post-enrollment-binding).\n\nand...\n\n6.3.2 | Verify that the application requires users to either use a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms. | 2\n-- | -- | --| \n\nto:\n\n6.3.2 | Verify that the application requires users to either use a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms (e.g. cryptographic authentication in conjunction with a password). | 2\n-- | -- | --| \n\nThe following Level 3 requirement need to be changed from:\n\n6.3.7 | Verify that a hardware-based authentication mechanism is supported that provides impersonation resistance against phishing attacks (such as WebAuthn) and verifies intent to authenticate by requiring a user-initiated action (such as a button press on a FIDO hardware key). | 3\n-- | -- | --\n\nTo:\n\n6.3.7 | Verify that a hardware-based authentication mechanism that provides compromise- and impersonation resistance (e.g: against phishing attacks), through the use of authentication standards (such as WebAuthn), is required, and that it verifies intent to authenticate by requiring a user-initiated action (such as a button press on a FIDO hardware key). | 3\n-- | -- | --\n\n\nWe could preferably refer to «confidential computing» instead of «hardware-based» as the latter could be misunderstood, given that most Intel and AMD chips now come with a TEE or TPM.\n\n«Confidential Computing is the protection of data in use by performing computation in a hardware-based, attested Trusted Execution Environment.\"», see definition under 2.1: https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf\n\nAlso, for reference:\n\nIntel DAL:https://www.intel.com/content/www/us/en/developer/tools/dal/technical-details.html\nAMD: https://docs.amd.com/r/en-US/wp548-single-chip-fips/Introduction-to-Secure-Execution-Environment\nAndroid: https://source.android.com/docs/security/features/trusty \nIPhone: https://support.apple.com/guide/security/secure-enclave-sec59b0b31ff/web",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6nMkVu",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Please note that I am stating that hardware-based authentication should be **required**, not just supported. This is very much achievable and should be the case as it is one of the few possibilities  we know of that digitally will satisfy the underlying requirements of compromise- and impersonation resistance together with verifying whether the action is user-initiated. The later can be achieved by inspecting the UV flag (https://w3c.github.io/webauthn/#abstract-opdef-credential-record-uvinitialized), the former by looking at the ACR and AMR claims. \n\nFor reference regarding \"compensating controls\", please read: https://pages.nist.gov/800-63-FAQ/#q-8 \n\nSo as an alternative, instead of the following:\n\nVerify that security decisions based on threat analysis is documented in situations where multi-factor or hardware-based authentication not is achievable or realistic, and that compensating controls that achieve the underlying three formal authenticator assurances (impersonation-, compromise resistance and authentication intent) have been deployed.\n\n we could instead simplify this as:\n\n_Verify, in situations where authentication requirements not is achievable or realistic, by demonstrating comparability of any chosen alternative, to include any compensating controls, when the complete set of applicable requirements not is implemented._\n\nse also my response: https://github.com/OWASP/ASVS/issues/2925#issuecomment-2805269821 \n\nSo My suggestion is that we add the following under V15\n\n\n15.2.5 | Verify, in situations where application security requirements not is achievable or realistic, by demonstrating comparability of any chosen alternative, to include any compensating controls, when the complete set of applicable requirements not is implemented. | 2\n-- | -- | --",
+      "createdAt": "2025-04-15T13:37:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2805089646",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pLVtb",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, firstly apologies for the delay in response @sydseter .\n\nI have read through all of this and have a few initial thoughts:\n\n1) Requiring some form of MFA for L2 was controversial but I think achievable and justifiable. However, I think that requiring hardware MFA for L3 is not. I am thinking about consumer facing banking and medical apps.\n2) I think the 15.2.5 concept is a little too generic for a usable requirement. I think we need to make exceptions rarely and otherwise rely on the catch-all comply or explain approach for ASVS.\n3) I can see that there is some subtlety in hardware based authentication but I really don't want to get bogged down in all the details and I don't think it provides a benefit for developers or security.\n4) I don't think we should assume that L1-3 of ASVS exactly matches to AAL1-AAL3 of NIST.\n5) I think that if we are requiring MFA then we are requiring MFA and that means two different authentication factors. For example, passkeys generally require that you have access to a private key (something you have) and then you access the certificate by either pass phrase/PIN/pattern (something you know) or a fingerprint (something you are).\n6) I think that as it is, this requirement 6.3.7 covers the goal of impersonation resistance well whilst also putting the onus on the user to take advantage of it.\n\nI think that we can clarify in this requirement that this is not requiring enforcement but rather just support and then I don't think I would do anything else.\n",
+      "createdAt": "2025-04-29T10:58:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2838322011",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pMUlA",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "In Europe, consumer-facing banking and medical apps are required to follow AAL3. In those cases, ASVS is irrelevant. Are you referring to other parts of the world? I strongly disagree with this. Access to banking and medical data should require using AAL3, no matter where you are. There have been numerous cases in recent years where medical and banking data have been stolen because of relaxed authentication requirements. The consequences for the consumers have been severe. \n\nLast year NIST came with some clarifications regarding AAL2 and AAL3: https://fidoalliance.org/nist-cites-phishing-resistance-of-synced-passkeys-in-digital-identity-guidelines-update/\n\n**Synced Passkeys** has been recognized for their [phishing resistance](https://www.corbado.com/blog/passkeys-phishing-resistant), and synced passkeys therefore meet AAL2 requirements by ensuring secure and encrypted transmission of authentication data.\n**Device-Bound Passkeys** is said to meet AAL3 standards due to their hardware-based authentication, providing very high confidence in the control of authenticators. \n\nDevice-Bound passkeys are supported by the following systems:\n\n- Windows 10 (EOL: October 14, 2025) and newer. \n- macOS Ventura (EOL: November 30, 2025) and newer.\n- ChromeOS 109 (EOL: October 10, 2023 ) and newer.\n- iOS 16 (EOL: 18 Sep 2023) and newer.\n- Android 9 (EOL: 01 Jan 2022) and newer. \n\nhttps://passkeys.dev/device-support/#advanced\n\nThis is why I believe it is no longer an issue to require the use of Device-Bound (hardware-based) passkeys for ASVS Level 3.\n\n",
+      "createdAt": "2025-04-29T12:12:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2838579520",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pOlss",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In Europe, consumer-facing banking and medical apps are required to follow AAL3\n\nI appreciate that UK is not exactly Europe but I access a UK bank account without cryptographic authentication.\n\n> Passkeys\n\nPasskeys almost always have some sort of fall back such as magic link which eliminates their phishing resistance.  They currently also have terrible UX. I would not want to mandate them for those two reasons.",
+      "createdAt": "2025-04-29T14:35:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2839173932",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQGcQ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I appreciate that UK is not exactly Europe but I access a UK bank account without cryptographic authentication.\n\nFWIW, I access a bank account in EU without cryptographic authentication. 😄",
+      "createdAt": "2025-04-29T16:47:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2839570192",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQMip",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In Europe, consumer-facing banking and medical apps are required to follow AAL3.\n\nI checked just at the moment and I did access French [Mon Espace Santé](https://www.monespacesante.fr/) (official centralized state-provided patient healthcare record) without any cryptographic authentication. 😄\n\nLast time I checked many other French patient healthcare websites did not require cryptographic authentication for patients either.",
+      "createdAt": "2025-04-29T16:59:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2839595177",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQaBX",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree that L3 apps (or NIST 800-83b AAL3 apps) should require smart cards, hardware tokens or other cryptographic exchange. Mobile apps in certain phones solve this purpose.",
+      "createdAt": "2025-04-29T17:20:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2839650391",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQbyK",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "You are right, I am wrong.\n\nThe European Banking Regulation require [Strong Customer Authentication (SCA)](https://finance.ec.europa.eu/publications/strong-customer-authentication-requirement-psd2-comes-force_en)\n\nThis means 2 out of the following 3:\n\n- somthing you have\n- something you know\n- something the user is\n\nBut, yes, that does not mean device-bound authentication is used.\n\nStill, in practice, that is what is being used.\n\nRegarding access to health data. Device-bound authentication has probably not been adopted by all country, but once eIDAS has been rolled out, it is going to be a requirement to use eIDAS to access health data in Europe. https://health.ec.europa.eu/document/download/4dd47ec2-71dd-49fc-b036-ad7c14f6ed68_en?filename=ehealth_ehds_qa_en.pdf   ",
+      "createdAt": "2025-04-29T17:23:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2839657610",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pW5lr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> IDAS has been rolled out, it is going to be a requirement to use eIDAS to access health data in Europe.\n\nhttps://github.com/eu-digital-identity-wallet/eudi-doc-standards-and-technical-specifications/blob/main/docs/technical-specifications/README.md\n\nLooks like the technical specifications are at a very early stage and there is no guarantee they will require a hardware authenticator is there?\n\n> AAL3\n\nI repeat that we don't necessarily want to map L3 to AAL3 but having looked at this more carefully, I think there are two different things we are talking about here:\n\n1) Cryptographic authenticator (some sort of stored key)\n2) Hardware authenticator (dedicated hardware device or enclave used to protect a cryptographic key.\n\nAAL3 talks about a cryptographic authenticator, it talks about hardware as details but doesn't specifically mandate anything.\n\nIn any case, I think it is irrelevant, both mechanisms are very hard to get non tech savvy people to use and the recovery flows are even more painful. Expecting that all banking apps will start requiring all users to use these mechanisms is pie in the sky and right now it is not clear to me how many banks even support their use. **To me, the latter would be a better fight right now and that is what I really want to push.**\n\n",
+      "createdAt": "2025-04-30T09:23:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2841352555",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pX9Mq",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "When we talk about a hardware-based cryptographic authenticator, we refer to devices that have an integrated circuit isolated from the main processor, which is meant for cryptographic operations and is commonly named a secure hardware module. Most mobile devices and laptops have built-in support for this, and all major operating systems support it. Yes, it can also be a separate hardware key, but it does not have to be, and in most cases it is not.\nToday, if a device supports passkeys, it also comes with an integrated isolated circuit for such purposes.\nOn Apple devices, this is called \"Secure Enclave\", on Windows it is called \"Trusted Platform Module\" (TPM), and on Android, \"Trusted Execution Environment (TEE)\".\n\nThe number of online accounts that can leverage passkeys today is said to be around 15 billion and rising: https://fidoalliance.org/passkey-adoption-doubles-in-2024-more-than-15-billion-online-accounts-can-leverage-passkeys/\n\nTo get users to use this is not far-fetched; it is happening at a breathtaking pace.\n\nWhen NIST refers to passkeys, they distinguish between passkeys that are synced and passkeys that aren't synced. That distinction will probably not last, but hardware-based cryptographic authentication is still widely supported. \n\nIf the sentiment is that hardware-based authentication should still only be supported for ASVS Level 3, then we should probably clarify the use of the word \"hardware-based\" whether we refer to [device-bound (residential) passkey authentication](https://www.passkeycentral.org/introduction-to-passkeys/passkey-types#device-bound-passkeys), [synced passkeys](https://www.passkeycentral.org/introduction-to-passkeys/passkey-types#synced-passkeys), or both.\n\n\n\n",
+      "createdAt": "2025-04-30T11:08:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2841629482",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6peN_1",
+      "author": {
+        "login": "anonymous-31"
+      },
+      "authorAssociation": "NONE",
+      "body": "After reviewing issue #2970 regarding MFA requirements for Level 3, I'd like to contribute to the discussion about whether hardware-based authentication should be \"supported\" or \"required\" at this level.\n\n### Analysis of Current Wording\n\nThe current wording in section 6.3 and requirement 6.3.8 uses \"supporting hardware-based mechanisms for L3\" and \"Verify that a hardware-based authentication mechanism is supported...\" This creates ambiguity about whether hardware-based authentication is mandatory for all users at Level 3 or merely needs to be available as an option.\n\n### Alignment with NIST SP 800-63\n\nNIST SP 800-63 AAL3 explicitly requires hardware-based authenticators for all authentication events, not just as an available option. The standard states:\n\n\"AAL3 authentication requires the use of a hardware-based authenticator that provides phishing resistance.\"\n\nThe key requirements for AAL3 include:\n1. Impersonation resistance\n2. Compromise resistance\n3. Authentication intent\n\nThese are achieved through hardware-based authenticators or specific combinations of authenticators that together provide these properties.\n\n### Security Implications\n\nThere's a significant security difference between supporting hardware-based authentication (making it available as an option) and requiring it (mandating its use for all users). Simply supporting hardware authenticators without requiring them creates a potential security gap - users can choose less secure authentication methods, undermining the security posture intended for Level 3 applications.\n\n### Recommendation\n\nI support the proposed changes to requirement 6.3.8:\n\n\"Verify that a hardware-based authentication mechanism that provides compromise- and impersonation resistance (e.g., against phishing attacks), through the use of authentication standards (such as WebAuthn), is required, and that it verifies intent to authenticate by requiring a user-initiated action (such as a button press on a FIDO hardware key).\"\n\nThis change would:\n1. Align ASVS Level 3 more closely with NIST AAL3\n2. Eliminate ambiguity about whether hardware-based authentication is optional or mandatory\n3. Ensure that applications claiming Level 3 compliance truly provide the high level of authentication security appropriate for highly sensitive applications\n\n### Compensating Controls\n\nI also support the suggestion to add language about compensating controls for situations where hardware-based authentication might not be feasible, provided that the three core properties (impersonation resistance, compromise resistance, and authentication intent) are still achieved through other means:\n\n\"Verify that security decisions based on threat analysis is documented in situations where multi-factor or hardware-based authentication is not achievable or realistic, and that compensating controls that achieve the underlying three formal authenticator assurances (impersonation resistance, compromise resistance, and authentication intent) have been deployed.\"\n\nThis provides flexibility while maintaining the security principles that underpin AAL3.",
+      "createdAt": "2025-04-30T21:00:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 2
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2843271157",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6piDEb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Those arguments here are nice and logical, but I share the same concern as Josh [pointed out](https://github.com/OWASP/ASVS/issues/2970#issuecomment-2841352555) - if the context is some internal web application, or with a controlled user-base, then we can _require_ it. If it is a worldwide accessible service to be used for everyone and from everywhere, I think it is not realistic to require it?\n\nFor example, do we consider Gmail to be a level 3 application?",
+      "createdAt": "2025-05-01T07:47:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2844274971",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6piTHa",
+      "author": {
+        "login": "anonymous-31"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for raising this important practical consideration. You've highlighted a key challenge in implementing strict hardware-based authentication requirements for globally accessible applications.\n\n### Clarifying ASVS Level 3 Scope\n\nASVS Level 3 is specifically designed for high-value, high-assurance, or high-safety applications - typically those in sectors like military, healthcare, critical infrastructure, or financial systems handling large transactions. These are applications where the security requirements justifiably outweigh some convenience factors.\n\nPublic-facing services like Gmail would likely target ASVS Level 2 compliance rather than Level 3, as Level 3 imposes controls that may be impractical for mass consumer applications. Level 3 is intended for applications where the risk profile justifies stricter controls.\n\n### The Value of Compensating Controls\n\nThis is precisely why I suggested including language about compensating controls in the requirement. For applications that legitimately need Level 3 security but face practical constraints in implementing hardware-based authentication for all users, the standard should allow for well-documented alternatives that still achieve the three core security properties:\n\n1. Impersonation resistance\n2. Compromise resistance\n3. Authentication intent\n\n### Proposed Approach\n\nI believe we can address this concern by:\n\n1. Maintaining the stronger \"required\" language to align with NIST AAL3\n2. Explicitly acknowledging that compensating controls are acceptable when:\n   - The application has documented why hardware-based authentication isn't feasible\n   - Alternative controls are implemented that achieve equivalent security properties\n   - The decision is based on a formal threat analysis\n\nThis approach maintains the security intent of Level 3 while providing flexibility for real-world implementation challenges.\n\n### Regarding Gmail\n\nTo directly address your question: Gmail would likely not be classified as requiring Level 3 compliance under ASVS. However, for high-security Gmail users (government officials, executives, journalists in dangerous regions), Google does offer their Advanced Protection Program which requires hardware security keys - effectively implementing Level 3 controls for their highest-risk users while maintaining Level 2 controls for the general user base.\n\nThis tiered approach might be a model worth considering - requiring hardware-based authentication for the highest-risk users or most sensitive functions within an application, while allowing alternative strong authentication methods for other users.",
+      "createdAt": "2025-05-01T08:01:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2844340698",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pjVpc",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I am not sure whether that was written by an AI or a human, but this is my opinion as well.\n\nWatering out the authentication requierment for L3 will only mean that less orgs will pay attention to it.\n\nTo not water it out, hardware-based auth need to be required, and not just supported.",
+      "createdAt": "2025-05-01T10:31:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2844613212",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pjbkO",
+      "author": {
+        "login": "anonymous-31"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks for your support! And yes, this is definitely me writing as a security professional, not AI 😊 \n\nI completely agree with your point - if we water down L3 requirements, we're defeating their purpose. Hardware-based auth needs to be required, not just supported, otherwise Level 3 loses its meaning as the highest security tier.\n\nThe compensating controls I mentioned are meant to provide flexibility in implementation while still maintaining the security principles, not to create loopholes that undermine the standard.",
+      "createdAt": "2025-05-01T10:52:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2844637454",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pjq-y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I am not sure whether that was written by an AI or a human...\n\nI had the same question... (sorry for offtopic)",
+      "createdAt": "2025-05-01T11:51:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2844700594",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6plj3X",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> For example, do we consider Gmail to be a level 3 application?\n\nGmail for consumers is not L3, but hardware AuthN is still an option.\n\nBut you can certainly configure gmail for _organizations_ to **_require_** hardware authentication for L3 organizations. Like many identity providers, the AuthN strength and requirements are configurable per-organization. So you certainly can make gmail for organizations L3 if you want to.",
+      "createdAt": "2025-05-01T16:30:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2845195735",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pmRwO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @danielcuthbert - is hardware-based authN must have for consumers for bank systems? And is it realistic? Taking into account the time window for the next, let's say 4 years?",
+      "createdAt": "2025-05-01T18:06:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2845383694",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pmfSG",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang To answer that we need to agree on what «hardware-based» is. I would say yes, because, to me, «hardware-based» is found in every device that has an integrated circuit isolated from the main processor meant for cryptography. That is found in every Android, Iphone and Laptop on sale out there right now. And about 18 billion accounts and every major operative system supports it. \n\nIf a bank isn’t able to give the consumer that possibility, then it’s just because they are too greedy or lazy to do so.",
+      "createdAt": "2025-05-01T18:30:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2845439110",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pm5z8",
+      "author": {
+        "login": "anonymous-31"
+      },
+      "authorAssociation": "NONE",
+      "body": "I value this discussion. To clarify: while flexibility in implementation is important, we cannot compromise on the security standards that define L3.\n\nThe core principles - resistance to impersonation, compromise, and clear authentication intent - must remain non-negotiable as already mentioned in my previous comments. Organizations can adapt their methods, but the outcome should never change.\n\nAs @sydseter rightly pointed out, hardware-based authentication is now widespread. For L3-level applications, it’s not just reasonable, it’s essential to preserve L3’s integrity.\n\nFlexibility in execution is fine. Compromise on security is not. \n\n ",
+      "createdAt": "2025-05-01T19:16:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2845547772",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pnJr0",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, and, in many ways the expression «hardware-based» belongs to another time before FIDO implementations became widespread. It will not age well. Alternatively we could drop the expression altogether. Every phone provider is gunning for having «synced passkeys» without attestation being the default. We could debate whether it is more appropriate to mandate «device-bound» passkeys for L3, but I would let that be up to whoever is doing the implementation. In the interest of simplicity and future proofing it would perhaps be better to talk about what can be considered «core principles» as @anonymous-31 points out.",
+      "createdAt": "2025-05-01T19:48:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2845612788",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pr5A-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Offtopic note 1, if I asked question precisely from a person, there is no need to react on that by others :)\n\nOfftopic note 2, downvoting comments as it is done (also) here raises a lot of questions on the motivation to do so and on topics such as \"anti-person propaganda\".\n\nOn topic - I'm in favor of having the requirement aligned with NIST AAL3. Just the concerns I have asked for must be well communicated, starting from an allowed list of methods for that.",
+      "createdAt": "2025-05-02T10:09:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2846855230",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6psBL4",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang I had no intention of derailing your question. I am also sincerely curious about what @danielcuthbert think. ",
+      "createdAt": "2025-05-02T10:29:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2846888696",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ptFqS",
+      "author": {
+        "login": "TG-Techie"
+      },
+      "authorAssociation": "NONE",
+      "body": "\nI found this section helpful when weighing everyone's input, thank you for adding it @anonymous-31 :\n\n> ### Clarifying ASVS Level 3 Scope\n>\n> ASVS Level 3 is specifically designed for high-value, high-assurance, or high-safety applications - typically those in sectors like military, healthcare, critical infrastructure, or financial systems handling large transactions. These are applications where the security requirements justifiably outweigh some convenience factors.\n\n#### Clarifying Question(s)\n\n1) In this example, are the participants in the \"healthcare\" and \"financial systems handling large transactions\" sectors* assumed to be part of a \"controlled user-base\"?  \n\n2) For this example, is it important if they are or are-not? \n \n\n\n\n#### Disclaimer\n\nI have just noticed this discussion and am commenting primarily as a reader. My apologies If this is obvious to someone more involved and I missed it due to my lack of context. \n\n\n\n\n\\* = ex: healthcare professionals vs patients. (Presumably the military and critical infrastructure sectors are implicitly controlled user-bases)",
+      "createdAt": "2025-05-02T13:10:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2847169170",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ptMcB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Those are valid questions, and it is pretty much the thing that I try to figure out here myself (starting from https://github.com/OWASP/ASVS/issues/2970#issuecomment-2844274971).\n\nIn the beginning, I associated \"hardware-based\" MFA more like a requirement to hand out yubikeys to the user base, and in this context, the question is valid to ask. But putting more time into the topic, I understand that a lot of current auth solutions actually satisfy the NIST AAL3 level.",
+      "createdAt": "2025-05-02T13:24:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2847196929",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6px75C",
+      "author": {
+        "login": "anonymous-31"
+      },
+      "authorAssociation": "NONE",
+      "body": "@TG-Techie - great question about controlled user bases in healthcare and financial sectors. This is exactly the kind of practical consideration we need to address.\n\nIn my experience, the reality is mixed. Healthcare staff might be a controlled group, but patients definitely aren't. Same with banking - employees vs customers. This is why I think we need to be clear about requirements while acknowledging implementation challenges.\n\n@elarlang - I get your concerns about practicality. When I first heard \"hardware-based authentication,\" I also pictured handing out physical tokens to everyone - which would be a nightmare for consumer-facing apps!\n\nBut as @sydseter pointed out (and I think this is crucial), we're not talking about separate hardware devices anymore. Modern phones and laptops already have the secure hardware elements built in. My iPhone has a Secure Enclave, Windows machines have TPMs, and Android has TEEs. These enable device-bound passkeys that satisfy AAL3 without extra hardware.\n\nThe tech is already there - it's just about implementation now.\n\n@tghosth - I understand your point about passkey fallbacks undermining security. But I think that's exactly why we need to be clear that L3 requires hardware-based auth, not just supports it. If we only require \"support\" for hardware auth, organizations will implement it alongside less secure fallbacks, and users will naturally choose the path of least resistance.\n\nHere's what I think:\n\n1. L3 should require hardware-based auth, not just support it\n2. We should clearly define what counts as \"hardware-based\" (including built-in secure elements)\n3. We should provide guidance on phased rollouts for organizations with diverse user bases\n4. For truly exceptional cases, we should allow documented compensating controls that still achieve the core security properties\n\n@jmanico made a great point about Gmail - consumer Gmail isn't L3, but Google Workspace can be configured to require hardware keys for high-security organizations. That's exactly the kind of tiered approach that makes sense.\n\nBottom line: If we water down L3 requirements, we're defeating the purpose of having a highest security tier. Let's keep L3 strong while providing clear guidance on modern implementation options.\n\n",
+      "createdAt": "2025-05-03T05:20:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2848439874",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1PxI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I think there are four options for our default position here, three of which are problematic.\n\n1) We require an L3 app to enforce hardware based authentication which means no synced passkeys and no fallback options. For large consumer facing apps, I don't see a realistic way to handle this at scale because there are no good recovery options and the app owner would spend their entire time helping people recover their accounts. I don't think this is feasible.\n\n2) We require  an L3 app to enforce cryptographic authentication without requiring hardware and therefore allowing synced passkeys but we **do not** allow fallback options. This takes us out of line with AAL3, is less secure but still has a similar level of pain from an account recovery perspective. I don't think this is feasible either.\n\n3) We require an L3 app to enforce cryptographic authentication without requiring hardware and therefore allowing synced passkeys but we **do** allow fallback options (magic links, etc). We are now requiring extra functionality that doesn't actually provide any major security uplift. I don't see the point in this.\n\n4) We require an L3 app to **support** hardware-based authenticators (or some variant). We therefore give users the option to better secure their accounts without the issues in the previous 3 options. We aren't aligned with AAL3 but I don't think that is a critical goal.\n\n\n> The core principles - resistance to impersonation, compromise, and clear authentication intent - must remain non-negotiable \n\n@anonymous-31\n\nThe part under negotiation is whether this must be enforced for all users or just supported for all users. My arguments above are that enforcing for all users is unrealistic but we should absolutely be mandating that L3 apps provide support for this ability to give users the ability to improve their security. I already think this would be a major uplift.\n\n> If a bank isn’t able to give the consumer that possibility, then it’s just because they are too greedy or lazy to do so.\n\n@sydseter\n\nKey word here is possibility, I am advocating that they provide the possibility. My understanding is that you are going further and saying they have to force it on consumers.\n\n\nQuestions for anyone who wishes to respond:\n\n1) Are synced passkeys an acceptable solution?\n2) How do you handle the massive customer support burden of:\n  a) Forcing all users onto passkeys without fallback options, bearing in mind that not all consumers of L3 apps are techies with new smartphones and laptops.\n  b) Handling constant account recovery issues for these users.\n3) If you are advocating for passkeys with fallback options, what is the security benefit of that?a\n\n\nOverall, I think that people have lost sight of \"[AviD's Rule of Usability](https://security.stackexchange.com/a/6116)\":\n\n> Security at the expense of usability comes at the expense of security.",
+      "createdAt": "2025-05-04T16:43:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849307720",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1d5Q",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Keep in mind that AAL3/NIST 800-63b which loosely maps to L3 ASVS is reserved for critical infrastructure and not consumer apps.\n\nThink apps that shoot missles, or health care apps that order controlled substances at scale, or apps that manage billions of private records, or access to classified systems, or control of critical infrastructure for large companies (like a root level AWS account).\n\nI would not consider consumer banking or consumer health care and similar to be L3.\n\nIn the context of mapping L3 closer to NIST 800-63b AAL3, then hardware AuthN is very sensible and has been a part of digital identity standards for over 5 years.",
+      "createdAt": "2025-05-04T18:53:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849365584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1fo8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Keep in mind that AAL3/NIST 800-63b which loosely maps to L3 ASVS is reserved for critical infrastructure **and not consumer apps**.\n\nCan we have facts and quotes for this?\n\n> Think apps that shoot missles, or health care apps that order controlled substances at scale, or apps that manage billions of private records, or access to classified systems, or control of critical infrastructure for large companies (like a root level AWS account).\n\nThis is a serious niche. I also think those are not in mass, having their own specific requirements and are per their own niche with their own specific needs. It means they don't need ASVS that much.\n\n> I would not consider consumer banking or consumer health care and similar to be L3.\n\nBased on my comments above, strong disagreement here with that.\n\nWe should take consumer banking and consumer healthcare as starter for L3.",
+      "createdAt": "2025-05-04T19:12:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849372732",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1mJc",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "\n> For large consumer facing apps, I don't see a realistic way to handle this at scale because there are no good recovery options and the app owner would spend their entire time helping people recover their accounts. I don't think this is feasible.\n\nI think you need to keep in mind that, in the cases where L3 is requiered, the question of recovery will need to be thought through from the moment the customer is onboarded. I can think of muliple ways both support and customer services could ensure a smooth transition from a usability and recovery perspective and still keep a thight grip on customer satisfaction while ensuring the L3 principles are followed at the level of security required.\n\nStill, to me it doesn’t seem appropriate to solve \nthe recovery and support challenges when we need to decide which authentication level is appropriate. Those are important, but still separate concerns that should be discussed once we have agreed on what is the appropriate authentication level we need to have for L3. Trying to balance all of this at the same time will make it very difficult to make a good decision about what would be a good authentication strength.\n\nAs @jmaico points out. Most consumer banks, at least in the states, doesn’t need to do this, at least not in several years. When the time finally comes due to regulations, the recovery and support perspective will be thoroughly thought through and implemented, and for the organizations where device-bound passkeys are required today the support and recovery perspective have already been solved. \n\n",
+      "createdAt": "2025-05-04T20:16:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849399388",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1oUd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @elarlang your disagreement is more then fair because NIST does not directly call this out, it's open to interpretation. \n\nBut take a look at https://pages.nist.gov/800-63-3/sp800-63-3.html diagram 6-1 which is the AAL decision workflow diagram. Also take a look at the text in the section before it.\n\nAAL-3 only lands on high risk categories (or moderate/high risk for personal safety).\n\nHere are a few quotes from this doc:\n\nReputation High: \"This is ordinarily reserved for situations with particularly severe effects or which potentially affect many individuals.\"\n\nFinancial Loss: \"High: severe or catastrophic financial loss to any party, or severe or catastrophic agency liability.\" -> I can see this debated in a few ways but it's usually reserved for major  financial loss, not loss from a typical banking consumer\n\nAgency impact: \"...severe mission capability degradation or loss of to the extent and duration that the organization is unable to perform one or more of its primary functions; or (ii) major damage to organizational assets or public interests.\"\n\nSensitive info High: \"a release of personal, U.S. government sensitive, or commercially sensitive information to unauthorized parties resulting in loss of confidentiality with a high impact as defined in FIPS 199\"\n\nPersonal safety High: \"a risk of serious injury or death.\"\n\nI can point out a few blogs from identity authors, but again this is all open to opinion and I can certainly see both points of view.",
+      "createdAt": "2025-05-04T20:40:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849408285",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1osz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And sadly there are still quite a few banks in the US that are still password only.\n\nI think banking accounts with small balances are AAL1. Banking accounts over a certain threshold could be AAL2. Bank accounts for major organizations are AAL3. But again that is just my interpretation. \n\nBut I hardly see a US bank account with under 1000 USD to be the same AAL risk category as protecting top secret documents.",
+      "createdAt": "2025-05-04T20:45:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849409843",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1p3X",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> > Keep in mind that AAL3/NIST 800-63b which loosely maps to L3 ASVS is reserved for critical infrastructure **and not consumer apps**.\n> \n> Can we have facts and quotes for this?\n\nEU consider the following areas as critical infrastructure: https://home-affairs.ec.europa.eu/policies/internal-security/counter-terrorism-and-radicalisation/protection/critical-infrastructure-resilience-eu-level_en\n\nThe Directive covers eleven sectors:\n\n- Energy\n- Transport\n- Banking\n- Financial market infrastructure\n- Health\n- Drinking water\n- Wastewater\n- Digital infrastructure\n- Public administration\n- Space\n- Production, processing and distribution of food\n\n> We should take consumer banking and consumer healthcare as starter for L3.\n\nSure, but keep in mind that US is very unlikely to roll out any regulations that will make consumer banking more secure over the next 4 years for reasons I do not want to discuss.\n\nI would like to point out that AAL3 is not that hard to implement anymore. Matters concerning recovery and support should be discussed, sure, but it would be wrong to make a security risk decision from a support perspective.\nWhat we should ask ourselves is, should our critical infrastructure be treated differently then the rest of consumer based applications? Is spear phishing something we should be concerned about for this sector? And are we facing threats that warrants AAL3 as a baseline for securing our critical infrastructure?\n\nI like to think of the above questions as rhetorical, but I am willling to keep an open mind as I have explained before.",
+      "createdAt": "2025-05-04T21:00:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849414615",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1xP3",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> And sadly there are still quite a few banks in the US that are still password only.\n> \n> I think banking accounts with small balances are AAL1. Banking accounts over a certain threshold could be AAL2. Bank accounts for major organizations are AAL3. But again that is just my interpretation.\n\n> But I hardly see a US bank account with under 1000 USD to be the same AAL risk category as protecting top secret documents.\n\nKeep in mind that, if you lost your credentials, it is often enough to call the bank and tell them what your last transactions where, then Imagine that someone steals your identity and give them self a 400.000 USD loan on your behalf. Sudenly, what you didn’t consider critical, suddenly is.\n\n",
+      "createdAt": "2025-05-04T21:21:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849444855",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p1ytN",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "\n> > Think apps that shoot missles, or health care apps that order controlled substances at scale, or apps that manage billions of private records, or access to classified systems, or control of critical infrastructure for large companies (like a root level AWS account).\n> \n> This is a serious niche. I also think those are not in mass, having their own specific requirements and are per their own niche with their own specific needs. It means they don't need ASVS that much.\n> \n\nYes, but, most og these also have a long chain of contractors and suppliers that may not follow the same regulations, but they still need look for guidance. ASVS is pretty important for a lot of them. If one of them get compromised, the risk is that you end up with a supply chain attack.",
+      "createdAt": "2025-05-04T21:35:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849450829",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p3uop",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Yes, but, most og these also have a long chain of contractors and suppliers that may not follow the same regulations, but they still need look for guidance. ASVS is pretty important for a lot of them. If one of them get compromised, the risk is that you end up with a supply chain attack.\n\nMy point is - if the ASVS L3 is only for \"nuclear facilities\" level, then we don't have practical audience for L3.\n\nAnyway, ASVS can not say how some organization or company needs to use it, it just needs to provide the same framework to have reasonable mechanisms based on their own risks.\n\nIn this context, we basically only discuss what the \"starting point\" is to require \"Device-Bound Passkeys\" (for example).\n\nIt is complicated to find agreement, as everyone interprets differently what \"Device-Bound Passkeys\" or for L3 is, and what AAL3 or EU alternative is.\n\nBased on the description by @sydseter in https://github.com/OWASP/ASVS/issues/2970#issuecomment-2838579520 - every gov-related app I use is using AAL3 level authentication _as the only option_ (Gov-provided infrastructure, central IdP by gov, and smart-cards or special sim cards), and online banks are supporting AAL3 level authentication, it is possible to authenticate with a lower level, but then you have limited functionality.",
+      "createdAt": "2025-05-05T05:36:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2849958441",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p35OZ",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Based on the description by [@sydseter](https://github.com/sydseter) in [#2970 (comment)](https://github.com/OWASP/ASVS/issues/2970#issuecomment-2838579520) - every gov-related app I use is using AAL3 level authentication _as the only option_ (Gov-provided infrastructure, central IdP by gov, and smart-cards or special sim cards), and online banks are supporting AAL3 level authentication, it is possible to authenticate with a lower level, but then you have limited functionality.\n\nAt least in scandinavia, all consumer banks, pharmacies, suppliers and contractors with access to critical infrastructure, governmental health services, public social services, public tax services, and yes, all public services require AAL3 for their costumers and employees. \n\nLink to page from Norway: https://eid.difi.no/nb/sikkerhet-og-personvern/ulike-sikkerhetsniva\n\nYou find similar arrangements in Sweden, Denmark and Sweden.\n\nAnd, at least in Norway, it’s been like that for 21 years. link in English: https://en.m.wikipedia.org/wiki/BankID_(Norway)",
+      "createdAt": "2025-05-05T06:11:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850001817",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p5JBK",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think banking accounts with small balances are AAL1. Banking accounts over a certain threshold could be AAL2. Bank accounts for major organizations are AAL3. But again that is just my interpretation.\n\nI think this is a perfect illustration of why we should require supporting but not require enforcing. It provides discretion whilst also making it clear that it is expected that strong auth is available.\n\nI think the Norwegian example is interesting but I was amazed to discover that Norway only has a population of around ~5.6m so I am not sure this would scale.",
+      "createdAt": "2025-05-05T08:51:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850328650",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p5PWn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think this is a perfect illustration of why we should require supporting but not require enforcing. It provides discretion whilst also making it clear that it is expected that strong auth is available.\n\nHow is that logical? If L3 / AAL3 must require it. It is up to bank or organizer to choose, do they want to be on L3 / AAL3. If some case using the bank on L1 level, does not invalidate the need for other case to require L3.\n\n> I think the Norwegian example is interesting but I was amazed to discover that Norway only has a population of around ~5.6m so I am not sure this would scale.\n\nIt is not only Norway, but there are other countries as well, for example, Estonia. Yes, you can come with arguments that \"those are small populations\", but the technical solution has been here/there for 20+ years. What is the precise excuse for other countries not to improve their solutions, and is this a valid reason why it should not be required by ASVS?\n\nL3 / AAL3 addresses the risks and requirements must be build according this information. What is not done in certain countries should not be an excuse here.\n\n---\n\nSome may find it to be useful information https://www.nist.gov/system/files/documents/2023/12/22/EU-US%20TTC%20WG1_Digital_Identity_Mapping_Report_Final%20Draft%20for%20Comment_22122023.pdf (as it is draft, it may make sense to search newer version)",
+      "createdAt": "2025-05-05T09:03:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850354599",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p5XSa",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> > I think banking accounts with small balances are AAL1. Banking accounts over a certain threshold could be AAL2. Bank accounts for major organizations are AAL3. But again that is just my interpretation.\n> \n> I think this is a perfect illustration of why we should require supporting but not require enforcing. It provides discretion whilst also making it clear that it is expected that strong auth is available.\n> \n> I think the Norwegian example is interesting but I was amazed to discover that Norway only has a population of around ~5.6m so I am not sure this would scale.\n\nFinland, Denmark, Seweden and Norway have a population of about 20 million, but Germany also use AAL3: https://www.personalausweisportal.de/Webs/PA/EN/home/home-node.html\n\nSo that is 100 million people that use AAL3 every day. \nIt scales just fine.",
+      "createdAt": "2025-05-05T09:16:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850387098",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p5t9X",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, so if I summarize, there seems to be consensus forming around the following points:\n\n* ASVS L3 should be considered to be in line with AAL3\n* ASVS L3 apps are not just nuclear missiles and national treasuries but also consumer banking and medical apps\n* ASVS L3 apps should require the use of *hardware based* mechanisms which either means device-bound passkeys or something custom. (Synced passkeys would not satisfy this)\n* Some national governments have a custom mechanism that would probably be suitable so it should be possible for all governments to do this.",
+      "createdAt": "2025-05-05T09:49:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850479959",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p518d",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Ok, so if I summarize, there seems to be consensus forming around the following points:\n> \n> * ASVS L3 should be considered to be in line with AAL3\n> * ASVS L3 apps are not just nuclear missiles and national treasuries but also consumer banking and medical apps\n> * ASVS L3 apps should require the use of _hardware based_ mechanisms which either means device-bound passkeys or something custom. (Synced passkeys would not satisfy this)\n> * Some national governments have a custom mechanism that would probably be suitable so it should be possible for all governments to do this.\n\nYes, and I believe that UK and Italy recently have gotten similar solutions as well:\n\nhttps://eprints.lse.ac.uk/90577/1/Whitley_Trusted%20digital%20ID_2018.pdf\n\nhttps://www.digital.go.jp/assets/contents/node/information/field_ref_resources/53ed2e40-a8be-4249-869d-e94f4f9a28fa/370028b2/20241016_news-g7_result_04.pdf",
+      "createdAt": "2025-05-05T10:03:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850512669",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p55ld",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "The UK service was closed down, but a new one is in the works. https://www.sign-in.service.gov.uk/about/roadmap",
+      "createdAt": "2025-05-05T10:10:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850527581",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p7CYR",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "For reference here is the information from EU clarifying the requirement for using \"strong customer authentication\": https://ec.europa.eu/commission/presscorner/detail/hu/qanda_19_5555\n\nAnd here further clarifications concerning the use of \"strong customer authentication\" when using \"digital wallets\" https://www.eba.europa.eu/publications-and-media/press-releases/eba-clarifies-application-strong-customer-authentication \n\nPSD2 came into effect in 2018. Assurance \"High\" can be considered equivalent to AAL3: https://ec.europa.eu/digital-building-blocks/sites/display/DIGITAL/eIDAS+Levels+of+Assurance\n\nEach country is supposed to implement its scheme according to eID regulation. Here is the full list of countries that have implemented or are planning to implement the eID scheme: https://ec.europa.eu/digital-building-blocks/sites/display/DIGITAL/Country+overview",
+      "createdAt": "2025-05-05T12:23:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850825745",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p7jxB",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "See the \"Approach to assurance level mapping\" on page 16 for mapping reference between AAL and eID https://www.nist.gov/system/files/documents/2023/12/22/EU-US%20TTC%20WG1_Digital_Identity_Mapping_Report_Final%20Draft%20for%20Comment_22122023.pdf\n",
+      "createdAt": "2025-05-05T13:10:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2850962497",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qAw71",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The US is behind the rest of the world. Our banking is mostly password + SMS which is only NIST 800-63b AAL-L1. Government websites are MFA (AAL L2) at best.\n\nI went down a dark hole of reading upcoming banking regulations in the US and the trend is going to be to \"catch up\" and force AAL3 type AuthN in the future.\n\nSo I really do believe that \"hardware based AuthN\" should be *required* for L3 apps since that is the direction most of the world is going right now. This will not age well if we do not make that choice, IMO.",
+      "createdAt": "2025-05-05T21:01:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2852327157",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qB6qa",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "The great thing about eID from a user perspective is that we can use our national AAL3 ID for all gov, banking, insurance and pharmacy services across Europe. Moving from Sweden to Spain? Not a problem, just continue to use your swedish bankid. Need to sign a document  in France, but your situated in Spain? Not a problem! Buying a house in Germany while your on vacation in Polen, sure, why not!\n\nIt’s not bad user experience, it’s fantastic user experience. I am truly sorry for your predicament there on the other side of the atlantic, I mean it.",
+      "createdAt": "2025-05-05T23:15:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2852629146",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qC0Bu",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I was thinking that it would be a good idea to add synced passkeys as an example for 6.3.3, like this to make it clear that this is not what we mean by passkeys in L3:\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **6.3.3** | Verify that either a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms (such as using synced passkeys in conjunction with a password), must be used in order to access the application. Relaxing this requirement requires a fully documented rationale and a comprehensive set of mitigating controls. | 2 | v5.0.be-2.2.9 |\n\nNew issue?",
+      "createdAt": "2025-05-06T00:51:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2852864110",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qFFXv",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have added my suggestion concerning L3 under 6.3\n\nInstead of:\n\n> supporting hardware-based mechanisms (such as standards provided by the Fast IDentity Online (FIDO) Alliance)\n\nI am suggesting:\n\n_hardware-based authentication, performed in an attested and trusted execution environment (TEE), is required for L3_\n\nI have replaced: \n\n> (such as WebAuthn)\n\nwith:\n\n_(such as device-bound passkeys, eIDAS LoA3 enforced authenticators, or authenticators with AAL3 assurance, or the equivalent thereof)_\n\nThe rest is just rearranging the sentence to make it flow.\n\nThe reason for replacing FIDO and WebAuthn is not that it isn't relevant; it's just that it's not precise enough.  WebAuthn is a web standard, and FIDO is a technical specification describing both AAL2 and AAL3 authenticators.\n\nI am mentioning attestation and TEE because they align with the true definition of what a AAL3 authenticator is supposed to be.\n\nE.g:\n\n«Confidential Computing is the protection of data in use by performing computation in a hardware-based, attested Trusted Execution Environment.\"», see definition under 2.1: https://confidentialcomputing.io/wp-content/uploads/sites/10/2023/03/CCC-A-Technical-Analysis-of-Confidential-Computing-v1.3_unlocked.pdf\n\neIDAs LoA3 stands side-by-side with AAL3 as NIST considers them to give equivalent assurances.\n\nSee the \"Approach to assurance level mapping\" on page 16 for mapping reference between AAL and eID https://www.nist.gov/system/files/documents/2023/12/22/EU-US%20TTC%20WG1_Digital_Identity_Mapping_Report_Final%20Draft%20for%20Comment_22122023.pdf\n\nAnd as we all agree now, AAL3 must be required for L3.",
+      "createdAt": "2025-05-06T06:51:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2853459439",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qFneW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I was thinking that it would be a good idea to add synced passkeys as an example for 6.3.3, like this to make it clear that this is not what we mean by passkeys in L3:\n> \n> | # | Description | Level | #v5.0.be |\n> | :---: | :--- | :---: | :---: |\n> | **6.3.3** | Verify that either a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms (such as using synced passkeys in conjunction with a password), must be used in order to access the application. Relaxing this requirement requires a fully documented rationale and a comprehensive set of mitigating controls. | 2 | v5.0.be-2.2.9 |\n> \n> New issue?\n\nPlease open a new issue",
+      "createdAt": "2025-05-06T07:52:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2853599126",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qFn-j",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I spoke to @danielcuthbert and he is going to provide some input here hopefully today ",
+      "createdAt": "2025-05-06T07:53:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2853601187",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qFv9M",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I would like to add that even though AAL3 consider eIDAS LoA3 to be equivalent, it’s not the same, the other way around. In EU, eIDAS LoA3 is legally binding and can be used in court. This is actually a great feature of eIDAS and provides for the possibility of providing services cross borders which otherwise would be considered to be high risk.",
+      "createdAt": "2025-05-06T08:04:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2853633868",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qF7Pw",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is a **fascinating** issue to me, especially given my current obsession with trying to get modern auth systems designed and used by all. First, I believe it’s important to reinforce that Level 3 has always served as the aspirational model of what a secure application should look like. It’s the Lamborghini on the bedroom wall, perhaps elusive for many, but no less worth striving for. \n\nWith that in mind, I support the position that hardware-based authentication should be required, not merely supported, at ASVS Level 3. This level should represent the pinnacle of application security maturity, and the mandatory use of phishing-resistant, hardware-based authenticators such as FIDO2/U2F tokens should be part of that definition. \n\nIdeally, we want this standard to encourage the use of hardware-based authentication mechanisms, such as FIDO2/U2F tokens, as a baseline requirement for high assurance systems. \n\nGiven the current crop of attacks and adversaries that abuse authentication flows, hardware-backed authenticators do provide substantial resilience against such attacks and this aligns the standard of achieving parity with NIST's 800-63B AAL3\n\nThat said, I also acknowledge the operational and implementation challenges that mandatory hardware tokens may pose. Therefore, the language of the requirement should carefully distinguish between:\n\n- Support: The applications technical capability to integrate with hardware-based authenticators, and \n- Require: A policy-driven enforcement that mandates the use of hardware-based authenticators for all users of L3 applications\n- \n\nYour suggestion of rewording 6.3.7 is valid and one wonders if we maybe should embrace that but also add something along the lines of:\n\n\"Applications verified at L2 must support the use of hardware-based authenticators compliant with FIDO2 or equivalent standards. Where feasible, such authenticators should be required for all users performing sensitive operations or accessing administrative interfaces\"\n\n  \n\n",
+      "createdAt": "2025-05-06T08:22:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2853680112",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qGCqB",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> \"Applications verified at L2 must support the use of hardware-based authenticators compliant with FIDO2 or equivalent standards. Where feasible, such authenticators should be required for all users performing sensitive operations or accessing administrative interfaces\"\n\nLove it!\n\nAdded: https://github.com/OWASP/ASVS/issues/3095 ",
+      "createdAt": "2025-05-06T08:33:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2853710465",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qILoG",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'll reiterate my comment here: https://github.com/OWASP/ASVS/issues/3094#issuecomment-2854257577\n\nWe may need to gather requirements related to cryptographic authenticators into their own section or make sure they are grouped appropriately.\n\nhttps://pages.nist.gov/800-63-4/sp800-63b/authenticators/#sfc\nhttps://pages.nist.gov/800-63-4/sp800-63b/authenticators/#mfc\nhttps://pages.nist.gov/800-63-4/sp800-63b/syncable/#appB\n\nNew issue?",
+      "createdAt": "2025-05-06T11:45:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2854271494",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qJdK5",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "yes please @sydseter ",
+      "createdAt": "2025-05-06T13:34:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2854605497",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qKuOO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok I think there is strong consensus here about L3.\n\nThe current wording proposal is here as it will be merged into a single mega-requirement designed to handle this topic for both L2 and L3.\n\nPlease provide comments here:\n\nhttps://github.com/OWASP/ASVS/issues/3094#issuecomment-2854877610",
+      "createdAt": "2025-05-06T15:13:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2854937486",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qMwWt",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "We now have multiple issues spinning off, but they essentially come back to the issue here.\nThis is making things more complicated than they need to be.\n\nFirst of all, there is a clear consensus, among us, and around the globe, that AAL3, IAL3, FAL3, and eIDAS LoA3 are **required** when doing business transactions that can be considered high-risk.. This is not only relevant to banking and health, but also to sectors like pharmaceutical, insurance, property, governmental services, critical infrastructure, and various other cross-border transactions.\n\nDevice-bound passkeys are the only technical authentication equivalent that can give this level of assurance. Synced passkeys can be both software-based and hardware-based. Synced passkeys do not appropriately prove ownership or intent because they lack attestation. This is not an issue for L2, but for L3 it is, legally speaking.  \n\nSome things to consider:\n\n- MFA and hardware-based authentication are additive, not supplementary.\n- FIDO2/U2F tokens can be software-based and stored in a password manager, but that does not give any high assurance needed for what is being considered above from a risk perspective.\n- When FIDO2/U2F tokens are backed up, they lose their attestation. For high assurance, believe it or not, backup is not allowed. I know this doesn't seem easy, but the entire population of the European Union seems to do just fine despite it. \n\nSo for ASVS L3 authenticators, the following requirement should hold:\n\n1. The authenticator must be device-bound.\n2. The authenticator must require multi-factor.\n3. The authenticator can not be backed up.\n4. The authentication must be performed in an attested and trusted execution environment (TEE) or by authenticators with AAL3 assurance or equivalent.\n\n\"or equivalent\" is important because each European member nation is implementing their eIDAS LoA3 authenticator that is not necessarily based on FIDO2 or WebAuthN",
+      "createdAt": "2025-05-06T18:02:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2855470509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qNCez",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I still can't get past the point that @danielcuthbert wants his Lamborghini on his bedroom wall, instead of in a garage. 🤷‍♂️ \n",
+      "createdAt": "2025-05-06T18:32:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2855544755",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qPyS3",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "In regard to rollout and availability of eIDAS LoA3. Next year, The EU Digital Identity Framework Regulation Enters into Force.\n\nFor Non-European citizens it is difficult to understand the ramifications. It means that each member state will now be required to offer at least one EU Digital Identity Wallet to all Citizens, and Residents by 2026.\nThat means that 449 million citizens will use eIDAS LoA3 on a daily basis. \n\nThere are 4 guiding principles: https://www.digital-identity-wallet.eu/news/what-are-the-four-key-principles-guiding-the-european-digital-identity-wallet/\n\n1. User-centricity: putting the user first\n2. Interoperability: enabling seamless cross-border use\n3. Privacy by design: safeguarding personal data\n4. Security by design: building a resilient architecture\n\nWhat will it be used for, well, from my own experience in Scandinavia, basically everything and you can take it with you all over Europe. That last part is the new thing. Me and my Spanish wife can move to Spain and when I open my bank account there, I will use my Norwegian credentials and authenticate using eIDAS LoA3. I will be able to use if for everything else as well. It’s basically a digital passport, but I can use it nomatter where I am to requiere any type of digital services provided the business has integrated these into their application. One credentials, used for basically everything and used everywhere.",
+      "createdAt": "2025-05-06T22:27:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2856264887",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qWlHZ",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@danielcuthbert,  @elarlang, @jmanico,  @tghosth Please have a look at https://github.com/OWASP/ASVS/pull/3093\n\nCould you give a thumbs up if you agree with the text? If you think I need to make changes, please let me know, and I'll see what I can do.\n@tghosth, I looked at your text, and as you know, I see several challenges with it. I would keep it simple in the interest of speed and clarity.",
+      "createdAt": "2025-05-07T10:31:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2858045913",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qcsoi",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I looked at your text, and as you know, I see several challenges with it. I would keep it simple in the interest of speed and clarity.\n\nSee my suggestion here:\nhttps://github.com/OWASP/ASVS/issues/3094#issuecomment-2859626771",
+      "createdAt": "2025-05-07T17:57:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2859649570",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ql5Qo",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Here is a report from Bitwarden concerning passkeys. \n\nPasskeys are taking off:\n\n- Over 15 billion online accounts can now use passkeys\n- Bitwarden reported a 550% jump in daily passkey creation in late 2024\n- 57% of consumers are now familiar with passkeys (up from 39% in 2022)\n- Major platforms report significant user uptake:\n\n- Google: Over 800 million accounts using [passkeys](https://www.authsignal.com/features/passkeys)\n- Amazon: 175 million users created passkeys in the first year\n- Microsoft: Expanded passkey support to Xbox, Microsoft 365, and Copilot in 2024\n- What's driving this success? People are discovering that passkeys are:\n\n- Faster: Amazon users log in 6x faster with passkeys, TikTok users 17x faster\n- More reliable: Microsoft reports a 98% sign-in success rate (versus just 32% for passwords)\n\nref: https://www.authsignal.com/blog/articles/world-passkey-day-the-state-of-passkeys-in-2025\n\nYou should definitely require support for L2. At a minimum, you will need a section for cryptographic authenticators. \n\nhttps://github.com/OWASP/ASVS/issues/3095 and https://github.com/OWASP/ASVS/issues/3096\n\nPasskeys readiness: https://state-of-passkeys.io/",
+      "createdAt": "2025-05-08T07:30:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2862060584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qsq9a",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "L2 is discussed in #3095 . The L3 wording was resolved on #3094. I am closing this issue for now.",
+      "createdAt": "2025-05-08T17:54:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2970#issuecomment-2863837018",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-15T12:16:24Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjtAg",
+      "name": "4a) Waiting for another",
+      "description": "This issue is waiting for another issue to be resolved",
+      "color": "7EDA08"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2970,
+  "state": "CLOSED",
+  "title": "L3 MFA: Are we mandating \"supported\" or \"required",
+  "url": "https://github.com/OWASP/ASVS/issues/2970"
+}

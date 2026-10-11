@@ -1,0 +1,193 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "This requirement is a security weakness.\r\n\r\n2.7.5 | Verify that the out of band verifier retains only a hashed version of the authentication code.\r\n-- | --\r\n\r\nEven 8 numerical digits when hashed are discoverable via rainbow tables.\r\n\r\nI suggest we change this to:\r\n\r\n2.7.5 | Verify that the out of band verifier retains only a hashed version of the authentication code using password storage algorithms such as Argon2id.\r\n-- | --\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5u_40P",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We have separate requirement for password storage:\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.1** | [MODIFIED] Verify that one of the following password hashing functions is used when storing the user's password for the application: argon2id, scrypt, bcrypt or PBKDF2. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nDo we want to have hashing requirements separately for \"usual password\" and \"out of band verifier\" (and also for \"lookup secrets\")? My question (and a bit recommendation is) - can we move/merge hashing part from those requirements to 2.4.1?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.6.2** | [MODIFIED, SPLIT TO 2.6.4] Verify that lookup secrets stored at the back-end with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a 32-bit random salt. A standard hash function can be used if the secret has 112 bits of entropy or more. | | ✓ | ✓ | 330 | 5.1.2.2 |\r\n| **2.7.5** | Verify that the out of band verifier retains only a hashed version of the authentication code. | | ✓ | ✓ | 256 | 5.1.3.2 |",
+      "createdAt": "2023-12-19T07:18:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1862241551",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vAk2L",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like the idea of combining these. Perhaps:\n\n[MODIFIED] Verify that the application employs one of the following \nrobust password hashing functions for securely storing secrets requiring \nverification. This includes user passwords, lookup secrets, out-of-band \nverifiers, and similar entities. The recommended hashing functions are \nargon2id, scrypt, bcrypt, or PBKDF2.\n\n",
+      "createdAt": "2023-12-19T09:36:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1862421899",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vGSOz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Feels a bit wordy AI output for me.\r\n\r\nWhat do you think about direction like:\r\n> Verify that argon2id, scrypt, bcrypt, or PBKDF2 password hashing function is used when storing the user's password for the application, including out-of-band verifier and lookup secrets.",
+      "createdAt": "2023-12-20T06:21:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1863918515",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vHT01",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like your requirement text better let’s do this.\r\n",
+      "createdAt": "2023-12-20T10:01:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1864187189",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vHu39",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Anything to keep from current 2.6.2 and 2.7.5?",
+      "createdAt": "2023-12-20T11:16:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1864297981",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5voqY0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico - should we keep anything from the current 2.6.2 and 2.7.5?\r\n\r\n@tghosth - what do you think about it?",
+      "createdAt": "2023-12-31T11:55:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1872930356",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vo3i2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Is there a way we can centralize the list of password storage algorithms and have other requirements point to it?\n\nOtherwise is looks good to me.",
+      "createdAt": "2023-12-31T16:06:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1872984246",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xokz1",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is one of those NIST requirements that hurts my head to read and to be honest I think that it has been misinterpreted. \r\n\r\nThe NIST requirement talks about an identifying key and an authentication secret. It talks about hashing the former and it talks about the latter having at least 20 bits of entropy.\r\n\r\nI think this is one of those sections that is going to need some sort of simplification to be usable so I would suggest either deleting this requirement or leaving this issue open for when someone does the V2 rewrite.",
+      "createdAt": "2024-01-23T16:36:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-1906461941",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AQ5Rt",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My only point here is that secrets that only need to be verified (and not reversed) should use a password hash, not a normal hash (message integrity code).",
+      "createdAt": "2024-06-06T10:12:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-2151912557",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Shipz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I propose deleting this as insufficient impact, I don't think this temporary code is important enough or long lived enough for me to care how it is stored.",
+      "createdAt": "2024-11-05T22:27:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1812#issuecomment-2458266227",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-12-18T14:29:07Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1812,
+  "state": "CLOSED",
+  "title": "2.7.5 is a security problem and weakness",
+  "url": "https://github.com/OWASP/ASVS/issues/1812"
+}

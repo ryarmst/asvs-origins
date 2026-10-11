@@ -1,0 +1,128 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirement:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **6.2.1** | Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended. | 1 |\n\nPreviously discussed in:\n\n* #913\n* #1540\n\nWe made current requirement based on [this version](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63B-4.2pd.pdf):\n\n> Verifiers and CSPs SHALL require passwords to be a minimum of eight characters in length and SHOULD require passwords to be a minimum of 15 characters in length.\n\nNow NIST SP 800-63-4 is released and it defines it:\n\n> Verifiers and CSPs SHALL require passwords that are used as a single-factor authentication mechanism to be a minimum of 15 characters in length. Verifiers and CSPs MAY allow passwords that are only used as part of multi-factor authentication processes to be shorter but SHALL require them to be a minimum of eight characters in length.\n\nSo, to be aligned with NIST, we need to require:\n\n  * min length 15 if multi-factor authentication is not used\n  * min length 8 if multi-factor authentication is used\n\nBut there is no quick-and-easy fix here, as it could be a breaking change for v5.0.0.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6-ukKn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Do you think we should split this into 2 requirements, or do something like:\n\n_6.2.1 | Verify that user set passwords are at least 15 characters in length. For L2 apps, a minimum of 8 characters is acceptable due to required multi-factor use. | 1_\n\n",
+      "createdAt": "2025-08-19T09:02:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3242#issuecomment-3199877799",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-xFdf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Do you think we should split this into 2 requirements, or do something like:\n\nNo spliting, we should have only one requirement that defines the min length for passwords.\n\nI think we don't need to take levels into the requirement text here, because it is related only with single- or multi-factor in use in the application.\n\n> Verify that user-set passwords are at least 15 characters in length if only a single-factor authentication mechanism is used, and at least 8 characters in length if a multi-factor authentication mechanism is used.",
+      "createdAt": "2025-08-19T12:21:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3242#issuecomment-3200538463",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-xrFn",
+      "author": {
+        "login": "ottosulin"
+      },
+      "authorAssociation": "NONE",
+      "body": "I agree with keeping it as one requirement without levels.\n\nMinimum possible change if we want to include this but don't want breaking changes would be something like:\n\"_Verify that user set passwords are at least 8 characters in length if multi-factor authentication is used, otherwise a minimum of 15 characters is strongly recommended._\"",
+      "createdAt": "2025-08-19T13:07:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3242#issuecomment-3200692583",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-xsit",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think these are both great suggestions to minimally change this one. 🤙🏽 ",
+      "createdAt": "2025-08-19T13:09:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3242#issuecomment-3200698541",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Nk3bi",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "NIST SP 800-63 are \"guidelines cover the identity proofing, authentication, and federation of users (e.g., employees, contractors, or private individuals) who interact with <mark>government information systems</mark> over networks\". I am wondering whether we should really always align with NIST SP 800-63 in the first place?\n\nWould requiring 15 characters in L1 be overkill? Would it make more sense in L3?",
+      "createdAt": "2025-10-26T23:03:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3242#issuecomment-3448993506",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7NpDEL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I am wondering whether we should really always align with NIST SP 800-63 in the first place?\n\nThe boolean answer is \"no\", we don't. At the same time, there is a lot of research behind this, and it would be more problematic to have different requirements in ASVS compared to NIST SP 800-63.\n\n> Would requiring 15 characters in L1 be overkill? Would it make more sense in L3?\n\nRequirements for passwords are mostly important for L1. For L2 and L3, there is already an MFA requirement in place, and password strength does not matter that much. From the same point of view, to require it from L3 does not make sense, because for L3, authentication must never be only asking for username and password.",
+      "createdAt": "2025-10-27T08:43:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3242#issuecomment-3450089739",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-08-18T11:41:19Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 3242,
+  "state": "OPEN",
+  "title": "v5.0.0-6.2.1 password min length vs NIST SP 800-63B-4",
+  "url": "https://github.com/OWASP/ASVS/issues/3242"
+}

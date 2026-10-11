@@ -1,0 +1,192 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "Right-To-Left Override (RTLO) is a unicode control character that is used to reverse the order of characters in languages that are written from right to left. Attackers can use this character to obscure the true extension of a file, potentially tricking users into executing malicious files. For example, an attacker could rename a malicious executable from \"evil.exe\" to \"evilgpj.[RTLO]exe.doc\" which would appear as \"evilgpjcod.exe\" to the user. You can see this write up for [Snapchat here](https://hackerone.com/reports/196222). \r\n\r\n**Verification Requirement:**\r\n\r\n_The application should validate and sanitize input to prevent the misuse of unicode control characters such as RTLO (U+202E)._\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5oMKuM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "On one hand this requires more attention, on the other hand it is covered by current 5.1.4 which requires to validate against allowed characters.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.3** | [MODIFIED] Verify that all input (HTML form fields, REST requests, URL parameters, HTTP headers, cookies, batch files, RSS feeds, etc) is validated using positive validation (allow lists). Where HTML markup must be accepted for input, refer to requirement 5.2.1. ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 20 |\r\n| **5.1.4** | [GRAMMAR] Verify that structured data is strongly typed and validated against a defined schema including allowed characters, length and pattern (e.g. credit card numbers, e-mail addresses, telephone numbers, or validating that two related fields are reasonable, such as checking that suburb and zipcode match). ([C5](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 20 |\r\n\r\n5.1.4 itself needs some clarification as well, related issue: https://github.com/OWASP/ASVS/issues/1552",
+      "createdAt": "2023-10-05T04:38:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1748020108",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oeIRr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that this should be covered by those requirements.\r\n\r\n@elarlang do you think we should close this or do we need to make changes to those requirements to make it clearer?",
+      "createdAt": "2023-10-09T10:14:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1752728683",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5of3X5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I was thinking about it more - I think with current 5.1.3 and 5.1.4 we can catch some cases, but for \"plain text input\" (like technical issue description field), we may miss this part as \"everything is allowed\".\r\n\r\nI don't clearly propose it (yet), but one way to solve it is actually separate sanitization requirement for that.\r\n\r\nBut, there is matching requirement as well:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.2** | Verify that unstructured data is sanitized to enforce safety measures such as allowed characters and length. | ✓ | ✓ | ✓ | 138 |",
+      "createdAt": "2023-10-09T15:04:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1753183737",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oy_Ov",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Chat messages are not structured (5.1.4) and also I believe 5.2.2 can be vague.",
+      "createdAt": "2023-10-11T17:55:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1758196655",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ozRsh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you found the issue, 5.2.2 is suitable for reporting. Just 5.2.2 does not say that you should specially test for that. The main question is, does it require special spotlight or not. If to create separate requirement, I think it sound too much just one edge-case of 5.2.2.",
+      "createdAt": "2023-10-11T18:32:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1758272289",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pvhcJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we need to consider this in the overall context of V5 so I think we push this to the \"rework\" stage.",
+      "createdAt": "2023-10-22T11:14:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1774065417",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pvh9-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Additionally to RTLO, maybe we should in general all non-printable characters here into the discussion?",
+      "createdAt": "2023-10-22T11:25:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1774067582",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qY6N-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If an application needs to accept it, then it must be able to display them correctly as well:\r\n\r\n* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdi\r\n* https://developer.mozilla.org/en-US/docs/Web/HTML/Element/bdo",
+      "createdAt": "2023-10-30T10:40:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-1784914814",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IH24p",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this should be covered by the proposed updates to 5.1.3:\r\n\r\nhttps://github.com/OWASP/ASVS/issues/1640#issuecomment-2283753247",
+      "createdAt": "2024-08-12T11:51:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-2283761193",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KoGG_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that is covered so I am going to close this,",
+      "createdAt": "2024-09-03T07:12:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1744#issuecomment-2325766591",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-10-04T19:53:34Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    }
+  ],
+  "number": 1744,
+  "state": "CLOSED",
+  "title": "Consideration for Right-To-Left-Override (RTLO) related vulnerabilities",
+  "url": "https://github.com/OWASP/ASVS/issues/1744"
+}

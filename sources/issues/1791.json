@@ -1,0 +1,289 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "Memcache, a widely-used distributed memory caching system, can be vulnerable to injection attacks. These vulnerabilities arise when untrusted data is concatenated into a Memcache command without proper handling or sanitization. The impact of such vulnerabilities can range from data leakage to unauthorized access or modification of cached data. [Reference](https://infosecwriteups.com/understanding-memcache-injection-d4d8f57595f0):\r\n```\r\n$key = $_POST['key'];\r\n$value = $_POST['value'];\r\n\r\n// The attacker can send a key that includes a command or query\r\n// For example: \"key; delete users; key\"\r\n\r\n$memcache = new Memcache();\r\n$memcache->connect('localhost', 11211);\r\n$memcache->set($key, $value);\r\n\r\n// The malicious command or query will be stored in the cache and may be executed later\r\n```\r\nProposed requirement:\r\n- Ensure that data sent to Memcache servers is properly validated and sanitized to prevent Memcache Injection attacks.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5snbI0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How the proposal is different from current 8.1.1?\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.1.1** | [MODIFIED, MERGED FROM 8.1.2] Verify that the application prevents sensitive data from being cached in server components such as load balancers and application caches or ensures that the data is securely purged after use. | | ✓ | ✓ | 524 |\r\n\r\nedit: but if I watch your code example, then there the problem is not caching as such, but not validated/sanitized value for `key`. This part is covered in general Input validation and Sanitization requirements.\r\n\r\nIn general I smell the usual \"testing checklist\" vs \"list of requirements for reporting\" mindset difference here.",
+      "createdAt": "2023-11-22T07:57:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1822274100",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5srATZ",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "These two are completely different!!! Memcache Injection represents a specific attack vector that arises from the unique way Memcache interprets concatenated commands. This risk is distinct from merely caching sensitive data.",
+      "createdAt": "2023-11-22T17:40:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1823212761",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5srE1d",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> These two are completely different!!!\r\n\r\nWell, there is a bit difference in your proposal as well:\r\n> Ensure that data sent to Memcache servers is properly validated and sanitized to prevent Memcache Injection attacks.\r\n\r\nMay comment was for this proposal - this proposed text is quite similar to 8.1.1 requirement - the end goal is the same.\r\n\r\nNow when I watched your code example, it was a bit different problem there than proposed requirement. ",
+      "createdAt": "2023-11-22T17:55:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1823231325",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5srYLz",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would like to highlight some key distinctions that make the inclusion of specific guidelines for Memcache Injection distinct from what is currently covered in 8.1.1.\r\n\r\nFirstly, requirement 8.1.1 primarily addresses the prevention of sensitive data being cached in server components and ensuring secure purging of data post-use. While important, this requirement doesn't explicitly cover the validation and sanitization of data being used in cache operations, especially in the context of Memcache.\r\n\r\nThe core of Memcache Injection attacks lies in the manipulation of cache keys or values, which is not directly addressed in 8.1.1. The proposed requirement emphasizes the need for specific handling of data sent to Memcache servers, focusing on validating and sanitizing the data used in Memcache commands to prevent attackers from executing malicious operations.\r\n\r\nI encourage you to review the nature of Memcache Injection attacks. ",
+      "createdAt": "2023-11-22T18:55:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1823310579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5srmFQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I was going to write the answer, but... everything I started to write is already written. Sometimes I wonder do people read before they post comments... :)\r\n\r\nFor (re)starting point:\r\n\r\n> edit: but if I watch your code example, then there the problem is not caching as such, but not validated/sanitized value for key. This part is covered in general Input validation and Sanitization requirements.\r\n\r\n> In general I smell the usual \"testing checklist\" vs \"list of requirements for reporting\" mindset difference here.",
+      "createdAt": "2023-11-22T19:19:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1823367504",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5suyg6",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think 5.3.4 is more applicable to memcache injection:\r\n\r\n> 5.3.4 Verify that data selection or database queries (e.g. SQL, HQL, ORM, NoSQL) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from database injection attacks.\r\n\r\nThere are many requirements already to prevent against specific types of attacks:\r\n\r\n- 5.2.3, SMTP or IMAP injection\r\n- 5.2.5, template injection\r\n- 5.3.4, 5.3.5, SQL injection\r\n- 5.3.6, JSON injection\r\n- 5.3.7, LDAP injection\r\n- 5.3.8, 12.3.5, command injection\r\n- 5.3.10, XPath injection or XML injection\r\n- 7.3.1, log injection\r\n\r\nYou could say, \"memcache injection is missing from this list!\", and you would be right. But I think it is pointless to try to exhaustively list all systems which would be vulnerable to injection. I would rather see more general requirements that work against all forms of injection.\r\n\r\n> `$memcache->set($key, $value);`\r\n\r\nThis shouldn't be vulnerable to injection. The `set` function itself should do the escaping, not the caller. I think it does and this blog post is talking nonsense. Memcache injection is possible, but not with this code example.\r\n\r\nThe blog post also suggests using prepared statements, but memcache doesn't have those. It also seems to confuse memcache and memcached.\r\n\r\n",
+      "createdAt": "2023-11-23T10:49:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1824204858",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sxFIw",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord I understand your point about the potential confusion between 'memcache' and 'memcached.' To clarify:\r\n\r\n**Memcached** is the specific open-source distributed memory caching system. It's the actual software that runs as a daemon and provides the caching functionality.\r\n\r\n**Memcache**, on the other hand, is often used more generally to refer to the concept or methodology of caching objects in memory to speed up applications. Additionally, in some programming languages, like PHP, there are libraries named 'Memcache' used to interface with the Memcached service.\r\n\r\nRegarding with the `set` function, this method is not typically designed to perform escaping or sanitization of input data. Its focus is on caching efficiency, not security.\r\n\r\nLet's go for a [real world example for Memcache Injection](https://www.sonarsource.com/blog/zimbra-mail-stealing-clear-text-credentials-via-memcache-injection/), to simplify this, a user's routing information is stored like this: \r\n```\r\nuser_email = \"user@example.com\"\r\ncache[user_email] = \"server1\"\r\n```\r\nAn attacker finds a way to inject a newline character and additional command. Now, the cache has an entry that not only stores the attacker's route, but also executes the malicious command which changes the route for the user to an attacker-controlled server.\r\n\r\nI'm curious to understand the reasoning behind the viewpoint that including Memcache Injection in the ASVS would be pointless. Could you elaborate on how we distinguish between vulnerabilities like LDAP or IMAP Injection, which are deemed valid for inclusion, and Memcache Injection, which is considered not necessary to include?\r\n ",
+      "createdAt": "2023-11-23T18:28:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1824805424",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xtr9a",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If we separately include things like LDAP injection and IMAP injection, I agree that we can't really ignore memcache injection. I do however think it is highly likely that at some point we will need to compress these requirements into less requirements.\r\n\r\nIn the meantime, is there any sanitization required other than preventing newlines @ImanSharaf?",
+      "createdAt": "2024-01-24T10:03:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1907801946",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xt2r0",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think the best solution for memcache and other forms of injections is to use a library with an API that automatically encodes/escapes/validates. The application does not have to take care of injection anymore, since this is abstracted away by the library. PHP's memcache APIs already do this, so\r\n\r\n```\r\n$memcache->set($key, $value);\r\n```\r\n\r\nis not vulnerable. The problem occurs if the application talks to memcache directly and creates its own commands by concatenating strings.\r\n\r\nI think \"use a high-level API instead of talking to the other system directly\" can be a nice requirement, solving many security problems.",
+      "createdAt": "2024-01-24T10:29:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1907845876",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xt4f5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think \"use a high-level API instead of talking to the other system directly\" can be a nice requirement, solving many security problems.\r\n\r\nFrom the requirement point of view, it applies to the last bit which communicates with an external component (in this case Memcache).",
+      "createdAt": "2024-01-24T10:33:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1907853305",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xu1uu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thoughts on:\r\n\r\n> Verify that the application uses a high-level API which performs input sanitization instead of communicating directly with  a memcache instance to prevent injection attacks. Alternatively, ensure that content is carefully sanitized before being sent to memcache.",
+      "createdAt": "2024-01-24T13:16:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1908104110",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xu4XR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't like the direction, I think we should concentrate only on preventing security holes from happening not giving architecture (and not directly security-related) advice.\r\n\r\n",
+      "createdAt": "2024-01-24T13:23:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1908114897",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x2HMD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Having discussed with @elarlang, I think we don't need to be too prescriptive...\r\n\r\n> Verify that the application sanitizes content before it is being sent to memcache to prevent injection attacks.\r\n\r\nAny final thoughts?",
+      "createdAt": "2024-01-25T11:44:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1910010627",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yLiov",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Having discussed with @elarlang, I think we don't need to be too prescriptive...\r\n> \r\n> > Verify that the application sanitizes content before it is being sent to memcache to prevent injection attacks.\r\n> \r\n> Any final thoughts?\r\n\r\nIt works for me.",
+      "createdAt": "2024-01-29T21:46:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1915628079",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ywhbv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The situation at the moment:\r\n\r\n* requirement: Verify that the application sanitizes content before it is ~~being~~ sent to memcache to prevent injection attacks.\r\n* category/section: \"V5.2 Sanitization and Sandboxing\"\r\n* level: it depends, how we going to describe levels, at the moment I would say 2\r\n* cwe: there is no precise match, canditates are listed in the \"[data neutralization issues](https://cwe.mitre.org/data/definitions/137.html)\" list, but I can not see anything to match. Descriptions and titles are quite specific for other problems. So, at the moment I would leave it empty.\r\n\r\n",
+      "createdAt": "2024-02-03T13:29:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1925322479",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5y2szY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1856 to add this",
+      "createdAt": "2024-02-05T12:58:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1791#issuecomment-1926941912",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-11-21T22:02:00Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 1791,
+  "state": "CLOSED",
+  "title": "Consideration for Memcache Injection Vulnerabilities",
+  "url": "https://github.com/OWASP/ASVS/issues/1791"
+}

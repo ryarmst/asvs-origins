@@ -1,0 +1,910 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjgyNg==",
+    "is_bot": false,
+    "login": "cmlh",
+    "name": "Christian Heinrich"
+  },
+  "body": "I would like to propose that OWASP recommend the migration from TLS v1.2 to TLS v1.3 [or later] to support PCI-DSS v3.2.1 Requirement 2.2.3 reproduced below:\r\n\r\n![image](https://user-images.githubusercontent.com/136826/116527891-81febb00-a91e-11eb-9bce-5441194ced91.png)\r\n\r\nTherefore, [V9.1 Client Communications Security ](https://github.com/cmlh/ASVS/blob/master/4.0/en/0x17-V9-Communications.md#v91-client-communications-security) will need to be modified.\r\n\r\nThe alignment with PCI-DSS v3.2.1 is tracked by GitHub Issue https://github.com/OWASP/ASVS/issues/317#issuecomment-829077114",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMDYyNzQxNA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "“Early TLS” cites TLS 1.0 and 1.1. I see nothing in PCI-DSS suggesting the deprecation of TLS 1.2.",
+      "createdAt": "2021-05-01T12:48:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-830627414",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMDY5MTgyNQ==",
+      "author": {
+        "login": "markehack"
+      },
+      "authorAssociation": "NONE",
+      "body": "The Federal Government standards require that TLS1.3 be supported by January 2024 so this proposal does appear somewhat premature both for PCI-DSS and for OWASP.",
+      "createdAt": "2021-05-01T20:44:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-830691825",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMDY5NjI2MA==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> “Early TLS” cites TLS 1.0 and 1.1. I see nothing in PCI-DSS suggesting the deprecation of TLS 1.2.\r\n\r\nPCI-DSS v3.2.1 states \"_Refer to industry standards and best practices for information on strong cryptography and secure protocols (e.g., NIST SP 800-52 and SP 800-57, **OWASP**, etc.)._\".\r\n\r\nTherefore, in order to maintain our leadership position OWASP must deprecate TLS v1.2 @jmanico.",
+      "createdAt": "2021-05-01T21:21:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-830696260",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMDY5Nzc0Ng==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> The Federal Government standards require that TLS1.3 be supported by January 2024 so this proposal does appear somewhat premature both for PCI-DSS and for OWASP.\r\n\r\nAre you referring to [NIST SP 800-52 Rev. 2](https://csrc.nist.gov/news/2019/nist-publishes-sp-800-52-revision-2) @markehack?\r\n\r\nThe [Australian Cyber Security Centre\r\n](https://www.cyber.gov.au/acsc/view-all-content/publications/implementing-certificates-tls-https-and-opportunistic-tls) states \"_TLS 1.3 removed vulnerable cipher suites found in TLS 1.2, while introducing stronger cipher suites._\" and advises to \"Begin transitioning from TLS 1.2 to TLS 1.3\" etc. \r\n\r\n",
+      "createdAt": "2021-05-01T21:34:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-830697746",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMTI3NDI1MQ==",
+      "author": {
+        "login": "markehack"
+      },
+      "authorAssociation": "NONE",
+      "body": "You end up with a competing set of standards and directives and\nimprecise statements and some present v future proofing conundrums\nwhile we wait for the Quantum resistant ciphers to shake out.\n\nNist-800-131a  initially  forbit both RSA handshakes and 3DES and then\nlater placed them on the deprecated list. Removing both  of these and\nrequiring PFS seems to be a good balance between security and\ncompatibility.\nTLS1.3 removed all CBC ciphers, DHE handshakes and SHA1 HMACs for a mix\nof reasons not all of them directly due to any vulnerability. (Risk yes\n)\nTLS1.3 still does not force re-negotiation based on time or traffic so\ncare needs to be taken with even AES128 GCM \nRequiring support for  a newer protocol and cipher set  is wise , while\nforbidding the usage, especially of a protocol may be a good security\nrequirment but can and will impact compatibility. In general a balance\nbetween the two and reasonable times to remove the ciphers and\nprotocols  seems a wiser choice than complete removal.\n\nOn Sat, 2021-05-01 at 14:34 -0700, Christian Heinrich wrote:\n> > The Federal Government standards require that TLS1.3 be supported\n> > by January 2024 so this proposal does appear somewhat premature\n> > both for PCI-DSS and for OWASP.\n> \n> Are you referring to NIST SP 800-52 Rev. 2 @markehack?\n> \n> The Australian Cyber Security Centre\n> \n>  states \"TLS 1.3 removed vulnerable cipher suites found in TLS 1.2,\n> while introducing stronger cipher suites.\" and advises to \"Begin\n> transitioning from TLS 1.2 to TLS 1.3\" etc.\n> \n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n> \n> [\n> {\n> ***@***.***\": \"http://schema.org\",\n> ***@***.***\": \"EmailMessage\",\n> \"potentialAction\": {\n> ***@***.***\": \"ViewAction\",\n> \"target\": \"\n> https://github.com/OWASP/ASVS/issues/979#issuecomment-830697746\",\n> \"url\": \"\n> https://github.com/OWASP/ASVS/issues/979#issuecomment-830697746\",\n> \"name\": \"View Issue\"\n> },\n> \"description\": \"View this Issue on GitHub\",\n> \"publisher\": {\n> ***@***.***\": \"Organization\",\n> \"name\": \"GitHub\",\n> \"url\": \"https://github.com\"\n> }\n> }\n> ]\n",
+      "createdAt": "2021-05-03T13:53:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-831274251",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMTU5ODQ5NQ==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "As the S in OWASP is for *Security* then our policy in the past has deliberately not been aligned with compatibility such as @jmanico @owasp.org email to the [OpenJDK security-dev mailing list](https://mail.openjdk.java.net/pipermail/security-dev/2017-February/015613.html)\r\n\r\nNevertheless, interim Pull Request #983 maintains backwards compatibility for TLS 1.2  rather than wait until [2024](https://github.com/OWASP/ASVS/labels/2024) for Pull Request #980 @markehack",
+      "createdAt": "2021-05-03T23:30:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 2
+          }
+        },
+        {
+          "content": "CONFUSED",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-831598495",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMTc1OTA2NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@cmlh, please have discussion here in the issue first, and if the change/proposal found agreement, then it's time to make PR. Discussion over pull-requests is just a mess. Discussion in PR should be targeted only for \"syntax or language\", not for the idea of the change itself. This is also stated in PR template.",
+      "createdAt": "2021-05-04T08:08:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-831759065",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMTg4MDY5Ng==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> As the S in OWASP is for _Security_ then our policy in the past has deliberately not been aligned with compatibility such as @jmanico @owasp.org email to the [OpenJDK security-dev mailing list](https://mail.openjdk.java.net/pipermail/security-dev/2017-February/015613.html)\r\n> \r\n> Nevertheless, interim Pull Request #983 maintains backwards compatibility for TLS 1.2 rather than wait until [2024](https://github.com/OWASP/ASVS/labels/2024) for Pull Request #980 @markehack\r\n\r\nChristian, using things that I said in 2017 as a way to either discredit me or make me look bad is the kind of behavior that got you banned from OWASP in the first place. Consider this a polite warning.",
+      "createdAt": "2021-05-04T11:48:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-831880696",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMTk0OTc2Mg==",
+      "author": {
+        "login": "markehack"
+      },
+      "authorAssociation": "NONE",
+      "body": "What is a good proposal is to remove all CBC ciphers. Removing SHA1\nHMACs to align with TLS1.3 is also fine.\nThe only downside is performance since AES256-GCM only defined SHA1 and\nSHA384  ( not clear why SHA256 was never defined) and most hardware\nonly accelerates SHA1 or SHA256.\n\n\n\nOn Mon, 2021-05-03 at 16:31 -0700, Christian Heinrich wrote:\n> As the S in OWASP is for Security then our policy in the past has\n> deliberately not been aligned with compatibility such as @jmanico\n> @owasp.org email to the OpenJDK security-dev mailing list\n> \n> Nevertheless, interim Pull Request #983 maintains backwards\n> compatibility for TLS 1.2  rather than wait until 2024 for Pull\n> Request #980 @markehack\n> \n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n> \n> [\n> {\n> ***@***.***\": \"http://schema.org\",\n> ***@***.***\": \"EmailMessage\",\n> \"potentialAction\": {\n> ***@***.***\": \"ViewAction\",\n> \"target\": \"\n> https://github.com/OWASP/ASVS/issues/979#issuecomment-831598495\",\n> \"url\": \"\n> https://github.com/OWASP/ASVS/issues/979#issuecomment-831598495\",\n> \"name\": \"View Issue\"\n> },\n> \"description\": \"View this Issue on GitHub\",\n> \"publisher\": {\n> ***@***.***\": \"Organization\",\n> \"name\": \"GitHub\",\n> \"url\": \"https://github.com\"\n> }\n> }\n> ]\n",
+      "createdAt": "2021-05-04T13:39:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-831949762",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjEyODM2NA==",
+      "author": {
+        "login": "tomato42"
+      },
+      "authorAssociation": "NONE",
+      "body": "There really is no cryptographic reason to deprecate TLS 1.2 completely.\r\nWhen it's used with ephemeral key exchanges, strong hashes for signatures, and AEAD ciphersuites it's as strong as TLS 1.3.",
+      "createdAt": "2021-05-04T17:50:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-832128364",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjM4NzM4MA==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "To address @elarlang https://github.com/OWASP/ASVS/issues/979#issuecomment-831759065\r\n\r\nWhile I wanted to wait until **after** the release of PCI-DSS 4.0 as per https://github.com/OWASP/ASVS/issues/317#issuecomment-719995572 which would have at delayed the timeline to 2024 or [later](https://github.com/OWASP/ASVS/issues/317#issuecomment-798993522) I have adhered to [CONTRIBUTING.md](https://github.com/OWASP/ASVS/blob/master/CONTRIBUTING.md): \r\n\r\nI created Issue https://github.com/OWASP/ASVS/issues/979 after the discussion within Issue https://github.com/OWASP/ASVS/issues/317#issuecomment-797796017 after @jmanico stated: \r\n\r\n> We are pushing toward 4.1 so PR's in this are are appreciated.\r\n\r\n@jmanico then posted comments to Pull Request https://github.com/OWASP/ASVS/pull/980#issuecomment-830627015 **against** [CONTRIBUTING.md](https://github.com/OWASP/ASVS/blob/master/CONTRIBUTING.md) before I was able to publish the other planned changes so they could be considered in their entirity.\r\n\r\nTo address both @markehack https://github.com/OWASP/ASVS/issues/979#issuecomment-831949762 and @ tomato42 https://github.com/OWASP/ASVS/issues/979#issuecomment-832128364\r\n\r\nUltimately, I believed that @OWASP wanted to regain its leadership in Web Application Security as stated within https://github.com/OWASP/ASVS/issues/979#issuecomment-830696260 and https://github.com/OWASP/ASVS/issues/979#issuecomment-831598495 as @OWASP is referenced within PCI-DSS and therefore can push changes downstream to PCI-DSS.\r\n\r\nAt the risk of repetition above I wanted to wait until **after** the release of PCI-DSS 4.0 as per https://github.com/OWASP/ASVS/issues/317#issuecomment-719995572 which would have at delayed the timeline to 2024 or [later](https://github.com/OWASP/ASVS/issues/317#issuecomment-798993522)\r\n\r\nTo address @jmanico https://github.com/OWASP/ASVS/issues/979#issuecomment-831880696\r\n\r\n@jmanico is aware that the ban was unprovoked, unjust and has caused considerable professional harm to me as he stated in his own words within https://lists.owasp.org/pipermail/owasp-leaders/2012-July/007468\r\n\r\nNeither was my intent to be perceived as discrediting @jmanico, rather my reference to [OpenJDK security-dev mailing list](https://mail.openjdk.java.net/pipermail/security-dev/2017-February/015613.html) was to convey @OWASP wanted to regain its leadership in Web Application Security in pushing changes downstream to PCI-DSS (again repeated above).\r\n\r\nI have decided to close this Issue #979 and will focus on making changes to [CONTRIBUTING.md](https://github.com/OWASP/ASVS/blob/master/CONTRIBUTING.md) reflecting the above positive outcome.\r\n",
+      "createdAt": "2021-05-05T03:20:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-832387380",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjQwNzIxMA==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "To quote @jmanico PR https://github.com/OWASP/ASVS/pull/983#issuecomment-831864189\r\n> This is a major change. Please fully complete the discussion and get at least some ASVS leaders to agree to this before submitting a PR. And Christian, I think this is a very valid issue to discuss. cc @tghosth @danielcuthbert @vanderaj\r\n\r\nhttps://github.com/OWASP/ASVS/pull/980#issuecomment-830719090 is when this alternative was presented. \r\n\r\nCan @tghosth and/or @danielcuthbert and/or @vanderaj merge https://github.com/OWASP/ASVS/pull/983 as a minor change and close this [#979] issue and label [2024](https://github.com/OWASP/ASVS/labels/2024) too please?\r\n \r\n\r\n\r\n\r\n",
+      "createdAt": "2021-05-05T04:43:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-832407210",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMjQwNzQyNg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have not checked the timeline (and it does not matter), maybe this CONTRIBUTING.md did not exists yet when Jim was asking PR from you. Back then Jim was full of enthusiasm and wanted to get old issues to move. \"Discussion in issue first, PR later\" was not that clearly in place, please take this context in account. Anyway, it is new CONTRIBUTING.md and in development, give it a bit of time first. My comment was with goal to point this change out.\r\n\r\nFeedback on this issue - technical issue should have focus on discussion over technical parameters and arguments, it's nice to have them here. Mailinglist history, who-when-what-was-said can be important and emotional for you, but from this issue point of view it feels a bit offtopic. It's just my opinion, I don't want to have any discussion over that or to \"fight for The Only Truth\" here.",
+      "createdAt": "2021-05-05T04:44:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-832407426",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzYzOTc0Mg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @cmlh what do you think of a ASVS Level 2 requirement that continues to endorse TLS 1.2-1.3 and a ASVS Level 3 requirement that states to only support TLS 1.3? I think these requirements would be in conflict if we expect folks to do all requirements but would be fine if we think of the different ASVS tiers as more of risk levels. Could this work? cc @ThunderSon ",
+      "createdAt": "2021-05-06T16:00:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-833639742",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzc0NzA0NA==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "There is no way that only TLS1.3 will be running on a web server. Impossible. Of course, this is from an implementation point of view, and not a theoretical side (which we really shouldn't care about here). Lol, card processors are still on 3DES and AES-CBC. What if you have an IoT system that doesn't properly support TLS1.3? Or any device that isn't a PC with an up to date browser?\r\nThe linked requirement mentions to prefer 1.3; that's it, that's more than enough at the current state we're in (even a year from now).\r\n\r\nFuture proof? What if tomorrow AES-GCM is found to be broken? Let's keep the ASVS as realistic as possible.\r\nOWASP is the leader for a reason in the appsec world -- it cares about its audience.",
+      "createdAt": "2021-05-06T18:10:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-833747044",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzg5MTI1MA==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "To address @jmanico https://github.com/OWASP/ASVS/issues/979#issuecomment-833639742 and @ThunderSon https://github.com/OWASP/ASVS/issues/979#issuecomment-833747044\r\n\r\nASVS has to determine if its guiding principal is either the _latest security_ OR _compatibility with older technologies_.\r\n\r\n> OWASP is the leader for a reason in the appsec world -- it cares about its audience.\r\n\r\nIf the above is true then ASVS guiding principal is _compatibility with older technologies_ so therefore ASVS Level 1-3 should be uniform for TLS v1.2 but at the very least we should give notice to the impending change scheduled for [2024](https://github.com/OWASP/ASVS/labels/2024) within the next minor release(s) of ASVS.\r\n",
+      "createdAt": "2021-05-06T21:48:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-833891250",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzNjQ1MjM2NA==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "**Other Sources**\r\n\r\n[NSA](https://media.defense.gov/2021/Jan/05/2002560140/-1/-1/0/ELIMINATING_OBSOLETE_TLS_UOO197443-20.PDF)\r\n_NSA recommends that only TLS 1.2 or TLS 1.3 be used_\r\n\r\n[NIST](https://csrc.nist.gov/publications/detail/sp/800-52/rev-2/final)\r\n_It requires that TLS 1.2 configured with FIPS-based cipher suites be supported by all government TLS servers and clients and requires support for TLS 1.3 by January 1, 2024_\r\n\r\n[AWS](https://aws.amazon.com/blogs/security/tls-1-2-required-for-aws-fips-endpoints/)\r\n_Beginning March 31, 2021, if your client application cannot support TLS 1.2, it will result in connection failures._",
+      "createdAt": "2021-05-10T09:20:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-836452364",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzOTQzNDc5MA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Given that 9.1.3 already mandates TLS 1.2 and 1.3, I am not sure I am clear on what is being added on 9.1.5.\r\n\r\nAlso, I'm not sure that server side support is as important as client side support which I think is the biggest problem in deprecating versions of TLS. I agree that we should be whatever possible mandating the best possible security controls but we also have to be realistic because the more controls we include which are impossible from a business perspective, the weaker the standard gets.\r\n\r\nPerhaps the best option would be a note within 9.1.3 that companies should expect and be ready for deprecations of TLS versions?\r\n\r\nAlso, as a general note (which I am not sure is documented anywhere), we don't like to include links within requirements (the links to the proactive controls are an exception which we are planning to remove in the next major release).\r\n\r\n",
+      "createdAt": "2021-05-12T05:00:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-839434790",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzOTU0MDg5MQ==",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"Perhaps the best option would be a note within 9.1.3 that companies should expect and be ready for deprecations of TLS versions?\"\r\n\r\nI like this approach, I think it gives enough time for those needing to plan and prepare. Yes, TLS 1.2 will become the bare minimum and rightly so, but we are also adult enough to know that many legacy apps wont and can't support it. I'd rather we highlight the issue, get people ready and help that way",
+      "createdAt": "2021-05-12T07:39:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-839540891",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzOTgzMzU1NA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@cmlh Once a compromise or decision is reached for a future version of ASVS, please don't re-open this or similar tickets if you didn't get the outcome that you obviously desire. We can't keep re-litigating the same issue over and over again. \r\n\r\nI trust my co-leads to come up with a path forward that encourages or demands better of our industry. The ASVS was one of the first standards to require the use of stronger authentication mechanisms back when that was controversial, and for more than 8 years we prohibited the use of insecure questions and answers, so we are early leaders and courageous when we need to be, but it needs to be a real likelihood that an impact is *always* going to happen in many different settings, rather than just a local shared wifi or hub based network. If we force people to take action on a really unlikely outcome, that's an opportunity cost to take an edge case action instead of another that might be far more impactful. This is the issue I have with PCI DSS - it has like 300 things you must do, and we still have breaches. It should be ordered with things you must do, that really do make a difference, and then the remaining 292 items are like \"yeah, try this\". \r\n\r\nIn practice, browsers and so on will choose the best available cipher suite, and in the absence of downgrade exploits that affect any connection, and not just local ones, means the likelihood of an attacker forcing a victim to use a weaker or exploitable ciphersuite is minimal in most settings. If there is a forced downgrade attack that is realistic, applies to most corporate or shared public networks, then we should be stronger in our recommendations to require the latest TLS. ASVS 5.0 is likely to last longer than 2024, so I'm supportive of noting that TLS 1.2 will be deprecated by many common browsers and platforms prior to 2024 and plans should be in place to migrate to the latest TLS or remove older cipher suites by then.\r\n\r\nWe need to be cognizant that if we say \"The latest TLS cipher suites and leading algorithm choices should be the first available server offered choices, and as strongly configured as possible.\" and \"If older TLS cipher suites, such as TLS 1.2, are required due to compatibility reasons with business-critical integrations, these older cipher suites must be offered last to prevent most users from using these weaker or potentially exploitable cipher suites.\" and \"Regular cipher testing should be conducted to ensure that all available algorithms and cipher suites are configured strongly, ordered in the strongest to the weakest alternative, deprecated cipher suites or algorithms are removed, and the remaining choices do not create exploitable, breach confidential communications, or break the integrity of a secure communications channel.\"",
+      "createdAt": "2021-05-12T14:47:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-839833554",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzOTg4Nzk1OA==",
+      "author": {
+        "login": "tomato42"
+      },
+      "authorAssociation": "NONE",
+      "body": "@vanderaj in general I agree, but blank requirement for server-side cipher suite ordering can be detrimental, clients running with pure software crypto stacks will prefer use of Chacha20 ciphers, while ones with hardware acceleration will likely want to use AES (both because of speed and battery usage). So I'd suggest a bit softer language on this requirement.",
+      "createdAt": "2021-05-12T15:57:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-839887958",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MDE4MzQ3NQ==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "To address @tghosth https://github.com/OWASP/ASVS/issues/979#issuecomment-839434790\r\n\r\n> Given that 9.1.3 already mandates TLS 1.2 and 1.3, I am not sure I am clear on what is being added on 9.1.5.\r\n\r\nPull Request https://github.com/OWASP/ASVS/pull/983 specifies the addition of 9.1.5 mandates the server side control exclude TLS 1.2 after TLS 1.3 support is released by the specific server side web technology. \r\n\r\n> Also, I'm not sure that server side support is as important as client side support which I think is the biggest problem in deprecating versions of TLS. I agree that we should be whatever possible mandating the best possible security controls but we also have to be realistic because the more controls we include which are impossible from a business perspective, the weaker the standard gets.\r\n\r\nI am willing to add a check box to a changes/Issue Template that I have discussed with @elarlang to disclose if an ASVS change  impacts client side support of deprecating web technologies, such as for [TLS 1.2](https://caniuse.com/tls1-2), etc.\r\n\r\nHowever, we would also need consensus that ASVS now extends to the client side too? \r\n\r\n> Perhaps the best option would be a note within 9.1.3 that companies should expect and be ready for deprecations of TLS versions?\r\n\r\nThese are most recent mandates tracked within https://github.com/OWASP/ASVS/issues/979#issuecomment-836452364\r\n\r\n- TLS 1.2 from March 31, 2021\r\n- TLS 1.3 from January 1, 2024\r\n\r\nI support inserting a note to document the above as proposed by @tghosth \r\n\r\n> Also, as a general note (which I am not sure is documented anywhere), we don't like to include links within requirements (the links to the proactive controls are an exception which we are planning to remove in the next major release).\r\n\r\nNo problem, I recommended this be explored with the OWASP Testing Guide within https://github.com/OWASP/ASVS/issues/992#issue-883840380 I just need to anchor it somewhere before Issue #992 is transferred. \r\n\r\nI'll also document this within the amended Issues and Pull Request Template(s) that I am working on.\r\n",
+      "createdAt": "2021-05-13T00:13:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-840183475",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MDMyMzI4MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some offtopic comments (from opened issue point of view).\r\n\r\n> I am willing to add a check box to a changes/Issue Template that I have discussed with @elarlang to disclose if an ASVS change impacts client side support of deprecating web technologies, such as for TLS 1.2, etc.\r\n\r\n> I'll also document this within the amended Issues and Pull Request Template(s) that I am working on.\r\n\r\nTranslation: \"I have discussed\" means here some comments in this issue (https://github.com/OWASP/ASVS/issues/979#issuecomment-831759065, https://github.com/OWASP/ASVS/issues/979#issuecomment-832407426).\r\n\r\nThe smartest way at the moment in my opinion is to wait first draft of \"development process\" to CONTRIBUTING.md and then make changes and proposals to them. Anyhow, change-impact checkbox seems over.engineering to me and here I smell some trouble - you put a lot of time/effort to create some proposal/PR and then you are not happy when it's not agreed. \r\n\r\nOn the positive side (from my point of view) - current situation shows to leaders, why clear process description is really \"must have\". :)",
+      "createdAt": "2021-05-13T05:54:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-840323280",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MTU3MzQ5MA==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Additional examples to insert into https://github.com/OWASP/ASVS/issues/979#issuecomment-836452364\r\n\r\n[**RFC 8996**](https://datatracker.ietf.org/doc/html/rfc8996)\r\n\"_...TLS 1.0..._\" and \"_...TLS 1.1 MUST NOT be used_...\"\r\n\r\n[**SANS**](https://isc.sans.edu/diary/rss/26936)\r\n\"_TLS 1.3 is now supported by about 1 in every 5 HTTPS servers_\"  (as of 31 Dec 2020).\r\n\r\n[**NCSC NL**](https://english.ncsc.nl/latest/news/2021/january/19/it-security-guidelines-for-transport-layer-security-2.1)\r\n\"_... downgrade the security level of TLS 1.2 from Good to Sufficient. TLS 1.3, a considerable revision of TLS based on modern insights, remains Good._\" (as of 19 January 2021)\r\n\r\n[**Mozillia**](https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_configurations)\r\n\"_Modern: Modern clients that support TLS 1.3, with no need for backwards compatibility_\"\r\n\r\n",
+      "createdAt": "2021-05-15T00:46:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-841573490",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MTc0MzQ2OQ==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "To quote @tomato42 https://github.com/OWASP/ASVS/issues/979#issuecomment-839887958\r\n\r\n> @vanderaj in general I agree, but blank requirement for server-side cipher suite ordering can be detrimental, clients running with pure software crypto stacks will prefer use of Chacha20 ciphers, while ones with hardware acceleration will likely want to use AES (both because of speed and battery usage). So I'd suggest a bit softer language on this requirement.\r\n\r\nTo quote @markehack https://github.com/OWASP/ASVS/issues/979#issuecomment-831949762\r\n\r\n> What is a good proposal is to remove all CBC ciphers. Removing SHA1 HMACs to align with TLS1.3 is also fine. The only downside is performance since AES256-GCM only defined SHA1 and SHA384 ( not clear why SHA256 was never defined) and most hardware only accelerates SHA1 or SHA256.\r\n\r\nIt wasn't my intention to create an ASVS Requirement[s] for the Server-Side Cipher Suite Order with this Issue #979 but it may be worth discussing in a another [new] Issue?\r\n\r\nI'll can extract the Server Side Configuration from those already listed within https://github.com/OWASP/ASVS/issues/979#issuecomment-841573490 and https://github.com/OWASP/ASVS/issues/979#issuecomment-836452364 above and any new references I add in the future below such as:\r\n\r\n- [Apache HTTPD](https://httpd.apache.org/docs/trunk/ssl/ssl_howto.html)\r\n- [Microsoft Windows Server](https://devblogs.microsoft.com/premier-developer/microsoft-tls-1-3-support-reference/)\r\n- [W3 Subresource Integrity](https://www.w3.org/TR/SRI/#cryptographic-hash-functions) [which refers to [TLS 1.2](https://tools.ietf.org/html/rfc5246) as it was last updated 23 June 2016 before TLS 1.3].\r\n- [Apache Tomcat](https://tomcat.apache.org/tomcat-9.0-doc/ssl-howto.html) [which doesn't refer to \"TLSv1.3\" as of 8 May 2021]\r\n \r\nI am also not sure this is the reason for `SHA384` being voted on for `AES256-GCM` but it may have to do with the increased computational effort was out-weighted by the slight increase to confidentiality but I would need to research this further (just noting this so I don't let it fall through).\r\n\r\nDo you also want another separate Issue for \"Hardware Acceleration\" or is a [Markdown Task List](https://docs.github.com/en/github/managing-your-work-on-github/about-task-lists) reasonable workaround to capture this?\r\n\r\n\r\n\r\n",
+      "createdAt": "2021-05-16T00:16:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-841743469",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MTgxMDQ1NQ==",
+      "author": {
+        "login": "sanmai-NL"
+      },
+      "authorAssociation": "NONE",
+      "body": "ASVS 4.0.2:\r\n> The ASVS must always look far into the future so that we provide sound advice for our primary audience - developers. \r\n\r\n+1 for TLS 1.3. Legacy concerns are not for developers, but for architects and managers.",
+      "createdAt": "2021-05-16T12:27:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-841810455",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0NzY0NDEzNw==",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Another backwards compatibility issue explored on the [OpenJDK Security-Dev Mailing List i.e. \"TLS v1.3 extensions in TLS v1.2 handshake\"](https://mail.openjdk.java.net/pipermail/security-dev/2021-May/026099.html)",
+      "createdAt": "2021-05-25T08:01:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-847644137",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4268Tf",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Additional example to be inserted into https://github.com/OWASP/ASVS/issues/979#issuecomment-836452364\r\n\r\nhttps://help.heroku.com/SXWA00YI/tls-v1-0-v1-1-end-of-life-schedule\r\n\r\nADDED 1 October 2021 [SANS - TLS 1.3 and SSL - the current state of affairs](https://isc.sans.edu/diary/rss/27882)",
+      "createdAt": "2021-09-17T03:11:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-921421023",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44F2E_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I do not want to keep issues lingering for years. We're not going to change this for 5.0 so I'm closing it for now and we can re-open as we get closer to 2024 and beyond.",
+      "createdAt": "2021-10-12T14:17:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-941056319",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5AsHcR",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Just marking a placeholder for the release of [PCI-DSS 4.0](https://www.pcisecuritystandards.org/about_us/press_releases/pr_03312022) ",
+      "createdAt": "2022-04-01T01:47:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-1085306641",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Lkm3D",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "https://www.nccoe.nist.gov/addressing-visibility-challenges-tls-13\r\nhttps://learn.microsoft.com/en-us/dotnet/framework/network-programming/tls",
+      "createdAt": "2022-10-05T03:34:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-1267887555",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LkvYC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Alright Christian. You’re starting to convince me that this may be prudent. Can we word this requirement so it’s a more timeless requirement like “use the most recent version of TLS” or similar?",
+      "createdAt": "2022-10-05T04:26:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-1267922434",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QFJmc",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@jmanico wrote:\r\n> Alright Christian. You’re starting to convince me that this may be prudent. Can we word this requirement so it’s a more timeless requirement like “use the most recent version of TLS” or similar?\r\n\r\nWe can make the decision before the publication of the next major release with consideration of   https://www.nccoe.nist.gov/addressing-visibility-challenges-tls-13 and the number of implementations observed by https://www.f5.com/labs/articles/threat-intelligence/the-2021-tls-telemetry-report and others.\r\n\r\n",
+      "createdAt": "2022-12-08T23:38:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-1343527324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5jDkYw",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "https://techcommunity.microsoft.com/t5/windows-it-pro-blog/tls-1-0-and-tls-1-1-soon-to-be-disabled-in-windows/ba-p/3887947",
+      "createdAt": "2023-08-02T09:39:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-1661879856",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-VZ-O",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "https://uptimerobot.com/blog/upcoming-security-update-tls",
+      "createdAt": "2025-08-16T02:50:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-3193282446",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-WDeM",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Currently we have:\n\n> **12.1.1** Verify that only the latest recommended versions of the TLS protocol are enabled, such as TLS 1.2 and TLS 1.3. The latest version of the TLS protocol must be the preferred option.\n\nThere is not an explicit list of TLS versions in the crypto appendix but we have:\n\n> | KDF              | Reference                                                                                     | Status |\n> | ---------------- | --------------------------------------------------------------------------------------------- | ------ |\n> | TLS 1.2 PRF      | [RFC 5248](https://www.rfc-editor.org/info/rfc5248)                                           | L      |\n\nThis implicitly makes TLS 1.2 somewhat into the **Legacy** status.",
+      "createdAt": "2025-08-16T06:55:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-3193452428",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6-axFD",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@randomstuff wrote:\n> This implicitly makes TLS 1.2 somewhat into the **Legacy** status.\n\nThe quote relevant for TLS 1.2 from [5.0 Appendix C Cryptography](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x92-Appendix-C_Cryptography.md) is reproduced below:\n>MAC-then-encrypt is still allowed for compatibility with legacy applications. It is used in TLS v1.2 with old ciphers suites.\n\n\n",
+      "createdAt": "2025-08-17T22:17:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-3194687811",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uNqXo",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Good advice from @ivanr on [LinkedIn](https://www.linkedin.com/posts/ivanr_active-cyber-defence-mail-check-and-web-activity-7432780302961520640-i7z7/)\n\n<img width=\"447\" height=\"177\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/8af0799b-d77f-4944-87cf-666fdc6c05aa\" />",
+      "createdAt": "2026-03-04T10:15:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-3996558824",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uPMoF",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The quote relevant for TLS 1.2 from [5.0 Appendix C Cryptography](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x92-Appendix-C_Cryptography.md) is reproduced below:\n\nActually, I was actually thinking about \"TLS 1.2 PRF (L)\" 😄 which is always used in TLS 1.2 and is marked as legacy in the document.\n\nMaybe explicitly stating/clarifying the status (A/L/D) of the the different TLS versions in the appendix would be nice.",
+      "createdAt": "2026-03-04T11:33:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-3996961285",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uUMHq",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm feeling very comfortable suggesting that folks only support TLS 1.3. I'm guessing standards are getting closer to that point as well. I reopened this issue.",
+      "createdAt": "2026-03-04T15:27:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-3998269930",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ulKPe",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks for the continued discussion on this topic and for all the links over the years @cmlh.\n\nI've done some research into where major standards bodies currently stand on TLS 1.2:\n\n- **IETF**: [RFC 8996](https://datatracker.ietf.org/doc/rfc8996/) (2021) deprecated TLS 1.0 and 1.1. There is no RFC deprecating TLS 1.2, and no active draft to do so. There is work on [deprecating obsolete key exchange methods](https://datatracker.ietf.org/doc/draft-ietf-tls-deprecate-obsolete-kex/) *within* TLS 1.2 but not the protocol itself.\n- **NIST**: [SP 800-52 Rev. 2](https://csrc.nist.gov/pubs/sp/800/52/r2/final) requires TLS 1.2 with FIPS-approved cipher suites as the minimum for all government systems and mandated TLS 1.3 *support* by January 2024. TLS 1.2 remains approved.\n- **PCI DSS 4.0.1**: Doesn't mandate specific TLS versions; it requires \"strong cryptography\" and considers SSL/early TLS (1.0, 1.1) insufficient. TLS 1.2+ is accepted. No move toward deprecating TLS 1.2. See their [FAQ on TLS versions](https://www.pcisecuritystandards.org/faq/articles/Frequently_Asked_Question/does-pci-dss-define-which-versions-of-tls-must-be-used/).\n- **Dutch NCSC**: Their [2025-05 guidelines](https://www.ncsc.nl/en/transport-layer-security-tls/security-guidelines-for-transport-layer-security-2025-05) downgraded TLS 1.2 from \"Good\" to \"Sufficient\" (the closest any body has come to deprecation, but still permits it).\n- **BSI (Germany)**: [TR-02102-2 (2026-01)](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TG02102/BSI-TR-02102-2.html) still covers TLS 1.2 with recommendations for strong cipher suites, and indicates TLS 1.2 can be used until 2031.\n- **UK NCSC**: [Updated TLS guidance](https://www.ncsc.gov.uk/guidance/using-tls-to-protect-data) but has not deprecated TLS 1.2.\n\nIn ASVS 5.0, we already mark \"TLS 1.2 PRF\" as Legacy (L) in the cryptography appendix, which aligns well with the Dutch NCSC's \"Sufficient\" classification. V12.1.1 says to use \"the latest recommended versions of the TLS protocol\" with TLS 1.3 as the preferred option. I think this current positioning is reasonable given where the industry is.\n\nGiven that no major standards body has actually deprecated TLS 1.2, I think mandating TLS 1.3-only would put us ahead of NIST, IETF, PCI DSS, and BSI combined on this specific point. While ASVS does aim to be forward-looking, I think we need to see more movement from standards bodies before we take that step.\n\nIf anyone is aware of a standards body that has already deprecated or disallowed TLS 1.2 (not just TLS 1.0/1.1), I would be very interested to hear about it, as that would change the picture.\n\nFor now, I'd suggest we revisit this when there's more concrete standards body support for deprecating TLS 1.2. Happy to reconsider if the landscape changes.",
+      "createdAt": "2026-03-05T06:57:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 2
+          }
+        },
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4002718686",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7umsmq",
+      "author": {
+        "login": "ivanr"
+      },
+      "authorAssociation": "NONE",
+      "body": "If you care about \"store now, decrypt later\" attacks, TLS 1.2 is de-facto deprecated today because it doesn't support a quantum-safe key exchange. This is because support for post-quantum cryptography will not be added to TLS 1.2: https://datatracker.ietf.org/doc/draft-ietf-tls-tls12-frozen/",
+      "createdAt": "2026-03-05T08:04:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4003121578",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7up-ju",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If you care about \"store now, decrypt later\" attacks, TLS 1.2 is de-facto deprecated today because it doesn't support a quantum-safe key exchange. This is because support for post-quantum cryptography will not be added to TLS 1.2: https://datatracker.ietf.org/doc/draft-ietf-tls-tls12-frozen/\n\nThanks @ivanr that is useful context, do you know of any standards or regulatory bodies who are currently pushing that?",
+      "createdAt": "2026-03-05T10:19:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4003981550",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uq-dg",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Given that no major standards body has actually deprecated TLS 1.2, I think mandating TLS 1.3-only would put us ahead of NIST, IETF, PCI DSS, and BSI combined on this specific point. While ASVS does aim to be forward-looking, I think we need to see more movement from standards bodies before we take that step.\n\nI would not say we should *mandate* TLS 1.3 in the sense that it TLS 1.2 must be disabled but in the sense that TLS 1.3 must be supported (with the result that it will be supported when communicating with modern peers): for your new project/your new server/when you update your system, TLS 1.3 mus be used in practice whenever possible and TLS 1.2 can be used for communicating with an older peer which do not support TLS 1.3. In practice, this means your clients and servers must support TLS 1.3.\n\nIn other words, if your application only supports TLS 1.2, it would be be considered in legacy state (it could, right?).\n\nThis is arguably not inconsistent with NIST SP 800 52r2 (emphasis mine):\n\n> Agencies **shall support TLS 1.3 by January 1, 2024**. After this date, servers shall support TLS 1.3 for both government-only and citizen or business-facing applications. In general, servers that support TLS 1.3 should be configured to use TLS 1.2 as well. However, **TLS 1.2 may be disabled on servers that support TLS 1.3 if it has been determined that TLS 1.2 is not needed for interoperability.**\n\nBSI TR-02102-2 (2026-01):\n\n> * **TLS 1.3 should be used in preference.**\n\n[ANSSI](https://messervices.cyber.gouv.fr/documents-guides/anssi-guide-recommandations_de_securite_relatives_a_tls-v1.2.pdf) (France) (translation mine, emphasis mine):\n\n> TLS version 1.3 must be supported and used in priority. TLS version 1.2 is accepted as well provided that this guide's recommendations are followed.",
+      "createdAt": "2026-03-05T11:02:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4004243296",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7usiIa",
+      "author": {
+        "login": "ivanr"
+      },
+      "authorAssociation": "NONE",
+      "body": "> do you know of any standards or regulatory bodies who are currently pushing that?\n\n@tghosth Are you asking me about post-quantum cryptography? Yes, everyone. I maintain a brief on this topic, take a look: https://redsift.com/guides/post-quantum-cryptography\n\nIMO, TLS 1.3 with X25519MLKEM768 is necessary nowadays.",
+      "createdAt": "2026-03-05T12:15:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4004651546",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7utpm_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > do you know of any standards or regulatory bodies who are currently pushing that?\n> \n> [@tghosth](https://github.com/tghosth) Are you asking me about post-quantum cryptography? Yes, everyone. I maintain a brief on this topic, take a look: https://redsift.com/guides/post-quantum-cryptography\n> \n> IMO, TLS 1.3 with X25519MLKEM768 is necessary nowadays.\n\nApologies @ivanr, I meant are there standards or regulatory bodies who are currently pushing deprecation of TLS 1.2 but I guess ultimately it comes down to whether \"store now, decrypt later\" attacks are in someone's threat model.\n\nRight now in ASVS, we mandate that L3 applications should have a post quantum migration plan but not the actual implementation. \n\nOn the other hand this is a slightly different question because actions that are or are not taken now will have an impact in the future.\n\nMy inclination is to include a recommendation about solely using TLS 1.3 where there is a \"store now, decrypt later\" rather than mandating this as a specific requirement.",
+      "createdAt": "2026-03-05T13:08:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4004944319",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uxFca",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> My inclination is to include a recommendation about solely using TLS 1.3 where there is a \"store now, decrypt later\" rather than mandating this as a specific requirement.\n\nPlain TLS 1.3 won't help you so much though 😄 ",
+      "createdAt": "2026-03-05T15:21:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4005844762",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7uyVEh",
+      "author": {
+        "login": "tomato42"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, the only reason to deprecate TLS 1.2 (as in, advise for it being disabled) is when the only key-exchanges we accept are the post-quantum ones, as those can't be used in TLS 1.2. At least, as far as predictable things go.\n\nUntil there's X25519 and P-256 in allowed groups for TLS 1.3, there's no reason to remove TLS 1.2 from \"acceptable provided good configuration\".",
+      "createdAt": "2026-03-05T16:10:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4006170913",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7u8yHg",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Until there's X25519 and P-256 in allowed groups for TLS 1.3, there's no reason to remove TLS 1.2 from \"acceptable provided good configuration\".\n\nThat's true from a purely technological POV, but the \"good configuration\" part is often the weak link that gets overlooked. Misconfigurations are rampant and conversations outside of security circles are too often oversimplified as just the TLS version numbers. There is also the reality that most of the world is slow to adopt change, so pre-emptive action can be a good reason to compensate for that too.\n\nI'm not necessarily in favor of disabling TLS 1.2 today, but there might be a point in time where no actively maintained and/or widely used software lacks TLS 1.3 support and that would be a good moment to do it.",
+      "createdAt": "2026-03-06T01:31:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4008911328",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vBGa2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Most standards only mandate TLS 1.2 (thanks Josh).\n\nI could only find one standard that mandates only TLS 1.3. That's the \nGerman *BSI TR-02102-2* cryptographic guideline. It recommends TLS 1.3 \nand deprecates older versions.\n\nAnd there is a lot of chatter about mandating PQC, which is only \nsupported by TLS 1.3.\n\n* NIST PQC standardization\n* SP 800-208\n* upcoming revisions to SP 800-52\n\nSo maybe not today, but soon enough the need for PQC will force the \nmandate of TLS 1.3.\n",
+      "createdAt": "2026-03-06T07:20:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/979#issuecomment-4010043062",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-05-01T04:43:39Z",
+  "labels": [],
+  "number": 979,
+  "state": "OPEN",
+  "title": "Deprecate TLS v1.2 for PCI-DSS v3.2.1 Requirement 2.2.3",
+  "url": "https://github.com/OWASP/ASVS/issues/979"
+}

@@ -1,0 +1,154 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "We currently don't really disallow any (legacy) OAuth/OIDC flows as far as I understand.\r\n\r\nIn V51.4 OAuth Authorization Server\r\n\r\n> 51.4.5 [ADDED] Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. Note that the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) *should* no longer be used.\r\n\r\nIn V51.6 OpenID Provider:\r\n\r\n> 51.6.1 [ADDED] Verify that the OpenID Provider only allows values 'code', 'ciba', 'id-token', or 'id-token code' for response mode. Note that 'code' is preferred over 'id-token code' (the OIDC Hybrid flow), and 'token' (any Implicit flow) *should* not be used\r\n\r\nCan we be more specific?\r\n\r\n* The resource Owner Password Credentials flow is currently \"should not be used\" as far as I understand. Can we have this a \"MUST not be used\" instead?\r\n* The implicit flow is currently \"should not use used\". Can we have a \"MUST not be used\" (or maybe we can allow it for L1?).\r\n* For the OIDC Hybrid flow: probably like the implicit flow?\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6VsN4G",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "*> *The resource Owner Password Credentials flow is currently \"should \nnot be used\" as far as I understand. Can we have this a \"MUST not be \nused\" instead?\n\nI suggest only a /should /at best. There are niche situations where ROPC \nis just fine. For example, when using a *Trusted First-Party Client \n*(ie: the same client and service from the same provider - like a \ndropbox app from dropbox)*then ROPC* is just fine.*\n*\n",
+      "createdAt": "2024-12-02T12:23:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2428#issuecomment-2511396358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Vt2En",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> the same client and service from the same provider - like a dropbox app from dropbox\r\n\r\nThere are important downsides to that which are relevant even for first party applications:\r\n\r\n* You are limited to authenticating using only a password (as opposed to using a TOTP, WebAuthn, mTLS, \"remember this device\", delegating to another SSO provider, confirmation code sent through another channel, grant this authorization from another device, CAPTCHA (**), etc).\r\n* You cannot ask for user consent and let the user review the requested authorization.\r\n\r\n(Moreover, resource owner password credentials flow is not specified in OAuth 2.1.)\r\n\r\nActually we have this requirement at L2 which seems like in conflict with allowing the usage of resource owner password credentials flow (*):\r\n\r\n> [ADDED, SPLIT FROM 2.2.4] Verify that the application requires users to either use a multi-factor authentication mechanism or a requires a combination of single-factor authentication mechanisms.\r\n\r\nIt would be consistent to allow the resource owner password credentials at L1 but probably not at L2 (?).\r\n\r\n(*) Unless the additional factor is implement in the client application / relying party. This does not make much sense for authorization Oauth (non-OIDC). For OIDC, this would mean having some authentication credentials stored in the IdP and some authentication credentials stored in the client applications which does not seem very nice/scalable to me and defeats the purpose of a SSO solution.\r\n\r\n(**) You can have a CAPTCHA in the RP but it would certainly make more sense to have a CAPTCHA in the IdP.",
+      "createdAt": "2024-12-02T15:19:52Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2428#issuecomment-2511823143",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WcbFR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe it fires back in some edge cases, but as both are dropped from the [OAuth 2.1](https://oauth.net/2.1/):\r\n* _The Implicit grant (response_type=token) is omitted from this specification_\r\n* _The Resource Owner Password Credentials grant is omitted from this specification_\r\n\r\nSo I think it is ok to go with \"must\".",
+      "createdAt": "2024-12-06T19:44:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2428#issuecomment-2524033361",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WwxeV",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "For L3 it is a MUST (according to FAPI specs), for L1 and even some L2 it might be fine to use...in example Microsoft has this note (for both ROPC and Implicit)\r\n\r\n_Microsoft recommends you do not use the ROPC [or Implicit] flow. In most scenarios, more secure alternatives are available and recommended. This flow requires a very high degree of trust in the application, and carries risks that are not present in other flows. You should only use this flow when other more secure flows aren't viable._ \r\n\r\nPerhaps have something like this?   \r\n\r\n> 51.4.5 [ADDED] Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. For L3, the grants 'token' (Implicit flow) and 'password' (Resource Owner Password Credentials flow) must no longer be used. For L1 and L2 they must not be used if more secure flows are viable.\r\n\r\nFor OIDC 51.6.1 it is the basically the same and the reason for \"code preferred over Hybrid\" is that Hybrid is allowed in FAPI 1.0 Advanced and 2.0 is still a draft (even if it seems to be solid for a while now and is draft 4) .\r\n",
+      "createdAt": "2024-12-09T20:23:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2428#issuecomment-2529367957",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W8ha1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It can be also the question of language - is there in MS material anything that they require with \"MUST\" or it is just a political way to say \"must\"?\r\n\r\nOne option is, that we use the word \"must\" and it is a level 2 requirement.",
+      "createdAt": "2024-12-10T17:50:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2428#issuecomment-2532447925",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XCTgt",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think \"must\" and L2 works (it is clear and in most cases it is correct).",
+      "createdAt": "2024-12-11T07:19:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2428#issuecomment-2533963821",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6XCupS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "https://github.com/OWASP/ASVS/pull/2453/commits/107a9e7b99b20489a0ad5fd1863c3aa58d0a0cde > #2453 ",
+      "createdAt": "2024-12-11T07:28:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2428#issuecomment-2534074962",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-12-01T21:40:02Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2428,
+  "state": "CLOSED",
+  "title": "V51 - Restrictions about the OAuth/OIDC flows",
+  "url": "https://github.com/OWASP/ASVS/issues/2428"
+}

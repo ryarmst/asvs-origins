@@ -1,0 +1,209 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "When logging in, should the password be matched in a case-sensitive manner? Or may an application perform `password.lower()` before hashing/comparison?\r\n\r\nNIST does not seem to say anything about this. It may be a balance between usability and performance. However, almost all applications perform case sensitive checks on the password, so this may be a valid requirement.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5una3W",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Case sensitivity matters. Many policies want upper and lower case in the \npast, even though NIST doesnt ask for it now. Forcing lowercase would \nharm the potency of any policy.\n\n",
+      "createdAt": "2023-12-14T13:12:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1855827414",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5uo4fH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Never seen it in practice... but whatever the policy is, if an attacker figures it out (and it is not hard to do that), it makes guessing passwords so much easier.\r\n\r\nI think it's worth a separate or to be mentioned in some requirement - it is easy to test, easy to (not) implement, and for that effort, it provides a good impact.",
+      "createdAt": "2023-12-14T16:59:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1856210887",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5up4FJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We have requirement 2.1.3:\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.1.3** | [MODIFIED] Verify that passwords are not truncated. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 521 | 5.1.1.2 |\r\n\r\nMaybe we can make it more abstract, idea:\r\n_Verify that the application compares and hashes the password from the user as it was sent without doing any modification such as truncation or transforming to lowercase._",
+      "createdAt": "2023-12-14T19:40:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1856471369",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5urUdS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like that idea, Elar.\n",
+      "createdAt": "2023-12-14T22:44:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1856849746",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5usf5v",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Wordsmithing it a little bit just to make it clear where we are sending it to: \r\n\r\n> _Verify that the application compares and hashes the password from the user as it was sent to the back-end without doing any modification such as truncation or transforming to lowercase._\r\n\r\nWhat do you think? \r\n",
+      "createdAt": "2023-12-15T02:07:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1857158767",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5utQWn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I analyzed my proposal and was able to verify 2 problems:\r\n\r\n  * it is not aligned with NIST, which allows to replacement multiple consecutive space characters with a single space character\r\n  * old-school applications add salt and pepper \"manually\" to the password and as it happens before hashing, one may interpret the requirement to disallow that\r\n\r\nQuotes from NIST SP 800-63B\r\n\r\n  * _To make allowances for likely mistyping, verifiers MAY replace multiple consecutive space characters with a single space character prior to verification, provided that the result is at least 8 characters in length._\r\n  <https://pages.nist.gov/800-63-3/sp800-63b.html#-5112-memorized-secret-verifiers>\r\n  * _... so it may be beneficial to remove repeated spaces in typed passwords prior to verification_\r\n  <https://pages.nist.gov/800-63-3/sp800-63b.html#a3-complexity>\r\n",
+      "createdAt": "2023-12-15T06:39:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1857357223",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5utXBs",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "When setting up a new password during registration we are often asked to enter it in twice. Mistyped passwords during registration is not a common issue IMO. I say we break from NIST and keep away from messing with registered passwords.\n",
+      "createdAt": "2023-12-15T07:11:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1857384556",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5u3pAA",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I don't understand why NIST has this exception for multiple spaces. Typing multiple spaces by accident does not seem common to me. Does anyone have more insight into why an exception is added for this particular situation? I think it's reasonable if the ASVS requires application to match as-is, and don't collapse multiple spaces.\r\n\r\nI agree that this can be merged with 2.1.3, about truncating passwords.\r\n\r\n> old-school applications add salt and pepper \"manually\" to the password and as it happens before hashing, one may interpret the requirement to disallow that\r\n\r\nI think this can be solved with a little bit better phrasing. It also depends on what you define as the \"hash algorithm\", whether that includes adding the salt or only concerns the MD5 function.\r\n\r\nPerhaps we can leave it a bit more vague:\r\n\r\n> Verify that passwords are processed by the application exactly as received from the user, without any modifications such as truncation or case transformation.\r\n\r\nOr we can define it more functionally and less technically. Only the exact password that the user configured should give access to the application.\r\n\r\n> Verify that the application grants access solely based on the exact password configured by the user without any alterations, such as trunaction or case transformation.\r\n\r\n",
+      "createdAt": "2023-12-18T10:41:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1860079616",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5u3v_L",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"granting access\" goes already away from authentication topic.\r\n\r\nOne more proposal:\r\n\r\n> Verify that the application uses the password from the user for password verification exactly as received from the user, without any modifications such as truncation or case transformation.",
+      "createdAt": "2023-12-18T10:51:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1860108235",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vG-6U",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Nice, I've shortened it a bit:\r\n\r\n> Verify that the application verifies the user's password exactly as received from the user, without any modifications such as truncation or case transformation.",
+      "createdAt": "2023-12-20T09:03:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1864101524",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vHsFm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I created PR #1814 , also removed CWE as it was not correct.",
+      "createdAt": "2023-12-20T11:08:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1807#issuecomment-1864286566",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-12-14T13:09:55Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 1807,
+  "state": "CLOSED",
+  "title": "Require case-sensitive password matching?",
+  "url": "https://github.com/OWASP/ASVS/issues/1807"
+}

@@ -1,0 +1,324 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Should be add a requirement about the risk of manipulation of the RAR authorization_details parameter?\r\n\r\nSee the [security considerations](https://datatracker.ietf.org/doc/html/rfc9396#name-security-considerations) from the RAR specification (emphasis mine):\r\n\r\n> The authorization_details parameter is sent through the user agent in case of an OAuth authorization request, which makes them **vulnerable to modifications by the user**. If the integrity of the authorization_details is a concern, clients MUST **protect authorization_details against tampering and swapping**. This can be achieved by signing the request using **signed request objects** as defined in [[RFC9101](https://datatracker.ietf.org/doc/html/rfc9101)] or using the **request_uri authorization** request parameter as defined in [[RFC9101](https://datatracker.ietf.org/doc/html/rfc9101)] in conjunction with [[RFC9126](https://datatracker.ietf.org/doc/html/rfc9126)] to pass the URI of the request object to the AS.\r\n\r\ni.e. when this is a concern, [JAR](https://datatracker.ietf.org/doc/html/rfc9101) or [PAR](https://datatracker.ietf.org/doc/html/rfc9101) can be used.\r\n\r\nStraw man wording:\r\n\r\n> Verify that the user cannot tamper with RAR requests. This can be achieved with PAR or JAR/JWS.\r\n\r\nArgument against: This type of requirement can be generalized to other requests (outside of OAuth) which is one reason for *not* including this requirement in the OAuth chapter. A more general requirement could be used instead in V5. Are the requirements already in V5 enough?\r\n\r\nContext: #2036 ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6QAEVu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In case we have a general requirement to cover that, we don't need to duplicate it into V51.\r\n\r\nAt the moment I don't have match to provide from existing requirement for this.\r\n\r\nCorret me if I'm wrong, but the requirement feels quite a niche and edge case. If rar is used...\r\n\r\nBut when watching the [RFC9396](https://datatracker.ietf.org/doc/html/rfc9396#name-authorization-request), it seems like another \"approved by RFC\" way to leak sensitive information (the content of authorization_details) via URL parameters.",
+      "createdAt": "2024-10-16T07:22:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2415936878",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QQKvS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - is this again \"if public client && rar then jar\"?\r\n\r\nIf yes, I really would like to make a requirement \"do not use public client\" for L2, L3 (#1963).",
+      "createdAt": "2024-10-17T17:57:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2420157394",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QQoCO",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \"if public client && rar then jar\"?\r\n\r\n@elarlang, The goal here is to protect against modification from the *user*. I don't believe it makes much sense to protect the authorization request from the user when we have a public client. For public client, the client is expected to be some application running on the user device so we can't really prevent the user from messing it up or forging it.\r\n\r\nSo my proposition should probably be completed as:\r\n\r\n> *For server-side clients*, verify that the user cannot tamper with RAR requests. This can be achieved with PAR or JAR/JWS.",
+      "createdAt": "2024-10-17T18:40:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2420277390",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjNx8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "* The requirement should start with the \"Verify that\".\r\n* \"server-side\" is some new term here, is it meant \"confidential client\" and if not, what is the difference?\r\n* \"PAR requests\" == \"pushed authorization request request\"\r\n\r\nWithout \"server-side\", is this close to the meaning?\r\n> Verify that the authorization server protects rich authorization request (RAR) integrity (that the end-user can not tamper the request) by using pushed authorization request (PAR) or JWT-secured authorization request (JAR) with JSON Web Signature (JWS).",
+      "createdAt": "2024-10-20T17:49:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2425150588",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjqIm",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My intent was to talk about backend-side clients i.e. clients which do not execute on the user device but on a backend server:\r\n\r\n* For clients which executes on the user device, this requirement does not make much sense because we cannot prevent the user from tampering with the authorization request.\r\n* For clients which executes on a backend server, the backend application might want to prevent the user from tampering with the authorization_details.\r\n\r\nThese two categories are somewhat related with the OAuth concept of public vs confidential clients but clients which executes on the user device can be confidential (with dynamic client registration).\r\n\r\nSo something like:\r\n\r\n> Verify that the user cannot tamper with rich authorization request (RAR) authorization_details if the client is not executed on a user device. This can for example be achieved using PAR.",
+      "createdAt": "2024-10-20T22:41:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2425266726",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QrZkZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement should be positive - what must be achieved. (That is why my proposal in https://github.com/OWASP/ASVS/issues/2151#issuecomment-2425150588 was worded differently)\r\n\r\nPreviously \"This can be achieved with PAR or JAR/JWS.\", in the last one \"This can for example be achieved using PAR.\".",
+      "createdAt": "2024-10-21T17:17:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2427296025",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RZk-G",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the user **cannot tamper** with rich authorization request (RAR) authorization_details if the client is not executed on a user device. This can for example be achieved using PAR.\r\n>\r\n> The requirement should be positive \r\n\r\nNote that we currently have from #1964:\r\n\r\n> Verify that for a given client, an attacker **may not tamper** with the 'response_mode' parameter, for example by having the authorization server validate this value against the expected values or by using pushed authorization request (PAR) or JWT-secured authorization request (JAR).\r\n\r\nwhich is similarly worded?\r\n",
+      "createdAt": "2024-10-26T06:53:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2439401350",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RZlUI",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Actually this topic is quite similar to #1964 and we could use the same wording and mitigation for both.",
+      "createdAt": "2024-10-26T06:56:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2439402760",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RZlgm",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Using the same wording as for #1964:\r\n\r\n> Verify that the user may not tamper with the 'authorization_details' parameter for clients which are not executed on the user device, for example by using pushed authorization request (PAR) or JWT-secured authorization request (JAR).\r\n\r\nI'll sync the wording with whatever comes out from #1964 (if applicable).",
+      "createdAt": "2024-10-26T06:58:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2439403558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Saajn",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think this is in sync with #1964 but a little hard to read, perhaps this is more clear?\r\n\r\n> For backend clients (which are not executed on the user device), verify that the user may not tamper with the 'authorization_details' parameter. For example by using pushed authorization request (PAR) or JWT-secured authorization request (JAR).\r\n \r\n",
+      "createdAt": "2024-11-05T07:09:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2456398055",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S4Q5Q",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We updated the other requirement (I think), we should come up with positive-wording requirement here as well.",
+      "createdAt": "2024-11-08T09:27:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2464222800",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TgnE-",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am coming up with:\r\n\r\n> Verify that for a given server-side client (which is not executed on the user device), the authorization server enforces that the 'authorization_details' parameter is not chosen by the user but by the client backend. For example by requiring the usage of pushed authorization request (PAR) or JWT-secured authorization request (JAR).\r\n\r\nbut this can certainly be improved.",
+      "createdAt": "2024-11-13T21:15:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2474799422",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Tjdut",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some moving around and changes:\r\n> Verify that for a server-side client (which is not executed on the user device), the authorization server enforces that the 'authorization_details' parameter value is from the client backend and not tampered by the user. For example by requiring the usage of pushed authorization request (PAR) or JWT-secured authorization request (JAR).\r\n\r\nQuestion as well: \"user device\" > \"end-user device\", \"user-controlled device\"?",
+      "createdAt": "2024-11-14T06:49:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2475547565",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T3Mxx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @randomstuff @TobiasAhnoff ",
+      "createdAt": "2024-11-16T18:27:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2480721009",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T5E65",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes maybe, \"end-user device\".",
+      "createdAt": "2024-11-17T11:51:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2481213113",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T_eHy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Goes in via #2383:\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.15** | [ADDED] Verify that for a server-side client (which is not executed on the end-user device), the authorization server enforces that the 'authorization_details' parameter value is from the client backend and not tampered by the user. For example by requiring the usage of pushed authorization request (PAR) or JWT-secured authorization request (JAR). | | | ✓ |",
+      "createdAt": "2024-11-18T12:21:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2151#issuecomment-2482889202",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-10-15T22:09:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2151,
+  "state": "CLOSED",
+  "title": "OAuth, Add Requirement about protection against modification of the RAR authorization_details parameter",
+  "url": "https://github.com/OWASP/ASVS/issues/2151"
+}

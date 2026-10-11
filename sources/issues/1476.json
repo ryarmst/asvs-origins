@@ -1,0 +1,195 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "Current 2.6.3:\r\n\r\n> Verify that lookup secrets are resistant to offline attacks, such as predictable values. | | ✓ | ✓ | 310 | 5.1.2.2 |\r\n\r\nCurrent 2.6.2:\r\n\r\n> [MODIFIED] Verify that lookup secrets have sufficient randomness (112 bits of entropy), or if less than 112 bits of entropy, are hashed with an approved password storage hashing algorithm.\r\n\r\n2.6.2 proposed in #1218 and #1449:\r\n\r\n> [MODIFIED] Verify that lookup secrets with 112 bits of entropy or more (typically 19 random alphanumeric characters or 34 random digits is sufficient) are hashed with an approved password storage hashing algorithm. If the secret has less than 112 bits of entropy, a 32bit random salt should be incorporated.\r\n\r\nWhat I said in the title. The point of the \"approved password storage hashing algorithm\" is to make the secret resistant to offline attack. As such, this extra requirement adds nothing.\r\n\r\nI would propose just deleting 2.6.3.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5RZs_D",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think?",
+      "createdAt": "2022-12-27T08:01:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1365692355",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RZ7kn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "[CWE-310](https://cwe.mitre.org/data/definitions/310.html) points to \"Cryptographic Issues\" which does not seem to be correct.\r\n\r\nIn general - 2.6.2 says how you need to store it, 2.6.3 says what value they can have.\r\n\r\nWith the proposal/modification of 2.6.2 you solve the \"reistant to offline attacks\" part - but what if the code is `0000`? I think 2.6.3 should cover that part - that this code can not be simple stupid and also not guessable with online attacks. Like with classical passwords we have different rules how you need to store the password and what kind of value password can (not) have.",
+      "createdAt": "2022-12-27T09:26:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1365752103",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rkhky",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So it currently says:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.6.3** | Verify that lookup secrets are resistant to offline attacks, such as predictable values. | | ✓ | ✓ | 310 | 5.1.2.2 |\r\n\r\nI would propose changing it to:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.6.3** | Verify that lookup secrets are generated using a Cryptographically Secure Pseudorandom Number Generator (CSPRNG) to avoid predictable values. | | ✓ | ✓ | 310 | 5.1.2.2 |\r\n\r\n\r\nWhat do you think @elarlang ?",
+      "createdAt": "2023-01-01T20:28:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1368529202",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rkhwp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, better.\r\n\r\n(... and the `MODIFIED` label for PR)",
+      "createdAt": "2023-01-01T20:34:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1368529961",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rkifq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Doh\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.6.3** | [MODIFIED] Verify that lookup secrets are generated using a Cryptographically Secure Pseudorandom Number Generator (CSPRNG) to avoid predictable values. | | ✓ | ✓ | 310 | 5.1.2.2 |\r\n\r\n@set-reminder 4 weeks @tghosth to open a PR hopefully after #1449 has merged",
+      "createdAt": "2023-01-01T20:58:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1368532970",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rkift",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nSunday, January 29, 2023 12:00 AM (GMT+01:00)\r\n> @tghosth to open a PR hopefully after #1449 has merged",
+      "createdAt": "2023-01-01T20:58:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1368532973",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RlJ_m",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Should we limit the generator to CSPRNG? There are generators that are enforced but not specified as CSPRNG, such as SecureRandom in Java. The attack to randomness of lookup secrets needs many samples, which is too difficult for attackers to obtain, so I suggest softer specification such as \"using secure generators\".",
+      "createdAt": "2023-01-02T06:55:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1368694758",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RpTUO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is SecureRandom not considered a CSPRNG. My understanding is that it is, no?",
+      "createdAt": "2023-01-03T13:38:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1369781518",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RpZ6z",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm sorry. The SecureRandom is CSPRNG and very wrong example. I might be confused to another language but please ignore that because it came from my unreliable knowledge.\r\nI will add comment here if I will find any issue with right information.",
+      "createdAt": "2023-01-03T14:07:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1369808563",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RqZRV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I'm sorry. The SecureRandom is CSPRNG and very wrong example.\r\n\r\nThe docs say:\r\n\r\npublic class SecureRandom\r\nextends [Random](https://docs.oracle.com/javase/8/docs/api/java/util/Random.html)\r\nThis class provides a cryptographically strong random number generator (RNG).\r\nA cryptographically strong random number minimally complies with the statistical random number generator tests specified in [FIPS 140-2, Security Requirements for Cryptographic Modules](http://csrc.nist.gov/cryptval/140-2.htm), section 4.9.1. Additionally, SecureRandom must produce non-deterministic output. Therefore any seed material passed to a SecureRandom object must be unpredictable, and all SecureRandom output sequences must be cryptographically strong, as described in [RFC 1750: Randomness Recommendations for Security](http://www.ietf.org/rfc/rfc1750.txt).\r\n",
+      "createdAt": "2023-01-03T17:59:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1370068053",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5T5Ngb",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/1476#issuecomment-1368532970) @tghosth\n> @tghosth to open a PR hopefully after #1449 has merged",
+      "createdAt": "2023-01-28T23:00:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1476#issuecomment-1407506459",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-12-27T08:01:47Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1476,
+  "state": "CLOSED",
+  "title": "2.6.3 is redundant and does not add anything to 2.6.2",
+  "url": "https://github.com/OWASP/ASVS/issues/1476"
+}

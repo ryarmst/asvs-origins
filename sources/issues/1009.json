@@ -1,0 +1,1012 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nProblem: there is no requirement which says, that API responses must be in JSON or XML format.\r\n\r\nIf they are not, and those return some content of file for example, then with direct request to the API response, the content may be executed as HTML, XML and/or JavaScript. Problem is valid for not authenticated API access or when session is cookie-based.\r\n\r\nIf an API returns XML output with `Content-Type: text/xml` and if an attacker can fully control the content, it's already possible to execute JavaScript from that situation with direct request.\r\n\r\nPreviously there was requirement 14.4.2, which was covering this kind of situations - serve them as attachment = no execution problem:\r\n\r\n> V14.4.2 Verify that all API responses contain a Content-Disposition: attachment; filename=\"api.json\" header (or other appropriate filename for the content type).\r\n\r\nThere was issue #721 to discuss the meaning for that, but requirement was deleted via issue #1004.\r\n\r\n\r\nLike in file section there is requirement:\r\n\r\n> V12.5.2 Verify that direct requests to uploaded files will never be executed as HTML/JavaScript content.\r\n\r\nI think something similar must be for API responses.\r\n\r\nOr in general - everything, which is not intended to serve with direct request, can have `Content-Disposition: attachment` header and solve a lot of content execution problems.\r\n\r\nNo proposals from my side yet, I was not supporting removing 14.4.2 for the reasons above, so now opened for discussions - what is the correct defense in this kind of situation and is it covered by ASVS? If not, we should fill the cap.\r\n\r\nping @NeilMadden @jmanico @Bankde ",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTc2NjIyOA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> If an API returns XML output with Content-Type: text/xml and if an attacker can fully control the content, it's already possible to execute JavaScript from that situation with direct request.\r\n\r\nIt's the user interface's job to protect against that based on how the XML or JSON is being embedded in a UI. This is not the job of a server.\r\n\r\nIf I missed something can you give me a more specific example?\r\n\r\nPS: **THANK YOU** for opening a new issue and moving the content here. I appreciate this Elar! \r\n",
+      "createdAt": "2021-05-27T16:19:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-849766228",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTc3MTU2NQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Dear @NeilMadden and @Bankde can you take a look at this issue and provide comments, please?",
+      "createdAt": "2021-05-27T16:27:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-849771565",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTc3MjYyMg==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "I think he mean directly access the URL; e.g. attacker sending API link to the victim.\r\nThis is the real possible case for API that incorrectly returns `Content-Type: text/html`. I'm not familiar with `text/xml` though. Is that also a case? I'm bit busy right now so will test it later.",
+      "createdAt": "2021-05-27T16:29:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-849772622",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTgwODQ1Mg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If `Content-Type` is `text/html` but content itself is JSON, then it's fixable with just proper `Content-Type: application/json`.\r\n\r\nIf you can make request directly to URL where API is serving XML content with `Content-Type: text/xml` it will execute as XML. And from XML you can execute JavaScript as well, if you have full control over served content.\r\n\r\nAn example:\r\n```xml\r\n<?xml version=\"1.0\"?>\r\n<html:html xmlns:html='http://www.w3.org/1999/xhtml'>\r\n<html:script>\r\nalert(1);\r\n</html:script>\r\n</html:html>\r\n```\r\n\r\nAnd if API is serving some other content, which is not XML or JSON? Then what?",
+      "createdAt": "2021-05-27T17:25:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-849808452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTg4MDEzNg==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have reviewed this issue a bit and here is my opinion.\r\n\r\nCurrent browsers consider XML mime type to be active content (thus executing Javascript/XSS). There are also other contents that fall into this categories. This link has very good summary on the content-types with XSS issue: https://github.com/BlackFan/content-type-research/blob/master/XSS.md\r\n\r\nI'm not sure I understand this correctly\r\nhttps://datatracker.ietf.org/doc/html/rfc7303#section-10\r\n```\r\nXML MIME entities contain information that may be parsed and further\r\n   processed by the recipient.\r\n```\r\nIt also stated that text/xml may also include processing instructions:\r\n```\r\nAn XML document labeled as application/xml or text/xml, or with a\r\n   '+xml' media type, might contain namespace declarations, stylesheet-\r\n   linking processing instructions (PIs), schema information, or other\r\n   declarations that might be used to suggest how the document is to be\r\n   processed.\r\n```\r\nI understand that the RFC does not explicitly state about the browsers but overall it looks like XML being executed is correct by the design (or until browsers decide to change this behavior). If this is true, then the responsibility of preventing vulnerabilities (not only XSS, but also many others) should normally fall into the input validation and encoding categories.\r\n\r\nI'm not confident in XML topic though. I will need more time for the research later.",
+      "createdAt": "2021-05-27T19:21:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-849880136",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDEzNjgwNQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First, let's not get stuck only to JSON and XML answers from an API - we don't have any requirement for such limitation.\r\n\r\n> I understand that the RFC does not explicitly state about the browsers but overall it looks like XML being executed is correct by the design (or until browsers decide to change this behavior). If this is true, then the responsibility of preventing vulnerabilities (not only XSS, but also many others) should normally fall into the input validation and encoding categories.\r\n\r\nThat is the same like to say \"XSS is input validation problem\" because execution HTML / JavaScript is correct by design. It is not input validation, it is output encoding problem. And if encoding is not the solution, then serving content correctly (`Content-Type` + as attachment if needed) is solution.\r\n\r\nThe problem here is, in this example, XML response from an API is not meant to be executed in browser as  a response for direct request to URL of an API - it's meant to be loaded by browser via user interface (using JavaScript).",
+      "createdAt": "2021-05-28T05:13:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850136805",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDIwOTcyNA==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "```\r\nIt is not input validation, it is output encoding problem.\r\n```\r\nWe might both have the same idea but just from different perspectives. I personally think it is both. We have to ensure that user input do not cross into the domain of script/HTML structure. If we concatenate the user input directly into the Javascript content (don't do this) then output encoding may not be enough.\r\n\r\nMy current breakdown idea is like this:\r\n- User can control the whole XML content for the API, then application may be doing something wrong.\r\n- User control the whole XML content as upload/downloadable file, application should serve back as an attachment. No issue here.\r\n- User can control some fields' values, encoding sounds like a solution. Preventing not only XSS but also poisoning and malformed XML structure. No issue here.\r\n- User can control both fields and values such that field=\"html:script xmlns:html...\" and value=\"alert(1);\", this is the only issue I could address. Either validation or content-type+attachment may be the solution?\r\n- Anything else I'm missing?\r\n\r\n```\r\nThe problem here is, in this example, XML response from an API is not meant to be executed in browser as a response for direct request to URL of an API\r\n```\r\nI get your point. And unlike json, this XML complex thing makes my head spin.\r\n`Content-Type + as attachment` looks good as a solution (not yet tested though); however, I'm not sure it is the standard mitigation to this issue. Does `Content-Type: text/plain` also accomplish the same thing? It basically says to the browser \"Do not execute this\" and let JS handles the rest.",
+      "createdAt": "2021-05-28T07:25:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850209724",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDIxODg1Mw==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "By the way, I completely agree with @elarlang concern. While I don't have an exact idea of recommendation, I propose to add some general idea like this into the requirements:\r\n```\r\nVerify and choose proper Content-Type for API responses that the browsers do not execute them as an active content (XSS) when directly access through the API URLs.\r\n```\r\nThis will cover not only json but also XML and others as well and let the complex details to the developers to decide according to their applications.",
+      "createdAt": "2021-05-28T07:40:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850218853",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDIzNDQwMg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Content-Type `text/plain` for XML content probably solves this example, but I call it dirty hack.\r\n\r\n> Verify and choose proper Content-Type for API responses that the browsers do not execute them as an active content (XSS) when directly access through the API URLs.\r\n\r\nWhat is the reason that you want/need to show answer from an API in browser? (inline vs attachment).\r\n\r\nIn practice, what `Content-Type` someone need to use when serving XML (including SVG)? PDF? any other text? any other binary?\r\n`application/octet-stream` could be actually solution here, but the effect is the same like forcing download the content with previously removed requirement. At the moment I have not tested it, maybe browsers actually still want to render the content.\r\n\r\nMy idea is that `Content-Type` **must** match with served content, otherwise (in theory) you may cause some other problems.\r\n\r\nChoosing correct `Content-Type` is (and will be covered) with V14.4.1.\r\n\r\nSolution for current problem should be: to avoid response from an API being rendered as active content, serve it as attachment.\r\n\r\n... and this is what deleted requirement V14.4.2 covered.\r\n\r\nWhy I got stuck in #721 was:\r\n\r\n  * should \"force download\" be only for API\r\n  * should \"force download\" be for everything which is not mean to be served with direct HTTP request, but as source for HTML/JavaScript/CSS/... content.\r\n\r\nIf you don't need to navigate to this URL, it should be served as attachment and a lot of problems could be solved.",
+      "createdAt": "2021-05-28T08:07:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850234402",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDI3ODMyMg==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Content-Type text/plain for XML content probably solves this example, but I call it dirty hack.\r\n\r\nThat's true haha. (Forgive me if I sound like a troll), the point is I feel like \"API response as an attachment\" is also a dirty hack more or less.\r\n\r\n> What is the reason that you want/need to show answer from an API in browser? (inline vs attachment).\r\n\r\nNot much, some developers love to see it visualize though. That's the reason why browsers support json beautifier.\r\n\r\n> ... and this is what deleted requirement V14.4.2 covered.\r\n\r\nIt is a positive side-effect but not the main concern of V14.4.2 though. In my opinion, deleting that one when it's deprecated then propose a new accurate requirement that matches you concern is a better call.\r\n\r\n> Solution for current problem should be: to avoid response from an API being rendered as active content, serve it as attachment.\r\n\r\nThe problem is that while it solves problem for XML, it improves nothing for JSON. Not that I turn your idea down, I just feel that it's also a hacky solution and I don't want the new requirement to effect JSON API application too much. Should it be specifically for XML? or L3 for JSON?\r\nHow about this?\r\n```\r\nVerify and choose proper Content-Type or serve as an attachment for API responses so that the browsers do not execute them as an active content (XSS) when directly access through the API URLs.\r\n```\r\nI don't want it to be duplicate or sound like a new V14.4.1 though. But I don't want it to be too specific or a hindrance to the applications that do not have this XSS issue either. You may change it as you wish.",
+      "createdAt": "2021-05-28T09:18:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850278322",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDMwMzM0NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  point is I feel like \"API response as an attachment\" is also a dirty hack more or less.\r\n\r\nDisagree. Serving content as attachment when you don't have any business logic need to watch it directly it's correct solution. You can not see any piece of content \"out of context\" (not only XSS problem)\r\n\r\n\r\n> Not much, some developers love to see it visualize though. That's the reason why browsers support json beautifier.\r\n\r\n\"Some developers may like to see visualized JSON beautifier\" is not really valid argument to remove some security requirement.\r\n\r\n\r\n> In my opinion, deleting that one when it's deprecated then propose a new accurate requirement that matches you concern is a better call.\r\n\r\nCan you please clarify - what exactly is deprecated?\r\n\r\n\r\n> The problem is that while it solves problem for XML,\r\n\r\nLike I wrote many times, don't get stuck with XML and JSON examples. Till we don't have requirement to limit API output only for JSON and XML, we need to take in account, it can be whatever.\r\n\r\n> it improves nothing for JSON.\r\n\r\nThat's correct and I have never said anything against that but it is valid ONLY if you have `Content-Type` set correctly. But if you don't have and an API returns JSON but `Content-Type` is `text/html`, then serving response as attachment saves the situation. Wrong `Content-Type` is covered with 14.4.1, but gives one extra layer of defense.\r\n\r\n> I just feel that it's also a hacky solution and I don't want the new requirement to effect JSON API application too much.\r\n\r\nDisagree. Arguments? How does it affect JSON API? Just this \"developers want to see\" situation or something else?",
+      "createdAt": "2021-05-28T09:58:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850303345",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDM2ODY3NA==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "Apologize. My head is so spinning over so many issues tangling together @_@\r\n\r\n> Disagree. Serving content as attachment when you don't have any business logic need to watch it directly it's correct solution. You can not see any piece of content \"out of context\" (not only XSS problem)\r\n\r\nAh I get your perspective now. It does make sense.\r\n\r\n> Can you please clarify - what exactly is deprecated?\r\n> Disagree. Arguments? How does it affect JSON API? Just this \"developers want to see\" situation or something else?\r\n\r\nAt first, I wouldn't want a change that affect too much, against the norm, and with little improvement. But that argument **was from my own mistake and confusion** that this will be a new requirement; this requirement is actually been here for quite some time so there should not be any issue to developers if we bring it back.\r\n\r\n**Another mistake** is that I thought it exists solely to mitigate RFD and mime type confusion ([which original commit stated](https://github.com/OWASP/ASVS/blame/45a586e09711d1c2585a572f1839cb72b7950b4d/4.0/en/0x22-V14-Config.md#L78)) so I called a remove too early as I saw that most of RFD and mime type confusion is deprecated and handled by other requirements. However, from this discussion, it does also prevent browser execution on non-business-logic-related content too.\r\n\r\nFor the level, I originally preferred it to be L3. I'm still inclined that proper encoding/validation can prevent XML XSS and this is just a defense in depth. However, I find the idea to be similar to CSP so I'm ok if it's L1, L2, L3 (same level as CSP).\r\n\r\nThank you for tackling with my head. I'm still opened to the discussion but I need to rest for today.\r\n",
+      "createdAt": "2021-05-28T12:00:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850368674",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDM3OTIxNQ==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Allow me to chime in.\r\n\r\nAPIs are the main orchestrator for the type that gets returned. What the issue should clearly say is that \"The client should not parse the returned response as they please it to be\", MIME confusion is a direct issue here, executing JSON, running a JPG file as a script, etc.\r\n\r\nThis is related to anything being returned to ANY client, and not to browsers only. It's similar with how TLS can be configured to enforce the **server** config over the client one.\r\n\r\nThe API if it returns XML, should clearly say \"This is XML\", do what you would do with XML. If the backend is worried about the client behaviour, then it should clearly secure its response. XML is supposed to execute, and should for all I know if it's sent as is.\r\nCDATA is there to protect against that and load content as text.\r\n\r\nMaybe something to the lines of \"Be aware of the execution paths of your responses\" which is still vague, but I am trying to get this a bit closer to how APIs are and should work. Going for undercuts just make security look cheap and provide a false sense of security.",
+      "createdAt": "2021-05-28T12:20:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850379215",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDY2MTIzMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussed this topic with @ThunderSon and I provided some more food for brain.\r\n\r\nTL;DR\r\n* for taking away JavaScript execution you can use `Content-Security-Policy: sandbox`\r\n* for taking away any content execution in browser you can use `Content-Disposition: attachment`\r\n\r\nTarget: only resources which are not meant to be accessed directly but user/browser can do it - non-autenticated users or users in application which uses cookie-based sessions.\r\n\r\n## Direct access - no extra defense\r\n\r\n| Test | `Content-Type` | Content | HTML/XML executed | JavaScript executed |\r\n| :---: | :--- | :--- | :---: | :---: |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=html&content=html) | `text/html` | HTML | Yes | Yes |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=html&content=json) | `text/html` | JSON | Yes | Yes |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=json&content=json) | `application/json` | JSON | No | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=xml&content=xhtml) | `text/xml` | XHTML | Yes | Yes |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=svg&content=svg) | `image/svg+xml` | SVG | Yes | Yes |\r\n\r\n\r\n## Direct access - defense `Content-Disposition: attachment`\r\n\r\n| Test | `Content-Type` | Content | HTML/XML executed | JavaScript executed |\r\n| :---: | :--- | :--- | :---: | :---: |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=html&content=html&defense=attachment) | `text/html` | HTML | No | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=html&content=json&defense=attachment) | `text/html` | JSON | No | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=json&content=json&defense=attachment) | `application/json` | JSON | No | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=xml&content=xhtml&defense=attachment) | `text/xml` | XHTML | No | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=svg&content=svg&defense=attachment) | `image/svg+xml` | SVG | No | No |\r\n\r\n\r\n## Direct access - defense `Content-Security-Policy: sandbox`\r\n\r\n| Test | `Content-Type` | Content | HTML/XML executed | JavaScript executed |\r\n| :---: | :--- | :--- | :---: | :---: |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=html&content=html&defense=sandbox) | `text/html` | HTML | Yes | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=html&content=json&defense=sandbox) | `text/html` | JSON | Yes | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=json&content=json&defense=sandbox) | `application/json` | JSON | No | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=xml&content=xhtml&defense=sandbox) | `text/xml` | XHTML | Yes | No |\r\n| [link](https://elarlang.eu/asvs/issue1009/?content_type=svg&content=svg&defense=sandbox) | `image/svg+xml` | SVG | Yes | No |\r\n\r\n",
+      "createdAt": "2021-05-28T20:45:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850661230",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDc0NjA3NA==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "That's very nice summary and comparison with CSP. Thank you.\r\n\r\nThought from me: \r\n- There is still some small use from this header for a Defense in Depth that is not completely deprecated by browsers yet. \r\n- The requirement was originally existing before we deleted it (a few days ago), so there should not be any issue in reverting it.\r\n- So overall, I'm ok if we bring the requirement back.\r\n\r\nLastly, I also like this idea. I'm interested if there is any reference (as a security requirement/practice) to this?\r\n> Serving content as attachment when you don't have any business logic need to watch it directly it's correct solution. You can not see any piece of content \"out of context\" (not only XSS problem)",
+      "createdAt": "2021-05-29T01:33:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850746074",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDc5OTYzOA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some more options to achieve \"do not render content out of context in browser\":\r\n\r\n  * for API - for old-style XHR request you can check, is there `XMLHttpRequest` header, and if there is not, then you should not give response.\r\n    * Problem, fetch API do not send this header, but you can set your own custom header to solve it (like serving content with direct access is not issue, when API needs Authorized header)\r\n  * use `Sec-Fetch-Mode` and check on the server side, was it navigation request or not.\r\n    * not ready as only solution yet, as Firefox, IE ans Safari do not support it, global support 68% (https://caniuse.com/mdn-http_headers_sec-fetch-mode)\r\n\r\nThe point is - there are many ways to achieve goal do not serve or render response content on direct access to resource, which is not intended for that.\r\n\r\nThe reason, why #721 stayed opened, was that purpose for 14.4.2 was not clear and that is why it got (too fast) deleted as well. So just bringing back this requirement with the same text is not the best solution and instead of \"technical requirement\" maybe we should ask \"what vector must be taken away\".\r\n\r\nDirection for that requirement should contain goals:\r\n\r\n  * if there is direct request to resource which is not meant to be navigation (including responses from API)\r\n    * is not rendered and/or executed in browser as HTML, XML or JavaScript\r\n      * using serving as `Content-Disposition: attachment`\r\n      * using sandboxing with `Content-Security-Policy: sandbox`\r\n    * OR serving response is not provided\r\n      * as request is not initialized by application (not authorized request)\r\n\r\nAt the moment it seems, that technically the most bullet-proof solution could be to bring back previous 14.4.2, removing API part from it and adding description, what goal this requirement have.\r\n\r\nSo, opened for discussion and arguments if there is some better alternatives.",
+      "createdAt": "2021-05-29T09:01:10Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850799638",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MDgwNzkzOA==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I am tilted more towards the CSP solution:\r\n1. Pushes for the adoption of CSP\r\n2. If something is to look bad, it feels better contained in the browser\r\n3. I am not a fan of websites that download content when being traversed (no one is)\r\n\r\nThe benefit of using `Content-Disposition` is against the HTML rendering. That is still going to happen when the user opens the file. What we just did is mainly add an additional step.\r\n\r\nThe last defense option looks like using the `Origin` header. If it's coming from the API domain itself, then don't provide a response. Not a big fan, but can be an extra layer since the browsers are firm on this header.",
+      "createdAt": "2021-05-29T10:06:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850807938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MTk4MzE1MQ==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi, I don't want this to go stale. \r\nThis `Content-Disposition` is currently still in the current released version of ASVS. We should decide it soon whether to bring it back (and/or rephrase) or confirm of removal so the change can be minimal.\r\n\r\nI'm ok with either way.\r\nor how about rephrase into something more general?\r\n```\r\nVerify that security controls are in place that browsers do not render or execute the API responses (and other resources not meant for navigation) from the direct URL access.\r\n```\r\n\r\nI'm not a fan of adding specific implementations into the general guidelines; they are usually fragile. Developers are free to add them in their project as pleased though.",
+      "createdAt": "2021-06-01T09:37:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-851983151",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MTk5NzAzMw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One more random argument, CSP vs attachment but now against attachment - if user is forced to download some attacker controlled content, it is better for application but worse for user.\r\n\r\nLet's say application is serving HTML content and serving it as attachment. If user opens it in own machine, all the scripts inside HTML can be now executed without `Content-Security-Policy` limitations. It can not cause directly any damage for the application, but can use victim's browser to make some other attack.",
+      "createdAt": "2021-06-01T09:59:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-851997033",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjAwMTc2MQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I'm not a fan of adding specific implementations into the general guidelines; they are usually fragile. Developers are free to add them in their project as pleased though.\r\n\r\nIt's only true when you have multiple ways to achieve the same goal - like with CSRF. If we want to keep this requirement in V14.4 category, it should direct clearly what kind of configuration options it covers.",
+      "createdAt": "2021-06-01T10:06:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852001761",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjAxNDMxMw==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "> can use victim's browser to make some other attack\r\n\r\nThank you for bringing that up. I realize we may not want something with possible negative effect in the guidelines so... \r\nhow about this?\r\n```\r\nVerify that API responses contains `Content-Security-Policy: sandbox` or other security controls so that the browsers do not render when directly accessed from the URL..\r\n```\r\nThis way, we are enforcing the CSP (not yet perfect but no downside) while still open to other solutions (that devs have to take care by themselves)",
+      "createdAt": "2021-06-01T10:28:15Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852014313",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjA2Njg1Mw==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "This just came in today:\r\nhttps://portswigger.net/daily-swig/epub-vulnerabilities-electronic-reading-systems-riddled-with-browser-like-flaws\r\n\r\nExactly what we are discussing, if we want to consider the endpoint returning the content to be our API at hand.",
+      "createdAt": "2021-06-01T12:00:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852066853",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjE4Nzg4Mg==",
+      "author": {
+        "login": "NeilMadden"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A bit late to this party (long weekend in the UK). I am generally in favour of `Content-Security-Policy: sandbox` over `Content-Disposition` as I think it better reflects what we actually want to achieve and I agree with @ThunderSon 's comment from a few days ago.\r\n\r\nTo add to what @elarlang says about running a local file may result in CSP bypass, it looks like the origin of a `file:` URL is [somewhat murky](https://url.spec.whatwg.org/#origin). I suspect most browsers would push it into an opaque origin much like `CSP: sandbox`, but this doesn't seem guaranteed.",
+      "createdAt": "2021-06-01T14:48:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852187882",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjE4OTA0OA==",
+      "author": {
+        "login": "NeilMadden"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm also happy with wording like @Bankde suggests.",
+      "createdAt": "2021-06-01T14:50:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852189048",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjIwNDYyNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First big decision for wording is - do we limit it for API or we going to build general \"do not allow browser to render responses if they are not intended to be rendered by the application itself\"?",
+      "createdAt": "2021-06-01T15:10:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852204627",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjQxOTk1MA==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "> First big decision for wording is - do we limit it for API or we going to build general \r\n\r\nI'd love it to cover all the cases.\r\nHowever, I'm not sure whether this some-parts-of general case may be already covered by other requirements? For example, V12.5.2 has covered the downloadable files. Then it might be reasonable to have separate requirement for API endpoints so it's easier to follow/audit?\r\n> V12.5.2 Verify that direct requests to uploaded files will never be executed as HTML/JavaScript content.",
+      "createdAt": "2021-06-01T20:20:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852419950",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1MjU1MTQ4NQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Just a note on 12.5.2\r\n\r\n1. User authored HTML is common, you just need to clean that content via a HTML sanitizer before displaying to another user.\r\n2. Even user authored JavaScript can be displayed to another user safely via iFrame sandboxing like https://jsfiddle.net/.",
+      "createdAt": "2021-06-01T23:19:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852551485",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1NTQxMjI0NA==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "How about this?\r\nAs far as we know, downloadable content is handled by other reqs. So we specify this to be an API requirement. This will make the initial proposal simple and easy to provide with specific configurations. We can raise a new issue/req later if we find areas that are not covered by download/upload or API.\r\n\r\nMy previous proposal still stands and feel free to adjust/criticize/edit/reword any way you like.\r\n> Verify that API responses contains `Content-Security-Policy: sandbox` or other security controls so that the browsers do not render when directly accessed from the URL.",
+      "createdAt": "2021-06-06T14:56:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-855412244",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg1NjY5NDYwNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Example: if you have some template (like twig) parts, you can access them with direct HTTP request (because you need to) then those are not \"downloadable content\" nor API responses.\r\n\r\nRequirement text should solve goals:\r\n* needed only if direct requests to resource will be rendered in browser (no need for `Content-Type: application/json` for example)\r\n* needed only if direct request to resource is not intended to be rendered in browser\r\n\r\npoint (not actual wording):\r\n> Verify that security controls are in place (like Content-Security-Policy: sandbox) to avoid HTTP responses being rendered in browser if not intended so with direct HTTP request.\r\n",
+      "createdAt": "2021-06-08T11:47:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-856694607",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3MDM0MzA4Ng==",
+      "author": {
+        "login": "timhemel"
+      },
+      "authorAssociation": "NONE",
+      "body": "I got on this thread because I was a bit surprised about issue #1004 and removing the requirement for content-disposition. I have always seen it as a bit of a workaround, so if we can live without that requirement, that is fine with me. IMO the core of the problem is that you want the server to return an API response as-is, but prevent the response to be abused if it is not called as an API request. There are a few solutions to handle this, one of which was 14.4.2. In terms of mitigations, we cannot encode the output, because we don't want that in an API context. We also do not want to restrict the content types for API responses.\r\nTherefore I think the more elegant mitigation must happen earlier: the server should only respond if the call is made from an allowed (API) context. Proper CSRF protection helps, checking the `X-Requested-With` header helps (but is not standard), checking a custom header helps (but requires some extra programming on the caller site). Unless I am missing something, this would mitigate many attacks and prevents us from having to rely on complex and imperfect mitigations in browsers. This would also address @elarlang 's point above.\r\n",
+      "createdAt": "2021-06-29T07:23:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-870343086",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3OTc0NDE1Ng==",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "Bump. It's been a month and I think everyone agrees that this requirement/verification is useful.\r\nI love the proposal from Elarlang. It is generic to cover many cases, descriptive enough for the reader to understand the goal, and providing the best practice solution while not being forceful.\r\n\r\nIt won't got back to 14.4.2 (API) though so we need a new number.\r\n@jmanico Any suggestion to rewording or a pass for @elarlang to create PR would be nice, please.",
+      "createdAt": "2021-07-14T09:31:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-879744156",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg4MDI5Nzc0MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I defer to @elarlang to create a PR for this.",
+      "createdAt": "2021-07-15T00:30:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-880297741",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40k_nV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think I need help with wordsmithing valid and understandable requirement text out of my points in comment: https://github.com/OWASP/ASVS/issues/1009#issuecomment-856694607. So, help needed with that.",
+      "createdAt": "2021-07-18T20:30:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-882112981",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40mxCd",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "For the number, I think it should be V14.3 (Need confirm)\r\n\r\nAbout wordsmithing, I'm not good either so I try throwing some idea here. Feel free to edit anyway you like.\r\n> Verify that security controls are in place (e.g. Content-Security-Policy: sandbox) to prevent browsers from rendering inappropriate HTTP responses (such as APIs) when requested directly from the URL.",
+      "createdAt": "2021-07-19T14:07:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-882577565",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM46_KVk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe we should take one more step further and say, that content may not be served as a defense option.",
+      "createdAt": "2021-12-09T08:47:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-989635940",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-zmjP",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that security controls are in place (e.g. Content-Security-Policy: sandbox) to prevent browsers from rendering HTTP responses in situations where the application wouldn't render them (e.g. when APIs are requested directly from the server)\r\n\r\nA bit old, having some time to review stale things. Let me know what you think about this :)\r\nReasons for the changes:\r\n1. We are in the API section/category already\r\n2. APIs being accessed directly is one example (let's keep an open mind to unknown cases I guess)\r\n3. Flipped a bit the wording to go on the defensive and preventive side, versus going on saying \"we're handling malicious input\"\r\n\r\n@elarlang @Bankde",
+      "createdAt": "2022-02-27T23:09:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1053714639",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4_DMhQ",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "@ThunderSon Hi, hmm this is so old. Forgive me if my memory is fading.\r\n1. It was originally about API but we have already agreed it should cover wider areas so it shouldn't be in API section now.\r\n2. Yes it's one example.\r\n3. As far as I remember, the very original issue focused on \"malicious input/RFD attack\" which has already been deprecated by browsers security patch. That's why it got deleted. And due to its similarity to RFD, the original discussion was confusing. However elarlang has already pointed out, the main idea is just that we are missing \"the security control on non-rendering resources\". So it's not really a flip of wording.",
+      "createdAt": "2022-03-03T08:35:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1057802320",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4_EOAI",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yep, it took me a bit to get back into it as well haha.\r\nDo you think what I proposed doesn't help with what Elar suggested? And what's being suggested can fit in any section, since APIs are an example now.\r\nI believe my main change was the explicit call out to avoid rendering data. In the first proposal, it was focused on browsers, I added the reliance on the application as well.",
+      "createdAt": "2022-03-03T14:01:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1058070536",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4_E4Se",
+      "author": {
+        "login": "Bankde"
+      },
+      "authorAssociation": "NONE",
+      "body": "@ThunderSon Oh sorry, I didn't see the proposal and thought it's a quote. I'm not good at wording either but I'm sure every proposal will be useful for the final one.",
+      "createdAt": "2022-03-03T16:39:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1058243742",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5IYWxK",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that security controls are in place (e.g. Content-Security-Policy: sandbox) to prevent browsers from rendering HTTP responses in situations where the application wouldn't render them (e.g. when APIs are requested directly from the server)\r\n\r\nI think this needs to say something about HTML. I think it's fine if a response is rendered as JSON or plain text in the browser.\r\n\r\nDoes `Content-Security-Policy: sandbox` really prevents browsers from rendering a request? I think a sandboxed page will still render, so this example contradicts the requirement. Do we still think this is acceptable? Then we should reword the requirement.\r\n\r\nI would propose something like this:\r\n\r\n> Verify that API responses that are not rendered in the browser by the application cannot be made to render as HTML by the browser by visiting their URL directly.\r\n",
+      "createdAt": "2022-08-14T11:21:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1214344266",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LgmH3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "TL;DR && conclusion.\r\n\r\nProblem to solve: avoid content (HTML, XML, SVG -> JavaScript) to be rendered/executed with direct HTTP request to some resource which was not meant to be accessed directly. This covers: malicious user input is executed as so called \"XSS\" attack and also some (partial) content displayed or functionality executed out of context.\r\n\r\nWe are not limited with API here.\r\n\r\nExamples:\r\n* some resources used by client-side scripts (like twig templates, API responses (with whatever content, ex XML)) - but there is no reason why web server or application should serve them with direct access\r\n\r\nSolution:\r\n* do not serve response\r\n\r\nAlternative solutions:\r\n* serve as attachment\r\n* serve sandboxed",
+      "createdAt": "2022-10-04T11:36:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1266835959",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QQeoX",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang to investigate this further",
+      "createdAt": "2022-12-12T13:26:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1346497047",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Q_-CG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Question, we have [12.5.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V12-Files-Resources.md#v125-file-download) which I think was intended to address [reflected file download](https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/).\r\n\r\nIs this attack in scope for the discussion here?\r\n\r\nAt this point, I am not sure how focussed on this attack 12.5.3. is.",
+      "createdAt": "2022-12-20T07:31:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1358946438",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RABNr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Also, have you seen this link: https://w3c.github.io/webappsec-post-spectre-webdev/#subresources\r\n\r\nOverall, I don't think [RFD](https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/) is considered a valid issue in modern browsers but that link above might help with other questions in this issue.",
+      "createdAt": "2022-12-20T07:48:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1358959467",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RANoW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Is this attack in scope for the discussion here?\r\n\r\nRFD is not in scope in this issue.\r\n\r\n> https://w3c.github.io/webappsec-post-spectre-webdev/#subresources\r\n\r\nNice finding. In general it covers discussion in this issue and main point from my side: do we actually need to respond with data when the way of requesting it is clearly not the use-case for the application itself.\r\n\r\nNow, what cause me allergy is usage of obsoleted `X-Frame-Options` HTTP response header instead of `Content-Security-Policy` header with directive `frame-ancestors`:\r\n<https://w3c.github.io/webappsec-csp/#frame-ancestors-and-frame-options>\r\n\r\nBrowser support:\r\n* [95.05%](https://caniuse.com/mdn-http_headers_content-security-policy_frame-ancestors) - `Content-Security-Policy: frame-ancestors`\r\n* [98.67%](https://caniuse.com/x-frame-options) - `X-Frame-Options`\r\n\r\nOther related policies:\r\n* [93.26%](https://caniuse.com/mdn-http_headers_cross-origin-resource-policy) - `Cross-Origin-Resource-Policy`\r\n* [90.32%](https://caniuse.com/mdn-http_headers_cross-origin-opener-policy) - `Cross-Origin-Opener-Policy`\r\n\r\n\r\n`Sec-Fetch-*` is nice direction, but maybe we are not there yet with browser support:\r\n* [76.38%](https://caniuse.com/mdn-http_headers_sec-fetch-dest) - `Sec-Fetch-Dest`\r\n* [76.62%](https://caniuse.com/mdn-http_headers_sec-fetch-mode) - `Sec-Fetch-Mode`\r\n* [76.62%](https://caniuse.com/mdn-http_headers_sec-fetch-site) - `Sec-Fetch-Site`\r\n\r\nFor me, the direction and solution for this issue is something like \"Resource Isolation Policy\":\r\n<https://xsleaks.dev/docs/defenses/isolation-policies/resource-isolation/>\r\n\r\nWith addition, that it should be resource type specific. E. g. if you don't have any need to navigate to certain (potentially rendered) resource, it should not be allowed as well.\r\n\r\nAdditionally, maybe we should have separate requirements for CORP and COOP.",
+      "createdAt": "2022-12-20T08:40:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1359010326",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RBNrj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is old school, suggest we drop it.\n",
+      "createdAt": "2022-12-20T12:14:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1359272675",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hHCdd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I am still not sure what your are proposing to add here. ",
+      "createdAt": "2023-07-10T15:51:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1629235037",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nXzGG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang I am still not sure what your are proposing to add here.\r\n\r\nRe-read it all and https://github.com/OWASP/ASVS/issues/1009#issuecomment-1266835959 is still valid opinion, goal and proposal.",
+      "createdAt": "2023-09-25T18:51:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1734291846",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5naVsk",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "If resources are only meant to be used with JavaScript requests, a possible solution would be for the client to set a specific header (`X-Requested-With: XMLHttpRequest`) and then only serving the response if that header is present. This would prevent users from browsing to that resource directly.\r\n\r\nAnother solution is to set a content-type to `text/plain` or `application/octet-stream`. That way, the HTML won't be interpreted as HTML. However, I don't really like this since then the content type is incorrect, and this can make it harder to work with these resources in legitimate use cases.\r\n\r\n",
+      "createdAt": "2023-09-26T07:10:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1734957860",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5naZVU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If resources are only meant to be used with JavaScript requests, a possible solution would be for the client to set a specific header (`X-Requested-With: XMLHttpRequest`) and then only serving the response if that header is present. This would prevent users from browsing to that resource directly.\r\n\r\nIt is one possible way of detecting it, but nowadays I would take direction to `Sec-Fetch-*` headers. The requirement must be abstract enough to not limit to any solution but must just describe the goal.\r\n \r\n> Another solution is to set a content-type to `text/plain` or `application/octet-stream`. That way, the HTML won't be interpreted as HTML. However, I don't really like this since then the content type is incorrect, and this can make it harder to work with these resources in legitimate use cases.\r\n\r\nThis is technically incorrect and against `X-Content-Type-Options: nosniff` requirement, if the header is set (like requirement V14.4.4 asks), then with incorrect `Content-Type` for `<script>` sources are not loaded by browsers.",
+      "createdAt": "2023-09-26T07:22:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1734972756",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5naaPW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Any request defense that requires certain non-session headers can be directly evaded.\n",
+      "createdAt": "2023-09-26T07:24:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1734976470",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5np1tV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > @elarlang I am still not sure what your are proposing to add here.\r\n> \r\n> Re-read it all and [#1009 (comment)](https://github.com/OWASP/ASVS/issues/1009#issuecomment-1266835959) is still valid opinion, goal and proposal.\r\n\r\nSo can you come up with a proposed requirement wording @elarlang because I am still not sure what we are asking developers to do.",
+      "createdAt": "2023-09-28T12:10:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1739021141",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nqc-u",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, based on https://github.com/OWASP/ASVS/issues/1009#issuecomment-1266835959\r\n\r\nI tried to put my ideas here (wording needs some work):\r\n_Verify that if a client navigates to a resource (template, API response) which are not meant to be accessed directly, the application have defense (not serving the response, serving as an attachment or sandboxed content) to avoid rendering the response in browser or showing content and functionality out of context._",
+      "createdAt": "2023-09-28T13:29:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1739181998",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rthnT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth - does the last comment makes it more clear for you?",
+      "createdAt": "2023-11-12T11:19:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1807096275",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sIwFO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so how about:\r\n\r\n> Verify that security controls are in place (e.g. Content-Security-Policy: sandbox, Content-Disposition: attachment) to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context such as when an API is called directly rather than via an XmlHttpRequest.\r\n",
+      "createdAt": "2023-11-16T11:08:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1814233422",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sJLDy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "2 things to improve:\r\n* your proposal does not cover \"do not serve content at all\" which would be my first recommendation\r\n* XmlHttpRequest is a bit oldschool, there is also fetch. But I would not limitate the requirement to API context, it applies the same way to every resource.",
+      "createdAt": "2023-11-16T12:26:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1814343922",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sKpdM",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So how about this:\r\n\r\n> Verify that security controls are in place (e.g. **not serving the content unless headers indicate it is the correct context**, Content-Security-Policy: sandbox, Content-Disposition: attachment, etc) to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context. For exampel when an API **or other resource** is loaded directly rather than via an XmlHttpRequest/fetch.\r\n",
+      "createdAt": "2023-11-16T15:50:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1814730572",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sK3bT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I tried to change to order, fix typo end remove the last part:\r\n\r\n> Verify that to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context, security controls are in place (e.g. not serving the content unless headers indicate it is the correct context, Content-Security-Policy: sandbox, Content-Disposition: attachment, etc). For example when an API or other resource is loaded directly.",
+      "createdAt": "2023-11-16T16:22:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1814787795",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vPTsA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement got in as 50.5.3 as it was proposed:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.5.3** | [ADDED, DEPRECATES 14.4.2] Verify that to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context, security controls are in place (e.g. not serving the content unless headers indicate it is the correct context, Content-Security-Policy: sandbox, Content-Disposition: attachment, etc). For example when an API or other resource is loaded directly. | ✓ | ✓ | ✓ | |\r\n\r\n@tghosth - do you have any additional recommendations to this wording or we can close this?",
+      "createdAt": "2023-12-21T13:49:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1866283776",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vhi2O",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Makes sense to me",
+      "createdAt": "2023-12-28T11:08:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1871064462",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-05-27T16:13:50Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 1009,
+  "state": "CLOSED",
+  "title": "Discussion: serving content when resource is not meant to be accessed directly",
+  "url": "https://github.com/OWASP/ASVS/issues/1009"
+}

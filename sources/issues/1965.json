@@ -1,0 +1,420 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "spin-off from https://github.com/OWASP/ASVS/issues/1916 \"Discussion/Proposal 3\"\r\n\r\nProbably I was the first one to say that `redirect_uri` validation is a duplicate of general open-redirect but now I think it's important to have them as a separate requirement:\r\n\r\n`redirect_uri` must be validated with the _string-match_ method, which means no \"wildcard\" validations.\r\n\r\nThere are 2 parts:\r\n\r\n  * Authorization Server must not accept anything else than (one of) the precise URL from the pre-registered list\r\n  * As a precondition: the OAuth Client must not send business logic URL to the Authorization Server. It is pretty much the same as Referrer leakage.\r\n\r\n--\r\nFeedback from @tghosth in https://github.com/OWASP/ASVS/issues/1916#issuecomment-2024985876\r\n\r\n> Suggest you propose an updated/added requirement.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5-YRKz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Probably I was the first one to say that redirect_uri validation is a duplicate of general open-redirect but now I think it's important to have them as a separate requirement:\n\nI agree here, Elar. FYI: Redirect flows (login, etc) are often less likely to be amendable to allow-list validation than OAuth flows.\n\n",
+      "createdAt": "2024-05-20T11:43:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2120290995",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-3vzk",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, is this being addressed by my latest PR #1971? Or am I missing something about it? ",
+      "createdAt": "2024-05-24T05:16:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2128542948",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-5St1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @csfreak92 , let's find the agreement first in the issue and do PR. Discussion over PR's its complicated to follow.\r\n\r\nWe also need to think, should we have one common requirement for OAuth and OIDC or not.\r\n\r\nI prefer requirement text with the idea like:\r\n> Verify that Authorisation Server accepts the redirect uri value from the Client that belongs to the pre-registered list of allowed values using the string-match method, e.g. wildcards are not in use.",
+      "createdAt": "2024-05-24T08:39:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2128948085",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5--nW-",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Understood, but I just pushed my PR since it has been sitting in my local for a while and I thought better to have it out there than get lost somewhere as I have worked on it the past few months. :) \r\n\r\nCan we agree over discussion and if they are already covered in the PR then that's good and then if not or needs some modifications, then I would modify them as needed? ",
+      "createdAt": "2024-05-24T20:55:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2130343358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AHe6P",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that Authorization Server accepts the redirect URI value from the Client that belongs to the pre-registered list of allowed values using the string-match method, e.g. wildcards are not in use.\r\n\r\n@elarlang, I like this text though, sorry missed it. How would a pre-registered list of allowed values be handled? Should we add a text in the chapter/section how this should be done? Also, string-match method seems like regex, right? ",
+      "createdAt": "2024-06-05T10:26:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2149445263",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AHk_2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> How would a pre-registered list of allowed values be handled? Should we add a text in the chapter/section how this should be done? \r\n\r\nI don't think we need to provide guidance for OAuth Client configuration.\r\n\r\n> Also, string-match method seems like regex, right?\r\n\r\nNo, it's the opposite. _string-match_ against pre-registered list of _full_ values says that you should not use any regex, substring, wildcard, etc. Provided redirect_uri value must exists in the pre-registered addresses list as it is.\r\n",
+      "createdAt": "2024-06-05T10:39:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2149470198",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6FFvJF",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Based on OAuth2 RFCs (where the redirect uri is mentioned on several places), OIDC FAPI 2.0 and own experiences from pentests, I suggest that ASVS should capture that redirect URIs must be: \r\n\r\n- Exact and pre-registered (for each client), see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#section-6.3.3.2.1 \r\n- Absolute, see https://www.rfc-editor.org/rfc/rfc6749#section-3.1.2\r\n- https (if not local loopback for native clients), see https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.3.2.2 \r\n- Fully validated using \"simple\" string comparison methods (no wildcards, starts-with or regexps etc), see https://www.rfc-editor.org/rfc/rfc6749#section-3.1.2.3\r\n\r\nPerhaps write this as \"Verify that redirect uri:s in authorization requests are pre-registerd, absolute, https (if not local loopback for native clients) and validated (by AS) using simple exact string comparison methods (no wildcards, reg exps or e g contains operations)\"\r\n\r\nNote that if using PAR, pre-registered uri:s are no longer mandatory (given confidential clients that first do client authentication as part of PAR, see https://datatracker.ietf.org/doc/html/rfc9126#section-2.4), but maybe that is too much details for ASVS? A good discussion from a NDC Security talk on this is found here https://youtu.be/IZyXOYNXbPk?t=2138 \r\n \r\nAs a side note, which shows things that can go wrong when being relaxed about redirect uri:s, a colleague of mine did some research on redirect issues in Keycloak during a pentest. A write up (as part of responsible disclosure)  can be found at https://securityblog.omegapoint.se/en/writeup-keycloak-cve-2023-6927/ and we presented this at NDC Security as part of a longer OAuth talk, which can be found here https://youtu.be/dj02Cr9S1FE   ",
+      "createdAt": "2024-07-17T09:36:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2232873541",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6FJhv6",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree 100%\n",
+      "createdAt": "2024-07-17T17:46:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2233867258",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GbyfS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Latest proposal from @TobiasAhnoff (acronym \"AS\" avoided):\r\n\r\n> Verify that redirect uri:s in authorization requests are pre-registerd, absolute, https (if not local loopback for native clients) and validated by the authorization server using simple exact string comparison methods (no wildcards, reg exps or e g contains operations)\r\n\r\nAre we ready to go with that or any errors or modifications needed? (We can do changes later as well)",
+      "createdAt": "2024-07-29T09:23:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2255431634",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6G_cPA",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Are we ready to go with that or any errors or modifications needed? (We can do changes later as well)\r\n\r\nI like it! Just to wordsmith and fix the capitalization/spacing, etc just for consistency with the other OAuth 2.0 language and make it ready for anything: \r\n\r\n`Verify that redirect URIs in authorization requests are pre-registered, absolute, sent over HTTPS (if not local loopback for native clients) and validated by the Authorization Server using simple exact string comparison methods (i.e, no wildcards, starts-with,  regular expressions or contain string operations)`\r\n\r\nHow does that look @TobiasAhnoff, @elarlang? ",
+      "createdAt": "2024-08-02T07:45:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2264777664",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6G_lZr",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> sent over HTTPS\r\n\r\n\"using the HTTPS scheme\"?",
+      "createdAt": "2024-08-02T08:07:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2264815211",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6HIP4n",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If you're using a strict allow-list then worrying about local IP addresses is not necessary. I suggest:\r\n\r\n_Verify that redirect URIs in authorization requests are pre-registered, absolute, sent over HTTPS, and validated by the Authorization Server using an exact string comparison based allow list. (i.e., no wildcards, starts-with, regular expressions, or contains operations)._",
+      "createdAt": "2024-08-03T17:55:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2267086375",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6HPEb4",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I like _exact string comparison based allow list_, more clear how to implement/verify than _simple exact string comparison methods_, which raises the question on what \"simple\" is? (even if this is described in RFC).\r\n\r\nTo align with [RFC for Native apps](https://www.rfc-editor.org/rfc/rfc8252.html#section-7) I think a note on \"native client loopback\" is needed, perhaps put in another way. \r\n\r\nI also like _using the HTTPS scheme_, _sent over HTTPS_ works as well but it might be unclear if the redirect URI must be HTTPS or if the authorization request must be sent over HTTPS or both.\r\n\r\nA suggestion is:\r\n\r\n_Verify that redirect URIs in authorization requests are pre-registered, absolute, using the HTTPS scheme, and validated by the Authorization Server using an exact string comparison based allow list. (i.e., no wildcards, regular expressions, starts-with or contains operations). Note that for native clients (mobile apps) using the HTTPS scheme for loopback interfaces is preferred (not required)._\r\n\r\nPerhaps consider writing \"avoid using wildcards etc\" instead of \"no wildcards etc\"? Is \"no\" too strict for some scenarios? Perhaps, but \"avoid\" would be harder to verify...I believe \"no\" is good to make the point that wildcards, regular expressions, starts-with and contains operations introduce risk (could not be considered \"simple\"), which sometimes leads to vulnerabilities. ",
+      "createdAt": "2024-08-05T11:43:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2268874488",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Hgfxu",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest dropping the avoid section and just focus on the positive. Perhaps:\r\n\r\n_Verify that redirect URIs in authorization requests are pre-registered, absolute, using the HTTPS scheme, and validated by the Authorization Server using an exact string comparison based allow list._ ",
+      "createdAt": "2024-08-07T13:12:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2273442926",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ho9OC",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I suggest dropping the avoid section and just focus on the positive. Perhaps:\r\n> \r\n> _Verify that redirect URIs in authorization requests are pre-registered, absolute, using the HTTPS scheme, and validated by the Authorization Server using an exact string comparison based allow list._\r\n\r\nI agree, short and clear, and for mobile app scenarios the RFC will explain that http loopback URIs are ok to use if https is not supported (too much details for ASVS, perhaps it could be considered for MASVS?).  \r\n\r\nI´m not sure if this is better, but perhaps it is good to also make it clear that the allow list need to be per client?    \r\n\r\n _Verify that redirect URIs in authorization requests are absolute, using the HTTPS scheme, and validated by the Authorization Server using exact string comparison based on a client specific allow list of pre-registered URIs._\r\n\r\n",
+      "createdAt": "2024-08-08T12:07:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2275660674",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6HsMsG",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like your addition - very clear. I think we are close to a PR.\n",
+      "createdAt": "2024-08-08T19:27:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2276510470",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IB8oN",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> _Verify that redirect URIs in authorization requests are absolute, using the HTTPS scheme, and validated by the Authorization Server using exact string comparison based on a client specific allow list of pre-registered URIs._\r\n\r\nI concur with this @TobiasAhnoff and @jmanico. Let's wait for the community and then we will create a PR once agreed on. ",
+      "createdAt": "2024-08-10T17:05:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2282211853",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IEVS1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In practice, there is no other community to wait for in the issue as already presented in the issue. It catches more attention when included in the document.\r\n\r\nIt's PR time, as a new requirement to section 50.1.",
+      "createdAt": "2024-08-11T17:47:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2282837173",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6II98U",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'll submit a PR now.",
+      "createdAt": "2024-08-12T13:52:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2284052244",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LoZE4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "re-open due the feedback https://github.com/OWASP/ASVS/issues/2041#issuecomment-2341855336 by @randomstuff\r\n\r\n> Should this allow the usage of http://127.0.0.1:{port}/{path} and http://[::1]:{port}/{path}?\r\n\r\n> Also, should there be a discussion about private-Use URIs? (Is this in scope?)",
+      "createdAt": "2024-09-11T04:55:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2342621496",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LobKv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.1.7** | [ADDED] Verify that redirect URIs in authorization requests are absolute, using the HTTPS scheme, and validated by the Authorization Server using exact string comparison based on a client-specific allow list of pre-registered URIs. | ✓ | ✓ | ✓ |\r\n\r\nIs it HTTPS or not, is not in the scope for this requirement, it is covered by \r\n> V9.1.1 [MODIFIED] Verify that TLS is used for all connectivity between a client and external facing, HTTP-based services, and does not fall back to insecure or unencrypted communications.\r\n\r\nThe goal for 51.1.7 is to have string-match validation against pre-registered list of URL's. To avoid further confusions, I propose / agree with proposals, to remove the HTTPS part from the requirement.\r\n\r\nI would just use:\r\n> Verify that the Authorization Server validates redirect URIs based on a client-specific allow list of pre-registered URIs using exact string comparison.",
+      "createdAt": "2024-09-11T05:03:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1965#issuecomment-2342630063",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-05-19T19:35:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 1965,
+  "state": "CLOSED",
+  "title": "proposal/discussion: OAuth - separate requirement for redirect_uri string-match registration and handling",
+  "url": "https://github.com/OWASP/ASVS/issues/1965"
+}

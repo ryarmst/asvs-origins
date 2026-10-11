@@ -1,0 +1,445 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc1ODUyMA==",
+    "is_bot": false,
+    "login": "timhemel",
+    "name": ""
+  },
+  "body": "Reading 7.1 and 7.2 it seemed to me that there may be some duplication. Perhaps I have missed something.\r\n\r\nIt looks to me as if 7.2.1 and 7.2.2 are specific cases of 7.1.3 and 7.1.4 combined, and if so, they would be redundant. The descriptions in the sections don't really help me to understand the difference. One section seems to be about the content, the other about the format. Could someone explain this?\r\n\r\n| **7.1.3** | Verify that the application logs security relevant events including successful and failed authentication events, access control failures, deserialization failures and input validation failures. ([C5, C7](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n| **7.1.4** | Verify that each log event includes necessary information that would allow for a detailed investigation of the timeline when an event happens. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n| **7.2.1** | Verify that all authentication decisions are logged, without storing sensitive session tokens or passwords. This should include requests with relevant metadata needed for security investigations.  | | ✓ | ✓ | 778 |\r\n| **7.2.2** | Verify that all access control decisions can be logged and all failed decisions are logged. This should include requests with relevant metadata needed for security investigations. | | ✓ | ✓ | 285 |\r\n\r\nIf I explain logging to developers, I tell them they need to decide which events to log (i.e. all relevant security events, failed and successful) and what data to log for that event (enough for a security investigation, but as few sensitive data as possible). 7.1 nicely summarizes this.\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MTg0Njc3MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "another one from my todo list :)\r\n\r\nMy current improvement idea on that field:\r\n7.1 should be clearly \"what must every log line contain and what it should not contain\", \"Log Content\" is ok category name here. I'm ok with this part.\r\n7.2 is the confusing one here. It seems to be list of security events. Category name \"Log Processing\" is confusing here. I think I have discussed it in some issue already, but did not find it at the moment. And my current setup, I agree, both 7.2.1 and 7.2.2 are covered by 7.1.3+7.1.4.\r\n\r\nGood material was recently published under CheatSheet project:\r\nhttps://cheatsheetseries.owasp.org/cheatsheets/Application_Logging_Vocabulary_Cheat_Sheet.html\r\n\r\nNow it's good question, how to list all expected security events - at the moment there is only 2: authentication and authorization but this gives a false signal - like logging only those is already good enough.",
+      "createdAt": "2021-05-16T17:14:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-841846770",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MTg2Njc2NA==",
+      "author": {
+        "login": "timhemel"
+      },
+      "authorAssociation": "NONE",
+      "body": "Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nDo I understand correctly that you intend 7.1 to be about the 'what' and 7.2 about the 'when'? Currently both are in 7.1 and that is fine, i don't see any reason to split it, unless you want to be more detailed about the specific events.\r\n\r\nIt is going to be hard to be complete with respect to expected security events, as some events may be very domain specific. Therefore I would use the system's threat model as inspiration. Good candidates would be:\r\n\r\n* any functionality that requires non-repudiation\r\n* any important status of a mitigation in progress, such as the result of a security check or a security decision.\r\n\r\nOf course the ASVS could suggest some common ones, like authentication, authorization, validation, DoS-protection, security relevant errors, attack detection. That list in the cheatsheet is a good source of inspiration, it could grow into a standard of its own!\r\n\r\nSo, I would give the reader the general guidelines and some examples, rather than give the false impression of completeness.",
+      "createdAt": "2021-05-16T19:39:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-841866764",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0MjA1NzYzNQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Sorry, I did not know it was on your list already :) . I tried to my best to search if the issue was reported already but could not find it.\r\n\r\nNo reason to say sorry. I like that someone else notices this kind stuff as well. And I like your fact-based arguments, keep going!\r\n\r\n> It is going to be hard to be complete with respect to expected security events, as some events may be very domain spec\r\n\r\nOne way to go is to have \"architecture\" requirement like (however to say it in English correctly) \"Verify, that all expected security events for logs are documented.\" Like requirement https://github.com/OWASP/ASVS/issues/892\r\n\r\nThis could be required input for current 7.1.3. In this case 7.2.* requirements are not necessary, but on the other hand, it's nice to point out \"minimum list of events what must be logged\". ",
+      "createdAt": "2021-05-17T06:55:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-842057635",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41P4Ej",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Either we take out \"including successful and failed authentication events, access control failures,\" from 7.1.3 and leave this to in 7.2.1 + 7.2.2 . Or better: change the order. To me it is more relevant to log failed login attempts and similar (thus it maybe it better to put important things first but that doesn't seem relevant here). Also please Level 1 for auth events, see #1040.",
+      "createdAt": "2021-08-05T10:39:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-893354275",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41P_Fo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Logging and level 1 - by current description (see https://github.com/OWASP/ASVS/blob/master/4.0/en/0x03-Using-ASVS.md), level 1 is not the case for logging related requirements, as those require access to logs.",
+      "createdAt": "2021-08-05T11:29:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-893383016",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41QCDP",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Right, forgot that definition (if you mean _completely penetration testable_ and not _Level 1 is the bare minimum that all applications should strive for_).\r\n\r\nOT: It should be either one or the other",
+      "createdAt": "2021-08-05T11:49:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-893395151",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41QEsh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "and on this topic there is discussion in https://github.com/OWASP/ASVS/issues/956",
+      "createdAt": "2021-08-05T12:07:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-893405985",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41QMja",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": "yeah maybe and thx for the hint. But participate in that discussion is too much for me.\r\n\r\nMy personal stake is that at least ASVS should be more clear and not on one side _completely penetration testable_ and on the other hand _not Level 1 is the bare minimum that all applications should strive for_ . That seems a stretch to me and that needs to be fixed - YMMV",
+      "createdAt": "2021-08-05T12:59:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-893438170",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hWdu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang  any idea what the next action on this is?",
+      "createdAt": "2022-02-23T15:53:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1048930158",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BydM9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Starting point here is - how do we cover \"all security events what must be logged\" without listing them.",
+      "createdAt": "2022-04-20T10:03:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1103745853",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BzI4w",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "May I suggest we take the OWASP logging vocabulary cheat sheet and build a separate logging standard for logging events?\n\nhttps://cheatsheetseries.owasp.org/cheatsheets/Logging_Vocabulary_Cheat_Sheet.html",
+      "createdAt": "2022-04-20T13:20:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1103924784",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5B0WMs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> May I suggest we take the OWASP logging vocabulary cheat sheet and build a separate logging standard for logging events? https://cheatsheetseries.owasp.org/cheatsheets/Logging_Vocabulary_Cheat_Sheet.html\r\n\r\nthis is something to do, but do not answer to my question at all - how to cover it in ASVS :)",
+      "createdAt": "2022-04-20T17:49:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1104241452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5B05bI",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "It **_does_** answer your question, let me help.\r\n\r\nBy suggesting we move the logging requirements to a separate standard, I suggest that we do NOT provide those details in ASVS. \r\n\r\nIs that suggestion helpful?",
+      "createdAt": "2022-04-20T19:38:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1104385736",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5CKrAV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we need to provide high level requirement in ASVS and in the references section link to the relevant cheatsheet. So what is the next action here @elarlang ?",
+      "createdAt": "2022-04-26T18:00:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1110093845",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LLDqf",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'd like to add that when looking at:\r\n\r\n7.1.3 and 7.2.1 both (in part) contain the same information.\r\n\r\nhttps://github.com/OWASP/ASVS/blob/master/5.0/en/0x15-V7-Error-Logging.md",
+      "createdAt": "2022-09-28T16:52:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1261189791",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QQRfP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Section 7 needs serious rework deduplication and maybe also ensure that there is no important, high-level content from the cheat sheet which is missing.\r\n\r\n@set-reminder 1 week @elarlang  to look at this",
+      "createdAt": "2022-12-12T12:52:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1346443215",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QQRf1",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nMonday, December 19, 2022 12:00 AM (GMT+01:00)\r\n> @elarlang  to look at this",
+      "createdAt": "2022-12-12T12:52:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1346443253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Q4JSy",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/997#issuecomment-1346443215) @tghosth\n> @elarlang  to look at this",
+      "createdAt": "2022-12-18T23:00:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1356895410",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TaXzT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For full clarity I would add to this:\r\n\r\na) \"This should include requests with relevant metadata needed for security investigations.\" sounds like a different requirement that shouldn't need to appear within 7.2.1 and 7.2.2 but rather should be covered once and separately.\r\nb) \"Verify that all access control decisions can be logged and all failed decisions are logged\" the first half and second half seem to repeat themselves. This seems to be an old requirement from ASVS 2.0 so it is hard to see if there is rationale for this strange wording. I think it needs to be simplified.",
+      "createdAt": "2023-01-22T07:38:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1399422163",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5s4dbo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @timhemel - I did some reorganizing and deduplications https://github.com/OWASP/ASVS/pull/1794\r\n\r\nIt all requires more work, but lets start from the first step - do you think it solves the first set of problems addressed when the issue was opened (https://github.com/OWASP/ASVS/issues/997#issue-892711114)?",
+      "createdAt": "2023-11-26T10:00:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1826739944",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5s4fCj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The scope for this issue: duplication between requirements 7.1.3 (proposed to move to 7.2.3), 7.1.4, 7.2.1, 7.2.2\r\n\r\nFor covering different security events, I opened separate issue: https://github.com/OWASP/ASVS/issues/1795 which also should handle potential need to modify or finetune requirements 7.1.3/7.2.3, 7.2.1 and 7.2.2.",
+      "createdAt": "2023-11-26T10:32:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1826746531",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tB7Ac",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "hi @elarlang, in #1794 \r\n\r\na) We lose some detail from 7.2.1 and 7.2.2. \"This should include requests with relevant metadata needed for security investigations\". Are you sure this is covered elsewhere already?\r\n\r\nb) Why did you comment out the surrounding text?\r\n",
+      "createdAt": "2023-11-28T06:56:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1829220380",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tCBSN",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I tried to put self-explaining commit messages:\r\nhttps://github.com/OWASP/ASVS/pull/1794\r\n\r\na) commit https://github.com/OWASP/ASVS/pull/1794/commits/5790450cd3149064988a11c0490fbd21200678c2 says \"deduplicate 7.2.1 and 7.2.2 from 7.1.4\"\r\n\r\nand current 7.1.4 is:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.4** | Verify that each log event includes necessary information that would allow for a detailed investigation of the timeline when an event happens. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |\r\n\r\nb) commit https://github.com/OWASP/ASVS/pull/1794/commits/1584d726975fc7c86dc05af04dedc67b0956238a says \"hide outdated section descriptions\"\r\n\r\nThose texts are outdated - if we make changes and want to get feedback, we don't want to get feedback for already known outdated or out of sync intro texts.",
+      "createdAt": "2023-11-28T07:21:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1829246093",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tCCH5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ah ok, so what do you think about rewording 7.1.4 slightly:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **7.1.4** | [MODIFIED] Verify that each log **entry** includes necessary **metadata** that would allow for a detailed investigation of the timeline when an event happens. ([C9](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | 778 |",
+      "createdAt": "2023-11-28T07:25:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1829249529",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tDSfn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't mind, but I can not see improvement from \"information\" > \"metadata\" change. Any reasoning?",
+      "createdAt": "2023-11-28T10:55:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1829578727",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tS0JS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth - PR updated via https://github.com/elarlang/ASVS/commit/b43f8b75445fc8a0596531905333115505dc7d9c",
+      "createdAt": "2023-11-30T12:11:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/997#issuecomment-1833648722",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-05-16T16:54:23Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABJFMusA",
+      "name": "V16 (prev V7)",
+      "description": "Temporary label for grouping logging related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    }
+  ],
+  "number": 997,
+  "state": "CLOSED",
+  "title": "relation between ASVS-v4.0.3 7.2.1, 7.1.2.2 and 7.1.3, 7.1.4",
+  "url": "https://github.com/OWASP/ASVS/issues/997"
+}

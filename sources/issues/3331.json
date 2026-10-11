@@ -1,0 +1,112 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Currently, we have this requirement:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **3.3.4** | Verify that if the value of a cookie is not meant to be accessible to client-side scripts (such as a session token), the cookie must have the 'HttpOnly' attribute set and the same value (e. g. session token) must only be transferred to the client via the 'Set-Cookie' header field. | 2 |\n\nThere are apparently new `__Http-` and `__Host-Http-` prefixes for `HttpOnly` cookies, which protects the cookie from being overwritten by client-side JS code. Shall we require this usage somehow in this requirement?\n\nCaveat: there is no `__Secure-Http-` prefix for some reason.\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7n4PyP",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Description from [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie)\n\n> __Host-Http-: Cookies with names starting with __Host-Http- must be set with the Secure flag by a secure page (HTTPS) and must have the HttpOnly attribute set to prove that they were set via the Set-Cookie header. In addition, they also have the same restrictions as __Host--prefixed cookies. This combination yields a cookie that is as close as can be to treating the origin as a security boundary while at the same time ensuring developers and server operators know that its scope is limited to HTTP requests.\n\nIt is at the moment with 65% of global coverage: https://caniuse.com/mdn-http_headers_set-cookie_http_host-http_prefixes\n\nWhat we have at the moment:\n\n  * `__Host-` prefix is required (v5.0.0-3.3.3)\n  * `HttpOnly` is required if the cookie is not meant to be accessible for JavaScript (v5.0.0-3.3.4)\n\nWhat it could give extra: if there is a browser-side JavaScript execution possibility for the attacker, then it is not possible to (over)write the cookie with the name prefix `__Host-Http-` (or `__Http-` but we require `__Host-` to be used anyway).\n\nAs `__Host-Http-` to have any impact, it requires malicious JavaScript execution in the same-origin scope as pre-condition, then I'm not convinced that in practice it solves or mitigates any security problems. ~~Definitely not worth a level 2 requirement. If there is consensus that it is needed, then maybe for level 3, into the same requirement.~~\n\nedit: thinking more about it, it has enough impact to be part of the current requirement.",
+      "createdAt": "2026-02-12T11:14:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3331#issuecomment-3890281615",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7oHk9F",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This has come up on my radar as well. I don't think we want to edit or add a new requirement, but what about adding it as a note somehow? \n\nFolks have used cookie clobbering to do session fixation and similar in a lot of legacy attacks via XSS. Very surgical.\n\n> If malicious JS execution is already possible, does this really help?”\n\nMost often this is no. But sometimes yes, particularly when:\n\n- session binding is strict\n- privileged actions require fresh cookies\n- auth cookies are rotated or bound to IP/device",
+      "createdAt": "2026-02-13T01:22:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3331#issuecomment-3894300485",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qds8D",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This has come up on my radar as well. I don't think we want to edit or add a new requirement, but what about adding it as a note somehow?\n\nYes, I agree with @elarlang  and @jmanico  analysis. Adding a note at some point could be a good choice for that.",
+      "createdAt": "2026-02-20T12:00:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3331#issuecomment-3933654787",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7r4L2Z",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So the action plan here is:\n* For the next patch release, we can add a note to the section text to mention the possibility\n* For the next minor or major release, we'll modify the requirement as we feel is correct at the time",
+      "createdAt": "2026-02-25T07:32:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3331#issuecomment-3957374361",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABHwccEA",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For reference, see [new wording](https://github.com/oauth-wg/oauth-browser-based-apps/pull/112) of the OAuth for Browser based apps document.",
+      "createdAt": "2026-06-27T06:09:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3331#issuecomment-4815526928",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2026-02-12T10:49:22Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 3331,
+  "state": "OPEN",
+  "title": "3.3.4, Require __Http- or __Host-Http- prefix for HttpOnly cookies when applicable",
+  "url": "https://github.com/OWASP/ASVS/issues/3331"
+}

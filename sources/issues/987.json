@@ -1,0 +1,129 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjMyNDMzNTc1",
+    "is_bot": false,
+    "login": "ThunderSon",
+    "name": ""
+  },
+  "body": "In [v2.7](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v27-out-of-band-verifier), specifically 2.7.1  and 2.7.4, there is an overlap of requirements.\r\nThe first mentions not to have by default SMS for example, which is clear text, easily retrievable and logged.\r\nIn the second, it forces out of band verifiers to be over a secure channel.\r\n\r\nLet's say an SMS based OOB was provided, by default or not, the other requirement fails as a direct cause of this.\r\n\r\nI believe that having SMS is L1, versus having TOTP and other secure OOB implementations to be L2. A lot of companies can't provide anything but SMS because the people using them are non-technical, and we're saying implementing SMS is as bad as not having SMS since it doesn't even pass level 1 requirements.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzUwMTM1NQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is an astute observation.\r\n\r\nI talked to Jim Fenton (the author of NIST SP800-63) about this recently. He said for AAL-1 MFA is not needed. For AAL-2 applications, SMS (and other NIST restricted authenticators) are only acceptable for AAL-2 if another stronger method is made available (and is default). \r\n\r\nSo what we are missing for this entire section is that different types of authenticator requirements are necessary for different risk levels of applications.\r\n\r\nIs there a way to acknowledge your concerns with all of this in mind?",
+      "createdAt": "2021-05-06T12:58:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/987#issuecomment-833501355",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzUyMjE4Mg==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "It depends on the direction of the section. If you want to be as close as possible to NIST, then the requirements I mentioned should be L2, and not L1.\n\nNow if I want to be picky, if you look at 2.5.6, it mentions as well the communication of tokens, and having TOTPs is definitely not L1, and most probably an email or SMS OTP will be sent.\n\nMy advice would go to say \"Have SMS or email as an OOB verifier\" as a nice to have, as it's already implemented in other areas of the application and should be easily doable.\n\nOpen for deeper discussions on this, it's never straight forward around these topics.",
+      "createdAt": "2021-05-06T13:27:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/987#issuecomment-833522182",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzUyNjAzMQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like the direction you're going in. Would you care to provide what you think the PR should look like? I think your concern is very fair but I'm not sure how to word it. ",
+      "createdAt": "2021-05-06T13:32:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/987#issuecomment-833526031",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hPTq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ThunderSon did you have any thoughts on the wording for this?",
+      "createdAt": "2022-02-23T15:26:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/987#issuecomment-1048900842",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-i6YM",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Looking at this, what is the feeling on moving 2.7.1 and 2.7.4 to L2?\r\nI believe doing that opens up the door to having SMS (or clear text) OTPs since it's required in other L1 requirements, and that enforce that it should be short lived.\r\n\r\nI was looking at 2.2.2; this is a different view as well on this specific topic, and I think a review of all authenticator requirements, their levels, etc. across V2 to be reviewed.\r\n\r\nIf this is something you agree with, I can take this on to detail some further thoughts by end of week and get some consensus on it.\r\nOtherwise, let me know what you think about this.",
+      "createdAt": "2022-02-23T23:47:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/987#issuecomment-1049339404",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5A_bVE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To me [2.7.1](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v27-out-of-band-verifier) needs to be L1 but I would be open to [2.7.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v27-out-of-band-verifier) becoming level 2.\r\n\r\nI think 2.2.2 is talking about primary authentication and 2.7.x is talking about MFA.\r\n\r\n@ThunderSon how do you want to proceed?",
+      "createdAt": "2022-04-06T14:56:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/987#issuecomment-1090368836",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BqNz4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ThunderSon I will probably close during mid-May if there is no further comment.",
+      "createdAt": "2022-04-18T17:24:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/987#issuecomment-1101585656",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-05-06T10:30:58Z",
+  "labels": [],
+  "number": 987,
+  "state": "CLOSED",
+  "title": "Out of band authenticators overlap",
+  "url": "https://github.com/OWASP/ASVS/issues/987"
+}

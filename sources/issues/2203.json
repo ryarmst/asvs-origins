@@ -1,0 +1,297 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Should we include requirements for compression based side-channel attacks in general and BREACH (which is still alive and well as far as I know) in particular?\r\n\r\nOptions:\r\n\r\n* general requirement\r\n* specific requirement for BREACH\r\n* both\r\n\r\ncf. #1798 \r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Rhvyq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @Sjord ",
+      "createdAt": "2024-10-28T13:08:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2441542826",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RkdaU",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Only really old ciphers are vulnerable to BREACH. The crypto requirements saying use modern ciphers should cover this problem.\n",
+      "createdAt": "2024-10-28T17:52:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442253972",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RlJ7W",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, Do you have a reference on this? The references I found seems to says otherwise (or at least does not suggest that modern crypto mitigates BREACH) and must understanding of the subject is that it was still an issue.\r\n\r\nReferences:\r\n\r\n* [Implement TLS 1.3 random record padding to mitigate BREACH](https://trac.nginx.org/nginx/ticket/1977)\r\n* [StackExchange cryptography answer](https://crypto.stackexchange.com/a/108151/2524)\r\n* [Importance of TLS 1.3: SSL and TLS Vulnerabilities](https://beaglesecurity.com/blog/article/importance-of-tls-1-3-ssl-and-tls-vulnerabilities.html)",
+      "createdAt": "2024-10-28T19:23:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442436310",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rln95",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yep, you’re right and I stand corrected. Here is a more comprehensive resource that discusses how it’s TLS version and cipher agnostic.BREACH ATTACKbreachattack.comDefenses this resource suggests include:Disabling HTTP compression Separating secrets from user input Randomizing secrets per request Masking secrets (effectively randomizing by XORing with a random secret per request) Protecting vulnerable pages with CSRF Length hiding (by adding random number of bytes to the responses) Rate-limiting the requestsMessage ID: ***@***.***>",
+      "createdAt": "2024-10-28T20:28:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442559353",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rm2f0",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would recommend against a specific requirement for BREACH specifically because there are many similar vectors. As one example (which I don't think has been published on yet - my bad for not getting around to it), web-based PDF generators using text compression can also be utilized for side-channel compression attacks. BREACH could be mitigated by disabling HTTP compression, but this would not mitigate other forms of side-channel compression attacks.\r\n\r\nThe broad mitigations generally overlap with those to protect against XS-Leaks, but I would not technically classify these as XS-Leaks. I think controls may be most appropriate in V50, but I haven't kept up-to-date on the latest discussions. Ultimately, it requires restricting cross-site/cross-origin requests (not just read capability using CORS, but preventing a response from the server). \r\n\r\nExample mitigations:\r\n- Using Origin (or Fetch Metadata) headers to reject requests from unintended sources\r\n- For apps using cookies for sessions, restricting transmission via the *samesite* attribute\r\n- Anything else specific to the mechanism or business logic.. ",
+      "createdAt": "2024-10-28T23:46:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442881012",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rm3cJ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I would recommend against a specific requirement for BREACH specifically because there are many similar vectors.\r\n\r\nYes, at the same time BREACH is a very simple and generic vector with very simple/actionable mitigations (\"in doubt just don't enable HTTP compression for dynamic responses in your server\").",
+      "createdAt": "2024-10-28T23:50:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442884873",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rm5Ce",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What I mean is that having some wording targeting explicitly BREACH would help the users of the ASVS to at least tackle BREACH whereas the general case seems quite hard to grasp and not so easy to mitigate.\r\n\r\nSo I would say that a general requirement would be necessary but that an additional BREACH-specific requirement would be useful as well (even if it would strictly speaking be redundant).",
+      "createdAt": "2024-10-28T23:57:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442891422",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rm79A",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm not a performance engineer and am not certain of the significance of HTTP level compression, but I suspect a broad requirement to disable compression for dynamic responses may not be universally feasible.",
+      "createdAt": "2024-10-29T00:08:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442903360",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rm8g5",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes I did not mean to say that the requirement should be \"you must disable HTTP compression for dynamic content\" :)",
+      "createdAt": "2024-10-29T00:10:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2442905657",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Rp5Pq",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> For apps using cookies for sessions, restricting transmission via the samesite attribute\r\n\r\nWe could have a requirement for SameSite=strict on session cookies under certain conditions. Then an attacker cannot forge cross-site requests that retrieve information from the user's session.",
+      "createdAt": "2024-10-29T09:24:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2443678698",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RqOWx",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Could we have something such as:\r\n\r\n> Verify that the application mitigates compression based side-channel attacks.\r\n\r\nand\r\n\r\n> Verify that the application mitigates BREACH attacks if HTTP compression is used in dynamic HTTPS response.\r\n\r\nThis hints that a mitigation is to disable HTTP compression in dynamic HTTP responses (and that if you use HTTP compression in dynamic HTTP responses you may want to consider implementing another mitigation) without being too specific.",
+      "createdAt": "2024-10-29T10:02:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2443765169",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6RqSWy",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Other forms of CSRF protection are often stated in the literature as well.\n",
+      "createdAt": "2024-10-29T10:09:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2443781554",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sn9zR",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thinking about it further, the issue can be generalized to when the following co-occur:\r\n1. Compression of sensitive information occurs *before* encryption.\r\n2. An attacker is either able to inject (chosen) or observe (known) plaintext (the latter is probably unlikely to pose significant risk) and also observe encrypted data (most likely network sniffing).\r\n\r\nIn addition to BREACH (HTTP compression) and app-specific functionality like PDFs (PDF compression), this is also mentioned in [RFC 8725](https://datatracker.ietf.org/doc/html/rfc8725#name-avoid-compression-of-encryp) for JWTs.\r\n\r\nTherefore, perhaps a general requirement to avoid compress-then-encrypt patterns for V6?",
+      "createdAt": "2024-11-06T14:47:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2459950289",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6So3S7",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ping @danielcuthbert ",
+      "createdAt": "2024-11-06T16:07:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2460185787",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sr9xz",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Therefore, perhaps a general requirement to avoid compress-then-encrypt patterns for V6?\r\n\r\nYes, it might be useful to have a general requirement in V6. (I am wondering if the uses cases outside of HTTP compression are not somewhat niche though.)\r\n\r\nThe HTTP compression is probably important-enough to warrant some proper wording or event dedicated requirement outside of V6 for better exposition (?). If BREACH is only covered as a subclause of a general requirement in V6, it might easily be overlooked.",
+      "createdAt": "2024-11-06T23:25:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2460998771",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S4yyU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Having discussed it between us, we think that a requirement would be very hard to implement correctly and also potentially have a low impact on security posture as the likelihood of a successful attack is low. We also think that other cross origin and anti-automation controls would hopefully help mitigate this.",
+      "createdAt": "2024-11-08T10:33:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2203#issuecomment-2464361620",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-10-28T12:57:54Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    }
+  ],
+  "number": 2203,
+  "state": "CLOSED",
+  "title": "Compression based side-channel attacks and BREACH",
+  "url": "https://github.com/OWASP/ASVS/issues/2203"
+}

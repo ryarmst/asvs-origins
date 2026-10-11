@@ -1,0 +1,83 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2024-09-04T22:36:07Z",
+      "diff": "Note: this is referenced as 4.1.10 in #2033, but I updating the numbering to account for the skipped requirements.\r\n\r\nI propose the addition of a new requirement that addresses the need for access decisions to be made on the most current permissions information. For example, let's say a user's access permissions are modified while that user has an active session (i.e. admin revokes access to edit files) - if the system does not check the user's permissions in real time (i.e. instead relying on cached access information), the user would be able to edit a file, which they should no longer be able to do.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that the access control system makes real-time access control decisions based on current permissions values. | ✓ | ✓ | ✓ | |\r\n"
+    },
+    {
+      "editedAt": "2024-10-31T15:11:52Z",
+      "diff": "Note: this is referenced as 4.1.10 in #2033, but I updating the numbering to account for the skipped requirements.\r\n\r\n**Ed note: This is being merged as 4.1.6**\r\n\r\nI propose the addition of a new requirement that addresses the need for access decisions to be made on the most current permissions information. For example, let's say a user's access permissions are modified while that user has an active session (i.e. admin revokes access to edit files) - if the system does not check the user's permissions in real time (i.e. instead relying on cached access information), the user would be able to edit a file, which they should no longer be able to do.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that the access control system makes real-time access control decisions based on current permissions values. | ✓ | ✓ | ✓ | |\r\n"
+    },
+    {
+      "editedAt": "2024-10-31T15:12:00Z",
+      "diff": "Note: this is referenced as 4.1.10 in #2033, but I updating the numbering to account for the skipped requirements.\r\n\r\n**Ed note: _This is being merged as 4.1.6_**\r\n\r\nI propose the addition of a new requirement that addresses the need for access decisions to be made on the most current permissions information. For example, let's say a user's access permissions are modified while that user has an active session (i.e. admin revokes access to edit files) - if the system does not check the user's permissions in real time (i.e. instead relying on cached access information), the user would be able to edit a file, which they should no longer be able to do.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.1.7** | [ADDED] Verify that the access control system makes real-time access control decisions based on current permissions values. | ✓ | ✓ | ✓ | |\r\n"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2412325172",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "What about something like \"ensure that changes of roles and entitlement are taken into account  in the policy enforcement points in at most `X`\".\r\n\r\nWhen using some kind of reference token which involves a request to a separate service for validation, you will probably end up using a small cache in order to avoid making the token validation request for each incoming request (based on the freshness of your last check and how critical the current request is).\r\n\r\nWhen using a self-encoded token, this is going to be implemented by the short validity of the token.\r\n",
+          "recorded_at": "2024-10-14T20:53:30Z"
+        },
+        {
+          "body": "Shouldn't the requirement be something like \"ensure that changes of roles and entitlement are taken into account  in the policy enforcement points in at most `X`\".\r\n\r\nWhen using some kind of reference token which involves a request to a separate service for validation, you will probably end up using a small cache in order to avoid making the token validation request for each incoming request (based on the freshness of your last check and how critical the current request is).\r\n\r\nWhen using a self-encoded token, this is going to be implemented by the short validity of the token.\r\n",
+          "recorded_at": "2024-10-14T20:52:43Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2423252509",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> Maybe the solution is to either allow a grace period or make this an L2 or L3 requirement.\r\n\r\nYes, in practice for scalability reasons, you are often going to have some small grace period between the moment you modify some user permissions and the moment the modification is actually taken into account (especially in highly distributed and high-availability systems).\r\n\r\nSome examples:\r\n\r\nIf you are using some OIDC user claims for authorization decision and you want real-time access control decision, you are going to need to be a UserInfo request for each incoming request. (Another solution would be to rely on [Shared Signals](https://openid.net/specs/openid-sse-framework-1_0.html)).\r\n\r\nIf you are using OAuth access tokens and you want real-time access control decision, the resource server is going to need to check the status of the access token (using token introspection) for each incoming request.\r\n\r\nAnother case is if you are storing the user permissions in a database which features eventual consistency for high availability.\r\n\r\nGoogle's [Zanzibar](https://storage.googleapis.com/gweb-research2023-media/pubtools/5068.pdf) is certainly a  well-designed scalable system for this topic. However it does *not* feature real-time access control decision (in this sense) but only features *external consistency*:\r\n\r\n> Zanzibar’s external consistency model is one of its most salient features. It respects the ordering of user actions, yet\r\nat the same time allows authorization checks to be evaluated at distributed locations without global synchronization",
+          "recorded_at": "2024-10-19T16:19:04Z"
+        },
+        {
+          "body": "> Maybe the solution is to either allow a grace period or make this an L2 or L3 requirement.\r\n\r\nYes, in practice for scalability reasons, you are often going to have some small grace period between the moment you modify some user permissions and the moment the modification is actually taken into account (especially in highly distributed and high-availability systems).\r\n\r\nSome examples:\r\n\r\nIf you are using some OIDC user claims for authorization decision and you want real-time access control decision, you are going to need to be a UserInfo request for each incoming request. (Another solution would be to rely on [Shared Signals](https://openid.net/specs/openid-sse-framework-1_0.html)).\r\n\r\nIf you are using OAuth access tokens and you want real-time access control decision, the resource server is going to need to check the status of the access token (using token introspection) for each incoming request.\r\n\r\nAnother case is if you are storing the user permissions in a database which features eventual consistency for high availability.\r\n\r\nGoogle's [Zanzibar](https://storage.googleapis.com/gweb-research2023-media/pubtools/5068.pdf) is certainly a  well-designed scalable system for this topic. However it does not feature real-time access control decision (in this sense) but only features *external consistency*:\r\n\r\n> Zanzibar’s external consistency model is one of its most salient features. It respects the ordering of user actions, yet\r\nat the same time allows authorization checks to be evaluated at distributed locations without global synchronization",
+          "recorded_at": "2024-10-19T16:18:34Z"
+        },
+        {
+          "body": "> Maybe the solution is to either allow a grace period or make this an L2 or L3 requirement.\r\n\r\nYes, in practice for scalability reasons, you are often going to have some small grace period between the moment you modify some user permissions and the moment the modification is actually taken into account (especially in highly distributed and high-availability systems).\r\n\r\nSome examples:\r\n\r\nIf you are using some OIDC user claims for authorization decision and you want real-time access control decision, you are going to need to be a UserInfo request for each incoming request. (Another solution would be to rely on [Shared Signals](https://openid.net/specs/openid-sse-framework-1_0.html)).\r\n\r\nIf you are using OAuth access tokens and you want real-time access control decision, the resource server is going to need to check the status of the access token (using token introspection) for each incoming request.\r\n\r\nYou are storing the user permissions in a database which features eventual consistency for high availability.\r\n\r\nGoogle's [Zanzibar](https://storage.googleapis.com/gweb-research2023-media/pubtools/5068.pdf) is certainly a  well-designed scalable system for this topic. However it does not feature real-time access control decision (in this sense) but only features *external consistency*:\r\n\r\n> Zanzibar’s external consistency model is one of its most salient features. It respects the ordering of user actions, yet\r\nat the same time allows authorization checks to be evaluated at distributed locations without global synchronization",
+          "recorded_at": "2024-10-18T21:24:32Z"
+        },
+        {
+          "body": "> Maybe the solution is to either allow a grace period or make this an L2 or L3 requirement.\r\n\r\nYes, in practice for scalability reasons, you are often going to have some small grace period between the moment you modify some user permissions and the moment the modification is actually taken into account (especially in highly distributed and high-availability systems).\r\n\r\nSome examples:\r\n\r\nIf you are using some OIDC user claims for authorization decision and you want real-time access control decision, you are going to need to be a UserInfo request for each incoming request. (Another solution would be to rely on [Shared Signals](https://openid.net/specs/openid-sse-framework-1_0.html)).\r\n\r\nIf you are using OAuth access tokens and you want real-time access control decision, the resource server is going to need to check the status of the access token (using token introspection) for each incoming request.\r\n\r\nYou are storing the user permissions in a database which features eventual consistency for high availability.\r\n\r\nGoogle's [Zanzibar](https://storage.googleapis.com/gweb-research2023-media/pubtools/5068.pdf) is certainly a  well-designed scalable system for this topic. However it does not feature real-time access control decision in this sense but only features *external consistency*:\r\n\r\n> Zanzibar’s external consistency model is one of its most salient features. It respects the ordering of user actions, yet\r\nat the same time allows authorization checks to be evaluated at distributed locations without global synchronization",
+          "recorded_at": "2024-10-18T21:23:59Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2441237146",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> real time\r\n\r\nActually, the definition of \"real-time\" is that the delay must be bounded by some specified value, so if we wanted to paraphrase the meaning of this, it would be:\r\n\r\n> Verify permission values used in access control decisions are updated as quickly as possible and within a documented bound constraint defined according to the security requirements of the application. This time constraint may vary depending on the action to authorize and must be lower than XXX.\r\n",
+          "recorded_at": "2024-10-28T10:48:48Z"
+        },
+        {
+          "body": "> real time\r\n\r\nActually, the definition of \"real-time\" is that the delay must be bounded by some specified value, so if we wanted to paraphrase the meaning of this it would be:\r\n\r\n> Verify permission values used in access control decisions are updated as quickly as possible and within a documented bound constraint defined according to the security requirements of the application. This time constraint may vary depending on the action to authorize and must be lower than XXX.\r\n",
+          "recorded_at": "2024-10-28T10:48:25Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2059#issuecomment-2444828455",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Maybe we take the time out from this, for the direction:\r\n> Verify that permissions values on which access control decisions are made (such as changes in user rights, roles, or account status) are effective immediately. If permission changes are not effective immediately then there must be a solution to monitor and revert changes that are made by the user after the permissions were changed to not allow that. Note that it is not possible to revert information leakage.\r\n\r\nBut we should mention the stateless token struggle there more clearly to cover current requirement:\r\n> V3.5.7 Verify that all active stateless tokens, which are being relied upon for access control decisions, are revoked when admins change the entitlements or roles of the user.",
+          "recorded_at": "2024-10-29T17:32:16Z"
+        },
+        {
+          "body": "Maybe we take the time out from this, for the direction:\r\n> Verify that permissions values on which access control decisions are made (such as changes in user rights, roles, or account status) are effective immediately. If permission changes are not effective immediately then there must be a solution to monitor and revert changes that are made by the user after the permissions were changed to not allow that. Note that it is not possible to revert information leakage.",
+          "recorded_at": "2024-10-29T16:49:30Z"
+        }
+      ]
+    }
+  ]
+}

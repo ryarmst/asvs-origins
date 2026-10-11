@@ -1,0 +1,431 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzOTMwMDU=",
+    "is_bot": false,
+    "login": "leirn",
+    "name": ""
+  },
+  "body": "[2.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v24-credential-storage)\r\n\r\nOWASP Password storage cheat sheet recommends slow and salted algorithm which is quite good. It prevents for both brute-force and rainbow table attacks. But it is not sufficient to prevent against dictionary attack. A bcrypt hash would only take a couple of hours to be compared to a rockyou like dictionary on a modern gaming GPU (and way less on a computation rig or on cloud computation capabilities). To prevent this, you need to add a pepper on the password, pepper meaning cryptographic secret, unlike the salt which is public when you have the hash fingerprint at hand.\r\n\r\nA possible way to add a pepper could be bcrypt(hmac_sha256(pepper, password)).\r\nThis recommended approach also answers the question here about prefixed pepper and bcrypt 72 characters limitation : https://github.com/OWASP/ASVS/issues/1159#issuecomment-1214220278\r\n\r\nThis should at least be a L3 requirement, maybe L2 also.\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5W7oeP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is getting close to doing crypto on your own and I do not at all recommend it. If this risk is a problem then stop using  bcrypt and move to Argon2id.",
+      "createdAt": "2023-03-07T16:34:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1458472847",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W7v55",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "I used bcrypt as an example, the question remains for other alternatives : how to prevent from dictionary attacks. bcrypt, scrypt, argon2id and pbkdf2 are all possible recommendation for password storage today, including is the document we are currently discussing. You cannot just say \"move to argon2id\".\r\n\r\nIn all those cases, the need to add a pepper remains to prevent from dictionary based attack, which is not addressed by the document in its current state.\r\n\r\nThe specific way I suggest to integrate a pepper within bcrypt is almost a side story. At the same time is is in any case better that let a random dev using bcrypt(pepper.password) with a 80 character long pepper :)\r\n\r\nOn another aspect, argon2id has its own issues. Being \"too\" configurable, it increase the risk of insecure parameters if used by low-knowledge persons (like most developers are in term of cryptography). But that is another debate.",
+      "createdAt": "2023-03-07T16:51:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1458503289",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W70Ku",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that technically it makes password guessing harder for an attacker, but...\r\n\r\nIf you calculate it pragmatically - how much it actually gives more security to an application? And against what attack vector it defends?\r\n\r\nTo guess plain-text version for same hash, you need to have the hash first. It means, all password-storage security is 2nd layer of defense.\r\n\r\nAgainst dictionary attacks there should be also pre-condition, that users can not use password which exists in dictionary or are present in topxxx password list.",
+      "createdAt": "2023-03-07T17:02:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1458520750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5W8xAw",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "> To guess plain-text version for same hash, you need to have the hash first. It means, all password-storage security is 2nd layer of defense.\r\n\r\nIt may be true, but is it ? Check the list of breaches and leaks. Password hashes into the wild are not that uncommon at all.\r\n\r\nJust in February 2023, 16 million bcrypt hashes leaked from Eye4fraud ( see haveibeenpwned.com )\r\n\r\n> Against dictionary attacks there should be also pre-condition, that users can not use password which exists in dictionary or are present in topxxx password list.\r\n\r\nThis is not easier to implement, and at the same time less efficient. You will probably not use the same dictionaries, they also keep evolving meaning that the password may not be present in a dic at the time it is set, but can be later when a hacker will try to find hash pre-image.\r\n\r\nThe typical scenario here would be hacker that get hashes from an important leak, find persons of interest (celebs, politicians, persons of influence, CxOs...), having only a few dozens hashes to reverse. The probability that one of it is in a dictionary is far from low. The password can then be used to try accessing other systems where the user will use shared passwords.\r\n\r\nYou will reply MFA. It is far from being generalized among non IT people.\r\n\r\nThe only way to prevent this more than plausible scenario is peppering the passwords in the db.\r\n\r\n",
+      "createdAt": "2023-03-07T20:01:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1458769968",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XB866",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Again, in your example scenario, you actually need hashes first.\r\n\r\nIf we already talk about leakage, what if plain-text versions of passwords leaked? The point and problem is - if user re-uses the password, only MFA helps.\r\n\r\nI repeat my question:\r\n> If you calculate it pragmatically - how much it actually gives more security to an application? And against what attack vector it defends?\r\n\r\nTo be clear - I'm not against any new requirement, I just want to have clear reasons and arguments to the issues.",
+      "createdAt": "2023-03-08T13:07:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1460129466",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XCQAB",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "I agree, you need hashes first. The fact is getting hashes is not that difficult. Any SQLi will lead to that, or any massive leak that you can find.\r\n\r\nYes, MFA is another layer of security. But the fact another potential security might exist in some case does mean you should not do something else. This is the swiss cheese / layered security model. (and MFA is not widely deployed anyway). Don't trust the users to do what is right.\r\n\r\nMy proposition is probably a L3 requirements, not a basic one. At the end, I am deeply convinced this fills hole that are not covered otherwise in many cases.",
+      "createdAt": "2023-03-08T14:06:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1460207617",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XGpjI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The fact is getting hashes is not that difficult. Any SQLi will lead to that, or any massive leak that you can find.\r\n\r\nThe fact? If we talk about level 3 type of requirement and application, getting hashes should be already really difficult. From level 3 also MFA is/should be required.\r\n\r\nMassive leak - if a leak comes from one application, you can not defend against that in other application. If people are reusing their passwords, nothing helps and that's why MFA is anyway only solution against that.\r\n\r\nI agree, that proposed solution makes guessing hashes more difficult, but on the other hand, I'm not sure it solves any problem in practice _as level 3 requirement_. That's why I asked and keep asking the question:\r\n> If you calculate it pragmatically - how much it actually gives more security to an application? And against what attack vector it defends?\r\n\r\nAnd back to the beginning\r\n\r\n> OWASP Password storage cheat sheet recommends slow and salted algorithm which is quite good. It prevents for both brute-force and rainbow table attacks. \r\n\r\nusing pepper should defend against brute-force attacks as well. I can not see, why it's different from dictionary attacks.",
+      "createdAt": "2023-03-09T06:21:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1461360840",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XHlb9",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "> using pepper should defend against brute-force attacks as well. I can not see, why it's different from dictionary attacks.\r\n\r\nOf course pepper improve the position against brute-force as well. I did not mentioned it because against brute force, you already have a first layer of security measure called slow algorithm. So I based my point on remaining threats, where the ROI from implementing peppering is much higher.\r\n\r\nIf you cannot see the difference between dictionary and brute force attacks, maybe you are not the right person to debate here. Let me help you with some computation.\r\n\r\nLet use computation speed I benchmarked on a recent but not that expensive GPU, the RTX2070. For BCrypt (10 rounds), I got 1100 hashes/s.\r\n- For a brute force attack with, lets say, a 10 character passwords with upper and lower case letters, figures and special characters (6 of the most used of them), it roughly gives 68^10 possibilities, which we round at 2e18. In average, you find the solution at the middle of the search space, which is 1e18. It means you will need 1e15 seconds to find the password in average at 1000 h/s, which is 30 million years.\r\n- For a dictionary attack, you have a search space of 14 million passwords if you use rockyou. AT 1100 h/s, the full search space is roughly 3,5 hours\r\n\r\nDo you spot the difference between the two attack methods ?\r\n\r\nMy point is, currently, the requirements are covering correctly brute force and rainbow table, but not dictionary, for the reasons explained above (computation time + attack scenario in a previous post).\r\n\r\nThere could be other dictionary attack prevention requirements (check for password being present in already known dictionary for instance), but they do not seem easier to implement, nor having a better coverage (there are dozens of dictionaries and hackers made also their own that are not public), and also not easier to maintain in time (dictionaries evoluates, you need to be able to repopulate your table regularly). But if you offer a smarter and easier to implement way to handle dictionary attacks, I am of course fully open to hear and discuss them. It come here with peppering because it is the best I know, and it is already use in many places.\r\n\r\nYou will find here a small threat coverage analysis from the ASVS requirements :\r\n[https://pasteboard.co/RZ50Qr6VGxl6.png](https://pasteboard.co/RZ50Qr6VGxl6.png)\r\n\r\nAdding a pepper like disposition could improve the situation that way :\r\n[https://pasteboard.co/cE5R5XDLsePk.png](https://pasteboard.co/cE5R5XDLsePk.png)\r\n\r\n(Yes, pepper could also cover rainbow as well as salting, in addition too brute force and dictionary, but that is still not the point. Existing requirements are great for rainbow and brute force and I don't say we should touch them, only add an extra layer to handle a currently uncovered threat).\r\n\r\nBy the way, increasing the parameters on the algorithm (for example rounds on bcrypt) would not be a viable solution because at some point, the cost of a single computation will become to high to be used in a standard usage).\r\n\r\n\r\n\r\n",
+      "createdAt": "2023-03-09T09:02:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1461606141",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XHv7P",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If you cannot see the difference between dictionary and brute force attacks, maybe you are not the right person to debate here. Let me help you with some computation.\r\n\r\nNot very smart path to choose.\r\n\r\nI was pointing out that issue title addresses only dictionary attack, but recommending using pepper is not limited to that, but improves defense against brute-force as well. So I can not understand your attitude here.\r\n\r\nI think from measuring the risk you may take \"guessing hashes\" as an action a bit out of context from entire attack scenario and your start position is that you already have hashes - without taking into account, what must be done to get them.\r\n\r\nI can not see answers or arguments to the question asked 3 times. The context - level 3 requirement:\r\n> If you calculate it pragmatically - how much it actually gives more security to an application? And against what attack vector it defends?",
+      "createdAt": "2023-03-09T09:28:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1461649103",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XIhuy",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "> So I can not understand your attitude here.\r\n\r\nProbably a misunderstanding on my side. Sorry for that.\r\n\r\n> I think from measuring the risk you may take \"guessing hashes\" as an action a bit out of context from entire attack scenario and your start position is that you already have hashes - without taking into account, what must be done to get them.\r\n\r\nI still don't get you point here since the whole paragraph about password storage in the ASVS is based on the fact that you already have hashes, which is again not that uncommon, based on the many example of millions of hashes being in the wild and the not that low frequency of SQL injection occurrence.\r\n\r\n> I can not see answers or arguments to the question asked 3 times. The context - level 3 requirement:\r\n> \r\n> > If you calculate it pragmatically - how much it actually gives more security to an application? And against what attack vector it defends?\r\n\r\nI am sorry to evade this question. I am not sure what you expect with \"calculate pragmatically\", not being familiar enough with how you proceed usually probably. Otherwise I would have answered directly.\r\nHere is (quite old unfortunately, didn't find anything more recent) resources that point out 65% of passwords were, at that time, in a dictionary : [https://pthree.org/2013/04/17/password-attacks-part-ii-the-dictionary-attack/](https://pthree.org/2013/04/17/password-attacks-part-ii-the-dictionary-attack/)\r\nIt is probably lower today, but probably not close to 0.\r\n\r\nPassword re-use statistics say in average a password is use 14 times, meaning that you can easily exploit one breach to get to another system.\r\n\r\nMFA deployment is roughly 50%, meaning you still have half of the account that are vulnerable (and the statistic seems limited to system implementing MFA, which is far from being all of them).\r\n\r\n\r\nAlso, I just saw peppeing is part of the Cheat sheet (I recalled it otherwise, but maybe my memory came from another source) : [https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#peppering](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#peppering)\r\n\r\nAdding to the the ASVS would just align the two documents.\r\n",
+      "createdAt": "2023-03-09T11:29:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1461853106",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XIzNC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Password re-use statistics say in average a password is use 14 times, meaning that you can easily exploit one breach to get to another system.\r\n\r\nIf there is a breach from 3rd party site - if users re-used their passwords and those can be used against some other site, then peppering does not provide anything extra. Only MFA does.\r\n\r\nI try to explain my point of view: If there is breach from the tested/targeted site - what is the difference, are the passwords peppered or not? Peppering provides defense against offline attacks (yes, you need to have hashes first) and it only gives extra defense against impersonating (logging in as victim) to the targeted site and doing some actions there (because it was not _that easy_ to guess to plain text version of some hash). If there was breach for hashes, we can consider, that everything is breached and it does not give anything extra (confidentiality) for the site anymore there.\r\n\r\nNow, the Level 3 requirement point of view - if some application is level 3, it's most likely bank, health care or something like that. MFA there is must have. In short - for level 3 in my opinion peppering does not provide too much value anymore.\r\n\r\nPeppering comes to effect to more vulnerable sites, where breach may happen with higher likelihood.\r\n\r\nI think I have done enough talking here, ping @tghosth @jmanico .",
+      "createdAt": "2023-03-09T12:11:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1461924674",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XI9w4",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Peppering comes to effect to more vulnerable sites, where breach may happen with higher likelihood.\r\n\r\nMaybe there is something I didn't get earlier in the conversation. Are you discussing peperring relevance at global, or the level it should be in ?\r\nFrom this comment, should I understand you recommend it, but for lower levels like L2, or maybe L1 ?\r\n\r\nMFA purpose is to add a factor, not to replace password. Can we say we don't have to protect password sufficiently enough because of MFA ?\r\n\r\nThe breach do not have to come from targeted site due to password re-use unfortunately.",
+      "createdAt": "2023-03-09T12:33:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1461967928",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XJHOf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> From this comment, should I understand you recommend it, but for lower levels like L2, or maybe L1 ?\r\n\r\nLike I have repeated, I can see the benefits but I don't think it gives anything reasonable extra for level 3. It gives extra for level 1 and level 2. But not that much anymore for the application (as the breach have happened), but to the end-users.\r\n\r\n> MFA purpose is to add a factor, not to replace password. Can we say we don't have to protect password sufficiently enough because of MFA ?\r\n\r\nI'm not going to give any boolean answer for that. We can say, that authentication with only asking username and password is not enough. It relies on end-users, how they manage and choose their passwords and it's out of application (owner) control.\r\n\r\n> The breach do not have to come from targeted site due to password re-use unfortunately.\r\n\r\nThen it's offtopic from the issue perspective. If you get someones password from 3rd party breach and person re-uses it, then you can just log in as this person (online attack) and it does not matter what is the defense solution against offline attacks.",
+      "createdAt": "2023-03-09T12:49:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1462006687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XgXlw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this was quite a long discussion, I am going to try summarise it without reading every letter 🙃\r\n\r\n* If I understand correctly, the proposal from @leirn is to add a level 3 requirement for peppering as [discussed here](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#peppering).\r\n* The problem this is solving that even if password hashes leak, they will not be crackable unless the attacker has also got access to the peppering secret.\r\n* This is fundamentally an ecosystem level risk rather than a specific risk to this application because by level 3 the ASVS should be mandating MFA anyway. i.e. this requirement is effectively protecting other sites and not this actual application. (This is @elarlang's primary argument I think)\r\n* It could also be argued that this requirement would be defense in depth although your should have had to go through various defense levels to get hashes in the first place...\r\n\r\nAny critical points I have missed?",
+      "createdAt": "2023-03-14T13:27:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1468103024",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Xg3yD",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thank you for this very good summary.\r\n\r\nI would add that peppering is in the cheat sheet next to salting. I can't understand why it should be considered useless in one while recommended in the other. There is a lack of consistency that should be explained.\r\n\r\nAlso \"it's the ecosystem, not my app\" seems a non logical argument to me. If you have a leak on your system and your hashes are in the wild, and a hacker can use it to access another system on some targeted credentials, the initial failure will still be on you. Saying to others (who can be in the same company, not just someone overseas you do not know) \"you should have add MFA to compensate my not well enough protected system\" does not sound right. Or you can simply rely on plain text password everywhere saying that this whole cryptography stuff is irrelevant because it is only second layer and you should have MFA :-) (a bit provocative, I know, sorry, but said with no aggressiveness).",
+      "createdAt": "2023-03-14T14:44:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1468234883",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XiFEz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's a bit \"let's fix the world\". Maybe nice in theory or dreams, not realistic in practice. One just can not rely on hope, that others are protecting users's passwords well. Some sites may be made for stealing users password and to be used against other sites. I recommend to read or think about [Zero Trust](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf) here.",
+      "createdAt": "2023-03-14T17:44:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1468551475",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XiUEK",
+      "author": {
+        "login": "leirn"
+      },
+      "authorAssociation": "NONE",
+      "body": "It is just \"let's do the best (at reasonable cost) at my own level\". \r\n\r\nAgain, this recommendation is already fully part of the OWASP cheat sheet, I am not trying to bring a revolution here. Or maybe I should do a issue on the cheat sheet part to explain this is useless and gold plated and should be removed ?\r\n\r\nThis will be my last post anyway, I spent enough time trying to convince you already. There is no way forward to this discussion.\r\n\r\nThanks for you time and ideas.\r\n",
+      "createdAt": "2023-03-14T18:21:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1468612874",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XiXzY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This will be my last post anyway, I spent enough time trying to convince you already. There is no way forward to this discussion.\r\n\r\n\"Trying to convince you\" is a bit different than having an argument-based conversation. Convincing is more like a spreading own religion without taking into account what others have said.\r\n\r\nReopen as the topic itself still needs clear decisions:\r\n* is it worth to have requirement for peppering\r\n* \"the peppering thing\" and bcrypt combo maybe needs some attention in 2.4.4 (or at least recheck) as well",
+      "createdAt": "2023-03-14T18:32:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1468628184",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XisoU",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Peppering is very useful. Dropbox and other high-risk sites use this technique. It has been published in secure coding guides many times. If the attacker does not have the key (because it’s stored in a key vault or similar) and the database of encrypted hashes is leaked (as we have seen in a few breaches), then getting to the password hashes is more challenging. I have not seen any argument in this thread that explains why this is not the case. Therefore, I’m a big fan of peppering, especially if the app already has a crypto storage method in place.",
+      "createdAt": "2023-03-14T19:38:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1468713492",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XmzBp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @elarlang / @leirn, thanks for your input (thanks @jmanico as well 😀)\r\n\r\nI think you both set out your positions clearly although I think there is some subtlety here.\r\n\r\n### Utility of the control\r\n\r\nI don't think the intention here is to argue that the control is not useful. It certainly adds another layer. However, I think the subtler point here is that the control is complex enough that we don't want to mandate it until L3 but by L3, the mandated use of MFA should reduce the risk of offline password cracking anyway.\r\n\r\nThere is therefore a question (specifically in the context of the ASVS) of whether the extra benefit the control provides alongside the other mandated controls is worth the complexity of implementing the control. Bear in mind that peppering effectively changes takes the complexity of password hashing and adds to it the complexity of encrypted data storage with all the key management, key rotation, key versioning overhead that this brings.\r\n\r\n### Ecosystem risk\r\n\r\nASVS is kinda designed to fix the world, we would like everyone to be using it :) As such, I don't think this disqualifies a requirement if it is addressing an ecosystem level risk more than a specific risk on the application.  \r\n\r\n---\r\n\r\nAt this point, I would like to leave this issue open for a bit to see if there is other community feedback and I will tag it accordingly. I guess the key question is, should we have a separate requirement for peppering at L3?",
+      "createdAt": "2023-03-15T10:56:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1469788265",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5lRt0M",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I 100% agree that peppering as a L3 requirement is a good idea. \r\n\r\nNow let's also keep in mind that a good password policy is more critical that peppering, and is the right control. But I see a lot of big companies who already have cryptographic architectures in play absolutely encrypting their password hash before storing it. I like this, L3.",
+      "createdAt": "2023-08-30T13:12:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1699142924",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l6vTj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to tag this as rework/v2 mostly because I want to leave it for a discussion and then we can come to a decision when we rewrite the chapter.",
+      "createdAt": "2023-09-07T10:21:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-1709896931",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AQz6N",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I am a fan of peppering, as discussed above, an early article that discussed this is https://dropbox.tech/security/how-dropbox-securely-stores-your-passwords\r\n\r\nBut I realize ASVS is getting bulky and we have a lot of over fish to fry. I am ok with letting this one go if you wish.",
+      "createdAt": "2024-06-06T10:01:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-2151890573",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PAJTf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This feels like more complexity than we need so I propose to close this issue @jmanico  @elarlang ",
+      "createdAt": "2024-10-08T08:21:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-2399179999",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6PLVbC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed, Josh.",
+      "createdAt": "2024-10-09T11:54:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1569#issuecomment-2402113218",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-03-07T16:12:53Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 1569,
+  "state": "CLOSED",
+  "title": "Password storage recommendation does not protect against dictionary attack",
+  "url": "https://github.com/OWASP/ASVS/issues/1569"
+}

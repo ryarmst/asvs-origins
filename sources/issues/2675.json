@@ -1,0 +1,266 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "We currently have :\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **51.4.7** | [ADDED] Verify that confidential client is authenticated for client-to-authorized server backchannel requests such as token requests, pushed authorization requests (PAR), token revocation requests, and token introspection requests. | 2 |\n\nIncluding \"token introspection requests\" might not really make sense here. The token introspection endpoint is intended to be used by the *RS* not by the *client*, so the current wording (“confidential client is authenticated”) is not really accurate in this case.\n\nRelated to PR #2648",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6hDkW3",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Suggestion by splitting the requirement:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **51.4.7** | [ADDED] Verify that confidential client is authenticated for client-to-authorized server backchannel requests such as token requests, pushed authorization requests (PAR) and token revocation requests. | 2 |\n| **51.4.8** | [ADDED] Verify that the AS enforces authentication of the resource server on token introspection requests and that the authenticated RS is the one associated with the introspected token. | 2 |\n\nI would consider rewording 51.4.7 as well:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **51.4.7** | [ADDED] Verify that the AS enforces client authentication for client-to-AS backchannel requests such as token requests, pushed authorization requests (PAR) and token revocation requests and rejects the request if the authenticated client is not the correct one. | 2 |\n",
+      "createdAt": "2025-03-05T21:01:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2702067127",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6hRVb9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "51.4.7 - I think we can go with the first proposal, \"and rejects the request if the authenticated client is not the correct one.\" is just duplicating the first part in my opinion.\n\n\"51.4.8\" - as we already have 51.4.8, it makes sense to point out that we are talking about new requirement here and not updating the current 51.4.8. Correct?\n\nFor content it feels like we are missing a condition here - AS does not need to enforce always introspection requests, only when opaque access token is used - otherwise it is optional. Maybe the point here should be, that if RS is using introspection from AS, it must be authenticated?\n\nFrom RFC 7662 \"OAuth 2.0 Token Introspection\"\n\n https://datatracker.ietf.org/doc/html/rfc7662#section-2.1\n\n> To prevent token scanning attacks, the endpoint MUST also require\n   some form of authorization to access this endpoint, such as client\n   authentication as described in OAuth 2.0 [RFC6749] or a separate\n   OAuth 2.0 access token such as the bearer token described in OAuth\n   2.0 Bearer Token Usage [RFC6750].\n\nhttps://datatracker.ietf.org/doc/html/rfc7662#section-4\n\n> If left unprotected and un-throttled, the introspection endpoint\n   could present a means for an attacker to poll a series of possible\n   token values, fishing for a valid token.  To prevent this, the\n   authorization server MUST require authentication of protected\n   resources that need to access the introspection endpoint and SHOULD\n   require protected resources to be specifically authorized to call the\n   introspection endpoint.\n",
+      "createdAt": "2025-03-07T06:56:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2705676029",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6hRxJU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  think we can go with the first proposal, \"and rejects the request if the authenticated client is not the correct one.\" is just duplicating the first part in my opinion.\n\nI don't disagree with you.\n\nThe intent was to say that it is not enough to merely authenticate a client but check authorization as well. This is implicit in the original formulation but this is an important verification that might be overlooked by a naive implementation/verification. For example, if we take the PAR example from [rfc9126 section 1.1](https://datatracker.ietf.org/doc/html/rfc9126#section-1.1):\n\n~~~\nPOST /as/par HTTP/1.1\nHost: as.example.com\nContent-Type: application/x-www-form-urlencoded\n\n&response_type=code\n&client_id=CLIENT1234&state=duk681S8n00GsJpe7n9boxdzen\n&redirect_uri=https%3A%2F%2Fclient.example.org%2Fcb\n&client_assertion_type=\n  urn%3Aietf%3Aparams%3Aoauth%3Aclient-assertion-type%3Ajwt-bearer\n&client_assertion=eyJraWQiOiI0MiIsImFsZyI6IkVTMjU2In0.eyJpc3MiOiJDTE\n  lFTlQxMjM0Iiwic3ViIjoiQ0xJRU5UMTIzNCIsImF1ZCI6Imh0dHBzOi8vc2VydmVyL\n  mV4YW1wbGUuY29tIiwiZXhwIjoxNjI1ODY4ODc4fQ.Igw8QrpAWRNPDGoWGRmJumLBM\n  wbLjeIYwqWUu-ywgvvufl_0sQJftNs3bzjIrP0BV9rRG-3eI1Ksh0kQ1CwvzA\n~~~\n\nIf the AS only verifies client authentication but does not check that the authenticated client is consistent with the `client_id` in the PAR request, then a malicious client could submit a PAR on behalf of another client.\n\n> \"51.4.8\" - as we already have 51.4.8, it makes sense to point out that we are talking about new requirement here and not updating the current 51.4.8. Correct?\n\nOh yes, sorry.\n\n> For content it feels like we are missing a condition here - AS does not need to enforce always introspection requests, only when opaque access token is used - otherwise it is optional. Maybe the point here should be, that if RS is using introspection from AS, it must be authenticated?\n\n👍 I agree, that maybe this verification can be relaxed in some cases.\n\nI think there are other cases where this verification is important. If the token contains sensitive information (secrets, PII) in encrypted form, authentication is important in order if token introspection would be used to access this sensitive information (using the AS to decrypt the token). (I'll try to make a proposition accordingly.)",
+      "createdAt": "2025-03-07T08:07:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2705789524",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6hpF56",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I'll try to make a proposition accordingly.\n\nI have not yet found a satisfying proposition for that :)\n\nThere are several reasons we might want to have authentication on the token introspection endpoint:\n\n1. In order to prevent polling token values. This reason is mentioned in [RFC7662](https://www.rfc-editor.org/rfc/rfc7662#section-4). I am still not convinced that it is a convincing argument as the attacker could just poll the token values by submitting the forged tokens to the RS instead. Moreover, we would expect the token to have a sufficiently enough entropy/cryptographic security to make this kind of attacks unfeasible.\n2. In order to prevent an attacker to extract sensitive associated with a token he has obtained (legitimately or not). This includes opaque token of encrypted self-contained tokens. I find this reason a lot more convincing and problematic than the previous one.\n3. In order to make sure that the RS interprets the token introspection response correctly (details below). On this topic, we have this requirement from RFC 7662:\n\n   > […] If the token can be used only at certain resource servers, the authorization server MUST determine whether or not the token can be used at the resource server making the introspection call.\n\n   If the AS fails to follow this requirement, the RS could assume that an `\"active\": true` response means that the RS should accept the token whereas the token is actually intended for another RS:\n\n   > If an authorization server fails to perform any applicable check, the resource server could make an erroneous security decision based on that response.\n\nConsidering 3, I would be tempted to conclude that the requirement about token introspection should actually not be relaxed.",
+      "createdAt": "2025-03-10T21:36:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2711903866",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ioMm-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - I re-read it but I'm a bit confused, what is the latest proposal or expected action from this? Or we don't have it yet?",
+      "createdAt": "2025-03-17T07:31:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2728446398",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ixiFe",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some attempt:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **51.4.7** | [ADDED] Verify that the AS requires client authentication for backchannel requests originating from confidential clients. This includes token requests, pushed authorization requests (PAR) and token revocation requests. | 2 |\n| **51.4.X** | [ADDED] Verify that the if the OAuth token introspection endpoint can be used to obtain secret of confidential information from tokens, it uses authentication to only provide this information to authorized parties. | 2 |\n\nSome comments:\n\n* For 51.4.7, this wording does not explicitly mention that the client authentication must match with the client used in the request but this is implicit.\n  * When using for example [client assertion](https://datatracker.ietf.org/doc/html/rfc6749), the client used in the assertion may not map with the required `client_id` found in the request. The AS should check that the `client_id` matches with the one in the assertion.\n* For 51.4.X, I tried to focus on avoiding disclosure of confidential data through token introspection.\n  * This wording does not cover token polling which is mentioned [in RFC7662](https://www.rfc-editor.org/rfc/rfc7662#section-4) but I'm not sure that's such a big problem.\n\nMaybe a more general wording would be:\n\n> 51.4.X [ADDED] Verify that the AS requires authentication for the token introspection endpoint and only exposes token  introspection data to authorized parties.",
+      "createdAt": "2025-03-17T20:50:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2730893662",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jV5VR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Wording updates:\n> V51.4.7 [ADDED] Verify that the authorization server requires client authentication for backchannel requests originating from confidential clients. This includes token requests, pushed authorization requests (PAR) and token revocation requests.\n> V51.4.X [ADDED] Verify that the authorization server requires authentication for the token introspection endpoint and only exposes token introspection data to authorized parties.\n\nFor V51.4.X - public clients can not use introspection?",
+      "createdAt": "2025-03-20T13:16:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2740426065",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jdsQG",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Well, as usual with OAuth RFCs it is possible...but in my experience introspection is done from a confidential backend client.\n\nhttps://datatracker.ietf.org/doc/html/rfc7662#section-2.1 \n> To prevent token scanning attacks, the endpoint MUST also require\n   some form of authorization to access this endpoint, such as client\n   authentication as described in OAuth 2.0 [[RFC6749](https://datatracker.ietf.org/doc/html/rfc6749)] or a separate\n   OAuth 2.0 access token such as the bearer token described in OAuth\n   2.0 Bearer Token Usage [[RFC6750](https://datatracker.ietf.org/doc/html/rfc6750)].  The methods of managing and\n   validating these authentication credentials are out of scope of this\n   specification. \n\nSo to align with the RFC we need to change authentication to authorization in V51.4.X, for L3 this doesn´t matter since since 51.4.10 requires confidential clients. Maybe V51.4.X could be like this to reflect that:\n\n> V51.4.X [ADDED] Verify that the authorization server requires **authorization** for the token introspection endpoint and only exposes token introspection data to authorized parties. If the request originates from a confidential client the authorization server should authenticate the client.\n",
+      "createdAt": "2025-03-21T06:31:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2742469638",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6je45y",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@TobiasAhnoff: Is \" If the request originates from a confidential client the authorization server should authenticate the client.\" really useful given the previous sentence?",
+      "createdAt": "2025-03-21T09:20:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2742783602",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jkusF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I feel that we are going a bit too deeply into the authorization server implementation field. If there is a problem with authorization, then in general whatever from current V4 applies.\n\nIf there is a specific case from widespread problem to address, that is also clear and verifiable, then we can add this as a separate requirement. For a reminder, our initial goal was to cover low-hanging fruits from OAuth... :)",
+      "createdAt": "2025-03-21T19:53:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2744314629",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jmPW9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with Elar. I think these requirements are exceptional but are going a little bit too deep for ASVS. (And I politely think the same for TLS and other crypto requirements)\n\nBut again, this is amazing work, IMO.",
+      "createdAt": "2025-03-22T00:13:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2744710589",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jnvVn",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, OK so maybe we can just remove \"token introspection requests\" from 51.4.7 and drop 51.4.X?",
+      "createdAt": "2025-03-22T07:06:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2745103719",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jn0NK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [@jmanico](https://github.com/jmanico), OK so maybe we can just remove \"token introspection requests\" from 51.4.7 and drop 51.4.X?\n\nYes, PR it in.\n\nI think the introspection thing is so niche (it is not that widespread in use based on my experience), it requires quite many pre-conditions for an attack to be successful.  Although theoretically, the problem to solve is there, we don't have any precise OAuth-specific thing to ask there other than \"require authentication and/or authorization\" and general V4 chapter applies. So I would say that we can skip that requirement without having any uncovered areas in the flow.",
+      "createdAt": "2025-03-22T07:40:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2745123658",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jsdrd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Got sorted via #2761",
+      "createdAt": "2025-03-23T18:02:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2675#issuecomment-2746342109",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-03-05T20:50:53Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2675,
+  "state": "CLOSED",
+  "title": "Don't require client authentication for backchannel token requests",
+  "url": "https://github.com/OWASP/ASVS/issues/2675"
+}

@@ -1,0 +1,334 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I would like to bring to attention a potential vulnerability related to file upload functionality, specifically concerning the handling of image files. A simple yet impactful attack vector, known as the Pixel Flood Attack, can be executed whenever there is a file upload functionality that accepts images. In a Pixel Flood Attack, an attacker attempts to upload an image file with an exceedingly large pixel size, which could result in significant server resource consumption. This, in turn, may lead the application to crash, creating a scenario akin to an application-level denial of service (DoS).\r\n\r\nModern applications frequently leverage third-party libraries to process large images and convert them into smaller, more manageable sizes, thus conserving storage and processing power. However, some of these libraries might be susceptible to the Pixel Flood Attack, potentially leading to resource exhaustion or an Application-Level DoS attack.\r\n\r\nThis vulnerability could be of particular concern in scenarios where applications have not implemented adequate checks on the dimensions of the uploaded image files. Given the rise in the utilization of third-party image processing libraries, it's imperative to ensure that they are resilient against such attack vectors.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5n0gQ1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good one, I think there are other ways to achieve it also, like pbm images.\r\n\r\nNow the good question is, should we have separate requirement for images to \"check the dimensions to be in expected range\" or use some other requirement to cover it.\r\n\r\nWe have close requirement for this.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.2.1** | [MODIFIED] Verify that when the application is accepting a file, it checks that the file extension of the file matches an expected file extension and that it validates that the contents of the file match the type represented by that extension, including but not limited to checking the initial \"magic bytes\". | | ✓ | ✓ | 434 |\r\n\r\nAs separate requirement it should belong to 12.1, as there are some archive content validation requirements, so validating something image specific fits there as well.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.1.2** | Verify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum number of files before uncompressing the file. | | ✓ | ✓ | 409 |\r\n| **12.1.4** | [ADDED] Verify that the application does not allow uploading compressed files containing symlinks unless this is specifically required (in which case it will be necessary to enforce an allow list of the files that can be symlinked to). | | ✓ | ✓ | 61 |\r\n",
+      "createdAt": "2023-09-30T17:13:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1741816885",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oeFEY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree this should be in a general file checking requirement. @ImanSharaf can you suggest where to add it?",
+      "createdAt": "2023-10-09T10:05:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1752715544",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5of5Q5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "**Verify that when the application is accepting a file**, it checks that the file extension of the file matches an expected file extension and that **it validates that the contents of the file match the type represented by that extension, including but not limited to checking the initial \"magic bytes\"**.\r\n\r\nTo point out more clearly: ... including but **not limited to** checking the initial \"magic bytes\".\r\n\r\nSo, if I find this vulnerability, requirement 12.2.1 is something to use for reporting. The question is - should be put some special hilight on the attack vector in the 12.2.1 or in some new separate requirement.",
+      "createdAt": "2023-10-09T15:08:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1753191481",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pvg61",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I don't think 12.2.1 applies in this case because @ImanSharaf is talking about a situation where the filetype is as expected but it effectively contains a denial of service payload.\r\n\r\nAs such, @ImanSharaf it would be good to get your perspective on the specific requirement to be added and where?",
+      "createdAt": "2023-10-22T11:03:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1774063285",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pvhKe",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it will be separate requirement, we can look current 12.1.2 as a direction.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.1.2** | Verify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum number of files before uncompressing the file. | | ✓ | ✓ | 409 |\r\n\r\nOne more question to answer - should we watch as malicious content in general and handle them like viruses, or should we have requirement only to protect an application - if you going to create thumbnails and load image to the memory based on dimensions described by user, then validate the maximum allowed dimensions.",
+      "createdAt": "2023-10-22T11:09:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1774064286",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5py_em",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If it will be separate requirement, we can look current 12.1.2 as a direction.\r\n\r\nI think there is a theoretical risk in trying to cover all the possible bad things that can happen in an uploaded file, it may be there is no limit to the possibilities.\r\n\r\nOn the otherhand, in the same way as we specifically talk about zipped files, images are also highly common with some common risks.\r\n\r\nAs such, I think we should have a separate requirement, similar to 12.1.2 about this issue.\r\n\r\n> One more question to answer - should we watch as malicious content in general and handle them like viruses, or should we have requirement only to protect an application - if you going to create thumbnails and load image to the memory based on dimensions described by user, then validate the maximum allowed dimensions.\r\n\r\nWe already have [12.4.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V12-Files-Resources.md#v124-file-storage) to cover this:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.4.2** | Verify that files obtained from untrusted sources are scanned by antivirus scanners to prevent upload and serving of known malicious content. | ✓ | ✓ | ✓ | 509 |",
+      "createdAt": "2023-10-23T11:19:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1774974886",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzfzI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes I know we have separate requirement for viruses, my question was - should we watch the pixel flooded image as virus as well? It's clearly malicious content.\r\n\r\nAnd the zip bomb (12.1.2)? And symlinked zip (12.1.4)? It makes sense to put them to one subcategory?",
+      "createdAt": "2023-10-23T12:41:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1775107272",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzj0Y",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Same category, maybe. Some requirement, no",
+      "createdAt": "2023-10-23T12:50:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1775123736",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5pzpKC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Clarification:\r\n* On topic (the issue) - new separate requirement.\r\n* sidetopic - zip bomb, zip symlink, viruses and pixel flood - can be put to the same subcategory _as separate requirements_ as those all are clearly malicious inputs",
+      "createdAt": "2023-10-23T13:03:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1775145602",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p0WNu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> On topic (the issue) - new separate requirement.\r\n\r\nI would suggest:\r\n\r\n```12.2.x Verify that the application enforces a maximum pixel size for uploaded images to prevent pixel flood attacks.```\r\n\r\nMaybe [CWE 400](https://cwe.mitre.org/data/definitions/400.html)?\r\n\r\nL1\r\n\r\n> sidetopic - zip bomb, zip symlink, viruses and pixel flood - can be put to the same subcategory as separate requirements as those all are clearly malicious inputs\r\n\r\nOpened #1769\r\n\r\n",
+      "createdAt": "2023-10-23T14:27:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1775330158",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p1QDa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 12.2.x Verify that the application enforces a maximum pixel size for uploaded images to prevent pixel flood attacks.\r\n\r\nWhat means \"enforces\" in this context?",
+      "createdAt": "2023-10-23T16:26:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1775567066",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p5Fho",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "enforces = uses input validation on images with a pixel size larger than the maximum allowed to either reject them or reduce the pixel size down to the maximum",
+      "createdAt": "2023-10-24T05:47:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1776572520",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sr7C8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> or reduce the pixel size down to the maximum\r\n\r\nbut pixel flood attack is addressing exactly this functionality, no?\r\n\r\nMaybe we should watch this potential pixel flood image as zip bomb or virus content - clearly malicious, do not proceed?",
+      "createdAt": "2023-11-22T20:17:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1823453372",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ssGIn",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "An antivirus doesn't detect that as a malicious file!",
+      "createdAt": "2023-11-22T21:02:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1823498791",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ssGZA",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > On topic (the issue) - new separate requirement.\r\n> \r\n> I would suggest:\r\n> \r\n> `12.2.x Verify that the application enforces a maximum pixel size for uploaded images to prevent pixel flood attacks.`\r\n> \r\n> Maybe [CWE 400](https://cwe.mitre.org/data/definitions/400.html)?\r\n> \r\n> L1\r\n> \r\n> > sidetopic - zip bomb, zip symlink, viruses and pixel flood - can be put to the same subcategory as separate requirements as those all are clearly malicious inputs\r\n> \r\n> Opened #1769\r\n\r\nI am good with this.",
+      "createdAt": "2023-11-22T21:03:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1823499840",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5stY_N",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> An antivirus doesn't detect that as a malicious file!\r\n\r\nI wrote: Maybe **we** should watch ...",
+      "createdAt": "2023-11-23T05:29:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1823838157",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tSu-1",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > On topic (the issue) - new separate requirement.\r\n> \r\n> I would suggest:\r\n> \r\n> `12.2.x Verify that the application enforces a maximum pixel size for uploaded images to prevent pixel flood attacks.`\r\n> \r\n> Maybe [CWE 400](https://cwe.mitre.org/data/definitions/400.html)?\r\n> \r\n> L1\r\n> \r\n> > sidetopic - zip bomb, zip symlink, viruses and pixel flood - can be put to the same subcategory as separate requirements as those all are clearly malicious inputs\r\n> \r\n> Opened #1769\r\n\r\nFollowing discussion with @elarlang,\r\n\r\n`12.2.x Verify that the application blocks uploaded images with a pixel size larger than the maximum allowed, to prevent pixel flood attacks.`",
+      "createdAt": "2023-11-30T11:59:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1833627573",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tSvBb",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ImanSharaf are you ok with that as well",
+      "createdAt": "2023-11-30T11:59:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1833627739",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ulMmM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, I took:\r\n* requirement text and category/section from here: https://github.com/OWASP/ASVS/issues/1740#issuecomment-1833627573\r\n* CWE from here: https://github.com/OWASP/ASVS/issues/1740#issuecomment-1775330158\r\n* Level 1 - it is relatively easy to implement, just check the image pixel size first\r\n\r\nand created PR: https://github.com/OWASP/ASVS/pull/1803\r\n\r\nIf @ImanSharaf has some improvement ideas, we can reopen the issue.\r\n\r\nCategory and section may be changed in the future - https://github.com/OWASP/ASVS/issues/1769\r\n\r\n\r\n\r\n",
+      "createdAt": "2023-12-14T06:49:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1740#issuecomment-1855244684",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-09-29T22:59:47Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSfggFQ",
+      "name": "V5 (prev V12)",
+      "description": "",
+      "color": "7412BF"
+    }
+  ],
+  "number": 1740,
+  "state": "CLOSED",
+  "title": "Consideration of Pixel Flood Attack Vulnerability in File Upload Functionality",
+  "url": "https://github.com/OWASP/ASVS/issues/1740"
+}

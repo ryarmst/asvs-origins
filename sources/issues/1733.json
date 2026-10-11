@@ -1,0 +1,901 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I could not find an specific item that addresses the issue of DOM Clobbering. As you know, DOM Clobbering is a type of attack where attackers can redefine JavaScript global variables or native DOM elements by making use of certain HTML payloads. This can lead to various security implications, including bypassing Content Security Policies (CSP), filters or causing unexpected behavior in web applications.\r\n\r\nWith modern web applications relying heavily on JavaScript and dynamic DOM manipulations, vulnerabilities like DOM Clobbering can easily be overlooked. Including it in the ASVS will ensure that application developers, security testers, and organizations are aware of this potential risk and can take measures to prevent it.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5ngqt1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "DOM clobbering does require some defense. (from ChatGPT)\n\nDefensive Measures\n1. Isolate and Scope\nThe first line of defense is to isolate and properly scope your variables. Use JavaScript modules or closures to limit the scope of variables, making it harder for attackers to clobber them.\n\n(function() {\n  var username = \"Jim\";\n  // Your code here\n})();\n2. Use const and let\nUsing const and let instead of var can also help because they are block-scoped and not function-scoped, providing a tighter scope.\n\n{\n  const username = \"Jim\";\n}\n3. Object Freezing\nYou can use Object.freeze() to make an object immutable, preventing new properties from being added to it and making existing properties non-configurable.\n\nconst secureObject = Object.freeze({ username: \"Jim\" });\n4. Explicit Property Access\nInstead of directly accessing properties, use methods that explicitly check the type of the accessed property. For example, use document.getElementById() instead of directly accessing document.username when you want to manipulate DOM elements.",
+      "createdAt": "2023-09-27T03:28:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1736616821",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ngrIC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "But really, if you are protected from XSS these attacks wont happen in the first place. Once XSS, it really is game over. I think we should just focus on XSS defense vs these kinds of special JS hardening.",
+      "createdAt": "2023-09-27T03:31:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1736618498",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5niqPC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\r\n\r\n> But really, if you are protected from XSS these attacks wont happen in the first place. Once XSS, it really is game over. I think we should just focus on XSS defense vs these kinds of special JS hardening.\r\n\r\nI think this is a good point, @ImanSharaf  do you have an example where DOM clobbering could occur without XSS?",
+      "createdAt": "2023-09-27T10:34:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1737139138",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nk60G",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> But really, if you are protected from XSS these attacks wont happen in the first place. Once XSS, it really is game over. I think we should just focus on XSS defense vs these kinds of special JS hardening.\r\n\r\n@tghosth Even when an application is fortified with robust cross-site scripting (XSS) filters and a well-defined Content Security Policy (CSP), it may still remain susceptible to DOM Clobbering attacks. It's essential to recognize that attackers can exploit DOM Clobbering as a technique to circumvent the very protections offered by CSP and XSS filters. \r\n\r\nhttps://portswigger.net/research/bypassing-csp-via-dom-clobbering",
+      "createdAt": "2023-09-27T16:34:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1737731334",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nk9lp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Even when an application is fortified with robust cross-site scripting (XSS) filters and a well-defined Content Security Policy (CSP), it may still remain susceptible to DOM Clobbering attacks.\r\n\r\nI agree with your call on CSP, HTML injection can evade CSP.\r\n\r\nBut HTML injection (the non-Javascript XSS-like content injection \r\npossibility) does not evade good output encoding and HTML sanitization \r\npractices.\r\n\r\n",
+      "createdAt": "2023-09-27T16:40:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1737742697",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nlEY_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Here comes the place to point out - XSS is BS as a term, it does not say anything ([think about this and pay attention to published date](https://blog.jeremiahgrossman.com/2006/07/origins-of-cross-site-scripting-xss.html)). Let's talk about syntax + problem there - is it injection, is it execution, in HTML or in JavaScript.\r\n\r\nIn this case, out of curiosity, what is the expected defense? What would be the requirement (additionally HTML injection (covered by current 5.3.1)?",
+      "createdAt": "2023-09-27T17:00:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1737770559",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nokV8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Here comes the place to point out - XSS is BS as a term, it does not say anything ([think about this and pay attention to published date](https://blog.jeremiahgrossman.com/2006/07/origins-of-cross-site-scripting-xss.html)). Let's talk about syntax + problem there - is it injection, is it execution, in HTML or in JavaScript.\r\n\r\nLet's not open up this holy war again LOL\r\n\r\n> In this case, out of curiosity, what is the expected defense? What would be the requirement (additionally HTML injection (covered by current 5.3.1)?\r\n\r\nSo the defence [is covered here](https://portswigger.net/web-security/dom-based/dom-clobbering#how-to-prevent-dom-clobbering-attacks) and actually it reminds me of the \"defensive coding\" type of requirement that we discussed in #1617.\r\n\r\nI think I have changed my mind here. In principle this requires XSS but the problem is that sometimes you need to render some HTML but not all HTML. When that is the case, you generally run a library like DOMPurify to remove dangerous items.\r\n\r\nHowever, from a brief review, I don't think DOMPurify would prevent the following payload in [this vulnerability](https://portswigger-labs.net/dom-invader/testcases/augmented-dom-script-dom-clobbering-csp/?x=%3Ca%20id=%22ehy%22%3E%3C/a%3E%3Ca%20href=%22//subdomain1.portswigger-labs.net/xss/xss.js?%22%20name=%22codeBasePath%22%20id=%22ehy%22%3E%3C/a%3E) which is [described here](https://portswigger.net/research/bypassing-csp-via-dom-clobbering).\r\n\r\n```html\r\n<a id=ehy><a id=ehy name=codeBasePath href=\"//subdomain1.portswigger-labs.net/xss/xss.js?\">\r\n```\r\n\r\nSpecifically, I ran the HTML in the payload though DOMPurify and it did not remove anything.\r\n\r\nAs such, if a standard XSS prevention does not stop this from happening then I think we need have a specific item for it.\r\n\r\n@cure53 @hackvertor have I understood the situation corectly?",
+      "createdAt": "2023-09-28T08:16:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1738687868",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nomy6",
+      "author": {
+        "login": "cure53"
+      },
+      "authorAssociation": "NONE",
+      "body": "Correct, by default, this would _likely_ not be prevented by DOMPurify as we only prevent clobbering if we detect actual collisions with existing stuff in the DOM. \r\n\r\nTo give you a reliable answer, I'd need more context, i.e. what the page looks like when DOMPurify is loaded / running etc.",
+      "createdAt": "2023-09-28T08:23:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1738697914",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nou_9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Let's not open up this holy war again LOL\r\n\r\nlol and holy war? (-some filtered out lines here-). You just saw above that different people talked about \"XSS\" and had different understanding of it (in this example, does it cover \"HTML injection\" or not) and they are professionals on the field. It is a problematic term and you can not ignore or laugh over that.\r\n\r\nBack to the issue - if there is adequate and effective defense against DOM clobbering additionally to avoid HTML injection in the first place, we should consider this as separate requirement. From only \"we need to fix it only by avoiding HTML injection\" point of view we don't need large part of Content-Security-Policy as well, but... we need.",
+      "createdAt": "2023-09-28T08:47:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1738731517",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5no4Uk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As I understood, the problem is in JavaScript code, how it calls some objects based on name and id's (anything else?) and the requirement should say, how to write JavaScript code correctly to avoid that.\r\n\r\nIf DOM clobbering mostly or only work on `id` and `name` HTML attributes, then as 2nd layer of defense it is possible to use filtering them out via DOMPurify. The question - is there realistic need to have id and name attributes for elements for content, which gets cleaned up by DOMPurify?",
+      "createdAt": "2023-09-28T09:13:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1738769700",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5npAy7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "yeah I am pretty sure `id` and `name` HTML attributes are generic and can't just be removed as a normal thing",
+      "createdAt": "2023-09-28T09:30:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1738804411",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ntaoH",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth Also, DOMPurify permits the use of the cid: protocol, which doesn't encode double quotes in URLs. As a result, an encoded double quote can be inserted, which will then be decoded when executed.\r\nSo, [injecting something like this](https://book.hacktricks.xyz/pentesting-web/xss-cross-site-scripting/dom-clobbering):\r\n`<a id=defaultAvatar><a id=defaultAvatar name=avatar href=\"cid:&quot;onerror=alert(1)//\">`\r\nwill make the HTML encoded `&quot;` to be decoded on runtime and escape from the attribute value to create the onerror event.\r\n\r\n",
+      "createdAt": "2023-09-28T20:26:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1739958791",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ntmjy",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This attack does get through DomPURIFY but it does not execute in the latest Chrome. Is there a specific browser that ...\r\n\r\n`<a href=\"cid:&quot;onerror=alert(1)//\">CLICK ME</a>`\r\n\r\n...will fire in?",
+      "createdAt": "2023-09-28T21:07:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740007666",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ntm32",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Also, DomPURIFY does not resolve the `&quot;` as you can see here:\r\n![Screenshot 2023-09-28 at 2 08 33 PM](https://github.com/OWASP/ASVS/assets/531465/113939da-1b0c-45b8-a4a7-278e38e877af)\r\n",
+      "createdAt": "2023-09-28T21:09:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740008950",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nttHN",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "HTML encoded characters are valid in HTML element attribute value - browser first decodes them and then executes. For the time they are in DOM, those are decoded.\r\n\r\nAs DOMpurify is second layer of defense for DOM clobbering, I would say the focus here is a bit in wrong place. The problem is in JavaScript code.",
+      "createdAt": "2023-09-28T21:33:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740034509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nt-VC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> HTML encoded characters are valid in HTML element attribute value - browser first decodes them and then executes. For the time they are in DOM, those are decoded.\r\n> \r\n> As DOMpurify is second layer of defense for DOM clobbering, I would say the focus here is a bit in wrong place. The problem is in JavaScript code.\r\n\r\nI agree with Elar.",
+      "createdAt": "2023-09-28T23:02:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740105026",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nvPZ1",
+      "author": {
+        "login": "hackvertor"
+      },
+      "authorAssociation": "NONE",
+      "body": "I think this can be fixed at the filtering level too by prefixing the name and id attributes. For example:\n\nInput: \n```html\n<img id=x name=y>\n```\nOutput:\n```html\n<img id=myApp-x name=myApp-y>\n```\n\nUsing hyphen ensures existing variable names won't be clobbered. By defining a prefix in DOM purify (currently doesn't support this) an application can be secure against most clobbering attacks. You'd probably want to protect against class clobbering too by prefixing CSS class names.",
+      "createdAt": "2023-09-29T07:32:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740437109",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nvToo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "But it is all more taking the likelihood and impact down, but not actually fixing the problematic code which causes it?",
+      "createdAt": "2023-09-29T07:43:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740454440",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nvX3q",
+      "author": {
+        "login": "hackvertor"
+      },
+      "authorAssociation": "NONE",
+      "body": "Well it really needs to fixed at the browser level but then you could break existing sites and you'd have to catch all variants:\r\n\r\n```html\r\n<a href='https://blah:&quot' id=x></a>\r\n<script>\r\nalert(x)\r\n</script>\r\n```",
+      "createdAt": "2023-09-29T07:58:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740471786",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oAKLk",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so @ImanSharaf I think there seems to be enough evidence here that this is a specific issue which needs to be addressed.\r\n\r\nSo the next question, what do you think the requirement needs to be. I think Jim mentioned some protections here https://github.com/OWASP/ASVS/issues/1733#issuecomment-1736616821 and Gareth mentioned some here https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740437109 but how do we make it into a real requirement?",
+      "createdAt": "2023-10-03T12:31:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1744872164",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oBfWR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me the point in the requirement should be: write your javascript correctly to avoid DOM clobbering.\r\n\r\nEven if you can do it with purify, it is second layer of defense and does not fix the source of the problem. Also the question is - can you always ask to purify the content? So it can be recommended as 2nd layer of defense if business logic allow purifying.",
+      "createdAt": "2023-10-03T15:31:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1745221009",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oEB5U",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "These are 8 common DOM Clobbering [patterns](https://domclob.xyz/domc_wiki/indicators/patterns.html):\r\n![image](https://github.com/OWASP/ASVS/assets/78227895/fd13e699-3903-405e-9ab4-8f85482719a0)\r\n \r\nI believe Gareth solution [#1733 (comment)](https://github.com/OWASP/ASVS/issues/1733#issuecomment-1740471786) works. \r\n\r\n[Here](https://domclob.xyz/domc_wiki/indicators/patterns.html#secure-patterns--guidelines) they have mentioned 4 mitigations: \r\n1. Explicit Variable Declarations -> could patch the patterns A, D, E, F, and H\r\n2. Strict Type Checking -> could patch the patterns B, C and G\r\n\r\nBy having these two in place we can patch all common patterns.\r\n\r\nAlso, it seems 4. Namespace Isolation -> can patch all common patterns by itself. ",
+      "createdAt": "2023-10-03T23:34:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1745886804",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oECTD",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Also, [here](https://domclob.xyz/domc_markups/list) you can test your browser to see if it is vulnerable to DOM Clobbering.",
+      "createdAt": "2023-10-03T23:37:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1745888451",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oFfBl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Here is some nice material as well: https://portswigger.net/web-security/dom-based/dom-clobbering",
+      "createdAt": "2023-10-04T07:10:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1746268261",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oP__b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so @ImanSharaf can you suggest the requirement text?",
+      "createdAt": "2023-10-05T14:28:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1749024731",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qkYUf",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is your opinion about this one? @tghosth \r\n\r\n> Ensure your application mitigates DOM clobbering by employing explicit variable declarations, strict type checking, avoiding document for global variables, and implementing namespace isolation.",
+      "createdAt": "2023-10-31T19:39:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1787921695",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qknsN",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"Verify that the application...\"\r\n\r\nI think the requirement should mention the word JavaScript. Or is it problem somewhere else as well? .. and should we worry that JavaScript is trademark and maybe we should use ECMAScript instead?\r\n\r\nWhat means \"avoiding document for global variables\"?",
+      "createdAt": "2023-10-31T20:29:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1787984653",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5q-cO3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the following incorporates @ImanSharaf's and @elarlang's points.\r\n\r\n> **Verify that the application** mitigates DOM clobbering **in JavaScript** by employing explicit variable declarations, performing strict type checking, **avoiding storing global variables on the document object**, and implementing namespace isolation.\r\n\r\nI am not super worried about the ASVS getting sued for trademark infringement 😄 \r\n\r\nI think we should also include this great site as a reference:\r\n\r\nhttps://domclob.xyz/domc_wiki/indicators/patterns.html#secure-patterns--guidelines\r\n",
+      "createdAt": "2023-11-06T12:54:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1794753463",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rBD8Z",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Buh, here lack of Englush and lack of knowledge on the topic maybe meet, but the position of \"in JavaScript\" maybe need to improved. If for others it is clear and understandable, then just ignore this comment.\r\n\r\n\"mitigates DOM clobbering in JavaScript\" - for me it gives feeling/understanding, that DOM clobbering happening only in JavaScript. Yes, the reason is there, but it requires DOM + JavaScript code.\r\n\r\nCan it start with?\r\n> Verify that the application mitigates in JavaScript against DOM clobbering by ...\r\n\r\nand one more thing or question - as we have also nodejs and server-side javascript, should we limit it to client-side javascript?",
+      "createdAt": "2023-11-06T16:44:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1795440409",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rChuJ",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": " > **Verify that the application** mitigates DOM clobbering **in JavaScript** by employing explicit variable declarations, performing strict type checking, **avoiding storing global variables on the document object**, and implementing namespace isolation.\r\n\r\nI believe this is a good one.",
+      "createdAt": "2023-11-06T18:21:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1795824521",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rZbeQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": " > Verify that the application **avoids** DOM clobbering **when using client-side JavaScript** by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation.\r\n\r\n@elarlang, better?",
+      "createdAt": "2023-11-08T12:48:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801828240",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rZcOc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, good for me.\r\n\r\nOther pieces:\r\n* category: \"client-side\" I guess\r\n* cwe - does not contain \"globbering\", so cwe-79 as abstract match\r\n* level 2",
+      "createdAt": "2023-11-08T12:50:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801831324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rZebL",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I was actually thinking about putting it into the defensive coding section....",
+      "createdAt": "2023-11-08T12:56:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801840331",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rZelA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Agree with CWE and level",
+      "createdAt": "2023-11-08T12:56:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801840960",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rZe36",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "https://github.com/OWASP/ASVS/blob/defensive_coding/5.0/en/0x18-V10-Malicious.md#v104-defensive-coding",
+      "createdAt": "2023-11-08T12:57:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801842170",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5rZgrC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I was actually thinking about putting it into the defensive coding section....\r\n\r\nok, let's put it there",
+      "createdAt": "2023-11-08T13:01:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801849538",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n55ou",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Right now Dom Clobbering is listed as \n\n_15.3.8 | Verify that the application avoids DOM clobbering when using client-side JavaScript by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation._\n\nWhich I think is the wrong location. I'd suggest moving it to V1.2 Injection Prevention or similar. \n\n",
+      "createdAt": "2025-04-20T03:34:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2816973358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6HVu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Which I think is the wrong location. I'd suggest moving it to V1.2 Injection Prevention or similar.\n\nThe defense for this is not encoding or escaping. I think it is in correct place.",
+      "createdAt": "2025-04-20T06:52:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2817029486",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6IPZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The JavaScript client defenses seem out of place for me. I'd like it moved somewhere else so it's not lost in a generic category when it's specific to client side defense.",
+      "createdAt": "2025-04-20T07:04:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2817033177",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6TBD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V1.2 and V1.3 certainly are not only client side defense so I don't think moving the requirement there would make much difference. \n\nWe have the web browser based chapter in V3 but I am not sure there is a good fit for it there.\n\nhttps://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V3-Web-Frontend-Security.md\n\n The nice thing about section V15 is that it deliberately gathers some more code level security considerations so the context should be clear.",
+      "createdAt": "2025-04-20T09:10:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2817077315",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7k-m",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I politely disagree. I think 15.3.6 and 15.3.8 are getting lost in a mass of other unrelated requirements.\n\n- _15.3.6\tVerify that JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals._\t\n- _15.3.8\tVerify that the application avoids DOM clobbering when using client-side JavaScript by employing explicit variable declarations, performing strict type checking, avoiding storing global variables on the document object, and implementing namespace isolation._\t\n\nI'd like to merge them in with 3.2, currently called \"Unintended Content Interpretation\" and includes only 2 requirements:\n\n\n- _3.2.1 Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields (such as Sec-Fetch-*) indicate it is the correct context, using the sandbox directive of the Content-Security-Policy header field or using the attachment disposition type in the Content-Disposition header field._\n- _3.2.2 Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of content such as HTML or JavaScript._\n\nThese four checks all deal with protecting the browser’s handling of content and its DOM from unintended execution or tampering. In other words, they’re all about ensuring that what gets rendered in the page - and the JavaScript environment around it - can’t be hijacked or polluted by malicious inputs.\n\nI suggest that we move them into 3.2 and rename it to \"Safe Browser Rendering\" or \"Safe Browser Rendering & DOM Integrity Protections\"\n\n",
+      "createdAt": "2025-04-21T00:28:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2817413030",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n9O09",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Unfortunately 15.3.6 is relevant at both the server side and also the client side so we cannot move that to V3. \n\nFor moving 15.3.8, it explicitly says client-side so @elarlang what do you think about that?",
+      "createdAt": "2025-04-21T07:34:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2817846589",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n9ycT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "**location for 15.3.6**\n\nThere is logic to propose it to the web frontend security chapter, as I did initially myself: https://github.com/OWASP/ASVS/issues/1733#issuecomment-1801831324\n\nWhat is the problem to solve here vs what is the problem we create with the move:\n* Problem to solve: not much, it just fits to 2 different chapters.\n* Problem to create: it is separate from other similar requirements, and then we create 2 places from which you need to look at them. Developers who need to build Web Frontend Security need to follow the requirements from the current section V15.3.\n\nFor reasons above, I _prefer_ not to move it.\n\n---\n\n**merge topic**\n\nAll those requirements are different test-cases to address different problems, I'm clearly _against_ merge proposal.\n\nMission to reduce the number of requirements can not sacrifice testability. Making one requirement to cover different problems does not solve anything; just not readable. Making one requirement more abstract makes it more vague, which was another problem declared in another thread, and does not really support that initiative.",
+      "createdAt": "2025-04-21T09:06:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2817992467",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n-A2t",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> merge topic\n\nI am pretty sure Jim means merging the requirements into that section, not merging the requirements into themselves\n\n> Problem to create: it is separate from other similar requirements, and then we create 2 places from which you need to look at them.\n\nI would have thought developers need to look in both places anyway, no? I don't see a scenario where this means they need to look at 2 sections instead of 1.",
+      "createdAt": "2025-04-21T09:41:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2818051501",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oC7TN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > merge topic\n> \n> I am pretty sure Jim means merging the requirements into that section, not merging the requirements into themselves\n\nExactly. These 4 requirements are very much handling the same category of defense and it's seems sensible to group them.",
+      "createdAt": "2025-04-21T19:35:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2819339469",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oNVXM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, misinterpreted the merge proposal.\n\nAs I said, I don't care too much where the requirement 15.3.8 is located, it fits to both places. It can be moved to V3.2 if there is desire and agreement to do so.\n\nBut I can not see the fit for 15.3.6 to be in that section.\n\n> I suggest that we move them into 3.2 and rename it to \"Safe Browser Rendering\" or \"Safe Browser Rendering & DOM Integrity Protections\"\n\nI'm quite confused from the section title proposal. If we move only 15.3.8, then I prefer we keep the title as it is.\n\n",
+      "createdAt": "2025-04-22T17:54:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2822067660",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oNeRZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My preference it to move 15.3.6 and 15.3.6 into 3.2.\n\n_15.3.6 Verify that JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals.\n3.2.2 Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or te_xtContent) to prevent unintended execution of content such as HTML or JavaScript.\n\nThese two are very related. They both address _unintended interpretation or execution of content_. Here is a breakdown of the details.\n\n| Aspect           | `15.3.6` – Prototype Pollution                            | `3.2.2` – Safe Text Rendering                                        |\n|------------------|-----------------------------------------------------------|----------------------------------------------------------------------|\n| **Theme**         | Structural tampering                                      | Visual/content injection                                             |\n| **Goal**          | Prevent unintended side-effects via JS inheritance        | Prevent unintended rendering or execution                           |\n| **Root Cause**    | Unsafe use of objects for dynamic properties              | Unsafe rendering methods                                             |\n| **Risk**          | Silent logic manipulation                                 | Visible/exploitable XSS                                              |\n| **Layer**         | JavaScript runtime logic, object structure                | Browser DOM rendering and HTML parsing                              |\n| **Outcome**       | Application behavior is altered globally via prototype    | Malicious content is executed rather than displayed                 |\n| **Common Thread** | Untrusted input being interpreted in ways it shouldn’t    | Untrusted input being interpreted in ways it shouldn’t              |\n\nBoth of these relate to unintended interpretation and attack-triggered behavior outside of intended scopes - I think it helps organize ASVS better.",
+      "createdAt": "2025-04-22T18:11:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2822104153",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oRO1Q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Ok, misinterpreted the merge proposal.\n\nIt's ok, I think I misinterpreted something you wrote above as well 🙃\n\n@jmanico regardless of the overall theme of the requirements, V3 explicitly says at the top:\n\n> The category focuses on requirements that protect against attacks that are executed via a web frontend for an application. \n\nPrototype pollution is relevant at both client-side and [also server-side](https://portswigger.net/web-security/prototype-pollution/server-side) and therefore does not fit into this category.\n\nCurrent summary:\n\n- We all agree that 15.3.8 DOM Clobbering can move to section V3.2.\n- @elarlang and I disagree about moving 15.3.6 prototype pollution since it is not only relevant to client-side/web frontend but also backend.",
+      "createdAt": "2025-04-23T05:19:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2823089488",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ob0wK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I did some research and I do see that server side prototype pollution is a big thing. I'm ok with this.\n\nBut small note before we close this out, many of these requirements in v3 are both server and client side.\n\n* V3.1.1 – Web Frontend Security Documentation\nWhy both? The server must emit correct headers and behavior, but the browser (client) must support and enforce them. Documentation also spans both perspectives.\n\n* V3.2.1 – Prevent Content in Wrong Context\nWhy both? Server must detect misuse (e.g., bad Sec-Fetch-* headers) and respond defensively, but browser behavior (rendering) is the ultimate execution surface.\n\n* V3.3.x – Cookie Setup\nWhy both? The server sets cookie attributes (Secure, HttpOnly, SameSite, etc.), but the browser enforces them.  This is always server side code that addresses this control.\n\n* V3.4.x – Browser Security Mechanism Headers\nWhy both? Headers like:\nContent-Security-Policy\nReferrer-Policy\nStrict-Transport-Security\nX-Content-Type-Options ...are emitted by the server but enforced by the browser.\n\n* 3.7.2 - Redirect\nThis is often enforced both server and client side\n\n",
+      "createdAt": "2025-04-24T00:46:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2825866250",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6od_OK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Josh already quoted it, I do it as well:\n\nV3 chapter text defines clearly:\n> The category focuses on requirements that protect against attacks that are executed via a web frontend for an application. These requirements will not be relevant for machine-to-machine solutions.\n\nMost of the requirements that apply for client side must be made on the server side, but that is not the point here. The point is, that those requirements are valid only when the _victim browser_ is involved in the attack scenario (and those requirements are not needed for example for machine-to-machine scenario).\n\nAre any of those listed requirements needed if there is no victim browser involved in the attack scenario? 3.7.2 can technically fit.",
+      "createdAt": "2025-04-24T05:31:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2826433418",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ofCH1",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "On 3.7.2, I would say that redirects are only really interesting where there are browsers...",
+      "createdAt": "2025-04-24T07:57:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2826707445",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ofheB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> On 3.7.2, I would say that redirects are only really interesting where there are browsers...\n\nWe have now #3040 and let's move that discussion there. Here, we should decide:\n* do we move DOM globbering to V3?\n* is there anything else to solve?",
+      "createdAt": "2025-04-24T08:46:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2826835841",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6okEyH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would like to move DOM clobbering into v3 if that works for you. I just like JavaScript requirements grouped as much as possible. \n\nThis is not a huge deal to me, just a suggestion if you like the idea.",
+      "createdAt": "2025-04-24T15:23:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2828029063",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6okUCK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I accidentally configured PR to close the issue, but I think everything we have agreement here is sorted out with the PR and the rest should stay like it is, or, it should have a separate issue, because then it is not about the DOM globbering issue anymore.",
+      "createdAt": "2025-04-24T15:42:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1733#issuecomment-2828091530",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-09-27T00:07:14Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 1733,
+  "state": "CLOSED",
+  "title": "15.3.8 / v5.0.be-10.4.2 DOM Clobbering",
+  "url": "https://github.com/OWASP/ASVS/issues/1733"
+}

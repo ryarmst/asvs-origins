@@ -1,0 +1,66 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1262783985",
+      "author": "jsulinski",
+      "previous_versions": [
+        {
+          "body": "Yes, that is the way it is currently written. However, some best practices suggest that the current session be expired and/or the session id renewed. Otherwise, there is no way to block access to attackers in the case of account compromise with the existing session (ie, remediated mitm, device access, etc). \r\n\r\n3.7.1 refers to re-authentication **before** sensitive transactions/account modifications. 3.3.3 refers to **after**. ",
+          "recorded_at": "2022-09-29T20:36:26Z"
+        },
+        {
+          "body": "Yes, that is the way it is currently written. However, some best practices suggest that the current session be expired and/or the session id renewed. Otherwise, there is no way to block access to attackers in the case of account compromise with the existing session (ie, mitm, device access, etc). \r\n\r\n3.7.1 refers to re-authentication **before** sensitive transactions/account modifications. 3.3.3 refers to **after**. ",
+          "recorded_at": "2022-09-29T20:33:58Z"
+        },
+        {
+          "body": "Yes, that is the way it is currently written. However, some best practices suggest that the current session be expired and/or the session id renewed. Otherwise, there is no way to block access to attackers in the case of account compromise. \r\n\r\n3.7.1 refers to re-authentication **before** sensitive transactions/account modifications. 3.3.3 refers to **after**. ",
+          "recorded_at": "2022-09-29T20:32:53Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1263153465",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "My proposal could to extend 3.2.1 with \"including re-authentication, and terminate previous session token\".\r\n\r\nWith regenerate session token there are sometimes mistakes like - instead of \"create new one, destroy previous one\" is used \"create new token, copy content from previous (but old one stays valid as well)\"",
+          "recorded_at": "2022-10-03T06:37:34Z"
+        },
+        {
+          "body": "My proposal could to extend 3.2.1 with \"including re-authentication, and terminate previous session token\".\r\n\r\nWith regenerate session token there are sometimes mistakes like - instead of create \"new one, destroy previous one\" is used \"create new token, copy content from previous (but old one stays valid as well)\"",
+          "recorded_at": "2022-09-30T06:20:03Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1266501844",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Some more comments.\r\n\r\n> The specific sensitive action that I'm concerned about is when a user utilizes an existing session to change their password.\r\n\r\nWith session takeover, when an attacker wants to change password for victim account, he/she need to know current valid password. Related requirements:\r\n* _V2.1.6 Verify that password change functionality requires the user's current and new password._\r\n* _V3.7.1 [MODIFIED] Verify the application requires re-authentication or secondary factor verification before allowing any sensitive transactions or account modifications._\r\n\r\nIf victim's account credentials are leaked, then there is hope only for MFA. Related requirements:\r\n* _V2.2.9 [ADDED, SPLIT FROM 2.2.4] Verify that multi-factor authentication is required, that is, the application uses either a multi-factor authenticator or a combination of single-factor authenticators._\r\n* _V2.2.10 [ADDED, SPLIT FROM 2.2.3] Verify that users are notified of suspicious authentication attempts. Suspicious authentication attempts may include successful or unsuccessful authentication from an unusual location or client, partially successful authentication with only one of multiple factors, successful or unsuccessful authentication after a long period of inactivity or successful authentication after several unsuccessful attempts._\r\n\r\nBefore closing the issue, I'm going to implement my own proposal, as it fixes 2 problems.",
+          "recorded_at": "2022-10-04T07:10:03Z"
+        },
+        {
+          "body": "Some more comments.\r\n\r\n> The specific sensitive action that I'm concerned about is when a user utilizes an existing session to change their password.\r\n\r\nWith session takeover, when an attacker wants to change password for victim account, he/she need to know current valid password. Related requirement:\r\n_V2.1.6 Verify that password change functionality requires the user's current and new password._\r\n\r\nIf victim's account credentials are leaked, then there is hope only for MFA. Related requirements:\r\n* _V2.2.9 [ADDED, SPLIT FROM 2.2.4] Verify that multi-factor authentication is required, that is, the application uses either a multi-factor authenticator or a combination of single-factor authenticators._\r\n* _V2.2.10 [ADDED, SPLIT FROM 2.2.3] Verify that users are notified of suspicious authentication attempts. Suspicious authentication attempts may include successful or unsuccessful authentication from an unusual location or client, partially successful authentication with only one of multiple factors, successful or unsuccessful authentication after a long period of inactivity or successful authentication after several unsuccessful attempts._\r\n\r\nBefore closing the issue, I'm going to implement my own proposal, as it fixes 2 problems.",
+          "recorded_at": "2022-10-04T07:07:30Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1386#issuecomment-1267283557",
+      "author": "jsulinski",
+      "previous_versions": [
+        {
+          "body": "> Verify the application generates a new session token on user authentication. \r\n\r\n> including re-authentication, and terminate previous session token\r\n\r\nIf you combine these two, you get:\r\n\r\n\"Verify the application generates a new session token on user authentication, including re-authentication, and terminate previous session token.\"\r\n\r\nWhile this is an improvement for security, the user experience is going to be pretty poor for applications that utilize separate sessions for mobile or desktop applications. \r\n\r\nIt might also be prudent to investigate whether many popular auth libraries support this functionality, as it will be a heavy lift getting the recommendation implemented otherwise. The one I know off-hand is that Devise does not support this without modifications.",
+          "recorded_at": "2022-10-04T16:48:30Z"
+        },
+        {
+          "body": "> Verify the application generates a new session token on user authentication. \r\n\r\n> including re-authentication, and terminate previous session token\r\n\r\nIf you combine these two, you get:\r\n\r\n\"Verify the application generates a new session token on user authentication, including re-authentication, and terminate previous session token.\"\r\n\r\nWhile this is an improvement for security, the user experience is going to be pretty poor, especially for applications that utilize separate sessions for mobile or desktop applications. \r\n\r\nIt might also be prudent to investigate whether many popular auth libraries support this functionality, as it will be a heavy lift getting the recommendation implemented otherwise. The one I know off-hand is that Devise does not support this without modifications.",
+          "recorded_at": "2022-10-04T16:47:54Z"
+        }
+      ]
+    }
+  ]
+}

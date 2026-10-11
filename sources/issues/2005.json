@@ -1,0 +1,355 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwOTExOTc1",
+    "is_bot": false,
+    "login": "deleterepo",
+    "name": "Jordan Sherman"
+  },
+  "body": "Developers sometimes mix up ID tokens and access tokens, especially in first-party scenarios, such as the case where both the client and the resource server, such as an API, is under their control. Using the ID token to make authorization decisions is a security issue, as there is no mechanism that ties the ID token to the API. Thus if an attacker steals the ID token in this case, they can use it to act as a legitimate client and call the API. For access tokens, these can be \"sender constrained\", such that the access token is bound to a specific sender. If an access token is stolen, an attacker can't necessarily use it to access the API since the token can be bound to the original client that requested it.\r\n \r\nFrom https://oauth.net/2/access-tokens/:\r\n\r\n> Access tokens may be either \"[bearer tokens](https://oauth.net/2/bearer-tokens/)\" or \"sender-constrained\" tokens. Sender-constrained tokens require the OAuth client to prove possession of a private key in some way in order to use the access token, such that the access token by itself would not be usable.\r\n\r\nAnother way of looking at this is the audience claim for each token. For the ID token, the intended recipient is the client, whereas for the access token, it's the RS.\r\n \r\nThat's a lot to digest 🤢, but the requirement itself can be as simple as this:\r\nVerify that the ID token is only used to prove that the user has been authenticated, and is not accepted as an authorization token by the Resource Server.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6GXXI2",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the ID token is only used to prove that the user has been authenticated, and is not accepted as an authorization token by the Resource Server.\r\n\r\nAnd the other way around? Verify that access tokens are not recognized as ID token?\r\n\r\nIn addition, would any requirement against [ID token / access token](https://www.rfc-editor.org/rfc/rfc9068#name-security-considerations) [cross-JWT confusion](https://www.rfc-editor.org/rfc/rfc8725.html#name-cross-jwt-confusion) make sense? (such as making sure that \"aud\" values are different for ID tokens and for access tokens?)\r\n",
+      "createdAt": "2024-07-27T22:32:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2254271030",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6GYlN2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Based on my understanding the `typ` must be checked for that and I have addressed the topic in the issue: https://github.com/OWASP/ASVS/issues/1967\r\n\r\nping @deleterepo @randomstuff - do you think/agree that checking the `typ` solves the issue or we need some additional requirement for that?",
+      "createdAt": "2024-07-28T17:37:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2254590838",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Gb_cQ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> do you think/agree that checking the typ solves the issue or we need some additional requirement for that?\r\n\r\nAFAIU, this is not really enough (not as simple as that) in general because OpenID ID token does not mandate any `typ`. As far as I understand, the type might be missing but a type might be present. It might be `JWT` (which is very general) or could be something else (?).\r\n\r\nIn addition, while RFC 9068 requires using `application/at+jwt` for JWT access tokens, it nos always used in practice.\r\n\r\nFor example, Keycloak currently uses `'typ': 'JWT'` for both access tokens and ID tokens.",
+      "createdAt": "2024-07-29T09:48:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2255484688",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6InfEb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The wording needs (a lot of) work, but maybe this as a direction:\r\n_Verify that the token is made for that type of usage before accepting it, such as an ID token for authentication and an access token for authorization without allowing cross-usage._",
+      "createdAt": "2024-08-15T19:33:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2292052251",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Iyifk",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "How about: (this is a bit too verbose but a step in the right direction I think)\n\nVerify that tokens are used according to their intended purpose: ID tokens should be used exclusively to prove authentication, while access tokens should be used strictly for delegation or authorization. Ensure that cross-usage between ID tokens and access tokens is explicitly disallowed.\n\n",
+      "createdAt": "2024-08-17T19:20:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2294949860",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IyyIH",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is not very directly actionnable but is it not very easy to make this more actionnable.\r\n\r\nWhat about:\r\n\r\n> Verify that ID tokens issued or consumed by the system cannot be used as JWT access tokens. The can for example be achieved by using different values for the `iss` claims (eg. opaque client_id for ID tokens and server URI for the access tokens).\r\n\r\n> Verify that JWT access tokens issued or consumed by the system cannot be used as ID tokens. This can for example be achieved by using different values for the `iss` claims (eg. opaque client_id for ID tokens and server URI for the access tokens).\r\n\r\nOr more detailed formulation:\r\n\r\n> When consuming an ID tokens, verify that JWT access tokens cannot be used instead. This can be achieved by requiring the usage of a nonce.\r\n\r\n> When consuming a JWT access tokens, verify ID token cannot be used instead. This can be achieved by requiring the presence of a suitable `scope` claim value.\r\n\r\n> When producing an ID token, verify that it cannot be interpreted as a JWT access token by the consuming application (HOW?)\r\n\r\n> When producing a JWT access token, verify that it cannot be interpreted as an ID token by the consuming application (HOW?)\r\n\r\nNone of these formulations cover the other cases of JWT token mixup.\r\n",
+      "createdAt": "2024-08-17T22:33:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2295013895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6JOpgE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this direction goes to the cheat sheet side, we are not limited to id-token and access token, but can add refresh token into the mix.\r\n\r\nAlso a bit the point of view - \"Verify that ID-token can not be used as access token\" vs \"Verify that only valid ID-token can be used as ID-token\".",
+      "createdAt": "2024-08-21T15:10:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2302318596",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MFClE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This discussion here covers also #2049 and I closed this one to find the solution here.\r\n\r\nProbably best requirement proposal was in  https://github.com/OWASP/ASVS/issues/2049#issuecomment-2336813309\r\n> Verify that only access tokens can be used for authorization, not other kinds of tokens like ID Tokens or Logout tokens.",
+      "createdAt": "2024-09-13T20:44:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2350131524",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MFEkS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My attempt for catch all requirement:\r\n> Verify that tokens (such as ID tokens, access tokens and refresh tokens) can only be used according to their intended purpose without allowing cross-usage between them.\r\n\r\nping @randomstuff @TobiasAhnoff - any (dis)agreements or feedback?",
+      "createdAt": "2024-09-13T20:50:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2350139666",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MJ-X6",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that tokens (such as ID tokens, access tokens and refresh tokens) can only be used according to their intended purpose without allowing cross-usage between them.\r\n\r\nI agree, but perhaps it would be good with one example (like @jmanico suggested) to make it clearer, even if it does not list all scenarios and technical details, it highlights (in my experience) the most common token-confusion, like this  \r\n\r\n>  Verify that tokens (such as ID tokens, access tokens and refresh tokens) can only be used according to their intended purpose without allowing cross-usage between them. In example ID tokens should be used exclusively to prove user authentication for the client.\r\n",
+      "createdAt": "2024-09-15T07:13:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2351425018",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKApK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can list examples if needed.\r\n\r\nGeneral feedback - the context for ASVS requirement is \"strong true of false requirement\" (must), but not recommendation (should). So the language must be more strict, instead of \"should be\" we can use \"can only be\" or \"must be\" (see also https://datatracker.ietf.org/doc/html/rfc2119).",
+      "createdAt": "2024-09-15T07:28:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2351434314",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKBZ-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For the section, the requirement is valid for OAuth and OIDC and may be more general _token_ validation, although it mentions OAuth-specific tokens as examples.",
+      "createdAt": "2024-09-15T07:33:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2351437438",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKTYF",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To make it more clear and \"actionable\". My proposal is to add the proposed requirement as a general token requirement to  to V3.5:\r\n> Verify that tokens (such as ID tokens, access tokens and refresh tokens) can only be used according to their intended purpose without allowing cross-usage between them. In example ID tokens cam only be used to prove user authentication for the client.\r\n\r\nping @TobiasAhnoff @deleterepo @tghosth @randomstuff ",
+      "createdAt": "2024-09-15T10:07:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2351511045",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MK6gX",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang \r\n\r\n> Verify that tokens (such as ID tokens, access tokens and refresh tokens) can only be used for their intended purpose. For example, ID tokens can only be used to prove user authentication for the client.\r\n\r\nThat would be my suggestion. I think this sounds like L3 to me. I would also tag @ryarmst as he is looking at V3.\r\n",
+      "createdAt": "2024-09-15T16:45:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2351671319",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MK7Ki",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is for sure L1. It's pretty much the same as checking that the token is in a valid time window (not expired).\r\n\r\nV3 as a category here is questionable, as these kinds of token-questions are not really session management questions.",
+      "createdAt": "2024-09-15T16:51:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2351674018",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MYDbB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would still like @ryarmst's input here as this is also a requirement that feels quite specific to OAuth",
+      "createdAt": "2024-09-17T09:54:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2355115713",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MY9dW",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For example, ID tokens can only be used to prove user authentication for the client.\r\n\r\nI think a counterexample would be more useful. « For example, ID tokens can cannot be accepted by resource servers. »\r\n\r\nOtherwise people won't notice that when they are using the ID token on the RS, they are not actually « only using the ID token to provide user authentication for the client ».",
+      "createdAt": "2024-09-17T11:04:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2355353430",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MZEPh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff - I think this is other and separate problem.\r\n\r\nBut to have smooth(er) and fast(er) development process, I'll add this requirement to V51 and OAuth chapter.",
+      "createdAt": "2024-09-17T11:14:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2355381217",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MhWzi",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement is now in the document via #2089 \r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.1.1** | [ADDED] Verify that tokens (such as ID tokens, access tokens and refresh tokens) can only be used for their intended purpose. For example, ID tokens can only be used to prove user authentication for the client. | ✓ | ✓ | ✓ |\r\n\r\nIf there are no immediate improvements needed, for me it seems we can close this issue.",
+      "createdAt": "2024-09-18T05:45:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2005#issuecomment-2357554402",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-07-27T20:35:03Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2005,
+  "state": "CLOSED",
+  "title": "Proposal/discussion: OIDC requirement about ID token only being used to prove that the user has been authenticated (edit: a general requirement for allowing only intended usage for tokens)",
+  "url": "https://github.com/OWASP/ASVS/issues/2005"
+}

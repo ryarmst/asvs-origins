@@ -1,0 +1,427 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEyMzcyOTY3",
+    "is_bot": false,
+    "login": "maizuka",
+    "name": "IZUKA Masahiro"
+  },
+  "body": "The requirement [2.2.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v22-general-authenticator-security) says that email is a weak (or restricted) authenticator as well as SMS.\r\n> Verify that the use of weak authenticators (such as SMS and email) is limited to secondary verification and transaction approval and not as a replacement for more secure authentication methods.\r\n\r\nHowever, [NIST 800-63B 5.1.3.1](https://pages.nist.gov/800-63-3/sp800-63b.html#sec5) doesn't allow email (and VOIP) as \"something you know\" authentication.\r\n> Methods that do not prove possession of a specific device, such as voice-over-IP (VOIP) or email, SHALL NOT be used for out-of-band authentication.\r\n\r\nAnd [their FAQ page](https://pages.nist.gov/800-63-FAQ/#q-b11) explains that email cannot be communication channel even in MFA. The FAQ page is referred from the two places: [V2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#control-objective) and [V2.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v22-general-authenticator-security).\r\n\r\n> NIST SP 800-63B does not allow the use of email as a channel for single or multi-factor authentication processes.\r\n\r\nI'm afraid that this requirement doesn't meet the NIST's guideline and that email should be prohibited for communicating tokens in authentication or password recovery.\r\n\r\nNote) In the discussion of [issue #559](https://github.com/OWASP/ASVS/issues/559) is related. It is confirmed that SMS to non-VOIP is one of the restricted authenticators but I cannot find how about email.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM411LsS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is not accurate per Jim Fenton the SP800-63 lead.\n\nJim says that authenticators may allow SMS for multi-factor (at AAL level 2) IF another stronger option is available and SMS is not the default option.",
+      "createdAt": "2021-08-21T15:34:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-903133970",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM411hP9",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you for information. I have questions.\n\n1) Does Jim say about restriction of SMS only to non-VOIP telephone numbers\nor even including to VOIP? Sorry but I don't know SMS can be sent to VOIP.\n\n2) Is it the same for email as SMS?\n\n2021年8月22日(日) 0:34 Jim Manico ***@***.***>:\n\n> This is not accurate per Jim Fenton the SP800-63 lead.\n>\n> Jim says that authenticators may allow SMS for multi-factor (at AAL level\n> 2) IF another stronger option is available and SMS is not the default\n> option.\n>\n> —\n> You are receiving this because you authored the thread.\n> Reply to this email directly, view it on GitHub\n> <https://github.com/OWASP/ASVS/issues/1046#issuecomment-903133970>, or\n> unsubscribe\n> <https://github.com/notifications/unsubscribe-auth/AC6MXZZGT2BZYKYQL3BCQETT57BQFANCNFSM5CR5GKIQ>\n> .\n> Triage notifications on the go with GitHub Mobile for iOS\n> <https://apps.apple.com/app/apple-store/id1477376905?ct=notification-email&mt=8&pt=524675>\n> or Android\n> <https://play.google.com/store/apps/details?id=com.github.android&utm_campaign=notification-email>\n> .\n>\n",
+      "createdAt": "2021-08-22T06:43:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-903222269",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM414xBI",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "@maizuka is correct; the restrictions in 5.1.3.1 apply to all out-of-band authenticators, including PSTN (voice and SMS). While SMS is acceptable for use under the guidelines for restricted authenticators, the phone number to which the SMS is delivered must not be a VoIP endpoint, because access to those endpoints doesn't prove possession of a specific physical device. It's possible to determine whether a phone number is a VoIP number using some commercial telephony API services.\r\n\r\nEmail is not acceptable for out-of-band authentication for the same reason that access to email does not prove possession of a specific physical device.\r\n\r\n(Please note that I am a contractor and not a NIST employee so this is not an official statement by NIST).",
+      "createdAt": "2021-08-23T19:51:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-904073288",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM415Bh7",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Thank you Jim! This is very helpful!\n",
+      "createdAt": "2021-08-23T21:19:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-904140923",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42rj0z",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you for information. It helps me understanding better.\r\n\r\nShould we consider updating the requirement [2.2.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v22-general-authenticator-security), so that email and SMS to a VoIP number are removed from restricted authenticators?",
+      "createdAt": "2021-09-11T11:12:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-917388595",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42r0Hq",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I instinctively think that is too much detail, but not unreasonably so. So sure, care to submit a PR?\n\n> On Sep 11, 2021, at 1:12 AM, IZUKA Masahiro ***@***.***> wrote:\n> \n> ﻿\n> Thank you for information. It helps me understanding better.\n> \n> Should we consider updating the requirement 2.2.2, so that email and SMS to a VoIP number are removed from restricted authenticators?\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n> Triage notifications on the go with GitHub Mobile for iOS or Android. \n",
+      "createdAt": "2021-09-11T18:46:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-917455338",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42sf2U",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@jmanico I have created a PR #1052. The change is based on these understandings.\r\n\r\n- Email or VOIP is not allowed.\r\n- One-time passwords with SMS or voice via PSTN is allowed as \"restricted\".\r\n- These can be used even in single-factor authentication, but must meet one of the requirements:\r\n  > Provide subscribers with meaningful information on the security risks of the RESTRICTED authenticator and availability of alternatives. It’s the user’s account and personal information, so we believe the user needs to participate in the risk determination process as well.\r\n- These can be used in 2FA (as a secondary verification or transaction approval) without offering alternate methods, because the other authenticator (e.g. user-chosen password) should meet AAL1.\r\n\r\nI guess it needs more changes to adjust the requirement or improve the explanation.",
+      "createdAt": "2021-09-12T13:16:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-917634452",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42skxD",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Your comments below demonstrate a very clear understanding and accurate read of NIST SP800-63. Thank you!\n",
+      "createdAt": "2021-09-12T15:10:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-917654595",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42s133",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "If you want to be consistent with SP 800-63B, the RESTRICTED authenticator requirements apply even if it is being used as the second factor at AAL2. It's necessary to offer an alternate physical authenticator, provide meaningful notice to the subscriber, etc.\r\n\r\nOf course, if the restricted authenticator is being used to provide additional risk reduction at AAL1 (in addition to a memorized secret), it's not necessary to do this because the memorized secret is sufficient.\r\n\r\nHope this makes it clearer.",
+      "createdAt": "2021-09-12T22:48:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-917724663",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42tbkG",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Should we extend this to include https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/block-legacy-authentication too?",
+      "createdAt": "2021-09-13T06:23:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-917879046",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42wBYp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Pardon @maizuka can you kindly give us a new PR based on comments from @jimfenton ?",
+      "createdAt": "2021-09-13T20:39:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-918558249",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42wCnv",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "...or just update the current pull request.\r\n\r\nBy the way, I should remind everyone that I'm not a NIST employee, and my comments aren't an official NIST statement.",
+      "createdAt": "2021-09-13T20:47:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-918563311",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42wjVO",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Should I create a new issue for https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/block-legacy-authentication @jmanico or not?",
+      "createdAt": "2021-09-14T00:38:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-918697294",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42xp7T",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I will think about AAL2 and Level 2. I don't have idea yet, so welcome if anyone posts suggestion.\r\n\r\nAnd I found a logical failure in the previous change. At AAL1, weak authenticators may be used as secondary verification because the other authenticator (e.g. memorized secrets) makes it sufficient, as well as restricted ones.",
+      "createdAt": "2021-09-14T09:38:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-918986451",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42zNU9",
+      "author": {
+        "login": "ike"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Perhaps something like the legend that used to be used in the Authentication section [V2.1](https://github.com/OWASP/ASVS/blob/v4.0.2/4.0/en/0x11-V2-Authentication.md#legend) could help make this distinction? I don't have the historical context for the change that removed this, so it may have been determined to be an anti-pattern.\r\n\r\n> | Mark | Description |\r\n> | :--: | :-- |\r\n> | | Not required |\r\n> | o | Recommended, but not required |\r\n> | ✓ | Required |\r\n\r\nIn the requirements, it looked like this:\r\n\r\n> | **2.8.6** | Verify physical single-factor OTP generator can be revoked in case of theft or other loss. Ensure that revocation is immediately effective across logged in sessions, regardless of location. |  | ✓ | ✓ | 613 | 5.2.1 |\r\n> | **2.8.7** | Verify that biometric authenticators are limited to use only as secondary factors in conjunction with either something you have and something you know. |  | o | ✓ | 308 | 5.2.3 |",
+      "createdAt": "2021-09-14T18:08:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-919393597",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42zdTd",
+      "author": {
+        "login": "ike"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I found issue https://github.com/OWASP/ASVS/issues/1022 which does talk about the optional notation and the context around removing it. I wonder if there are other ways to convey the graduated optionality of these AAL1 -> AAL2 requirements.",
+      "createdAt": "2021-09-14T19:40:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-919459037",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43MVza",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Let's please keep this discussion to 2.2.2 and open a new issue if you have a comment that is related to another issue. :)\r\n\r\nI suggest we change 2.2.2 to the following based on the comments above. I removed the part about secondary authentication and the last sentence. This seems a lot cleaner. cc @maizuka and @jimfenton does this look acceptable?\r\n\r\n| **2.2.2** | [MODIFIED] Verify that the weak authenticators (such as VOIP or email) are not used as authentication methods. Verify that the restricted authenticators using PSTN (such as phone or SMS-based OTPs directed to phones) are offered with alternate stronger methods. | ✓ | ✓ | ✓ | 304 | 5.2.10 |",
+      "createdAt": "2021-09-23T16:44:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-925981914",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NFWn",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "My suggestion:\r\n\r\n| **2.2.2** | [MODIFIED] Verify that weak authenticators (such as out-of-band authentication using VOIP or email) are not used as authentication methods. Verify that restricted authenticators (those using PSTN to deliver OTPs via phone or SMS) are offered only when alternate stronger methods are also offered and when the service provides information on their security risks to users. | ✓ | ✓ | ✓ | 304 | 5.2.10 |\r\n\r\nI guess the pull request has been merged, so a new one will be needed. It's helpful to link the pull request to this issue.",
+      "createdAt": "2021-09-23T21:31:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926176679",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NPRN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'll cut a new PR  with your suggestion and attach to this shortly. Thank you!",
+      "createdAt": "2021-09-23T22:48:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926217293",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NRr_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Any thoughts on this PR,  @maizuka ? ",
+      "createdAt": "2021-09-23T23:12:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926227199",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NR5d",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Perhaps something like the legend that used to be used in the Authentication section [V2.1](https://github.com/OWASP/ASVS/blob/v4.0.2/4.0/en/0x11-V2-Authentication.md#legend) could help make this distinction? I don't have the historical context for the change that removed this, so it may have been determined to be an anti-pattern.\r\n> \r\n> > Mark\r\n> > Description\r\n> > \r\n> > \r\n> > \r\n> > \r\n> > \r\n> > Not required\r\n> > \r\n> > \r\n> > o\r\n> > Recommended, but not required\r\n> > \r\n> > \r\n> > ✓\r\n> > Required\r\n> \r\n> In the requirements, it looked like this:\r\n> \r\n> > | **2.8.6** | Verify physical single-factor OTP generator can be revoked in case of theft or other loss. Ensure that revocation is immediately effective across logged in sessions, regardless of location. |  | ✓ | ✓ | 613 | 5.2.1 |\r\n> > | **2.8.7** | Verify that biometric authenticators are limited to use only as secondary factors in conjunction with either something you have and something you know. |  | o | ✓ | 308 | 5.2.3 |\r\n\r\nCan you move this to a new issue or suggestion? I want to briefly resolve the OP's issue here and close it. :)",
+      "createdAt": "2021-09-23T23:15:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926228061",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NXtD",
+      "author": {
+        "login": "ike"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico -- I totally could, but I think I was misunderstanding the change @maizuka was trying to make. I thought he needed some kind of optionality _within_ each requirement level, which now seems like not the case. I think #1022 has already determined that non-checkmarks are an antipattern in the level requirement box. Long way to say: I'm good leaving this alone if you are?",
+      "createdAt": "2021-09-24T00:11:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926251843",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43NZC0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "😎 ",
+      "createdAt": "2021-09-24T00:27:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926257332",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Na_q",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you all. And sorry for late action. I think the new suggestion is ok.\r\n\r\nI agree with @jmanico that the sentence about secondary verifications will be removed, because the number of valid authentication factor should be defined in another requirement. (But I couldn't find it for Level2/AAL2. Does it need a new one?)\r\n\r\nMy another suggestion to try making it clear is below, but this makes it verbose or lack of definition, so not needed.\r\n\r\nVerify that weak authenticators (...) are not used as *valid* authentication methods.\r\n\r\nI also agree with @jimfenton's suggestion since the usage of the words will get much clearer.\r\n\r\nComment) I want some longer time of suggestions to be determined, because we live in other time zones and can only work during time in absence of the salary job.",
+      "createdAt": "2021-09-24T00:51:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926265322",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Njb0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The initial request in this issue has been solved and merged.",
+      "createdAt": "2021-09-24T02:42:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1046#issuecomment-926299892",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-08-21T14:40:58Z",
+  "labels": [],
+  "number": 1046,
+  "state": "CLOSED",
+  "title": "2.2.2 allows email authenticators while NIST 800-63 does not",
+  "url": "https://github.com/OWASP/ASVS/issues/1046"
+}

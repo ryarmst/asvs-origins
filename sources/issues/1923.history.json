@@ -1,0 +1,156 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2053957053",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Hi, @sohsatoh ,\r\n\r\nwe had a long discussion over it here: https://github.com/OWASP/ASVS/issues/1772\r\n\r\nWhat to keep in mind - from the ASVS requirement structure point of view:\r\n* The requirement should be independent and \"usable out of context\" - no references to other requirements\r\n* The requirement must be positive (what must be done) not negative (what must not be done)\r\n\r\nI agree that we should abstract the precise limit out with the actual goal - to provide defense against Denial of Service attack. Also, as I pointed out in #1772, the requirement 2.1.2 contains 2 parts - one is for password length for end-user and another is for storage. The storage part is section 2.4:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.1** | [MODIFIED] Verify that one of the following password hashing functions is used when storing the user's password for the application: argon2id, scrypt, bcrypt or PBKDF2. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.3** | [MODIFIED] Verify that if PBKDF2 is used, the iteration count should be a minimum of 1,300,000 iterations with PBKDF2-HMAC-SHA1, a minimum of 600,000 iterations using PBKDF2-HMAC-SHA256, or with a minimum of 210,000 iterations with PBKDF2-HMAC-SHA512. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.4** | [MODIFIED] Verify that if bcrypt is used, the work factor is a minimum of 10 and password size is limited to 72-bytes due to bcrypt's input limit. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.6** | [ADDED] Verify that if argon2id is used, there should be a minimum configuration of 19 MiB of memory, an iteration count of 2, and 1 degree of parallelism. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.7** | [ADDED] Verify that if scrypt is used, the configuration should be a minimum work factor of (2^17), a minimum block size of 8 (1024 bytes), and a parallelization parameter of 1. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nInstead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message (not a wording proposal!) \"Verify that accepted method is used, it is used and configured according to the latest spec or recommendations, such as to have enough iterations and limitation to max input length against denial of service attacks\". Then it is more future-proof as well. We should modify the current 2.4.1 for that.\r\n\r\nOne option is also to provide those limits in the chapter text: \"When releasing the ASVS version v5.0, accepted limits per used function were ...\" + links to resources, from where to get the latest ones.\r\n\r\nping @tghosth @jmanico ",
+          "recorded_at": "2024-04-14T08:15:47Z"
+        },
+        {
+          "body": "Hi, @sohsatoh ,\r\n\r\nwe had a long discussion over it here: https://github.com/OWASP/ASVS/issues/1772\r\n\r\nWhat to keep in mind - from the ASVS requirement structure point of view:\r\n* The requirement should be independent and \"usable out of context\" - no references to other requirements\r\n* The requirement must be positive (what must be done) not negative (what must not be done)\r\n\r\nI agree that we should abstract the precise limit out with the actual goal - to provide defense against Denial of Service attack. Also, as I pointed out in #1772, the requirement 2.1.2 contains 2 parts - one is for password length for end-user and another is for storage. The storage part is section 2.4:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.1** | [MODIFIED] Verify that one of the following password hashing functions is used when storing the user's password for the application: argon2id, scrypt, bcrypt or PBKDF2. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.3** | [MODIFIED] Verify that if PBKDF2 is used, the iteration count should be a minimum of 1,300,000 iterations with PBKDF2-HMAC-SHA1, a minimum of 600,000 iterations using PBKDF2-HMAC-SHA256, or with a minimum of 210,000 iterations with PBKDF2-HMAC-SHA512. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.4** | [MODIFIED] Verify that if bcrypt is used, the work factor is a minimum of 10 and password size is limited to 72-bytes due to bcrypt's input limit. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.6** | [ADDED] Verify that if argon2id is used, there should be a minimum configuration of 19 MiB of memory, an iteration count of 2, and 1 degree of parallelism. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.7** | [ADDED] Verify that if scrypt is used, the configuration should be a minimum work factor of (2^17), a minimum block size of 8 (1024 bytes), and a parallelization parameter of 1. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nInstead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message (not a wording proposal!) \"Verify that accepted method is used, it is used and configured according to the latest spec or recommendations, such as to have enough iterations and limitation to max input length against denial of service attacks\". Then it is more future-proof as well. We should modify the current 2.4.1 for that.\r\n\r\nping @tghosth @jmanico ",
+          "recorded_at": "2024-04-14T08:13:31Z"
+        },
+        {
+          "body": "Hi, @sohsatoh ,\r\n\r\nwe had a long discussion over it here: https://github.com/OWASP/ASVS/issues/1772\r\n\r\nWhat to keep in mind - from the ASVS requirement structure point of view:\r\n* The requirement should be independent and \"usable out of context\" - no references to other requirements\r\n* The requirement must be positive (what must be done) not negative (what must not be done)\r\n\r\nI agree that we should abstract the precise limit out with the actual goal - to provide defense against Denial of Service attack. Also, as I pointed out in #1772, the requirement 2.1.2 contains 2 parts - one is for password length for end-user and another is for storage. The storage part is section 2.4:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.4.1** | [MODIFIED] Verify that one of the following password hashing functions is used when storing the user's password for the application: argon2id, scrypt, bcrypt or PBKDF2. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.2** | [DELETED] | | | | | |\r\n| **2.4.3** | [MODIFIED] Verify that if PBKDF2 is used, the iteration count should be a minimum of 1,300,000 iterations with PBKDF2-HMAC-SHA1, a minimum of 600,000 iterations using PBKDF2-HMAC-SHA256, or with a minimum of 210,000 iterations with PBKDF2-HMAC-SHA512. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.4** | [MODIFIED] Verify that if bcrypt is used, the work factor is a minimum of 10 and password size is limited to 72-bytes due to bcrypt's input limit. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.5** | [DELETED] | | | | | |\r\n| **2.4.6** | [ADDED] Verify that if argon2id is used, there should be a minimum configuration of 19 MiB of memory, an iteration count of 2, and 1 degree of parallelism. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n| **2.4.7** | [ADDED] Verify that if scrypt is used, the configuration should be a minimum work factor of (2^17), a minimum block size of 8 (1024 bytes), and a parallelization parameter of 1. | | ✓ | ✓ | 916 | 5.1.1.2 |\r\n\r\nInstead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message (not a wording proposal!) \"Verify that accepted method is used, it is used and configured according to the latest spec or recommendations, such as to have enough iterations and limitation to max input length against denial of service attacks\". Then it is more future-proof as well. We should modify the current 2.4.1 for that.\r\n\r\nping @tghosth @jmanico ",
+          "recorded_at": "2024-04-14T08:09:26Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2054555949",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Elar, this comment from the OP concerns password length and is related but separate from 2.4.x. Can you please separate your password storage comments into a separate issues, please?",
+          "recorded_at": "2024-04-15T02:54:47Z"
+        },
+        {
+          "body": "Elar, this comment from the OP concerns password length and is related but separate from 2.4.x. Can you please separate your password storage comments into separate issues?",
+          "recorded_at": "2024-04-15T02:54:33Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060610184",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> I would rather see this requirement here with the other password rules. I do not think the password storage section is the right place add a max-length password rule.\r\n\r\nI try to be patient... but well, I'm not.\r\n\r\n@jmanico , please, FACTS and arguments!\r\n\r\nFirst, why do we need this (max length for user-chosen passwords) requirement at all, and what risk it mitigates? Do we need this requirement? And if we need to, then we going to choose the correct section for that, based on the area which is impacted (password hashing functionality in this case).\r\n\r\nNote: I'm ok to keep the requirement itself as part of the current requirement, the main priority is to clarify the need for that based on facts. At the moment it seems to be too random.",
+          "recorded_at": "2024-04-17T07:52:31Z"
+        },
+        {
+          "body": "> I would rather see this requirement here with the other password rules. I do not think the password storage section is the right place add a max-length password rule.\r\n\r\nI try to be patient... but well, I'm not.\r\n\r\n@jmanico , please, FACTS and arguments!\r\n\r\nFirst, why do we need this (max length for user-chosen passwords) requirement at all, and what risk it mitigates? Do we need this requirement? And if we need to, then we going to choose the correct section for that, based on the area which is impacted (password hashing functionality in this case).\r\n\r\nNote: I'm ok to keep the requirements itself as part of the current requirement, the main priority is to clarify the need for that based on facts. At the moment it seems to be too random.",
+          "recorded_at": "2024-04-17T07:52:13Z"
+        },
+        {
+          "body": "> I would rather see this requirement here with the other password rules. I do not think the password storage section is the right place add a max-length password rule.\r\n\r\nI try to be patient... but well, I'm not.\r\n\r\n@jmanico , please, FACTS and arguments!\r\n\r\nFirst, why do we need this (max length for user-chosen passwords) requirement at all, and what risk it mitigates? Do we need this requirement? And if we need to, then we going to choose the correct section for that, based on the area which is impacted (password hashing functionality in this case).",
+          "recorded_at": "2024-04-17T07:50:11Z"
+        },
+        {
+          "body": "> I would rather see this requirement here with the other password rules. I do not think the password storage section is the right place add a max-length password rule.\r\n\r\nI try to be patient... but well, I'm not.\r\n\r\n@jmanico , please, arguments!\r\n\r\nFirst, why do we need this (max length for user-chosen passwords) requirement at all, and what risk it mitigates? Do we need this requirement? And if we need to, then we going to choose the correct section for that, based on the area which is impacted (password hashing functionality in this case).",
+          "recorded_at": "2024-04-17T07:48:40Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2060724135",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> There is no reason in the world to allow a regular password of longer than 128\r\n\r\nIt is not a reason to have a requirement in the ASVS.\r\n\r\n.. and we reach close to my proposal:\r\n> Instead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message (not a wording proposal!) \"Verify that accepted method is used, it is used and configured according to the latest spec or recommendations, such as to have enough iterations and limitation to max input length against denial of service attacks\". \r\n\r\nDenial of Service attack is just one thing to address with max-length, with bcrypt the issue is truncation.",
+          "recorded_at": "2024-04-17T08:46:16Z"
+        },
+        {
+          "body": ".. and we reach close to my proposal:\r\n> Instead of giving rules and limits for every used and accepted hashing function, we should abstract out the entire section with the message (not a wording proposal!) \"Verify that accepted method is used, it is used and configured according to the latest spec or recommendations, such as to have enough iterations and limitation to max input length against denial of service attacks\". \r\n\r\nDenial of Service attack is just one thing to address with max-length, with bcrypt the issue is truncation.",
+          "recorded_at": "2024-04-17T08:43:19Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2061542989",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "https://www.sjoerdlangkemper.nl/2021/07/02/long-password-denial-of-service/ is a solid argument. I am ok with dropping this requirement.",
+          "recorded_at": "2024-04-17T15:28:14Z"
+        },
+        {
+          "body": "There are many examples in the past where websites using PBKDF2 and similar were DOS'able (easily) via unlimited size passwords. \r\n\r\nCitation: https://www.helpnetsecurity.com/2013/09/17/too-long-passwords-can-dos-some-servers/",
+          "recorded_at": "2024-04-17T15:26:25Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2488788613",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Elar pointed out that section 2.4 is now empty aside from the requirement created in this issue and that the requirement doesn't really fit anyway.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **[2.4.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md#v24-credential-storage)** | [ADDED, SPLIT FROM 2.1.2] Verify that the application is protected against a denial of service attack caused by processing an overly long password. | | ✓ | ✓ | |\r\n\r\nThe background is that previously we mandated a maximum password length but didn't really explain why and in reality the reason is very algorithmic specific.\r\n\r\nGiven that the rest of this section has disappeared, I would recommend that we merge this back into the original requirement but in a clearer way as follows:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | [MODIFIED] Verify that passwords of at least 64 characters are permitted but that the application is protected against a denial of service attack caused by processing an overly long password. | ✓ | ✓ | ✓ | 521 |\r\n\r\nWhat do people think?",
+          "recorded_at": "2024-11-20T14:51:37Z"
+        },
+        {
+          "body": "Elar pointed out that section 2.4 is now empty aside from the requirement created in this issue and that the requirement doesn't really fit anyway.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **2.4.6** | [ADDED, SPLIT FROM 2.1.2] Verify that the application is protected against a denial of service attack caused by processing an overly long password. | | ✓ | ✓ | |\r\n\r\nThe background is that previously we mandated a maximum password length but didn't really explain why and in reality the reason is very algorithmic specific.\r\n\r\nGiven that the rest of this section has disappeared, I would recommend that we merge this back into the original requirement but in a clearer way as follows:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | [MODIFIED] Verify that passwords of at least 64 characters are permitted but that the application is protected against a denial of service attack caused by processing an overly long password. | ✓ | ✓ | ✓ | 521 |\r\n\r\nWhat do people think?",
+          "recorded_at": "2024-11-20T14:51:12Z"
+        },
+        {
+          "body": "Section 2.4 is now empty aside from the requirement created in this issue.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **2.4.6** | [ADDED, SPLIT FROM 2.1.2] Verify that the application is protected against a denial of service attack caused by processing an overly long password. | | ✓ | ✓ | |\r\n\r\nThe background is that previously we mandated a maximum password length but didn't really explain why and in reality the reason is very algorithmic specific.\r\n\r\nGiven that the rest of this section has disappeared, I would recommend that we merge this back into the original requirement but in a clearer way as follows:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **2.1.2** | [MODIFIED] Verify that passwords of at least 64 characters are permitted but that the application is protected against a denial of service attack caused by processing an overly long password. | ✓ | ✓ | ✓ | 521 |\r\n\r\nWhat do people think?",
+          "recorded_at": "2024-11-20T14:50:25Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2495640605",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Perhaps a small change to 6.6.2?\r\n\r\n6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force **and denial-of-service** attacks more challenging. |   | ✓ | ✓\r\n",
+          "recorded_at": "2024-11-23T20:09:07Z"
+        },
+        {
+          "body": "Perhaps a small change to 6.6.2?\r\n\r\n6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force and denial-of-service attacks more challenging. |   | ✓ | ✓\r\n",
+          "recorded_at": "2024-11-23T20:08:53Z"
+        },
+        {
+          "body": "Perhaps a small change to 6.6.2?\r\n\r\n# | Description | L1 | L2 | L3 | CWE\r\n-- | -- | -- | -- | -- | --\r\n6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force and denial-of-service attacks more challenging. |   | ✓ | ✓\r\n-- | -- | -- | -- | --\r\n",
+          "recorded_at": "2024-11-23T20:08:45Z"
+        },
+        {
+          "body": "Perhaps a small change to 6.6.2?\r\n\r\n\r\n# | Description | L1 | L2 | L3 | CWE\r\n6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force and denial-of-service attacks more challenging. |   | ✓ | ✓\r\n-- | -- | -- | -- | --\r\n",
+          "recorded_at": "2024-11-23T20:08:10Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2496075248",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "> Perhaps a small change to 6.6.2?\r\n> \r\n> 6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force **and denial-of-service** attacks more challenging. |   | ✓ | ✓\r\n\r\nIt would be nice to integrate it into a single requirement but I don't love the idea because I think that the parameter settings are a little different to the DoS problem which is more about how the hashing function is used.\r\n\r\nI would suggest instead a modification of @elarlang's suggestion:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **6.6.5** | [ADDED, SPLIT FROM 2.1.2] Verify that, where computationally intensive hashing functions are used (such as with passwords), the application is protected against overly long input leading to a denial of service condition. This could be done by limiting input length or by performing an initial hash using a fast algorithm to reduce the size of the input to a standard length before it is passed to the computationally intensive function. | | ✓ | ✓ | |",
+          "recorded_at": "2024-11-24T15:44:23Z"
+        },
+        {
+          "body": "> Perhaps a small change to 6.6.2?\r\n> \r\n> 6.6.2 | [MODIFIED, MOVED FROM 2.4.1, MERGED FROM 2.4.3, 2.4.4] Verify that passwords are stored using an approved, computationally intensive, hashing algorithm with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force **and denial-of-service** attacks more challenging. |   | ✓ | ✓\r\n\r\nIt would be nice to integrate it into a single requirement but I don't love the idea because I think that the parameter settings are a little different to the DoS problem which is more about how the hashing function is used.\r\n\r\nI would suggest instead a modification of @elarlang's suggestion for mo:\r\n\r\n\"__\"\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **6.6.5** | [ADDED, SPLIT FROM 2.1.2] Verify that, where computationally intensive hashing functions are used (such as with passwords), the application is protected against overly long input leading to a denial of service condition. This could be done by limiting input length or by performing an initial hash using a fast algorithm to reduce the size of the input to a standard length before it is passed to the computationally intensive function. | | ✓ | ✓ | |",
+          "recorded_at": "2024-11-24T15:44:09Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1923#issuecomment-2508107810",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I think pre-hashing should never be necessary if you use a modern password hashing algorithm. And from the recent research I have read, even very very long passwords do not cause a performance problem, that only shows up on \"legacy\" password cracking algorithms or bad implementations. \r\n\r\nThe main case study we see is the PBKDF2 issue from Django for performance. But that was really a implementation problem of the algorithm, not a developer problem.\r\n\r\nSo I suggest we just say, use a modern password hashing algorithm, suggest Argon2id in the notes somewhere, and call it a day.\r\n",
+          "recorded_at": "2024-11-29T16:22:05Z"
+        },
+        {
+          "body": "I think this is a dangerous path. Pre-hashing should never be necessary if you use a modern password hashing algorithm. And from the recent research I have read, even very very long passwords do not cause a performance problem, that only shows up on \"legacy\" password cracking algorithms or bad implementations. \r\n\r\nThe main case study we see is the PBKDF2 issue from Django for performance. But that was really a implementation problem of the algorithm, not a developer problem.\r\n\r\nSo I suggest we just say, use a modern password hashing algorithm, suggest Argon2id in the notes somewhere, and call it a day.\r\n",
+          "recorded_at": "2024-11-29T16:21:35Z"
+        }
+      ]
+    }
+  ]
+}

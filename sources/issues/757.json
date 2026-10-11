@@ -1,0 +1,261 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQwMDI3NjU=",
+    "is_bot": false,
+    "login": "csfreak92",
+    "name": "Ralph Andalis"
+  },
+  "body": "ASVS 4.0 - 2.9.2 verification requirement is:\r\n\r\n`Verify that the challenge nonce is at least 64 bits in length, and statistically unique or unique over the lifetime of the cryptographic device.`\r\n\r\nIt seems this verification requirement is better to be for an L3 only requirement as it is kind of overkill for L2 since the assessor/tester/auditor would need verification details for manufacturer of HSM or TPM (cryptographic devices). If removing it from L2 is not agreeable, maybe we can move it to \"Recommended but not required\" (o legend) in L2 instead of (✓ legend) \"Required\"?\r\n\r\nThis is related to Pull Request #754.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyNDA3NTg2NA==",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "But how about the part where this requirement says, \"statistically unique or unique over the lifetime of the cryptographic device\"? This is asking the assessor to contact the HSM or TPM manufacturers to know the lifetime of the cryptographic device and how unique each of those challenge nonces are. Unless \"cryptographic device\" term here means different and nothing to deal about HSMs and TPMs? ",
+      "createdAt": "2020-05-05T14:04:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-624075864",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0ODIxMzg2Ng==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is a breaking change, so 4.1",
+      "createdAt": "2020-06-23T14:50:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-648213866",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY1NzgwODQzOA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A nonce is for deduplication, so asking for it to be unique is right on. But why 64 bits? That means your number of messages to protect is 2^64 - that bit space just needs to be a big as the message space, 64 bits is a lot for most apps (but not enough for others)",
+      "createdAt": "2020-07-13T21:42:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-657808438",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc3MDcwNQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I personally like this requirement as is, as its basic crypto. HSM issues aside, I am going to close this. If you would like to readdress this please re-open. Nonces need to be unique.",
+      "createdAt": "2021-03-12T21:39:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-797770705",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RpB6q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am reopening this issue.\r\n\r\nIt seems to be that the PR was merged to move this to L3 but I do not believe there was significant consensus on doing that. \r\n\r\nPersonally it seems like it goes well together with the existing requirements in the section which are L2 and I don't see a justification for making it L3. This should not be difficult information to ascertain although I am open to persuading...\r\n\r\nOtherwise, I would be inclined to revert this change.\r\n\r\n@csfreak92 what do you think?\r\n\r\n@elarlang @jmanico any other thoughts?\r\n\r\nI am reproducing the whole section as it is now below for reference:\r\n\r\n\r\n## V2.9 Cryptographic Verifier\r\n\r\nCryptographic security keys are smart cards or FIDO keys, where the user has to plug in or pair the cryptographic device to the computer to complete authentication. Verifiers send a challenge nonce to the cryptographic devices or software, and the device or software calculates a response based upon a securely stored cryptographic key.\r\n\r\nThe requirements for single-factor cryptographic devices and software, and multi-factor cryptographic devices and software are the same, as verification of the cryptographic authenticator proves possession of the authentication factor.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.9.1** | Verify that cryptographic keys used in verification are stored securely and protected against disclosure, such as using a Trusted Platform Module (TPM) or Hardware Security Module (HSM), or an OS service that can use this secure storage. | | ✓ | ✓ | 320 | 5.1.7.2 |\r\n| **2.9.2** | [LEVEL L2 > L3] Verify that the challenge nonce is at least 64 bits in length, and statistically unique or unique over the lifetime of the cryptographic device. | | | ✓ | 330 | 5.1.7.2 |\r\n| **2.9.3** | Verify that approved cryptographic algorithms are used in the generation, seeding, and verification. | | ✓ | ✓ | 327 | 5.1.7.2 |",
+      "createdAt": "2023-01-03T12:24:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1369710250",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RpLd-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I leave the content part on you.\r\n\r\nIt just proves we need clear and strict rule - no PR before it is confirmed in related issue. Also PR is only for get the changes into repo, not for discussion and we should not have \"hanging PR\"-s, as those cause merge problems (just detected one today).",
+      "createdAt": "2023-01-03T13:09:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1369749374",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RqYjl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I merged over a dozed PR's last night, hopefully only the right ones. If I did a bad merge let me know please.",
+      "createdAt": "2023-01-03T17:56:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1370065125",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R8uWG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder 2 weeks @tghosth to revert this if there is no response from @csfreak92 ",
+      "createdAt": "2023-01-08T16:18:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1374872966",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R8uWL",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nSunday, January 22, 2023 12:00 AM (GMT+01:00)\r\n> @tghosth to revert this if there is no response from @csfreak92",
+      "createdAt": "2023-01-08T16:18:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1374872971",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R9lvz",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @set-reminder 2 weeks @tghosth to revert this if there is no response from @csfreak92\r\n\r\nHi @tghosth, I would like to clarify which one requires a reply for me for this issue? Was it about 2.9.2 moving it from L2 to L3? If that is, then I am good with it and have no objections as I think this is the right level for it. ",
+      "createdAt": "2023-01-09T04:38:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1375099891",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R9lwU",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nMonday, January 23, 2023 12:00 AM (GMT+01:00)\r\n> @tghosth to revert this if there is no response from @csfreak92",
+      "createdAt": "2023-01-09T04:38:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1375099924",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TaGEJ",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/757#issuecomment-1374872966) @tghosth\n> @tghosth to revert this if there is no response from @csfreak92",
+      "createdAt": "2023-01-21T23:00:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1399349513",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TbLM5",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/757#issuecomment-1375099891) @csfreak92\n> @tghosth to revert this if there is no response from @csfreak92",
+      "createdAt": "2023-01-22T23:00:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1399632697",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c8LLK",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Hi @tghosth, I would like to clarify which one requires a reply for me for this issue? Was it about 2.9.2 moving it from L2 to L3? If that is, then I am good with it and have no objections as I think this is the right level for it.\r\n\r\nSorry @csfreak92, I was saying that I think this requirement should be L2 because:\r\n\r\n> Personally it seems like it goes well together with the existing requirements in the section which are L2 and I don't see a justification for making it L3. This should not be difficult information to ascertain although I am open to persuading...\r\n\r\nDo you strongly disagree that it should be L2? ",
+      "createdAt": "2023-05-23T12:59:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1559278282",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e7nT5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1663 to revert this",
+      "createdAt": "2023-06-15T09:20:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/757#issuecomment-1592685817",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2020-05-04T22:51:20Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 757,
+  "state": "CLOSED",
+  "title": "2.9.2 - [Clarification/For Discussion] remove from L2 requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/757"
+}

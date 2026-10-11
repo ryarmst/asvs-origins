@@ -1,0 +1,349 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "edit: \r\n* proposal for v4.0.3 2020-02-23 is in: https://github.com/OWASP/ASVS/issues/722#issuecomment-590039185\r\n* proposal for v5.0 2023-12-13 is in: https://github.com/OWASP/ASVS/issues/722#issuecomment-1853461657\r\n\r\n\r\n> V14.4.7 Verify that a suitable X-Frame-Options or Content-Security-Policy: frame-ancestors header is in use for sites where content should not be embedded in a third-party site.\r\n\r\n## X-Frame-Options\r\nAs `X-Frame-Options` is obsolete (or will be?), we should use only `Content-Security-Policy: frame-ancestors`.\r\n\r\n- CSP2 <https://www.w3.org/TR/CSP2/#frame-ancestors-and-frame-options>\r\n- CSP3 <https://www.w3.org/TR/CSP3/#frame-ancestors-and-frame-options>\r\n\r\ncaniuse.com:\r\n- <https://caniuse.com/#search=ancestors>\r\n- <https://caniuse.com/#search=x-frame-options>\r\n\r\n## \"is in use for sites\"\r\nClassical problem - if for one resource there is need to be embedded by 3rd party, then entire site is allowed to be embedded by 3rd party. Embedding by 3rd party should be allowed only for those resources when it's needed, not for entire site. (As I'm not that good with english, I need help here with proper wording)\r\n\r\n## Discussion: V14.4.3 vs/and V14.4.7\r\nDiscussion (for ASVS v4.1): Which raises another question - should we have 2 separate requirement to use `Content-Security-Policy` (V14.4.3) or we should merge them?\r\n\r\nSeparate:\r\n- positive: it's good to have separate requirement for \"mitigate XSS impact\" and \"avoid 3rd party embedding\"\r\n- negative: V14.4.3 already covers V14.4.7 with \"suitable Content-Security-Policy\"",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTk4Mjc3MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I suggest both, x-frame-options works well and it’s a single easy to use header. No need to drop x-frame yet; lots of folks still do not use CSP.\n\n--\nJim Manico\n@Manicode\n\n\n> On Feb 22, 2020, at 11:02 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> V14.4.7 Verify that a suitable X-Frame-Options or Content-Security-Policy: frame-ancestors header is in use for sites where content should not be embedded in a third-party site.\n> \n> As X-Frame-Options is obsolete, we should use only Content-Security-Policy: frame-ancestors.\n> \n> Discussion (for ASVS v4.1): Which raises another question - should we have 2 separate requirement to use Content-Security-Policy (V14.4.3) or we should merge them?\n> \n> Separate:\n> \n> positive: it's good to have separate requirement for \"mitigate XSS impact\" and \"avoid 3rd party embedding\"\n> negative: V14.4.3 already covers V14.4.7 with \"suitable Content-Security-Policy\"\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-02-22T18:06:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-589982770",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU4OTk5OTkzMw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "`X-Frame-Options` as only header is no-go in my opinion. The only argument why to use it all, is some old browser which does not support `Content-Security-Policy` `frame-ancestors` (but how old it must be already!?)\r\n\r\n<https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options>\r\n\r\n> allow-from uri (obsolete)\r\n> This is an obsolete directive that no longer works in modern browsers. Don't use it.\r\n\r\nLet's take situation - you have a list of partners for whom you allow to embed content from your site. With `X-Frame-Options` you can not do it (as `allow-from` directive is obsolete even more than `X-Frame-Options` itself. With `Content-Security-Policy` you can build nice whitelist using correctly protocols and paths.\r\n\r\nAnd...\r\n> lots of folks still do not use CSP\r\n\r\nshould we say Windows XP is still ok, beause a lot of PC's are using it? :) No! It's time to move on.\r\n",
+      "createdAt": "2020-02-22T21:27:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-589999933",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU5MDAwNjgyNA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I still disagree, strongly, and let me explain why with more data.\n\nIf you want to stop framing then x-frame-options deny or sameorigin are just fine. We can add that point as a clarification.\n\nX-frame-options deny and sameorigin are supported in more browsers than frame-ancestors by a wide margin. Also, philosophically I prefer dedicated headers vs the mess that is CSP. \n\nSo again I’ll politely keep asserting to keep x-frame-options around for one more ASVS version. If you want clarification that allow-from is poorly supported I’m ok with that. But let’s also be clear that CSP frame ancestors is not supported on browsers like ie11 and others and ie11 still matters in the enterprise.\n\nhttps://caniuse.com/#search=Frame-ancestors\n\nCompare that to how well x-frame-options deny and sameorigin support are supported. It’s every browser tracked by caniuse.\n\nhttps://caniuse.com/#search=X-frame-options\n\nI hope this explains why we are keeping x-frame-options. If you want to help wordsmith this to address the lack of x-frame-options allow-from and CSP browser limitations that would help a lot.\n\n--\nJim Manico\n@Manicode\n\n> On Feb 23, 2020, at 10:27 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> X-Frame-Options as only header is no-go in my opinion. The only argument why to use it all, is some old browser which does not support Content-Security-Policy frame-ancestors (but how old it must be already!?)\n> \n> https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options\n> \n> allow-from uri (obsolete)\n> This is an obsolete directive that no longer works in modern browsers. Don't use it.\n> \n> Let's take situation - you have a list of partners for whom you allow to embed content from your site. With X-Frame-Options you can not do it (as allow-from directive is obsolete even more than X-Frame-Options itself. With Content-Security-Policy you can build nice whitelist using correctly protocols and paths.\n> \n> And...\n> \n> lots of folks still do not use CSP\n> \n> should we say Windows XP is still ok, beause a lot of PC's are using it? :) No! It's time to move on.\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-02-22T23:03:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-590006824",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU5MDAzOTE4NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Got your point, IE11 is party-stopper here. So, I agree we can not drop `X-Frame-Options`, yet.\r\n\r\nAt the same time I think we can not ignore the fact, `X-Frame-Options` will be obsoleted and we should not direct people to use it as only defense method. So, I still standing for: `X-Frame-Options` **as only header** is no-go in my opinion.\r\n\r\n> I still disagree, strongly, and let me explain why with more data.\r\n\r\nNot clear for me, was strong disagree for \"drop X-Frame-Options\" or \"do not use X-Frame-Options as only header\".\r\n\r\n# Conclusion so far\r\n\r\n- Too early to drop `X-Frame-Options`\r\n- In practice, both headers are required at the moment but web is moving towards `Content-Security-Policy: frame-ancestors`\r\n- V14.4.3 and V14.4.7 merge is not the topic till X-Frame-Options exist in requirement\r\n- Embedding must be disabled for every (at least HTML content) response by default, including error messages, because other ways it opens some (CSP) bypassing vectors (like: HTML injection > open iframe to error message page > write dynamic script tag or content there > CSP restrictions for whitelisted script src bypassed).\r\n\r\n## Proposal\r\nTo address described issues, my proposal is something like that (**it requires \"translation\" to correct English**):\r\n\r\nV14.4.7 Verify that content of the entire site is not allowed to be embedded by third-party by default and that embedding of the exact resources is allowed only where needed (with whitelisting 3rd party when possible) by using suitable `Content-Security-Policy: frame-ancestors` **and** `X-Frame-Options` (for older browsers) headers.\r\n\r\nIt contains 3 separate requirements:\r\n- disable embedding by default the entire site, even for error pages (like 400, 403, 404, 500, ...)\r\n- allow only for special resources\r\n- use both headers (`Content-Security-Policy: frame-ancestors` and `X-Frame-Options`)",
+      "createdAt": "2020-02-23T08:24:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-590039185",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU5MDA0NjYwOQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction.  CSP is the future and I do support this compromise of ideas.\n\nElar, well done. Please CC me @jmanico into any other major change you want to make. I want to get into more of these debates with you.\n\n--\nJim Manico\n@Manicode\n\n> On Feb 23, 2020, at 9:24 PM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> Got your point, IE11 is party-stopper here. So, I agree we can not drop X-Frame-Options, yet.\n> \n> At the same time I think we can not ignore the fact, X-Frame-Options will be obsoleted and we should not direct people to use it as only defense method. So, I still standing with my opinion: X-Frame-Options as only header is no-go in my opinion.\n> \n> I still disagree, strongly, and let me explain why with more data.\n> \n> Not clear for me, was strong disagree for \"drop X-Frame-Options\" or \"do not use X-Frame-Options as only header\".\n> \n> Conclusion so far\n> \n> Too early to drop X-Frame-Options\n> In practice, both headers are required at the moment but web is moving towards Content-Security-Policy: frame-ancestors\n> V14.4.3 and V14.4.7 merge is not the topic till X-Frame-Options exist in requirement\n> Embedding must be disabled for every (at least HTML content) response by default, including error messages, because other ways it opens some (CSP) bypassing vectors (like: HTML injection > open iframe to error message page > write dynamic script tag or content there > CSP restrictions for whitelisted script src bypassed).\n> Proposal\n> \n> To address described issues, my proposal is something like that (it requires \"translation\" to correct English):\n> \n> V14.4.7 Verify that content of the entire site is not allowed to be embedded by third-party by default and that embedding of the exact resources is allowed only where needed (with whitelisting 3rd party when possible) by using suitable Content-Security-Policy: frame-ancestors and X-Frame-Options (for older browsers) headers.\n> \n> It contains 3 separate requirements:\n> \n> disable embedding by default the entire site, even for error pages (like 400, 403, 404, 500, ...)\n> allow only for special resources\n> use both headers (Content-Security-Policy: frame-ancestors and X-Frame-Options)\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-02-23T08:52:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-590046609",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxMjYyOTcyOA==",
+      "author": {
+        "login": "devd"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi! Also consider that x-frame-options doesn't work if you iframe any untrusted content in your origin. see https://bugzilla.mozilla.org/show_bug.cgi?id=725490\r\n\r\nMy worry with X-F-O is that I have repeatedly seen it give a false sense of security. For example, the proposal above doesn't make it clear that the X-F-O sameorigin will not be secure if you iframe any untrusted content. ",
+      "createdAt": "2020-04-12T15:01:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-612629728",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxMjY1MDkwNA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Hi! Also consider that x-frame-options doesn't work if you iframe any untrusted content in your origin. see https://bugzilla.mozilla.org/show_bug.cgi?id=725490\r\n> \r\n> My worry with X-F-O is that I have repeatedly seen it give a false sense of security. For example, the proposal above doesn't make it clear that the X-F-O sameorigin will not be secure if you iframe any untrusted content.\r\n\r\nThis is completely different problem. \"To be shown by untrusted source\" vs \"To show untrusted source\".",
+      "createdAt": "2020-04-12T17:39:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-612650904",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxMjcwMTIwOQ==",
+      "author": {
+        "login": "devd"
+      },
+      "authorAssociation": "NONE",
+      "body": "not sure I understand. The point is that if you use x-frame-options same-origin and iframe even one untrusted source, you cannot prevent yourself from being shown by untrusted source. I.e., imagine you have set x-frame-options sameorigin on all your pages. If you iframed attacker.com even once, the x-frame-options sameorigin can be bypassed. Attacker.com can iframe any page and x-frame-options only checks the top most frame. CSP Frame-ancestors checks the whole tree; x-frame-options only checks window.top. ",
+      "createdAt": "2020-04-13T00:43:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-612701209",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxMjgwNTMwNQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For example, the proposal above doesn't make it clear that the X-F-O sameorigin will not be secure if you iframe any untrusted content.\r\n\r\n1) Your site or visitors are not secure anyway, if you include untrusted content in iframe - this is the problem what you need to address in your example. As a site owner, you can choose, what content and from where you going to include in iframe.\r\n2) If your example is fixed by `Content-Security-Policy: frame-ancestors`, then my proposal already contains \"the fix\" for this. `X-Frame-Options` should stay only because of IE and only additionally to `Content-Security-Policy`. I don't think this requirement need to contain \"do not include any untrusted content in your site\".",
+      "createdAt": "2020-04-13T08:26:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-612805305",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYxODU3OTA2Ng==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is there any consensus on a change to the requirement. Please remember requirements should be relatively short.",
+      "createdAt": "2020-04-23T18:36:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-618579066",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMTMwOTQxNQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From last proposal:\r\n> V14.4.7 Verify that content of the entire site is not allowed to be embedded by third-party by default and that embedding of the exact resources is allowed only where needed (with whitelisting 3rd party when possible) by using suitable Content-Security-Policy: frame-ancestors and X-Frame-Options (for older browsers) header\r\n\r\nwe can remove brackets:\r\n> V14.4.7 Verify that content of the entire site is not allowed to be embedded by third-party by default and that embedding of the exact resources is allowed only where needed by using suitable Content-Security-Policy: frame-ancestors and X-Frame-Options header\r\n\r\n(it requires language check)",
+      "createdAt": "2020-04-29T16:07:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-621309415",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMzE3Mjk1NA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, open a PR please.",
+      "createdAt": "2020-05-03T20:07:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-623172954",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzMjMxMzAwNg==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Merged",
+      "createdAt": "2020-05-21T20:00:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-632313006",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ueZSZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement 14.4.7\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.4.7** | Verify that the content of a web application cannot be embedded in a third-party site by default and that embedding of the exact resources is only allowed where necessary by using suitable Content-Security-Policy: frame-ancestors and X-Frame-Options response headers. | ✓ | ✓ | ✓ | 1021 |\r\n\r\n\r\n\r\nhttps://github.com/OWASP/ASVS/issues/722#issuecomment-590039185\r\n\r\nClose to 4 years later, is it now time to remove X-Frame-Options as a required response header?\r\n\r\nPreviously `X-Frame-Options` was required for IE11, but ...\r\nhttps://blogs.windows.com/windowsexperience/2022/06/15/internet-explorer-11-has-retired-and-is-officially-out-of-support-what-you-need-to-know/\r\n\r\nCurrent situation: `X-Frame-Options` with values `DENY` and `SAMEORIGIN` mitigates risks, so we can not say \"do not use it at all\", but we should not require it anymore **from everyone**. If someone needs to support IE11, they can still add it.\r\n\r\n`Content-Security-Policy: frame-ancestors` is supported 95.66%\r\n<https://caniuse.com/mdn-http_headers_content-security-policy_frame-ancestors>\r\n\r\nProposal direction (recommendations to improve it are welcome)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.4.7** | [MODIFIED] Verify that the content of a web application cannot be embedded in a third-party site by default and that embedding of the exact resources is only allowed where necessary by using suitable Content-Security-Policy: frame-ancestors. **Note that the X-Frame-Options solution is obsoleted.** | ✓ | ✓ | ✓ | 1021 |\r\n",
+      "createdAt": "2023-12-13T08:23:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-1853461657",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5uedQt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @jmanico - have your views on the topic changed from 2020 (https://github.com/OWASP/ASVS/issues/722#issuecomment-590006824)?",
+      "createdAt": "2023-12-13T08:35:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-1853477933",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5u2myo",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I support removing x-frame-options from this requirement",
+      "createdAt": "2023-12-18T08:40:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-1859808424",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5u_uQg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico - are you happy with the proposed wording change or do you have some recommendations?",
+      "createdAt": "2023-12-19T06:30:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-1862198304",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5u_ud_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "note: for PR waiting for https://github.com/OWASP/ASVS/pull/1809 before going further",
+      "createdAt": "2023-12-19T06:31:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-1862199167",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vADgo",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm OK with a suggested text. Thank you for seeing this one to completion Elar.",
+      "createdAt": "2023-12-19T08:00:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-1862285352",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vPNla",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement is moved to web front end category, 50.2.5.\r\n\r\nPR for update #1816 ",
+      "createdAt": "2023-12-21T13:37:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/722#issuecomment-1866258778",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-02-22T10:02:36Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 722,
+  "state": "CLOSED",
+  "title": "V14.4.7 (50.2.5) - X-Frame-Options is obsolete + sites vs resources + discussion",
+  "url": "https://github.com/OWASP/ASVS/issues/722"
+}

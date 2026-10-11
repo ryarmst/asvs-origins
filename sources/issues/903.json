@@ -1,0 +1,520 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "JSONP is a method to provide cross-site access. If this is misconfigured, it makes it possible for any site on the internet to access information from the target page. It seems the ASVS currently lacks a verification requirement for this attack vector.\r\n\r\nE.g. [Exploiting JSONP and Bypassing Referer Check](https://infosecwriteups.com/exploiting-jsonp-and-bypassing-referer-check-2d6e40dfa24)\r\n\r\nWe could make this more general and say that an application shouldn't use sensitive information from within JavaScript. For example, if an application has a file `profile.js` that has `var username = \"your_current_username\";`, any other site can load that script and figure out your username. It seems the ASVS does not currently have a requirement against this.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzczMTkxNQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "JSONP is a major antipattern and should not be used, it allows for CSP bypass.\r\n\r\nCan you give us a PR with a new requirement to avoid this and we can work on getting it rolled into main?\r\n\r\nReference: https://blog.fullstacktraining.com/why-jsonp-shouldnt-be-used/",
+      "createdAt": "2021-03-12T20:18:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-797731915",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjAwNzM1OA==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I would suggest something like this:\r\n\r\n> Verify that sensitive information is not present in JavaScript or JSONP responses, to prevent cross-origin access to that information.",
+      "createdAt": "2021-03-18T15:11:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-802007358",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjAxMjc4MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "  I really really like this a lot, Sjoerd.\n\nOn 3/18/21 11:11 AM, Sjoerd Langkemper wrote:\n>\n> I would suggest something like this:\n>\n>     Verify that sensitive information is not present in JavaScript or\n>     JSONP responses, to prevent cross-origin access to that information.\n>\n> —\n> You are receiving this because you were assigned.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/903#issuecomment-802007358>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCKWHWOMF2R2KP4NZ7LTEIJ3LANCNFSM4X2LDXGA>.\n>\n",
+      "createdAt": "2021-03-18T15:18:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-802012781",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjY2ODU4Nw==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Where should this go? Perhaps somewhere in V8?",
+      "createdAt": "2021-03-19T09:02:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-802668587",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjgyMTI2MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think V8.2 is reasonable. @elarlang ? ",
+      "createdAt": "2021-03-19T13:09:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-802821260",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjg0MjY4NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I need to investigate this topic more before I'm able to give recommendations. V8.2 does not seem the way to go - it's more \"do not store sensitive data on the client side\" which is not the problem at the moment.",
+      "createdAt": "2021-03-19T13:43:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-802842685",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMjg0NjkwNQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "JSONP is a menace to society and I would support a negative requirement so it's clear we need to avoid it",
+      "createdAt": "2021-03-19T13:49:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-802846905",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41dEyy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some more ideas on that category-topic - it's not sensitive data leakage from the point of view - this user's browser has permission to access it and can see it anyway (no extra leakage)\r\n\r\nThe problem is - JavaScript code, which is readable with Cross-Origin requests, contain (sensitive) data.\r\n\r\nAnd there are 2 ways how to fix it:\r\n\r\n  * remove data from JavaScript code\r\n  * restrict access for Cross-Origin requests (similar to defense against CSRF)\r\n\r\nThe problem exists, when request is made with authenticated/authorised user and response contains information which is only meant for them. It is most likely the case for cookie-based sessions as well.\r\n\r\nFor non-authenticated users there is requirement like 2.10.4.\r\n\r\nI watch this issue as \"Cross-Origin Reading (Request)\", and CSRF as \"Cross-Origin Writing (Request)\". So, those should belong together to one category and we don't have suitable one at the moment.\r\n\r\nOr\r\n* Cross-Origin Confidentiality - attacker forces victim's browser to read data from targeted site (XSSI)\r\n* Cross-Origin Integrity - attacker forces victim's browser to make data change request in targeted site (CSRF)\r\n\r\nThose were thoughts at the moment, still need more investigation from my side.",
+      "createdAt": "2021-08-11T13:11:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-896814258",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41e5bB",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Can I recommend that any specific older legacy web technology such as JSONP be put into an ASVS fork as there is no fix/control for JSONP bypassing CSP and developers will argue this works as intended?\r\n\r\nI believe we may need another create another issue to discuss sensitive data in cleartext JSON.   That said, isn't [JSON Web Encryption (JWE)](https://datatracker.ietf.org/doc/html/rfc7516) the appropriate control and if so the test case should be the \"Invalid Curve Attack\"?\r\n\r\n",
+      "createdAt": "2021-08-12T02:10:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-897291969",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41fTCX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Can I recommend that any specific older legacy web technology such as JSONP be put into an ASVS fork as there is no fix/control for JSONP bypassing CSP and developers will argue this works as intended?\r\n\r\nI think we should show the way to go, not discussing was the way so far correct.\r\n\r\n> I believe we may need another create another issue to discuss sensitive data in cleartext JSON. That said, isn't [JSON Web Encryption (JWE)](https://datatracker.ietf.org/doc/html/rfc7516) the appropriate control and if so the test case should be the \"Invalid Curve Attack\"?\r\n\r\nCheck #934",
+      "createdAt": "2021-08-12T06:59:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-897396887",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41h2Mf",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I think we should show the way to go, not discussing was the way so far correct.\r\n\r\nASVS is not intended to force a developer to change web technologies when a control exists, otherwise we'll alienate developers who implement JSONP. \r\n",
+      "createdAt": "2021-08-13T00:36:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-898065183",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41waN_",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Cross-Origin Confidentiality\r\n\r\nAnother issue that falls under this category is cross-site search. The attacker performs searches using CSRF requests, and times the responses to determine whether a result is found. This is not always prevented by frameworks with built-in CSRF tokens, since search is considered an idempotent operation, and can use GET (search.php?q=something). CSRF protection is often only enabled on POST requests.\r\n\r\n> Can I recommend that any specific older legacy web technology such as JSONP be put into an ASVS fork as there is no fix/control for JSONP bypassing CSP and developers will argue this works as intended?\r\n> ASVS is not intended to force a developer to change web technologies when a control exists, otherwise we'll alienate developers who implement JSONP.\r\n\r\nI don't understand what you are trying to say. Do you agree that we need an ASVS requirement that prohibits JSONP? Or do you want the ASVS to be compatible with existing systems that use JSONP?\r\n",
+      "createdAt": "2021-08-19T12:43:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-901882751",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41wcvd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Search should *not* be done over a GET since it contains sensitive data. \nThe advice about not using GET for idempotent operations is wrong. Any \nGET that is idempotent, nullimpotent OR CONTAINS SENSITIVE REQUEST DATA \nshould use a non-GET verb or at least not put sensitive data in URL's.\n\nI strongly oppose any use of GET for search since search always ends up \nincluding sensitive data.\n\nAdding CSRF defense to GET's is not the right defense, IMO.\n\n- Jim\n\n",
+      "createdAt": "2021-08-19T12:58:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-901893085",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41yBDn",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I don't understand what you are trying to say. Do you agree that we need an ASVS requirement that prohibits JSONP? Or do you want the ASVS to be compatible with existing systems that use JSONP?\r\n\r\nI am seeking to make ASVS diverse and inclusive for all web technologies and therefore the most secure implementation of JSONP within legacy web applications i.e. \"_Or do you want the ASVS to be compatible with existing systems that use JSONP?_\"",
+      "createdAt": "2021-08-19T22:55:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-902303975",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM49o12X",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If we focus on JSONP, is there any problem with @Sjord's suggestion above?\r\n\r\n> Verify that sensitive information is not present in JavaScript or JSONP responses, to prevent cross-origin access to that information.\r\n\r\nTo me it seems to handle the specific issue nicely. If we agreed that this needs to go somewhere, we can then decide where.\r\n",
+      "createdAt": "2022-02-09T19:28:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1034116503",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-f7m2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In general agree with proposal, category choice depends on https://github.com/OWASP/ASVS/issues/1230. At the moment best category seems to be 13.1 (\"V13 API and Web Service\" > \"V13.1 Generic Web Service Security\")\r\n\r\n> Verify that sensitive information is not present in JavaScript or JSONP responses, to prevent cross-origin access to that information.\r\n\r\nSome ideas/questions:\r\n* Should it contain attack name Cross-Site Script Inclusion (XSSI)?\r\n* Is it in general clear, what means \"JavaScript response\" or \"JSONP response\"? For me it is, but I'm worried, is it interpretable multiple ways.\r\n* `cross-origin` vs `Cross-Origin`\r\n* is \"to that information\" necessary?\r\n",
+      "createdAt": "2022-02-23T08:47:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1048558006",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hDBb",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How about this:\r\n\r\n> Verify that JSONP functionality is not enabled anywhere across the application and that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.",
+      "createdAt": "2022-02-23T14:39:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1048850523",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hEIP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> How about this:\r\n> \r\n> > Verify that JSONP functionality is not enabled anywhere across the application and that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nI like it. Since these are different ideas and fundamental ones, I'd split them into two requirements.",
+      "createdAt": "2022-02-23T14:42:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1048855055",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hF6C",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ok so like:\r\n\r\n> Verify that JSONP functionality is not enabled anywhere across the application to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n> Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.",
+      "createdAt": "2022-02-23T14:49:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1048862338",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hGQN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Love it!\n",
+      "createdAt": "2022-02-23T14:50:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1048863757",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hMFi",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "awaiting outcome of #1230",
+      "createdAt": "2022-02-23T15:13:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1048887650",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P78rl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is now part of #1230 so I am going to close this for now.",
+      "createdAt": "2022-12-07T15:14:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1341115109",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P7-J-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Re-open for better tracking.",
+      "createdAt": "2022-12-07T15:18:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1341121150",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tb8bS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nI prepare for PR and re-analyzing those requirements:\r\n\r\n* \"sensitive data\" is a bit vague - maybe authenticated data?\r\n* \"JavaScript\" is a bit vague - technically JSON is also JavaScript\r\n* \"file\" is a bit too strict - usually, when sensitive data is part of JavaScript content, it's a dynamically built response, not a file.\r\n\r\nNeed some wording and grammar help here, but the direction is maybe something like:\r\nVerify that authenticated data is not present in the HTTP response when it can be included as a JavaScript source to avoid Cross-Site Script Inclusion (XSSI) attacks.\r\n\r\nTechnical note: it's only problematic when the session token is transferred automatically with the same request, which in practice means if the session token is delivered in the Cookie header and:\r\n* the session cookie has the `SameSite` attribute set to `None`\r\n* OR to value `Lax` when an attack comes from  Same-Site scope.",
+      "createdAt": "2023-12-01T12:30:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1836041938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vPScd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirements are now in the document based on the last proposed wording:\r\n\r\n## V50.4 Cross-Site Script Inclusion\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.1** | [ADDED] Verify that JSONP functionality is not enabled anywhere across the application to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |\r\n| **50.4.2** | [ADDED] Verify that sensitive information is not present in JavaScript files to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |\r\n\r\nAs pointed out in previous comment (https://github.com/OWASP/ASVS/issues/903#issuecomment-1836041938), requirements can be improved.\r\n\r\nping @tghosth , @Sjord ",
+      "createdAt": "2023-12-21T13:47:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1866278685",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vhgCO",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How about:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.2** | [ADDED] Verify that **data which should require authorization** to access is not returned in **executable JavaScript** **format** to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |",
+      "createdAt": "2023-12-28T10:53:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1871052942",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vhhyY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think \"executable JavaScript format\" is misleading. Some may think it is only valid for some Electron apps etc. https://medium.com/swlh/javascript-executables-5644ead7016d\r\n\r\nmaybe direction like \"is not returned in response for loading script resource\"?",
+      "createdAt": "2023-12-28T11:02:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1871060120",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vhj3i",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You mean like this:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.2** | [ADDED] Verify that data which should require authorization to access is not returned in **script resource responses** to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |",
+      "createdAt": "2023-12-28T11:14:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1871068642",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5viPtz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction a lot. Can we add a little more detail to this to explain what script resource response means?",
+      "createdAt": "2023-12-28T14:56:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1871248243",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5viTCQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang can we maybe add a clarification like \r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.4.2** | [ADDED] Verify that data which should require authorization to access is not returned in script resource responses **(such as JavaScript files)** to avoid Cross-Site Script Inclusion (XSSI) attacks. | ✓ | ✓ | ✓ | |",
+      "createdAt": "2023-12-28T15:12:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1871261840",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5viqmk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "which > that, brackets to commas\r\nhttps://github.com/OWASP/ASVS/commit/46dba30718dd00910da28749247e73f4d338073a",
+      "createdAt": "2023-12-28T17:18:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/903#issuecomment-1871358372",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-02-18T13:59:13Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 903,
+  "state": "CLOSED",
+  "title": "Prevent cross-site access with JSONP",
+  "url": "https://github.com/OWASP/ASVS/issues/903"
+}

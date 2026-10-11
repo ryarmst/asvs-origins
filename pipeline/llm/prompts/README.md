@@ -1,6 +1,14 @@
 # LLM prompts
 
-Pass A (triage), Pass B (issue summarization), and Pass C (requirement
-synthesis) land here in M2. Each prompt file is versioned
-(`issue-pass.v1.md`) and recorded on artifact provenance as `prompt_id`
-plus `prompt_version`.
+Each pass has a versioned prompt. Provenance records `prompt_id` and
+`prompt_version`. Bump the version filename and add a row to
+`docs/prompt-changelog.md` in the same change.
+
+| Pass | File | Version |
+|---|---|---|
+| A — triage | `triage.v1.md` | v1 |
+| B — issue summarization | `issue-pass.v1.md` | v1 |
+| C — requirement synthesis | `requirement-pass.v1.md` | v1 |
+
+The model must not use prior knowledge of ASVS. Inputs are assembled by
+the pipeline.

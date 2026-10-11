@@ -1,0 +1,184 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "V16\n\nPoint 1\n\n> Security logs are a specific type of logging which is not focused on error handling or performance but rather specifically on recording when security sensitive events occur.\n\nWe should start what it is not, but keeping the message in the line \"security logs and error handling are different things and there should be no equal sign between them\"\n\n---\n\nPoint 2\n\n> The primary objective of security logging is to provide useful information for the user, administrators, and incident response teams, which contains more signal than discarded noise.\n\nTo user? I think we can remove \"the user, administrators, and\"\n\n---\n\nPoint 3\n\n> When logging security-related events, ensure that there is a purpose to the log and that it can be distinguished by SIEM or analysis software.\n\nOverlapping with the end of the previous sentence and is written like a requirement. I think the point should be merged to previous sentence.\n\n---\n\nPoint 4\n\n> Security logs, which often contain sensitive data, must be safeguarded in accordance with local data privacy laws or directives. This sensitive data also makes them very attractive to attackers as a target in their own right so they should be carefully protected.\n\n\"Security logs, which often contain sensitive data\" - this statement is in conflict with our requirements, that logs must not contain sensitive data.\n\n---\n\nPoint 5\n\nV16.1\n\nNeeds section text.\n\nThe message: \"It is important to have a precise overview, what kind of logs the application and all its components are producing, where those are located, and what information they contain.\"\n\n---\n\nPoint 6\n\nV16.2\n\nThe section should have some intro line to say that:\n> This section provides requirements to ensure that all security logs have the expected structure and contain the expected metadata about security events to achieve that they are machine-readable and correlatable with other logs.\n\n---\n\nPoint 7\n\n> Logging sensitive information is dangerous - the logs become classified themselves, which means they may need to be encrypted, become subject to retention policies, and must be disclosed in security audits.\n\nMaybe towards direction:\n\n> Naturally, security events happen when processing sensitive data in the application, and if to just log all of the related data, the logs become classified themselves. That means the data used in logs may need to be encrypted, become subject to retention policies, and must be disclosed in security audits.\n\n---\n\nPoint 8\n\n> Ensure only necessary information is kept in logs, and certainly no payment, credentials (including session tokens), sensitive or personally identifiable information.\n\nPropose to remove this part. It is written like a requirement and duplicates the content of the requirement 16.2.5.\n\n---\n\nPoint 9 (just one option how to organize things, I'm not sure it is better but I kept the idea here)\n\nAdd to the chapter text message:\n> The sections below contains fundamental logging requirements, but as every application has its unique needs ASVS can not go into details what precise security events must be logged and how those must be formated. This is something that must be analyzed and documented for each application and for doing that following OWASP Cheat Sheets can be useful:\n\n  * OWASP Logging Cheat Sheet\n  * OWASP Application Logging Vocabulary Cheat Sheet\n\nAnd then remove related lines from 16.2 and 16.3 sections\n\n> For the specific information which should be included in a log entry, refer to external detailed guidance such as the OWASP Logging Cheat Sheet.\n\n---\n\nPoint 10\n\n16.5\n\nremove \"The application should be written in a way that ensures this will always happen.\"\n\n---\n\nPoint 11\n\n> Note: Certain languages, such as Swift and Go - and through common design practice - many functional languages, do not support exceptions or last-resort event handlers. In this case, architects and developers should use a pattern, language, or framework-friendly way to ensure that applications can securely handle exceptional, unexpected, or security-related events.\n\nIn case we need this line, I think we should move it before requirements into the section text - that simplifies parsing the document to have text only before requirements. There are only few other places to have text after requirements and it should apply there as well. If it is not an issue to solve, it can stay as it is.\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6nU661",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good points here. For control objectives, I'd suggest one of these two version that considers all of your points. One is verbose, and one is concise depending on how deep you want to go.\n\n**Control Objective (attempt 1)**\n\nSecurity logs are distinct from error or performance logs and must not be confused with general application logging. Their primary function is to record security-relevant events, such as authentication attempts, access control decisions, privilege escalation, and other actions that may indicate misuse, abuse, or compromise.\n\nThe objective of security logging is to support incident detection, response, and forensic investigations by providing high-signal, low-noise information suitable for analysis by Security Information and Event Management (SIEM) systems and similar log management tools. Security events should be logged with clear intent and structured in a way that enables effective parsing and correlation.\n\nWhile logs must not include sensitive personal data unless absolutely necessary and legally justified, any data that is logged should be protected in accordance with applicable data protection laws. Because security logs can reveal operational details or can be used by attackers to plan further compromise, they must be treated as high-value assets and safeguarded accordingly.\n\nIt is also essential that the application fails securely. When errors occur, they should not expose internal details or sensitive context, nor should they disrupt secure operation or logging functionality.\n\n For detailed implementation guidance, refer to the OWASP Cheat Sheets:\n\n- OWASP Logging Cheat Sheet\n- OWASP Application Logging Vocabulary Cheat Sheet\n\n**Control Objective (attempt 2)**\n\nSecurity logs are distinct from error or performance logs and are used to record security-relevant events such as authentication, access control, and privilege escalation. Their purpose is to support detection, response, and investigation by providing high-signal, structured data for analysis tools like SIEMs.\n\nLogs should not include sensitive personal data unless legally required, and any logged data must be protected as a high-value asset. Logging must not compromise privacy or system security. Applications must also fail securely, avoiding unnecessary disclosure or disruption.\n\n For detailed implementation guidance, refer to the OWASP Cheat Sheets:\n\n- OWASP Logging Cheat Sheet\n- OWASP Application Logging Vocabulary Cheat Sheet",
+      "createdAt": "2025-04-15T19:34:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2807279285",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nU9Ht",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "It's hard to make section text for one requirement. Maybe move 16.1.1 elsewhere? I would suggestion moving 16.1.1 into 16.2 (general logging) and dropping section 16.1.\n\nOtherwise, maybe:\n\n **V16.1 Errors, Logging and Auditing Documentation** \n\nThis section ensures a clear and complete inventory of logging across the application stack. This is essential for effective security monitoring, incident response, and compliance. ",
+      "createdAt": "2025-04-15T19:37:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2807288301",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVCIQ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "How about this for section 16.2?\n\n**V16.2 General Logging**\n\nThis section provides requirements to ensure that security logs are consistently structured and contain the expected metadata. The goal is to make logs machine-readable and analyzable across distributed systems and tools.\n\nNaturally, security events often involve sensitive data. If such data is logged without consideration, the logs themselves become classified—subject to encryption requirements, stricter retention policies, and potential disclosure during audits. Therefore, it is critical to log only what is necessary and to treat log data with the same care as other sensitive assets.\n\nThe requirements below establish foundational requirements for logging metadata, synchronization, format, and control.",
+      "createdAt": "2025-04-15T19:43:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2807308816",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVD9y",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "How about this for section 16.3?\n\n**V16.3 Security Events**\n\nThis section defines requirements for logging security-relevant events within the application. Capturing these events is critical for detecting suspicious behavior, supporting investigations, and fulfilling compliance obligations.\n\nThis section outlines the types of events that should be logged but does not attempt to provide exhaustive detail. Each application has unique risk factors and operational context. \n\nNote that while ASVS includes logging of security events in scope, alerting and correlation (e.g., SIEM rules or monitoring infrastructure) are considered out of scope and are handled by operational and monitoring systems.",
+      "createdAt": "2025-04-15T19:47:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2807316338",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVE77",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Suggestion for 16.4\n\n**V16.4 Log Protection**\n\nLogs are valuable forensic artifacts and must be protected. If logs can be easily modified or deleted, they lose their integrity and become unreliable for incident investigations or legal proceedings. Additionally, logs may expose internal application behavior or sensitive metadata, making them an attractive target for attackers.\n\nThis section defines requirements to ensure that logs are protected from unauthorized access, tampering, and disclosure, and that they are safely transmitted and stored in secure, isolated systems.",
+      "createdAt": "2025-04-15T19:49:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2807320315",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVGua",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "For V16.5 Error Handling I would suggest:\n\n**V16.5 Error Handling (attempt 1)**\n\nThis section defines requirements to ensure that applications fail gracefully and securely without disclosing sensitive internal details\n\nNote: Some languages—such as Swift, Go, and many functional programming languages—do not support traditional exceptions or global error handlers. In these cases, developers should adopt language-appropriate patterns to securely handle unexpected or security-relevant errors.\n\nor drop the note alltogether:\n\n**V16.5 Error Handling (attempt 2)**\n\nThis section defines requirements to ensure that applications fail gracefully and securely without disclosing sensitive internal details. ",
+      "createdAt": "2025-04-15T19:52:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2807327642",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6je8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2961 which is not entirely a copy paste of the suggestions here but is inspired by them",
+      "createdAt": "2025-04-20T12:19:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2817144764",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oChlt",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Opened [#2961](https://github.com/OWASP/ASVS/issues/2961) which is not entirely a copy paste of the suggestions here but is inspired by them\n\nThis link is just referencing the same issue. I'll dig to see what you mean, but thank you Josh.",
+      "createdAt": "2025-04-21T18:42:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2819234157",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oC49c",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Opened [#2961](https://github.com/OWASP/ASVS/issues/2961) which is not entirely a copy paste of the suggestions here but is inspired by them\n> \n> This link is just referencing the same issue. I'll dig to see what you mean, but thank you Josh.\n\nOops sorry I meant #3009",
+      "createdAt": "2025-04-21T19:29:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2961#issuecomment-2819329884",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-14T07:37:41Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABJFMusA",
+      "name": "V16 (prev V7)",
+      "description": "Temporary label for grouping logging related issues",
+      "color": "6A5C69"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2961,
+  "state": "CLOSED",
+  "title": "V16 chapter texts",
+  "url": "https://github.com/OWASP/ASVS/issues/2961"
+}

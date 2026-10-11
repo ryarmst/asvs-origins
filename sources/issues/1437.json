@@ -1,0 +1,538 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nSituation: often (based on my experience as pentester) there is functionality in user interface for administrators for changing some API url, secrets, configurations etc.\r\n\r\nProblem to solve: if an attacker gains access as administrator (use your imagination how, one XSS or session takeover is enough), then it should not affect / escalate to change application configuration.\r\n\r\nA bit related to current requirement 2.10.4 (see below), but not directly - 2.10.4 focus is credentials only, but users should not be able to change to source addresses as well - this is also the way how to read credentials, because if you can change some integration source address to your controlled address, you can read the password sent by the application.\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.10.4** | Verify passwords, integrations with databases and third-party systems, seeds and internal secrets, and API keys are managed securely and not included in the source code or stored within source code repositories. Such storage SHOULD resist offline attacks. The use of a secure software key store (L1), hardware TPM, or an HSM (L3) is recommended for password storage. | | ✓ | ✓ | 798 | |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5TVrwR",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps 3.7.1 is relevant for this?\r\n\r\n> Verify the application requires re-authentication or secondary factor verification before allowing any sensitive transactions or account modifications.",
+      "createdAt": "2023-01-20T10:29:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1398193169",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TV48V",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it's not - it could require re-authentication for every change admins make. Additionally, then it could require every time admins want to see sensitive configuration/integration details.",
+      "createdAt": "2023-01-20T11:22:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1398247189",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TWCzM",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "What solution do you propose? That important configuration can not be modified at all from within the application?",
+      "createdAt": "2023-01-20T12:07:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1398287564",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TWK4T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes.\r\n\r\nExamples: database connection configuration, authentication service connection configuration.",
+      "createdAt": "2023-01-20T12:35:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1398320659",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c8FWg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am a little nervous that this would be hard to enforce. Do we have a better definition of \"important configuration\" that we could use in a theoretical new requirement @elarlang ?",
+      "createdAt": "2023-05-23T12:50:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1559254432",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dPtTJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I am a little nervous that this would be hard to enforce. Do we have a better definition of \"important configuration\" that we could use in a theoretical new requirement @elarlang ?\r\n\r\nMaybe you can provide some example, why? Some blog RSS feed import? It's usually \"SSRF with cronjob\" :)\r\n\r\nIf we take requirement 2.10.4\r\n\r\n> Verify passwords, integrations with databases and third-party systems, seeds and internal secrets, and API keys are managed securely and not included in the source code or stored within source code repositories. \r\n\r\nWe can interpret that is should not be ok to show database or user-authentication integration (openid, oauth, whatever sso solution service) password as plain-text to the output (target for XSS, cache, session takeover, account takeover). It should be stored safe against offline attacks but most likely is often stored as somewhere as plain-text.\r\n\r\nIntegration source address (e. g. sso host, database server) should not be changed to whatever value, as an impact for previously mentioned vectors, it may cause denial of service attack or give man-in-the-middle or proxied-communication possibility.\r\n\r\nCurrent 12.6.1 says:\r\n> Verify that the web or application server is configured with an allow list of resources or systems to which the server can send requests or load data/files from.\r\n\r\nIt also means, to allow application communicate to some new address, it may require some other configuration changes.",
+      "createdAt": "2023-05-26T13:30:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1564398793",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5d_QsA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I get your overall concept but I am struggling to come up with a solid requirement/s.\r\n\r\nI think 2.10.4 is saying something specific and is valid related to secret management and the ability to keep them confidential and rotate them.\r\n\r\n> We can interpret that is should not be ok to show database or user-authentication integration (openid, oauth, whatever sso solution service) password as plain-text to the output (target for XSS, cache, session takeover, account takeover). It should be stored safe against offline attacks but most likely is often stored as somewhere as plain-text.\r\n\r\nSo this is a problem I have seen in multiple places and I would interpret this as a requirement like\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **8.x.x** | Verify that if the application's provides configuration screens to set sensitive data in the application such as integration secrets or passwords, these configuration items are \"write-only\" to prevent an attacker with access to the configuration page from overwriting them. | | ✓ | ✓ | |\r\n\r\n> Integration source address (e. g. sso host, database server) should not be changed to whatever value, as an impact for previously mentioned vectors, it may cause denial of service attack or give man-in-the-middle or proxied-communication possibility.\r\n\r\nI can understand the concept here but I just don't know how best to define what should not be configurable in this context...",
+      "createdAt": "2023-06-05T14:00:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1576864512",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mX2QP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ping @elarlang :)",
+      "createdAt": "2023-09-13T12:25:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1717527567",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mX7vv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it is possible to override the configuration from the web interface, it means you can just kill the service (if ruining some connection parameters).",
+      "createdAt": "2023-09-13T12:38:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1717550063",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mdoW2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Again, I understand the concept of why this is dangerous and have seen this in the wild, I am just trying to come up with a more solid requirement. Is it as simple as saying something like:\r\n\r\n> Verify that there are extra controls for modifying passwords and connection parameters for integrations with databases and third-party systems if the application allows this within its administration interface.\r\n\r\nWhat do you think?",
+      "createdAt": "2023-09-14T08:58:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1719043510",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5md-v8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What would be those \"extra controls\"? Proposed requirement is better solution than to not have the requirement at all. But...\r\n\r\nI think with that direction we fall to requirement like \"make sure that user has permission to see and modify connection parameters\", like we had here: https://github.com/OWASP/ASVS/issues/1524#issuecomment-1576895079\r\n\r\nMy proposed \"extra control\" is to not have them in the user-interface to take down escalation for XSS, session takeover or account takeover.\r\n\r\nProblematic part (something which I/we need to define) is that \"what is allowed to change via admin web interface and what is not\".\r\n",
+      "createdAt": "2023-09-14T09:51:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1719135228",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ms8m9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think we can outlaw them all together.\r\n\r\nExtra controls make me think about step-up authentication/multi-person review or something and then that makes me think that maybe we need something like requirement [4.3.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x12-V4-Access-Control.md#v43-other-access-control-considerations) for sensitive/dangerous operations like these.\r\n\r\n> [GRAMMAR] Verify the application has additional authorization (such as step up or adaptive authentication) for lower value systems, or alternatively segregation of duties for high value applications to enforce anti-fraud controls as per the risk of application and past fraud.\r\n\r\nWhat do you think?",
+      "createdAt": "2023-09-18T09:33:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723058621",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtD3N",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In general it sounds reasonable to take town session hijacking vector, but I'm not really sure that multi-person review is suitable solution for setting credentials via web ui.",
+      "createdAt": "2023-09-18T09:54:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723088333",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtJkS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  but I'm not really sure that multi-person review is suitable solution for setting credentials via web ui.\r\n\r\nWhy not? I am thinking, a message goes to another admin saying something like:\r\n\r\n```Fred has tried to change connection string from X to Y, do you approve?```",
+      "createdAt": "2023-09-18T10:10:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723111698",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtLtx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Connection string is just part of credentials, think about\r\n\r\n`Fred has tried to change database connection password to Y, do you approve?`",
+      "createdAt": "2023-09-18T10:16:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723120497",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mt3rZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't 100% agree, especially as the connection URL specifically would also be a sensitive change but that isn't important right now, the important thing is do you consider the multi-person review and other mitigating controls like that to be the correct direction here?",
+      "createdAt": "2023-09-18T12:23:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723300569",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mt5wM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Multiuser preview can be acceptable solution, but not preferred one.",
+      "createdAt": "2023-09-18T12:29:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723309068",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muLAa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So maybe something along the lines of \r\n\r\n> Verify that there are extra controls (such as re-authentication or multi-user approval) for modifying passwords and connection parameters for integrations with databases and third-party systems if the application allows this within its administration interface.\r\n",
+      "createdAt": "2023-09-18T13:10:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723379738",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muNaQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, maybe just the \"if condition\" in front?\r\n\r\nDoes not feel correct, but the idea is:\r\n\r\n> Verify that if the application allows modifying passwords or connection parameters for integrations with databases and third-party systems within its administration interface there are extra controls (such as re-authentication or multi-user approval).",
+      "createdAt": "2023-09-18T13:16:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723389584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muQ_i",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How about:\r\n\r\n> Verify that, if the application allows changing highly sensitive configurations around passwords or connection parameters for integrations with databases and third-party systems, they are protected by extra controls (such as re-authentication or multi-user approval).\r\n",
+      "createdAt": "2023-09-18T13:24:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723404258",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muS6o",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Looks good :) Let's wait some feedback ",
+      "createdAt": "2023-09-18T13:29:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1723412136",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qPKgt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Did we actually reach to 4.3.3 now? 4.3.3 is more abstract and actually I can not translate it to action myself.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.3.3** | [GRAMMAR] Verify the application has additional authorization (such as step up or adaptive authentication) for lower value systems, or alternatively segregation of duties for high value applications to enforce anti-fraud controls as per the risk of application and past fraud. | | ✓ | ✓ | 732 |\r\n| proposed | Verify that, if the application allows changing highly sensitive configurations around passwords or connection parameters for integrations with databases and third-party systems, they are protected by extra controls (such as re-authentication or multi-user approval). | ? | ? | ? | ? |",
+      "createdAt": "2023-10-27T06:18:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1782360109",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5sIbG7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Basically yes. In #1045 and #1496 it was made clear that 4.3.3 needs to be fixed so I think we need to make it include your requirements as well as discussed in this issue.\r\n\r\nThe question is, do you consider this to be an access control issue or a business logic issue? i.e. which chapter should it go in @elarlang ?",
+      "createdAt": "2023-11-16T10:12:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1814147515",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xujvo",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok I want to replace 4.3.3 with this requirement and I want to create a new anti-fraud requirement in the business logic section which is worded slightly differently.\r\n\r\nI would suggest the following changes:\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.3.3** | [MODIFIED, SPLIT TO 11.1.10] Verify that, if the application allows changing highly sensitive configurations around passwords or connection parameters for integrations with databases and third-party systems, they are protected by extra controls (such as re-authentication or multi-user approval). | | ✓ | ✓ | 732 |\r\n| **11.1.10** | [ADDED, SPLIT FROM 4.3.3] Verify the application has additional authorization requirements (such as step up or adaptive authentication), segregation of duties to enforce anti-fraud controls. | | ✓ | ✓ | 732 |\r\n\r\nWhat do you think @elarlang ",
+      "createdAt": "2024-01-24T12:28:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1908030440",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xu2YR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "* I think we should have agreed guide-line how to use \"such as\" - using commas or brackets\r\n* anti-fraud - is it clear enough term or is it too abstract and requires some examples to be listed?",
+      "createdAt": "2024-01-24T13:18:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1908106769",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x1k-w",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think we should have agreed guide-line how to use \"such as\" - using commas or brackets\r\n\r\nNot sure if we need solid guidelines but I agree that it is interesting in this case. In the first requirement I think the brackets are extraneous and unnecessary. In the second requirement I think they are useful because they create a subsection in the middle of an existing list.\r\n\r\n> anti-fraud - is it clear enough term or is it too abstract and requires some examples to be listed?\r\n\r\n~~I think it is relatively clear but it does open some additional questions.~~ Actually I think that whole second requirement is not great and opens other questions about anti-fraud so let's discuss.\r\n\r\nCurrent suggestion for reference:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.3.3** | [MODIFIED, SPLIT TO 11.1.10] Verify that, if the application allows changing highly sensitive configurations around passwords or connection parameters for integrations with databases and third-party systems, they are protected by extra controls such as re-authentication or multi-user approval. | | ✓ | ✓ | 732 |\r\n| **11.1.10** | [ADDED, SPLIT FROM 4.3.3] Verify that the application uses additional authentication requirements (such as step up or adaptive authentication) or segregation of duties to enforce anti-fraud controls. | | ✓ | ✓ | 732 |\r\n\r\n\r\n",
+      "createdAt": "2024-01-25T10:38:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1909870512",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x2PaZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Need to check what is going on with 3.7.1",
+      "createdAt": "2024-01-25T12:02:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1910044313",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x2XD5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "anti-fraud seems too abstract and also not clear it is in scope for ASVS\r\n\r\nPotentially need to check if business logic chapter considers workflows or other functionality restrictions to enforce business logic controls, \r\n\r\nAside from this, we need to find a way to effectively merge the new requirement with 4.3.3 to cover the problem we are trying to solve, i.e. some additional authentication when performing highly sensitive operations.",
+      "createdAt": "2024-01-25T12:09:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1910075641",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x3yy4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, 3.7.1 was handled here: https://github.com/OWASP/ASVS/issues/1523\r\n\r\nTo be honest I think we can just replace 4.3.3 with this requirement \r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **4.3.3** | [MODIFIED] Verify that, if the application allows changing highly sensitive configurations around passwords or connection parameters for integrations with databases and third-party systems, they are protected by extra controls such as re-authentication or multi-user approval. | | ✓ | ✓ | 732 |\r\n\r\nI think that anti-fraud is just too nebulous and not in scope\r\n\r\n@elarlang what do you think about this modification?",
+      "createdAt": "2024-01-25T15:34:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1910451384",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5x30Eo",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Actually, I just opened a PR because you seemed to agree with this change above\r\n#1846",
+      "createdAt": "2024-01-25T15:37:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-1910456616",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM560ghH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is a rather complex requirement that I think can be removed.\r\n\r\nArguments? Did you actually take your time and analyze the content of the issue?",
+      "createdAt": "2024-04-17T07:37:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-2060585031",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM561A0Q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that is is complicated but we did have a long discussion about it and the requirement is solving a real problem. Open to suggestions on simplification ",
+      "createdAt": "2024-04-17T08:39:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-2060717328",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM582_BR",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "After reading the thread carefully, I think 4.3.3 covers this issue well and I am closing this issue,",
+      "createdAt": "2024-05-05T12:28:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1437#issuecomment-2094788689",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-11-30T19:46:32Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABKu5vbw",
+      "name": "V8 (prev V4)",
+      "description": "Temporary label for grouping authorization related issues",
+      "color": "6A5C69"
+    }
+  ],
+  "number": 1437,
+  "state": "CLOSED",
+  "title": "discussion: configuration (for example integration) in user interface",
+  "url": "https://github.com/OWASP/ASVS/issues/1437"
+}

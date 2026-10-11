@@ -1,0 +1,417 @@
+{
+  "author": {
+    "id": "U_kgDOBrYDpw",
+    "is_bot": false,
+    "login": "securitydave",
+    "name": "David Deatherage"
+  },
+  "body": "5.3.11 (additional requirement) or 5.6.1 (new section)\r\nVerify that links to external pages which specify a target include rel=\"noopener noreferrer\" to prevent tabnabbing. Tabnabbing is an attack in a linked-to page (not under the application's control) which replaces the linked-from tab in the user's browser with a malicious look-alike page.\r\n[CWE-1022](https://cwe.mitre.org/data/definitions/1022.html)",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5ZGIs2",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "noreferrer - it is separate topic and it is covered in ASVS.\r\n\r\nnoopener - Have you checked and verified it is still an actual issue with modern browsers?\r\n\r\nRelated MDN:\r\n* https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel/noopener\r\n* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy",
+      "createdAt": "2023-04-03T18:26:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1494780726",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZHqm1",
+      "author": {
+        "login": "securitydave"
+      },
+      "authorAssociation": "NONE",
+      "body": "I cannot find \"noopener\" nor \"noreferrer\" in 4.0.3. Is it in 5.0? Is there a generated doc of 5.0 which I can search?",
+      "createdAt": "2023-04-04T00:40:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1495181749",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZHrJL",
+      "author": {
+        "login": "securitydave"
+      },
+      "authorAssociation": "NONE",
+      "body": "At caniuse.com, \"noopener\" and \"noreferrer\" are well supported.",
+      "createdAt": "2023-04-04T00:44:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1495183947",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZIRHH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With \"browser supporting\" my point is - did you actually put it to work or you just read it from somewhere?\r\n\r\nIf I remember correctly I tested it and found, that browsers have changed their behavior on the topic, but I'll do the test one more time.\r\n\r\nReferrer leakage is separate problem from opener and referrer leakage is covered by:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.4.6** | Verify that a suitable Referrer-Policy header is included to avoid exposing sensitive information in the URL through the Referer header to untrusted parties. | ✓ | ✓ | ✓ | 116 |\r\n",
+      "createdAt": "2023-04-04T04:49:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1495339463",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZLkMz",
+      "author": {
+        "login": "securitydave"
+      },
+      "authorAssociation": "NONE",
+      "body": "Tested just now on chrome Version 111.0.5563.112 64-bit on Windows 10 and found that either noopener or noreferrer defends from tabnabbing. I agree with you that noopener is the logical solution. However I will still advice developers to include rel=\"noopener noreferrer\" in links which specify a target. Perhaps it will help on some obscure browser version!\r\n\r\nHere's my test code:\r\n\r\ncwe1022test.html:\r\n```\r\n<html>\r\n<body>\r\n<p>test page</p>\r\n<p><a href=\"cwe1022attack.html\" target=\"abc\">no defense</a></p>\r\n<p><a href=\"cwe1022attack.html\" target=\"abc\" rel=\"noopener\">noopener</a></p>\r\n<p><a href=\"cwe1022attack.html\" target=\"abc\" rel=\"noreferrer\">noreferrer</a></p>\r\n</body>\r\n</html>\r\n```\r\n\r\ncwe1022attack.html:\r\n```\r\n<html>\r\n<body>\r\n<p>attack page</p>\r\n<script>window.opener.location = \"cwe1022fake.html\";</script>\r\n</body>\r\n</html>\r\n```\r\n\r\ncwe1022fake.html:\r\n```\r\n<html>\r\n<body>\r\n<p>fake page</p>\r\n</body>\r\n</html>\r\n```",
+      "createdAt": "2023-04-04T15:42:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1496204083",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZO_6d",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I asked\r\n\r\n> noopener - Have you checked and verified it is still an actual issue with modern browsers?\r\n\r\nand ..\r\n\r\n> If I remember correctly I tested it and found, that browsers have changed their behavior on the topic, but I'll do the test one more time.\r\n\r\nSo, I did.\r\n\r\nFrom the issue description:\r\n> Tabnabbing is an attack in a linked-to page (not under the application's control) which replaces the linked-from tab in the user's browser with a malicious look-alike page.\r\n\r\nThe (scope)problem with your test:\r\n* problem statement is describing navigation away from an application (cross-origin and cross-site requests)\r\n* test-code is done only in same-origin scope\r\n\r\n`window.opener` object is sent only with `same-origin` request AND when `target` attribute is set AND `target` attribute value is some name (e. g. is not `_blank`, `_self` etc). Proof-of-Concept is available here: https://elarlang.eu/opener.html\r\n\r\nboth values (`noopener` and `noreferrer`) for `rel` attribute disable sending opener.\r\n\r\nSo, by default with modern browsers we don't have noopener problem for cross-origin requests. See:\r\n\r\n  * https://mathiasbynens.github.io/rel-noopener/\r\n  * https://github.com/whatwg/html/issues/4078\r\n  * https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/rel/noopener\r\n  * https://chromestatus.com/feature/6140064063029248\r\n\r\nYou can open cross-origin opener spreading with `Cross-Origin-Opener-Policy` and the question is, should we have separate requirement for that.\r\n\r\n<https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy>\r\n",
+      "createdAt": "2023-04-05T08:19:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1497104029",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZPJ_D",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@securitydave - if there are no other arguments, I'll close this issue (in the future).",
+      "createdAt": "2023-04-05T08:54:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1497145283",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZREP8",
+      "author": {
+        "login": "securitydave"
+      },
+      "authorAssociation": "NONE",
+      "body": "This is great news that compliant browsers may fix this. However, I would still recommend including rel=\"noopener\" on links supplying a non-blank target. Your reference https://mathiasbynens.github.io/rel-noopener/ recommends as such. Now my concern is only whether some still commonly-used browsers may be vulnerable. Your test is convincing for chrome. Thank you.",
+      "createdAt": "2023-04-05T15:04:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1497646076",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZUbH8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "There is quite a big difference between recommending and requiring. In ASVS we put requirements which everyone need to follow, it means we don't put \"it would be nice if you do this\". Only \"you need to do this\". From current information, I would say it's not worth requirement.\r\n\r\nFor older browsers - an application need to check user's browser and let him/her know if it needs update. Requirement(s) for that are cooking here: https://github.com/OWASP/ASVS/issues/959",
+      "createdAt": "2023-04-06T05:49:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1498526204",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dII8m",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Decision to make - should we have level3 requirement to cover opener configuration.",
+      "createdAt": "2023-05-25T07:28:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1562414886",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5diuMR",
+      "author": {
+        "login": "securitydave"
+      },
+      "authorAssociation": "NONE",
+      "body": "As already stated, I advise including rel=\"noopener\" on links supplying a non-blank target. I think it's a requirement.",
+      "createdAt": "2023-05-31T02:04:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1569383185",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hEnki",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So @securitydave is proposing a new requirement:\r\n\r\n> Verify that links to external pages which specify a target, include rel=\"noopener\" to prevent tabnabbing. \r\n\r\nIn principle modern browsers should fix this but it could be a problem in older browsers.\r\n\r\nAs such, @elarlang is proposing that it should be level 3 early based on the lower likelihood of it being an actual problem.\r\n\r\nHave I understood everything correctly?",
+      "createdAt": "2023-07-10T09:41:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1628600610",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hnJ6Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Have I understood everything correctly?\r\n\r\nRecap, just in case.\r\n\r\nFrom only `rel=\"noopener\"` point of view, I would say that we don't need separate requirement. Opener is sent only when \r\n* user is using too old browser (before 2021)\r\n* OR (the request is done in same-origin context AND link has `target` attribute with some name (not `_self` or `_target`).\r\n\r\nOld browsers problem is covered with:\r\n> V14.5.7 [ADDED] Verify that the web application warns users who are using an old browser which does not support HTTP security features on which the application relies. The list of old browsers must be periodically reviewed and updated.\r\n\r\nOther set of conditions - first the likelihood for the problem to happen is close to 0 and second, the attacker need to control resources in the same-origin context where the link points. If those conditions are filled, the opener issue is not your largest problem. Also we should not have many application in the same-origin context (https://github.com/OWASP/ASVS/issues/1299)\r\n\r\n\r\nLike I wrote here: https://github.com/OWASP/ASVS/issues/1602#issuecomment-1497104029\r\n\r\n> You can open cross-origin opener spreading with Cross-Origin-Opener-Policy and the question is, should we have separate requirement for that.\r\n\r\nIf we going to create new requirement, then I think we should set the wider focus and look for COOP and COEP response headers:\r\n\r\n* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy\r\n  * Global browser support [89.55%](https://caniuse.com/mdn-http_headers_cross-origin-opener-policy)\r\n* https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy\r\n  * Global browser support [91.61%](https://caniuse.com/mdn-http_headers_cross-origin-embedder-policy)",
+      "createdAt": "2023-07-17T09:09:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1637654168",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ik8Bx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "2021 is not that long ago, I think we should probably still be recommending something to prevent this. Especially because older browsers might not support COOP/COEP. Can we include both sets of requirements?",
+      "createdAt": "2023-07-27T15:27:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1653850225",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ilelE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Depends on how many more years 5.0 takes :) \r\n\r\nbut all the arguments were written in my previous comment.",
+      "createdAt": "2023-07-27T16:52:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1653991748",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5np0Nz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang do the  COOP and COEP response headers definitely prevent the same thing as the rel=noopener attribute. Should this be one requirement or two?\r\n\r\nReading here it felt like it was not exactly the same thing:  https://web.dev/why-coop-coep/",
+      "createdAt": "2023-09-28T12:05:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1739015027",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nqIdd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't know the answer right now, need to do \"the lab\" first.",
+      "createdAt": "2023-09-28T12:48:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1739097949",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nqzAN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so let me know please :)",
+      "createdAt": "2023-09-28T13:58:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1739272205",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xuyOS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Any update @elarlang ?",
+      "createdAt": "2024-01-24T13:07:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1908089746",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xvA6b",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Nope. It is low priority task here and it requires some research.",
+      "createdAt": "2024-01-24T13:43:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-1908149915",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sv53c",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "2021 is ancient in terms of browser version.\r\n\r\nI agree with @elarlang in that If we going to create new requirement, then I think we should set the wider focus and look for COOP and COEP response headers:\r\n\r\nhttps://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy\r\nGlobal browser support [89.55%](https://caniuse.com/mdn-http_headers_cross-origin-opener-policy)\r\nhttps://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Embedder-Policy\r\nGlobal browser support [91.61%](https://caniuse.com/mdn-http_headers_cross-origin-embedder-policy)",
+      "createdAt": "2024-11-07T11:47:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-2462031324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Sw7Su",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth \r\n\r\n> do the COOP and COEP response headers definitely prevent the same thing as the rel=noopener attribute. Should this be one requirement or two?\r\n\r\nYes, but only the COOP header is required for this (when set with the proper config). From [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy):\r\n\r\n> COOP will process-isolate your document and potential attackers can't access your global object \r\n\r\nCOOP and COEP together permit Cross-Origin Isolation, but that is separate from this discussion.\r\n\r\nThe extent to which browser support COOP and COEP is likely in line with the extent to which they protect against tab nabbing by default. Based on my understanding, I think we can drop this with no action for now. \r\n\r\n\r\n",
+      "createdAt": "2024-11-07T13:54:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-2462299310",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S4--p",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang Recommending closing this issue for these reasons:\r\n- Tabnabbing is mitigated by the browsers by default with high and increasing (over time) support\r\n- There is insufficient evidence of impact from not implementing a strict COOP configuration\r\n  - I think there could be an argument for a strict COOP for L3 apps as a defense in depth mechanism, but present requirements should cover existing attack vectors\r\n- There is insufficient evidence of impact from not implementing a strict COEP configuration\r\n- Combined COOP and COEP to achieve Cross-Origin Isolation is necessary to unlock browser features, but not a security requirement\r\n- Both headers are relatively new, seemingly widely misunderstood (or unknown), and have some differences in browser support of directives\r\n\r\nIf someone looks at this in the future, I think it is worth evaluating whether there are XS-Leak type attacks that are impactful and not sufficiently mitigated by other ASVS requirements. ",
+      "createdAt": "2024-11-08T11:00:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-2464411561",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6S96Go",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "+1 Ryan\n",
+      "createdAt": "2024-11-08T20:31:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1602#issuecomment-2465702312",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-04-03T01:54:58Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 1602,
+  "state": "CLOSED",
+  "title": "tabnabbing",
+  "url": "https://github.com/OWASP/ASVS/issues/1602"
+}

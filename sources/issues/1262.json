@@ -1,0 +1,114 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEyMzcyOTY3",
+    "is_bot": false,
+    "login": "maizuka",
+    "name": "IZUKA Masahiro"
+  },
+  "body": "[14.4.6](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x22-V14-Config.md#v144-http-security-headers) require Referrer-Policy in response headers.\r\n\r\n> Verify that a suitable Referrer-Policy header is included to avoid exposing sensitive information in the URL through the Referer header to untrusted parties.\r\n\r\nHowever, according to [MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy), the default policies in modern browsers are set to `strict-origin-when-cross-origin`, which doesn't leak the URL path across origins. Internet Explorer doesn't support this header. So the default without the header is not problem.\r\n\r\nOn the other hand, customizing by the header might bring some failure.\r\n\r\nMy suggestion is that we check the policy in the header if exists, but the absence is ok.\r\n\r\n> Verify that the specified policy in the Referrer-Policy header does not cause the browser to send URL paths for cross-origin requests through the Referer header to avoid exposing sensitive information in the URL.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5BHlxr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You expect, that all users are using modern and up-to-date browsers. It's a bit too optimistic.\r\n\r\nPoint to set this header is to not hope for browser's default settings, but to say clearly, how to handle it.\r\n\r\nI can not see improvement from proposal - given wording expects that the header exists.",
+      "createdAt": "2022-04-08T07:01:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1262#issuecomment-1092508779",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BJTxM",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree that it should support wide range of browser environments. But there is limit somewhere.\r\n\r\nThere doesn't seem to have a clear guide for the range. Because X-XSS-Protection was removed in v4 ([commit](https://github.com/OWASP/ASVS/commit/751cdbce263ee3214e9783a33d10026d10d2c92c)), defense-in-depth seems to be cut off for some situation such as IE. My idea is based on the hypothesis.\r\n\r\nI see this requirement as one of the defense-in-depths since URL should not have sensitive information as [13.1.3](https://github.com/OWASP/ASVS/blob/a0b99845684d4836928a7ac5df195e2cd5c72351/5.0/en/0x21-V13-API.md#v131-generic-web-service-security).\r\n\r\nI found that the default has been implemented in a few years, so it is okay if it should support to that versions. For example, Firefox changed it at release on Mar 2020. This page has details.\r\nhttps://caniuse.com/referrer-policy",
+      "createdAt": "2022-04-08T14:58:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1262#issuecomment-1092959308",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BJVOk",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Enabling the XSS Browser Auditor is very dangerous because it adds XSS where none existed before. I suggest X-Xss-Protection be set to 0. This is why the browsers have removed it.\r\n\r\nHere is some research that illustrates this. https://infosecwriteups.com/xss-auditor-the-protector-of-unprotected-f900a5e15b7b\r\n\r\nAlso, no one should be using Internet Explorer. It's an end of life browser with bad security.",
+      "createdAt": "2022-04-08T15:05:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1262#issuecomment-1092965284",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BJVVG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "X-XSS-Protection did not provide protection and was removed from browsers for that reason. It was a mistake and It's not good thing for comparing.\r\n\r\nI analyzed referrers from one of my web sites, and there were still many Full-URL Referer sendings. Clear reality is, that is not time yet to remove this requirement.\r\n\r\n\"Old browser\" problem should be covered with this issue:\r\nhttps://github.com/OWASP/ASVS/issues/959",
+      "createdAt": "2022-04-08T15:05:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1262#issuecomment-1092965702",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BJn-k",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you for information. I understand the reason about X-XSS-Protection correctly. The discussion #959 looks interesting and I will subscribe.\r\n\r\nElar's result is critical in this issue. Could you tell me one of the conditions where full URLs are sent?\r\nFinally, I think this issue should be closed. Thanks a lot.",
+      "createdAt": "2022-04-08T16:03:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1262#issuecomment-1093042084",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BJpBK",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Could you tell me one of the conditions where full URLs are sent?\r\n\r\nI misunderstood. The analysis is from the server logs so I have no question about it.",
+      "createdAt": "2022-04-08T16:07:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1262#issuecomment-1093046346",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-04-08T05:38:36Z",
+  "labels": [],
+  "number": 1262,
+  "state": "CLOSED",
+  "title": "14.4.6 Need to always require Referrer-Policy?",
+  "url": "https://github.com/OWASP/ASVS/issues/1262"
+}

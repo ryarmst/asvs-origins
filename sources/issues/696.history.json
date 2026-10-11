@@ -1,0 +1,57 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2019-11-24T22:51:53Z",
+      "diff": "Current requirement:\r\n> V3.1.1 Verify the application never reveals session tokens in URL parameters or error messages. \r\n\r\nProblem 1: **URL parameters**\r\nIt's kind of point to GET parameters. If session token is presented as \"folder\", it's still the same problem.\r\n\r\nRecommendation:\r\n\"part of URL\" ?\r\n\r\nProblem 2: **error messages**\r\nI can not understand the reason here (it should be more clear).\r\n- if it actually means \"logging session id in error messages to logs\" it's covered by V7.1.1\r\n- error messages with technical details should not be displayed to end-user anyway (V7.4.*)\r\n- if it does not mean logging and just showing it to output - then it should be more abstract like \"HTTP response\". But this discussion converts to \"should javascript be able to read session token or not\"\r\n\r\nShould this / or separate requirement cover also situation, if application sends session tokens to 3rd party program (like sama user-interaction trackers) as plain-text?"
+    },
+    {
+      "editedAt": "2019-11-25T08:15:05Z",
+      "diff": "Current requirement:\r\n> V3.1.1 Verify the application never reveals session tokens in URL parameters or error messages. \r\n\r\nProblem 1: **URL parameters**\r\nIt's kind of points to GET parameters. If session token is presented as \"folder\", it's still the same problem.\r\n\r\nRecommendation:\r\n\"part of URL\" ?\r\n\r\nProblem 2: **error messages**\r\nI can not understand the reason here (it should be more clear).\r\n- if it actually means \"logging session id in error messages to logs\" it's covered by V7.1.1\r\n- error messages with technical details should not be displayed to end-user anyway (V7.4.*)\r\n- if it does not mean logging and just showing it to output - then it should be more abstract like \"HTTP response\". But this discussion converts to \"should javascript be able to read session token or not\"\r\n\r\nShould this / or separate requirement cover also situation, if application sends session tokens to 3rd party program (like sama user-interaction trackers) as plain-text?"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-641898239",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "@jmanico, please take your time to investigate arguments above and let's find some proposal/decision for this.\r\n\r\nAbout 2nd part of the requirement:\r\n\r\n> V3.1.1 **Verify the application never reveals session tokens** in URL parameters or **error messages**.\r\n\r\nFor example, if site displays somewhere session tokens (e.g. `phpinfo()` output, list of active sessions etc), then those outputs are readable in XSS situation for JavaScript - session token leakage, potential session hijacking.\r\n\r\nWhy to limit in the requirement, that session token can not leak only through error messages? It does not make sense for me. If session is cookie-based, it should have `httpOnly` flag set and never displayed to any part of HTTP response other than `Set-Cookie` header.",
+          "recorded_at": "2020-06-10T10:08:06Z"
+        },
+        {
+          "body": "@jmanico, please take your time to investigate arguments above and let's find some proposal/decision for this.\r\n\r\nAbout 2nd part of the requirement:\r\n\r\n> V3.1.1 **Verify the application never reveals session tokens** in URL parameters or **error messages**.\r\n\r\nFor example, if site displays somewhere somewhere session tokens (e.g. `phpinfo()` output, list of active sessions etc), then those outputs are readable in XSS situation for JavaScript - session token leakage, potential session hijacking.\r\n\r\nWhy to limit in the requirement, that session token can not leak only through error messages? It does not make sense for me. If session is cookie-based, it should have `httpOnly` flag set and never displayed to any part of HTTP response other than `Set-Cookie` header.",
+          "recorded_at": "2020-06-10T10:04:28Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-798953776",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "### Discussion 1 - V3.1.1 vs V8.3.1\r\n\r\nV3.1.1 is covered by V8.3.1, but maybe it's good to keep this as clear separate requirement for sessions.\r\n\r\n> V3.1.1 Verify the application never reveals session tokens in URL parameters.\r\n\r\n> V8.3.1 Verify that sensitive data is sent to the server in the HTTP message body or headers, and that query string parameters from any HTTP verb do not contain sensitive data.\r\n\r\n\r\n\r\n### Discussion 2 - cookie based session management\r\n\r\nCurrent V3.2.3 will be removed one way or another (by issue #843 or like I recommended already here https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907)\r\n\r\nIf cookie-based session management is used, should we have requirement (like I proposed in https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907):\r\n\r\n\"Verify that cookie-based session tokens are only transferred in Set-Cookie and Cookie headers\"\r\n(never sent to 3rd parties and never sent in response body)\r\n(and it's covers clearly current V3.1.1 when cookies are used)",
+          "recorded_at": "2021-03-14T18:47:13Z"
+        },
+        {
+          "body": "### Discussion 1 - V3.1.1 vs V8.3.1\r\n\r\nV3.1.1 is covered by V8.3.1, but maybe it's good to keep this as clear separate requirement for sessions.\r\n\r\n> V3.1.1 Verify the application never reveals session tokens in URL parameters.\r\n\r\n> V8.3.1 Verify that sensitive data is sent to the server in the HTTP message body or headers, and that query string parameters from any HTTP verb do not contain sensitive data.\r\n\r\n\r\n\r\n### Discussion 2 - cookie based session management\r\n\r\nCurrent V3.2.3 will be removed one way or another (by issue #843 or like I recommended already here https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907)\r\n\r\nIf cookie-based session management is used, should we have requirement (like I proposed in https://github.com/OWASP/ASVS/issues/696#issuecomment-626231907):\r\n\r\n\"Verify that cookie-based session tokens are only transferred in Set-Cookie and Cookie headers\"\r\n(never sent to 3rd parties and never sent in response body)",
+          "recorded_at": "2021-03-14T18:18:03Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/696#issuecomment-832114918",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> This seems quite reasonable. Can we add \"and to specifically avoid sending session data via url?\" Thats the real worry.\r\n\r\nNo :)\r\n\r\n* Requirement already says that, just in other words\r\n* It would be another duplicate for 3.1.1\r\n  * V3.1.1 Verify the application never reveals session tokens in URL parameters.\r\n* And it's covered by 8.3.1 as well:\r\n  * V8.3.1 Verify that sensitive data is sent to the server in the HTTP message body or headers, and that query string parameters from any HTTP verb do not contain sensitive data.\r\n",
+          "recorded_at": "2021-05-04T17:45:20Z"
+        },
+        {
+          "body": "> This seems quite reasonable. Can we add \"and to specifically avoid sending session data via url?\" Thats the real worry.\r\n\r\nNo :)\r\n\r\n* Requirement already says that, just in other words\r\n* It would be another duplicate for 3.1.1\r\n  * V3.1.1 Verify the application never reveals session tokens in URL parameters.",
+          "recorded_at": "2021-05-04T17:29:41Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "\r\n3.5.8 | [ADDED] Verify that user session tokens, such as JWTs, are securely propagated between services as part of service-to-service communication, ensuring that session tokens are validated at each service layer. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\nThis suggestion came from the conversation here https://github.com/OWASP/ASVS/issues/2072\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6MARIH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What problem it solves?\r\n\r\nWhy it needs to be validated on each layer? Maybe it is not even used on each layer, just forwarded to the next one.\r\n\r\nI think we have similar discussion on https://github.com/OWASP/ASVS/issues/1312#issuecomment-1403225212 to remove 13.1.4\r\n\r\n> 13.1.4 Verify that authorization decisions are made at both the URI, enforced by programmatic or declarative security at the controller or router, and at the resource level, enforced by model-based permissions.",
+      "createdAt": "2024-09-13T12:48:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2348880391",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MASth",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "It's usually more secure to actually verify the token at each layer than to just pass a userid after the initial step.\r\n\r\nThis prevents forgery, is more of an end-to-end security mechanism (ie: zero trust), it's more reliable for access control since we reliably need the userid, which is only reliable when it's from the session, and some tokens actually contain the access control permission policy for the user which are likely needed at each layer.\r\n\r\nThere are many more benefits to this pattern. It's solves a lot of security problems.",
+      "createdAt": "2024-09-13T12:51:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2348886881",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAX4U",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Yes I think https://github.com/OWASP/ASVS/issues/1312#issuecomment-1403225212 touched on this issue but I still think we need a new requirement.\r\n\r\nEssentially I feel every API (and many big companies like google have this standard in their API secure coding docs) should have strong session management and strong access control, regardless of it being internal or external.\r\n\r\nIn the era of micro-services we no longer do access control in one place, we do access control at each individual micro-service. And to do that securely, we reliably need the userId. And to reliably get the userId we need an active session.",
+      "createdAt": "2024-09-13T13:00:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2348908052",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAnzl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Also personally I feel, that this is more V4 topic to check user permissions.\r\n\r\nIf it is about token validation, then it is covered by current \"V3.5 Token-based Session Management\" requirements. Many of them are under discussion, but for example 3.5.4:\r\n> 3.5.4\t[ADDED] Verify that stateless tokens are checked for expiration before processing them further.\r\n\r\nIt is valid for every service layer, where it is used. So kind of covering the point you propose?",
+      "createdAt": "2024-09-13T13:32:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2348973285",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MArOx",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "No, 3.5.4 is strictly about verifying expiration at one service layer.\r\n\r\nMy requirement focuses on API architecture, specifically around session management. When making a request that traverses several microservices, it's essential that the session token is passed all the way through the microservice structure. This ensures that each individual service receives the actual session artifact, which can then be verified and/or passed to the next service, rather than just passing a user ID. This is a critical difference.\r\n\r\nI can see this in v2 (Session management) or v13 (API's) but it is not specific to tokens, it's for any session artifact (even tough todays its mostly JWT's).",
+      "createdAt": "2024-09-13T13:38:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2348987313",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MBDxg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Are you actually talking about access tokens?",
+      "createdAt": "2024-09-13T14:24:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2349087840",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MBPrf",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "No. This could be any session artifact. \n",
+      "createdAt": "2024-09-13T14:47:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2349136607",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MDy3T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Assigned to @tghosth - maybe he can understand what security problem it solves. I can not.",
+      "createdAt": "2024-09-13T18:27:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2349805011",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MJwXh",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I believe we are duplicating the requirement I set out in the following comment, @jmanico \r\n\r\nhttps://github.com/OWASP/ASVS/issues/2061#issuecomment-2339794654",
+      "createdAt": "2024-09-15T04:55:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2351367649",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MJ-Fj",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "4.2.4 Is specifically about access control. I think the requirement I’m suggesting is more about overall session management architecture which has the potential to benefit:\r\n\r\nAccess Control\r\nBetter Statelessness (no need to verify a session in another service)\r\nBetter integrity of the session artifact\r\nDecentralizing security policies\r\nEnd to end security, each service is enforcing its own policies\r\n\r\nThere are a few downsides to this pattern as well, especially if you are using a bloated JWT with lots of extra unnecessary data.\r\n\r\nBut overall “pass the JWT” patterns are inline with the zero-trust architecture movement which is why I’m suggesting it.\r\n\r\n",
+      "createdAt": "2024-09-15T07:11:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2351423843",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MJ_ba",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You are saying (https://github.com/OWASP/ASVS/issues/2079#issuecomment-2348987313, https://github.com/OWASP/ASVS/issues/2079#issuecomment-2349136607) that is for sure not about access control, but first thing that it solves/benefits, is access control?",
+      "createdAt": "2024-09-15T07:21:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2351429338",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKKo0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What I am saying it is not *only* about access control, it’s just one of the benefits of this pattern.\r\n",
+      "createdAt": "2024-09-15T08:53:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2351475252",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKNPT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it is just one way to build a \"session handling eco-system\" and it is just a way to send session artifact information between (micro)services. So far, I can not see material for the \"it fits for everyone\" requirement here. If there is a list of abstract benefits, it does not share the information required - what problem does it solve, or what attack vector it mitigates?",
+      "createdAt": "2024-09-15T09:13:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2351485907",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKQms",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I can not see material for the \"it fits for everyone\"\r\n\r\nI think that’s a fair argument. This is more of a architectural design *suggestion* and there are other viable patterns like the gateway pattern that competes with it.\r\n\r\nI’m ok to drop this Elar. You make a fair point.",
+      "createdAt": "2024-09-15T09:41:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2351499692",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKSzX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As @tghosth descibed, most likely the security concerns from this issue are addressed by another issue:\r\n> I believe we are duplicating the requirement I set out in the following comment, @jmanico\r\n> \r\n> [#2061 (comment)](https://github.com/OWASP/ASVS/issues/2061#issuecomment-2339794654)\r\n\r\nClosing this.",
+      "createdAt": "2024-09-15T10:01:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2079#issuecomment-2351508695",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-13T12:40:39Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTNfDAw",
+      "name": "V7 (prev V3)",
+      "description": "",
+      "color": "B797E9"
+    }
+  ],
+  "number": 2079,
+  "state": "CLOSED",
+  "title": "Adding new session requirement for propagating session information",
+  "url": "https://github.com/OWASP/ASVS/issues/2079"
+}

@@ -1,0 +1,154 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwOTExOTc1",
+    "is_bot": false,
+    "login": "deleterepo",
+    "name": "Jordan Sherman"
+  },
+  "body": "@elarlang and team I'll begin with a few proposals of my own here to start the discussion about them (more to come). I'll try not to duplicate the ones already mentioned here https://github.com/OWASP/ASVS/issues/1925.\r\n\r\n1. Verify that the Implicit Flow grant is not used or configured by the Authorization Server, as it is vulnerable to access token leakage and access token replay attacks. \r\n    - This applies to both OAuth and OIDC. As per https://oauth.net/2/grant-types and https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#name-implicit-grant. If preferred we can consolidate this with `51.1.6` about Resource Owner Password Credentials Grant, but it might make sense to make it a separate requirement to keep it granular, because these grants are vulnerable to different attacks that we are highlighting.\r\n2. Verify that the unique identifier in the ID token for an end-user is a combination of the sub claim and the iss claim. Avoid usage of other claims such as email, phone_number, preferred_username, or name, as they may be mutable and can be potentially falsified.\r\n    - This is specific to OIDC and goes back to issues such as the vulnerability reported from Microsoft that I mentioned in my other issue here: https://github.com/OWASP/ASVS/issues/1826\r\n    - @jmanico also touches on this in https://github.com/OWASP/ASVS/issues/996#issuecomment-2003085972 for the ** Prevent Authorization Server Mix-Up Attacks:* comment\r\n3. Verify that the authorization server compares redirect URIs using exact string matching.\r\n    - This applies to both OAuth and OIDC. Using anything other than exact string matching, such as substrings, patterns etc opens up the door to open redirects. See here: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics#name-insufficient-redirect-uri-v.\r\n    - I see this was mentioned here: https://github.com/OWASP/ASVS/issues/1965, and perhaps this can be the verification requirement for it\r\n4. Verify that the nonce parameter sent in the authorization request is included in the nonce claim of the issued ID token, and that the client ensures that the nonce claim value is equal to the original value sent in the authorization request.\r\n    - This applies to OIDC. The nonce claim is a specific OIDC claim to bind an ID token to a client, to mitigate replay attacks. See here: https://openid.net/specs/openid-connect-core-1_0.html#IDToken\r\n5. Verify that relying parties ensure that the issuer URL they are using for the configuration request exactly matches the value of the issuer claim in the OpenID provider metadata document received by the relying party, and that this also exactly matches the iss claim value in ID tokens that are supposed to be from that issuer.\r\n    - This applies to OIDC. From: https://openid.net/specs/openid-connect-discovery-1_0.html#Security. An attacker may attempt to impersonate an OpenID Provider by publishing a Discovery document that contains an issuer Claim using the Issuer URL of the OP being impersonated, but with its own endpoints and signing keys. This would enable it to issue ID Tokens as that OP, if accepted by the RP\r\n\r\n\r\nPlease let me know what you think and happy to discuss these further. More to come!\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5-mfAa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you for your input, I do first quick feedback round:\r\n\r\n## proposal 1\r\n\r\nI opened a separate issue, with a point of view that we just need to accept PKCE: https://github.com/OWASP/ASVS/issues/1970\r\n\r\n\r\n## proposal 2\r\n\r\nIs it already covered by the issue #1826, and if not, what is the difference?\r\n\r\n\r\n## proposal 3\r\n\r\nWe have #1965 for this opened now.\r\n\r\n\r\n## proposal 4\r\n\r\nI think we have requirement 51.2.2 to cover it.\r\n\r\nIf you have a proposal, how to improve it, please open a separate issue for that.\r\n\r\nIf you would like to touch the topic from a different angle (as having a new separate requirement), then what could it be?\r\n\r\n\r\n## proposal 5\r\n\r\nIs it OIDC specific or is it general JWT validation (https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1)?\r\n\r\n> V3.5.6 Verify that other, security-sensitive attributes of a stateless token are being verified. For example, in a JWT this may include issuer, subject, and audience.\r\n\r\nFor mentioned requirement, we also have a opened issue: https://github.com/OWASP/ASVS/issues/1967\r\n",
+      "createdAt": "2024-05-22T07:01:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1969#issuecomment-2124017690",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-rdLQ",
+      "author": {
+        "login": "deleterepo"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Thank you for your input, I do first quick feedback round:\r\n> ## proposal 1\r\n> \r\n> I opened a separate issue, with a point of view that we just need to accept PKCE: #1970\r\n\r\nSounds good let's continue the discussion in #1970. Please see my latest comments.\r\n\r\n> ## proposal 2\r\n> \r\n> Is it already covered by the issue #1826, and if not, what is the difference?\r\n\r\nIt's covered. Let's keep the discussion going in #1826. Part of these proposals is pointing out what is OIDC-specific, in case we want to have a separate section for that in V51. I also wanted to make sure this issue is still considered as it seems to be an important requirement.\r\n\r\n> ## proposal 3\r\n> \r\n> We have #1965 for this opened now.\r\n\r\n👍 \r\n\r\n> ## proposal 4\r\n> \r\n> I think we have requirement 51.2.2 to cover it.\r\n> \r\n> If you have a proposal, how to improve it, please open a separate issue for that.\r\n> \r\n> If you would like to touch the topic from a different angle (as having a new separate requirement), then what could it be?\r\n\r\nFor 51.2.2 it might be best if I open a separate issue. I think this requirement has too much going on, as it states that we need to only use PKCE (see comments in #1970), and it also talks about using nonce when not using PKCE. PKCE or more specifically Authorization Code flow with PKCE can be used for both OAuth and OIDC, whereas the nonce is specific to OIDC. So the more I think about it the more it makes sense to have a separate section for OIDC, to avoid confusion. One way to start with that is to move or break out any requirements that involve the ID token. What do you think about that?\r\n\r\n\r\n> ## proposal 5\r\n> \r\n> Is it OIDC specific or is it general JWT validation (https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.1)?\r\n> \r\n> > V3.5.6 Verify that other, security-sensitive attributes of a stateless token are being verified. For example, in a JWT this may include issuer, subject, and audience.\r\n> \r\n> For mentioned requirement, we also have a opened issue: #1967\r\n\r\nThis requirement I mention is specific to OpenID Provider Issuer Discovery. See here: https://openid.net/specs/openid-connect-discovery-1_0.html#IssuerDiscovery. This requirement ensures that the issuer URL used to perform the OpenID Provider configuration request for the configuration document at `/.well-known/openid-configuration`, is the same as the issuer URL (claim) in the document itself, and that the same issuer URL is validated against the one in the ID token. \r\n\r\nFor example, here is one of Google's: https://accounts.google.com/.well-known/openid-configuration?callback=angular.callbacks._0. To perform issuer Discovery, you would make a GET request to retrieve this document, ensuring that the issuer claim matches `https://accounts.google.com`. Subsequent ID tokens issued from the token endpoint should have `iss` match `https://accounts.google.com` as well.",
+      "createdAt": "2024-05-22T17:00:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1969#issuecomment-2125320912",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-r8Ca",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Agree with\r\n* to open separate issue for proposal 4\r\n* to make separate section for OIDC (it was basically agreed long time ago somewhere else), just let's get first requirement(s) in\r\n* ack, it makes sense to open separate issue for proposal 5 as well\r\n\r\nIf separate issues are opened, we can close this issue.\r\n\r\nFor requirements - first let's have proposal in the issue, and if it finds agreement, then it's time for PR.",
+      "createdAt": "2024-05-22T18:07:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1969#issuecomment-2125447322",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-4XeB",
+      "author": {
+        "login": "damienbod"
+      },
+      "authorAssociation": "NONE",
+      "body": "A confidential Implicit Flow grant is fine to use if only the id_token is returned and no access tokens are used/allowed in this flow.\r\n\r\nThis is sometimes required. \r\n\r\nI suggest maybe changing the text in proposal 1 a bit? ",
+      "createdAt": "2024-05-24T06:48:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1969#issuecomment-2128705409",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-5cC9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> A confidential Implicit Flow grant is fine to use if only the id_token is returned and no access tokens are used/allowed in this flow.\r\n> \r\n> This is sometimes required.\r\n> \r\n> I suggest maybe changing the text in proposal 1 a bit?\r\n\r\nHi  @damienbod , I understand the comment is on \"proposal 1\". We have a separate issue for this opened now - https://github.com/OWASP/ASVS/issues/1970\r\n\r\nPlease share your argument there :)",
+      "createdAt": "2024-05-24T08:53:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1969#issuecomment-2128986301",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_H9Jb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I politely disagree with the comment below. See https://github.com/OWASP/ASVS/issues/1970#issuecomment-2132789742\r\n\r\n> A confidential Implicit Flow grant is fine to use if only the id_token is returned and no access tokens are used/allowed in this flow.\r\n> \r\n> This is sometimes required.\r\n> \r\n> I suggest maybe changing the text in proposal 1 a bit?\r\n\r\n",
+      "createdAt": "2024-05-27T07:09:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1969#issuecomment-2132791899",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M3lCu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me it seems we have all risen topics under discussion in separate issues and we can close this one.\r\n\r\nping @deleterepo ",
+      "createdAt": "2024-09-20T10:20:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1969#issuecomment-2363379886",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-05-22T00:10:38Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 1969,
+  "state": "CLOSED",
+  "title": "V51: Additional OAuth/OIDC proposals",
+  "url": "https://github.com/OWASP/ASVS/issues/1969"
+}

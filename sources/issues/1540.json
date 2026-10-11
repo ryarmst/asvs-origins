@@ -1,0 +1,600 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjgwMzY3Mjc=",
+    "is_bot": false,
+    "login": "drwetter",
+    "name": "Dirk Wetter"
+  },
+  "body": "I was just testing for a customer their password security and actually I also wanted to link hereto and not only to the NIST password standard (specifically: https://pages.nist.gov/800-63-3/sp800-63b.html#-5112-memorized-secret-verifiers)\r\n\r\nBut as it turned out, some points in the NIST standard are not in ASVS (https://github.com/OWASP/ASVS/blob/9b80241af66c09f4b8cc75a2d222ca62733e4f5f/5.0/en/0x11-V2-Authentication.md#v21-password-security) if I see that correctly:\r\n\r\n* Repetitive or sequential characters (e.g. ‘aaaaaa’, ‘1234abcd’).\r\n* Context-specific words, such as the name of the service, the username, and derivatives thereof.\r\n\r\nLet me know if you like a PR and if so against which branch.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5VP_8S",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Repetitive or sequential characters (e.g. 'aaaaaa', '1234abcd').\r\n\r\nI think those examples are covered in practice with current requirement as most likely those are leaked.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.1.7** | [MODIFIED, SPLIT TO 2.1.14] Verify that passwords submitted during account registration or password change are checked against an available set of, at least, the top 3000 passwords. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 521 | 5.1.1.2 |\r\n| **2.1.14** | [ADDED, SPLIT FROM 2.1.7, LEVEL L1 > L3] Verify that passwords submitted during account registration or password changes are checked against a set of breached username/password pairs. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | | ✓ | | 5.1.1.2 |\r\n\r\n\r\n> Context-specific words, such as the name of the service, the username, and derivatives thereof.\r\n\r\nThis I have rised myself in https://github.com/OWASP/ASVS/issues/683#issuecomment-539387178\r\n\r\n_Recommendation no 5: add requirement, that password should not contain expected and context-specific words, like user data or site data and \"1337 speaking version\" of them (example: owaspasvs > 0wa5pasvs) (part of passwords blacklist)._\r\n\r\nFrom pen-testing practice, this is one of the most important requirement to have in password topic - people have learned to use \"unique\" passwords per site, but they too often use site data with some other pattern for that.\r\n\r\nWe ask for PR if we have agreement here in the issue, what kind of change we want/need - otherwise it's discussion over PR's and it's not nice to follow or understand later, why some changes were made.",
+      "createdAt": "2023-02-14T19:18:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1430257426",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VSjTO",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I think those examples are covered in practice with current requirement as most likely those are leaked.\r\n\r\nnot all. In a case I had they checked via haveibeenpwend. They were some sequences in there (API) like the examples NIST gave but if you look at the wording of NIST it's much stronger.. So in a retest it was only possible to add two unique chars in a row. \r\n\r\n> Context-specific words, such as the name of the service, the username, and derivatives thereof\r\n\r\nI stumbled over password = username or password = mail address, password = first or last name , password = name of the site, password = service description of the site ....\r\n\r\n",
+      "createdAt": "2023-02-15T08:21:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1430926542",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VSqVy",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": "And to add: I wouldn't rely on leaked PWs only. So assuming  aaaa.... (dots for chars to follow) is in a leaked password list maybe right. But what about bbbb... , ääää...., åååå... or ÇÇÇÇ.... ? Especially for offline attacks that maybe a low handing fruit",
+      "createdAt": "2023-02-15T08:48:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1430955378",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VY2lo",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't agree that allowing mentioned (bbbb... , ääää...., åååå... or ÇÇÇÇ....) passwords make authentication more weak. If we talk about online attacks, amount of attempts must be limited\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.2.1** | [MODIFIED] Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. More than 5 failed authentication attempts per hour for a single account should trigger some sort of reaction or alert. | ✓ | ✓ | ✓ | 307 | 5.2.2 / 5.1.1.2 / 5.1.4.2 / 5.1.5.2 |\r\n\r\nThose passwords/patterns should not be my first 1000 list. And more popular ones exists already in leakage files or APIs. My point with those - in my opinion the benefit from this (proposed new) requirement is with questionable impact or if there is, it is too small to be worth separate requirement. If you think about risk rating - what is the risk for this finding in the report? How much more secure application is with not allowing those passwords? Or the actual security comes from somewhere else.\r\n\r\n**context specific passwords**  - and with context specific password I have clear opposite opinion - both based on my own experience as a pentester. People are using too often context specific words as passwords and those are effective as online attacks even when attempts are limited per user and/or per IP.",
+      "createdAt": "2023-02-16T06:09:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1432578408",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Vcfgq",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": ">  passwords make authentication more weak. If we talk about online attacks, amount of attempts must be limited\r\n\r\nI am in general talking about offline and online attacks. With online attacks only I could be way more relaxed concerning the rules if appropriate measures are in place. That's why bbbb... , ääää...., åååå... or ÇÇÇÇ are important to avoid. Don't know whether you know how offline attacks with hashcat and friends work? Also it's a NIST requirement. and I believe we should not weaken that. \r\n\r\nWhy do you believe OWASP should not follow that? \r\n\r\nThis is also true for context specific passwords. This is just crazy. Why should we not say no to \"<firstname>.<lastname>@companyname.tld as both the username and The password.\r\n\r\nOr  ~\"(<firstname>| <lastname>|<firstname>.<lastname>)\" as a password, especially  when the login is \"<firstname>.<lastname>@companyname.tld.\r\n\r\nThis is the first thing I try as a pentester for targetted attacks as it's the lowest handing fruit. And probably smart black hats too.",
+      "createdAt": "2023-02-16T18:31:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1433532458",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VjB35",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Against offline attack - first, how did you get the hashes, or were there hashes at all?\r\n\r\nIf they were correctly hashed\r\n* password must be long enough against brute force\r\n* do not contain _only_ dictionary words\r\n* do not predictable phrases by context\r\n\r\nPersonally I watch this _Repetitive or sequential characters (e.g. ‘aaaaaa’, ‘1234abcd’)._  as composition rule and we have requirement \"_Verify that there are no password composition rules limiting the type of characters permitted. There should be no requirement for upper or lower case or numbers or special characters._\"\r\n\r\nMy question stays:\r\n> If you think about risk rating - what is the risk for this finding in the report? How much more secure application is with not allowing those passwords? Or the actual security comes from somewhere else?",
+      "createdAt": "2023-02-17T20:43:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1435246073",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VjMg2",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Sorry, I am done with discussing this. If the project thinks, you need to be less strict than NIST, fine.\r\n\r\nI believe you shouldn't",
+      "createdAt": "2023-02-17T21:28:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1435289654",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VjOG1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I was just testing for a customer their password security and actually I also wanted to link hereto and not only to the NIST password standard (specifically: https://pages.nist.gov/800-63-3/sp800-63b.html#-5112-memorized-secret-verifiers)\r\n> \r\n> But as it turned out, some points in the NIST standard are not in ASVS (https://github.com/OWASP/ASVS/blob/9b80241af66c09f4b8cc75a2d222ca62733e4f5f/5.0/en/0x11-V2-Authentication.md#v21-password-security) if I see that correctly:\r\n> \r\n> * Repetitive or sequential characters (e.g. ‘aaaaaa’, ‘1234abcd’).\r\n> * Context-specific words, such as the name of the service, the username, and derivatives thereof.\r\n> \r\n> Let me know if you like a PR and if so against which branch.\r\n\r\nI would like to see a PR for this. This is all now very standard password advice right from NIST 800-63b. Good stuff!",
+      "createdAt": "2023-02-17T21:33:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "CONFUSED",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1435296181",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VjhXd",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "You seem to have missed a little context here. The bulleted list to which you refer is introduced by, \"For example, the list MAY include, but is not limited to:\" In other words, the bulleted list is there merely to provide some ideas for things to include in the blocklist, not as a requirement that any particular thing be included.\r\n\r\nThe intent of the blocklist is primarily to protect against online attacks, and the throttling requirements limit that to 100 guesses per account. Offline attacks should be protected against using good salted hashing, as memory- and compute-hard as practical. Also strongly consider using a secret-keyed hash or encryption, perhaps as a final step, using a very well protected key (perhaps doing this step in a separate processor, TEE/TPM, or the like).\r\n\r\nIt's a very slippery slope what to include in the blocklist, and if you get carried away with a huge one it's easy to end up with very frustrated users. By the way, the thought on \"context-specific words\" was that perhaps an IRS taxpayer site might have a bunch of people using \"Ihatetaxes\" (or something ruder) as their password, which is why the blocklist needs to be context specific.\r\n\r\nFeel free to tag me if you have any more questions on this.\r\n\r\n**Disclaimer:** Although I am a co-author of SP 800-63B, I am not a NIST employee and the above comments represent my personal opinion, not an official statement from NIST.\r\n\r\n**Hint, hint:** The draft SP 800-63 revision 4 (including SP 800-63B-4) is currently out for public comment; NIST would welcome public comments through March 24, 2023. https://pages.nist.gov/800-63-4/",
+      "createdAt": "2023-02-17T23:01:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1435375069",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VkFNz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Sorry, I am done with discussing this. If the project thinks, you need to be less strict than NIST, fine.\r\n\r\nNo hard feelings. All requirements should have clear argumentation, why it exists. Just the fact it exists somewhere else (in this case as optional consideration), is not enough. The reason is simple - if we have questionable requirements we will have in the future issues opened with question - what is the point of the requirements and what risk it mitigates. We just removed 2 requirements which also came as optional from NIST (ASVS v4.0.3 requirements 2.1.8, 2.1.12), so I have already went through this \"lifecycle\".\r\n\r\nThe question I asked here - to have arguments, why some requirements should exists and I provided my arguments.\r\n\r\nI have proposed requirements and then got arguments against my proposals which I did not have in my mind yet - this is the way how to learn and how to get things clear. This is normal process. Just it's important to read everything pragmatically. In short - @drwetter please keep opening issues with your ideas and concerns, with this issue I think there is material for one new requirement and I'll focus on that.\r\n\r\n@jmanico - reading through @jimfenton response which says the same points like I did, so you still stand for \"PR\"? Pushing some thumbs down is not really ... just arguments please.\r\n\r\nWe should have easy answers for those questions:\r\n\r\n> If you think about risk rating - what is the risk for this finding in the report? How much more secure application is with not allowing those passwords? Or the actual security comes from somewhere else?\r\n\r\nTo be clear, just in case I repeat:\r\n\r\n> Repetitive or sequential characters (e.g. ‘aaaaaa’, ‘1234abcd’).\r\n\r\nI don't think this requirement is with sufficient impact and it's complicated to develop (compared to potential/theoretical benefit) to be worth requirement in ASVS.\r\n\r\n> Context-specific words, such as the name of the service, the username, and derivatives thereof.\r\n\r\nI have used this in pen-tests and I can say (and I have said previously) this is missing requirement from ASVS.",
+      "createdAt": "2023-02-18T08:35:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1435521907",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VvqUd",
+      "author": {
+        "login": "drwetter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Will take care of a PR by the end of the week.\r\n\r\nPS: That were no hard feelings I had. It's just that my desk is full with other things. And If my arguments weren't convincing I'd rather move on. The thing with pw cracking I'd still need to explain. I have a different stance then Jim F.\r\n\r\n\r\n",
+      "createdAt": "2023-02-21T14:08:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1438557469",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5VwpsT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I point out my comment from https://github.com/OWASP/ASVS/issues/1540#issuecomment-1430257426\r\n\r\n> We ask for PR if we have agreement here in the issue, what kind of change we want/need - otherwise it's discussion over PR's and it's not nice to follow or understand later, why some changes were made.",
+      "createdAt": "2023-02-21T17:03:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1438817043",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XhKSB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, there is a lot going on here but I think we need to clarify a few things:\r\n\r\n* As @jimfenton pointed out, the specifics here are in a \"MAY\" section which is probably why they are not in the ASVS to begin with. I think I would interpret @jimfenton's comment as advising general caution in requiring this section (bearing in mind that he was co-author of the NIST document). Remember that we do not have a \"MAY\" concept in ASVS and therefore I don't think this makes us less strict than NIST.\r\n* NIST says in 5.1.1.1 \"_For example, the list MAY include, but is not limited to:... Repetitive or sequential characters (e.g. ‘aaaaaa’, ‘1234abcd’)._\" but then a few lines later says \"_Verifiers SHALL NOT impose other composition rules (e.g., ...prohibiting consecutively repeated characters) for memorized secrets_\" To me this is contradictory and I have raised this question on the call for feedback for revision 4. \r\n* Contradictory or not, blocking repetitive or sequential characters feels like composition rules which both us and NIST have been arguing against for ages now :) So for this reason and the contradiction reason in the previous point, I agree with @elarlang on this particular point that I don't think we should be including it.\r\n* I think there is slightly more merit to the \"context-specific words\" requirement. I wonder how much improvement impact it would really have compared to effort it would take? However, it seems like both @elarlang and @drwetter and probably @jmanico support including this so I would be prepared to support as well.\r\n\r\nAnything I have not covered?",
+      "createdAt": "2023-03-14T15:23:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1468310657",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XiHHd",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think there is slightly more merit to the \"context-specific words\" requirement. I wonder how much improvement impact it would really have compared to effort it would take? However, it seems like both @elarlang and @drwetter and probably @jmanico support including this so I would be prepared to support as well.\r\n\r\nIn reality, this is one of the lowest hanging fruit for web apps where authentication is done with username-password. Go-ahead from my side. Rest is said in: https://github.com/OWASP/ASVS/issues/1540#issuecomment-1435521907",
+      "createdAt": "2023-03-14T17:49:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1468559837",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5YoMSH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm with Elar, go ahead from my side.",
+      "createdAt": "2023-03-28T13:51:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1486931079",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c8siN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So @elarlang @drwetter I am open to a PR related to context specific words but I would like any requirement to make it clear what is actually required.",
+      "createdAt": "2023-05-23T13:49:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1559414925",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dV3ri",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ">  but I would like any requirement to make it clear what is actually required.\r\n\r\nCan you explain that?",
+      "createdAt": "2023-05-28T08:50:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1566014178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dexRN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > but I would like any requirement to make it clear what is actually required.\r\n> \r\n> Can you explain that?\r\n\r\nAs I understand it, you want to open a PR with a new requirement focused on \"context-specific words\". I am saying that I am comfortable with that but the text of the requirement needs to make it very clear what the the implementer actually needs to do or what the tester needs to verify as it seems like it could be very complicated. E.g. are we just expecting them to chose some basic words like the company name and user name or are we expecting them to run a tool like https://github.com/digininja/CeWL and disallow anything it returns? I can see this being a difficult to interpret requirement otherwise.",
+      "createdAt": "2023-05-30T12:27:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1568347213",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5gfv8O",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From NIST: https://pages.nist.gov/800-63-4/sp800-63b.html#memsecretver\r\n\r\n_When processing requests to establish and change memorized secrets, verifiers SHALL compare the prospective secrets against a blocklist that contains values known to be commonly used, expected, or compromised. For example, the list MAY include, but is not limited to:_\r\n\r\n  * _Context-specific words, such as the name of the service, the username, and derivatives thereof._\r\n\r\nStarter for the proposal:\r\n_Verify that passwords can not contain context-specific words, such as information of the service (name, host, address) and information of the user (username, names, email, phone, etc), and derivatives thereof._\r\n\r\nProblematic parts to solve:\r\n  *  \"and derivates there of\" I just copied from NIST at the moment but I think it's not clear enough for practical test. It should just cover all classical letter-to-number 1337-5p3ak1nG changes.\r\n  * \"can not contain\" can cause misfire when company, service, user or whatever other name is just 2-3 letters and then password can not contain that.\r\n",
+      "createdAt": "2023-07-03T17:43:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1618935566",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hBM2v",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that both the problems you highlight are highly significant and I am not sure we will successfully come up with a requirement that can overcome them...",
+      "createdAt": "2023-07-09T12:40:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1627704751",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hBh4-",
+      "author": {
+        "login": "jimfenton"
+      },
+      "authorAssociation": "NONE",
+      "body": "The key words here are, \"For example,\". This is just a list of ideas for things that might be included in the blocklist, and is not intended to be normative at all. That said, some of the suggestions do seem oddly specific, and more general examples might be more appropriate.",
+      "createdAt": "2023-07-09T18:31:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1627790910",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5lR04u",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Maybe one big ASVS requirement that lists possibilities just like NIST? This is not ideal but would at least address this gap.",
+      "createdAt": "2023-08-30T13:24:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1699171886",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5lZhbs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In practice I feel it's so important problem to solve that it is worth separate requirement. And in general I like more one thing per requirement solutions.",
+      "createdAt": "2023-08-31T14:45:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1701189356",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5lZ0u3",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> In practice I feel it's so important problem to solve that it is worth a separate requirement. And in general, I like more one thing per requirement solutions.\r\n\r\nI can get behind that. That seems very reasonable, @elarlang \r\n\r\nThe only problem is - some of these requirements are just \"for example\" and not \"you must do this\" but we still should address it in some way. Any suggestions on how to make that happen?",
+      "createdAt": "2023-08-31T15:31:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1701268407",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5lZ7ir",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Any suggestions on how to make that happen?\r\n\r\nYes, if it makes sense, we make new requirement and if it does not, we don't make :) No need to overthink.",
+      "createdAt": "2023-08-31T15:49:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1701296299",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5lZ9r5",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "You’re missing the point Elar. These requirements from NIST are part of the things to consider and are not hard requirements, but we still should put them out there.",
+      "createdAt": "2023-08-31T15:54:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1701305081",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5laGNi",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I said with kept that in mind and it is still valid (for me).",
+      "createdAt": "2023-08-31T16:16:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1701340002",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l7H6b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The only problem is - some of these requirements are just \"for example\" and not \"you must do this\" but we still should address it in some way. Any suggestions on how to make that happen?\r\n\r\nTo me, the key challenge is that if we are providing examples rather than explicit rules, how does someone know when they are complying and how does someone validate that an organization is complying?\r\n\r\nThe only way that I can think of handling this is with two requirements along the lines of:\r\n\r\n> Verify that a list of context specific words are documented in order to prevent their use in passwords.\r\n\r\n> Verify that the documented list of context specific words is used to prevent easy to guess passwords being created.\r\n\r\n(this second requirement could also be rolled into either [2.1.7 or 2.1.14](https://appsecg.host/2.1).",
+      "createdAt": "2023-09-07T11:37:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1709997723",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l8wBl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree this is a problem. But there are no hard and fast specific rules for password policy, implementors have a wide variety of *good* choices to choose from. \r\n\r\nSo I suggest we make a specific ASVS rule like \"_Implementors should choose 3 or more password rules from the following options: a,b,c,d,e,f,g.\"_ to turn the choice into a specific rule.",
+      "createdAt": "2023-09-07T16:08:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1710424165",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nGc7o",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I agree this is a problem. But there are no hard and fast specific rules for password policy, implementors have a wide variety of _good_ choices to choose from.\r\n> \r\n> So I suggest we make a specific ASVS rule like \"_Implementors should choose 3 or more password rules from the following options: a,b,c,d,e,f,g.\"_ to turn the choice into a specific rule.\r\n\r\nI think this approach is problematic @jmanico \r\n\r\nI think that giving them a mix and match makes the standard hard to implement and verify, I would rather give them solid requirements. Do you have major objection to what I mentioned above?\r\n\r\n> Verify that a list of context specific words are documented in order to prevent their use in passwords.\r\n\r\n> Verify that the documented list of context specific words is used to prevent easy to guess passwords being created.\r\n\r\n(this second requirement could also be rolled into either [2.1.7 or 2.1.14](https://appsecg.host/2.1).",
+      "createdAt": "2023-09-21T14:51:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1729744616",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nH31O",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm comfortable with your suggestion Josh",
+      "createdAt": "2023-09-21T18:44:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1730116942",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nXpst",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth  - Ready to move I guess",
+      "createdAt": "2023-09-25T18:23:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1734253357",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ndREF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Created #1732 \r\nI believe the new requirement being added to V1 matches the new definition for it",
+      "createdAt": "2023-09-26T15:01:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1540#issuecomment-1735725317",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2023-02-13T09:55:06Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1540,
+  "state": "CLOSED",
+  "title": "password security",
+  "url": "https://github.com/OWASP/ASVS/issues/1540"
+}

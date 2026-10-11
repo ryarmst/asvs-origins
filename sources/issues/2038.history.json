@@ -1,0 +1,159 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2024-08-31T09:07:13Z",
+      "diff": "To address BCPs from https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#name-application-architecture-pa a suggestion is to add the following verifications. Note that this address (closes) #1963. \r\n\r\n\r\n## V51.1 Generic OAuth2 security\r\n\r\nVerify that tokens are only managed by nodes where it's strictly needed, in example avoid having tokens accessible for JavaScript frontends. (L1, L2, L3)\r\n\r\n\r\n## V51.2 Authorization Server\r\n\r\nVerify that refresh tokens for public clients are sender-constrained using e g 'DPoP' (confidential clients requires client authentication). Note that refresh token rotation to prevent e g token replay attacks is no longer recommended, but allowed if motivated. (L1, L2, L3)\r\n\r\nVerify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. Note that L1-L2 applications could also use client-secret authentication and allow public clients. (L3)\r\n\r\nVerify that all token requests requires client authentication and that only sender-constrained (Proof-of-Posession) access-tokens are issued, either using 'mTLS certifcate binding' or 'DPoP'. (L3)\r\n\r\n"
+    },
+    {
+      "editedAt": "2024-08-31T15:33:50Z",
+      "diff": "To address BCPs from https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps#name-application-architecture-pa a suggestion is to add the following verifications. Note that this address (closes) #1963. \r\n\r\n\r\n## V51.1 Generic OAuth2 security\r\n\r\nVerify that tokens are only managed by nodes where it's strictly needed, in example avoid having tokens accessible for JavaScript frontends. (L1, L2, L3)\r\n\r\n\r\n## V51.2 Authorization Server\r\n\r\nVerify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. Note that L1-L2 applications could also use client-secret authentication and allow public clients. (L3)\r\n\r\nVerify that all token requests requires client authentication and that only sender-constrained (Proof-of-Posession) access-tokens are issued, either using 'mTLS certifcate binding' or 'DPoP'. (L3)\r\n\r\n"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2332561428",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> Verify that tokens are only managed by nodes where it's strictly needed, in example avoid having tokens accessible for JavaScript frontends. (L1, L2, L3)\r\n\r\n\"managed\" is somewhat vague?\r\n\r\nWhat about something like: \"Verify that tokens are not sent to components which do not strictly need them. For avoid having tokens accessible for the frontend when they are only needed by the backend. (L1, L2, L3)\"\r\n\r\n<del>Doesn't this also applies to refresh tokens?</del> → Sorry, I misread your text :)",
+          "recorded_at": "2024-09-08T22:07:28Z"
+        },
+        {
+          "body": "> Verify that tokens are only managed by nodes where it's strictly needed, in example avoid having tokens accessible for JavaScript frontends. (L1, L2, L3)\r\n\r\n\"managed\" is somewhat vague?\r\n\r\nWhat about something like: \"Verify that access tokens are not sent to components which do not strictly need them. For avoid having tokens accessible for the frontend when they are only needed by the backend. (L1, L2, L3)\"\r\n\r\nDoesn't this also applies to refresh tokens?",
+          "recorded_at": "2024-09-05T20:19:21Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2337234669",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "Based on the discussion in #2044 a suggestion is to modify/split \r\n\r\n>Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. Note that L1-L2 applications could also use client-secret authentication and allow public clients. (L3)\r\n\r\nto also make it clear that client-authentication (for all confidential clients, including code and clients-credentials) must be sufficient for the level of security. Perhaps have two verifications like this (where the first one for all levels and the second only for L3): \r\n\r\n> Verify that all confidential clients are configured to use secure client authentication. For L1 cryptographically secure client secrets using basic authentication can be used, while stronger methods (i. e. mTLS or private-key-jwt) are only recommended. (L1,L2,L3)\r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. (L3) \r\n\r\nI think this works, but then we have native mobile apps where it is common to have public clients (where all OAuth is done in the app). Some might use OIDC CIBA or integrate authorization for the app with other authentication protocols (in the Nordic countries this is often called BankID) which might not use OAuth at all, but sometimes this is also integrated with OAuth/OIDC.\r\n\r\nI think it is hard to capture this in verifications because it depends on context and threat models etc...\r\n  \r\nI like having the L3 verification to say just: \r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. (L3) \r\n\r\nAnd then (for L3 applications and maybe also L2?) you have to do your own risk assessment and mitigations (e g PKCE, Reference-tokens, DPoP) if you don´t follow this and introduce public client solutions or use other (weaker) client authentication methods. Or should we try and add something about native mobile apps to capture this?",
+          "recorded_at": "2024-09-09T06:31:04Z"
+        },
+        {
+          "body": "Based on the discussion in #2044 a suggestion is to modify/split \r\n\r\n>Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. Note that L1-L2 applications could also use client-secret authentication and allow public clients. (L3)\r\n\r\nto also make it clear that client-authentication (for all confidential clients, including code and clients-credentials) must be sufficient for the level of security. Perhaps have two verifications like this (where the first one for all levels and the second only for L3): \r\n\r\n> Verify that all confidential clients are configured to use secure client authentication. For L1 cryptographically secure client secrets using basic authentication can be used, while stronger methods (i. e. mTLS or private-key-jwt) are only recommended. (L1,L2,L3)\r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. (L3) \r\n\r\nI think this works, but then we have native mobile apps where it is common to have public clients (where all OAuth is done in the app). Some might use OIDC CIBA or integrate authorization for the app with other authentication protocols (in the Nordic countries this is often called BankID) which might not use OAuth at all, but sometimes this is also integrated with OAuth/OIDC.\r\n\r\nI think it is hard to capture this in verifications because it depends on context and threat models etc...\r\n  \r\nI like having just \r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. (L3) \r\n\r\nAnd then (for L3 applications and maybe also L2?) you have to do your own risk assessment and mitigations (e g PKCE, Reference-tokens, DPoP) if you don´t follow this and introduce public client solutions or use other (weaker) client authentication methods. Or should we try and add something about native mobile apps to capture this?",
+          "recorded_at": "2024-09-09T06:29:27Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2352121417",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "9.3.3 covers the mTLS parts of \r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. Note that L1-L2 applications could also use client-secret authentication and allow public clients. (L3)\r\n\r\n> Verify that all token requests requires client authentication and that only sender-constrained (Proof-of-Posession) access-tokens are issued, either using 'mTLS certifcate binding' or 'DPoP'. (L3)\r\n\r\nbut 9.3.3 does not address OAuth sender-constrained tokens and strong client authentication (without mTLS).\r\n\r\nA suggestion is to try and rewrite this (perhaps merge as one) in a more general way as @elarlang suggested, and also check for overlap with other suggested OAuth verifications like in #2040 \r\n",
+          "recorded_at": "2024-09-16T06:42:47Z"
+        },
+        {
+          "body": "9.3.3 covers the mTLS parts of \r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. Note that L1-L2 applications could also use client-secret authentication and allow public clients. (L3)\r\n\r\n> Verify that all token requests requires client authentication and that only sender-constrained (Proof-of-Posession) access-tokens are issued, either using 'mTLS certifcate binding' or 'DPoP'. (L3)\r\n\r\nbut 9.3.3 does not address OAuth sender-constrained tokens and strong client authentication (without mTLS).\r\n\r\nA suggestion is to try and rewrite this (perhaps merge as one) in a more general way as @elarlang suggested, and also check overlap with other suggested OAuth verifications like in #2040 \r\n",
+          "recorded_at": "2024-09-16T06:42:16Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2356459177",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I try to get the general \"token scope\" requirement in. We should have \"positive\" requirement to say, what must be achieved (instead of saying, what must not be done).\r\n\r\nSo my proposal for this is:\r\n> Verify that tokens are only sent to components that strictly need them. For example, avoid having access or refresh tokens accessible for the frontend when they are only needed by the backend.\r\n\r\nSection: \"Generic OAuth2 and OIDC security\"\r\n\r\nping @randomstuff @TobiasAhnoff ",
+          "recorded_at": "2024-09-17T17:10:02Z"
+        },
+        {
+          "body": "I try to get the general \"token scope\" requirement in. We should have \"positive\" requirement to say, what must be achieved (instead of saying, what must not be done).\r\n\r\nSo my proposal for this is:\r\n> Verify that tokens are only sent to components that strictly need them. For example, avoid having access or refresh tokens accessible for the frontend when they are only needed by the backend.\r\n\r\nping @randomstuff @TobiasAhnoff ",
+          "recorded_at": "2024-09-17T17:03:31Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2357571668",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "One requirement is now in the document as:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.1.2** | [ADDED] Verify that tokens are only sent to components that strictly need them. For example, avoid having access or refresh tokens accessible for the frontend when they are only needed by the backend. | ✓ | ✓ | ✓ |\r\n\r\nIf there is need to have changes into this requirement, I prefer we open a separate issue for that.\r\n\r\nThis issue stays open as here is another one or two requirements (https://github.com/OWASP/ASVS/issues/2038#issuecomment-2352121417) to discuss.",
+          "recorded_at": "2024-09-18T06:50:04Z"
+        },
+        {
+          "body": "One requirement is now in the document as:\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.1.2** | [ADDED] Verify that tokens are only sent to components that strictly need them. For example, avoid having access or refresh tokens accessible for the frontend when they are only needed by the backend. | ✓ | ✓ | ✓ |\r\n\r\nIf there is need to have changes into this requirement, I prefer we open a separate issue for that.\r\n\r\nThis issue stays open as here is another one or two requirements to discuss.",
+          "recorded_at": "2024-09-18T06:00:17Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2363718466",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "@randomstuff  Perhaps a misunderstanding, the suggestion is to require confidential clients for L3 (not allowing any public browser-based clients), and \"native mobile apps\" was an example of clients that often are public (even if we want confidential clients).\r\n \r\nPerhaps a dumb question from me, but do you agree that we should have this for L3?\r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'.\r\n\r\nSince different kinds of native apps (\"non-browser\" apps)  can be regarded as confidential clients (can be trusted with client secretes) and they can manage them using dynamic client registration (if needed)?\r\n\r\n",
+          "recorded_at": "2024-09-20T13:17:57Z"
+        },
+        {
+          "body": "@randomstuff  Perhaps a misunderstanding, the suggestion is to require confidential clients for L3 (not allowing any public web clients), and \"native mobile apps\" was an example of clients that often are public (even if we want confidential clients).\r\n \r\nPerhaps a dumb question from me, but do you agree that we should have this for L3?\r\n\r\n> Verify that all clients are confidential and configured to use strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'.\r\n\r\nSince different kinds of native apps (\"non-browser\" apps)  can be regarded as confidential clients (can be trusted with client secretes) and they can manage them using dynamic client registration (if needed)?\r\n\r\n",
+          "recorded_at": "2024-09-20T13:17:19Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2373764193",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "As discussed in #2042, we would not want to repeat in the PAR section: \"The authorization server must enforce client authentication for the PAR endpoint for confidential clients.\" On the other hand, we might want to make sure that the PAR endpoint, the revocation endpoint and so on are indeed protected by client authentication. So, would it be a good idea to include some examples here? Something in the line of,\r\n\r\n> … for backchannel endpoints such as the token endpoint, the token revocation endpoint, the PAR endpoint, the CIBA backchannel authentication endpoint, etc.",
+          "recorded_at": "2024-09-25T11:03:36Z"
+        },
+        {
+          "body": "As discussed in #2042, we would not want to repeat in the PAR section: \"The authorization server must enforce client authentication for the PAR endpoint for confidential clients.\" On the other hand, we might want to make sure that the PAR endpoint, the revocation endpoint and so on are indeed protected by client authentication. So, would it be a good idea to include some examples here? Something in the line of,\r\n\r\n> … for backchannel endpoints such as the token endpoint, the token revocation endpoint, the PAR endpoint, etc.",
+          "recorded_at": "2024-09-25T11:02:29Z"
+        },
+        {
+          "body": "As discussed in #2042, we would not want to repeat in the PAR section: \"The authorization server must enforce client authentication for the PAR endpoint for confidential clients.\" On the other hand, we might want to make sure that the PAR endpoint, the revocation endpoint and so on are indeed protected by client authentication. So, would it be a good idea to include some examples here? Something in the line of,\r\n\r\n> … for backend-to-backend endpoints such as the token endpoint, the token revocation endpoint, the PAR endpoint, etc.",
+          "recorded_at": "2024-09-25T11:02:06Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2393951798",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "> How the authorization server technically can require it?\r\n\r\n1) By forcing a client registration and approval process (usually just a one time event) (Some registration processes can require a full audit of the client if the server owner wants)\r\n2) By forcing client authentication like mTLS or other client secret",
+          "recorded_at": "2024-10-04T15:23:06Z"
+        },
+        {
+          "body": "> How the authorization server technically can require it?\r\n\r\n1) By forcing a client registration and approval process (usually just a one time event)\r\n2) By forcing client authentication like mTLS or other client secret",
+          "recorded_at": "2024-10-04T15:22:39Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2401584611",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Goes in as:\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.10** | [ADDED] Verify that the client is confidential and the authorization server requires the use of strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. | | | ✓ |\r\n| **51.2.11** | [ADDED] Verify that the authorization server issues only sender-constrained (Proof-of-Posession) access tokens, either using mTLS certificate binding or Demonstration of Proof of Possession (DPoP). | | | ✓ |\r\n\r\n---\r\n\r\n> I am wondering if \"strong client authentication method\" would need be reworded to be more precise.\r\n\r\nThere are examples given, so it's not just an abstract \"more precise\". If there is better wording to propose, we can update.\r\n",
+          "recorded_at": "2024-10-09T07:46:28Z"
+        },
+        {
+          "body": "Goes in as:\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.10** | [ADDED] Verify that the client is confidential and the authorization server requires the use of strong client authentication methods, i. e. 'mTLS' or 'private-key-jwt'. | | | ✓ |\r\n| **51.2.11** | [ADDED] Verify that the authorization server issues only sender-constrained (Proof-of-Posession) access tokens, either using mTLS certificate binding or Demonstration of Proof of Possession (DPoP). | | | ✓ |\r\n\r\n> I am wondering if \"strong client authentication method\" would need be reworded to be more precise.\r\n\r\nThere are examples given, so it's not just an abstract \"more precise\". If there is better wording to propose, we can update.\r\n",
+          "recorded_at": "2024-10-09T07:46:13Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2038#issuecomment-2402016180",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> There are examples given, so it's not just an abstract \"more precise\"\r\n\r\nWhat I meant was: Should the main part of the sentence (\"Verify that the client is confidential and the authorization server requires the use of strong client authentication methods\") somehow describe what are the features of these authentication methods which makes them strong in order to motivate the intent behind the requirement.\r\n\r\nI believe that important characteristics from the strong client authentication methods are that:\r\n\r\n1) they are resistant to replay attacks;\r\n2) the AS never has access to the client credentials (because they are based on public-key cryptography).\r\n\r\nIf we only consider (1) but not (2), then `client_secret_jwt` would be considered as a strong client authentication method.\r\n\r\nThe intent of the proposed wording is to disallow `client_secret_jwt` because this is not as safe as `private_key_jwt` because the AS must have access to the shared secret to validate the JWT. This interpretation is consistent with [draft-ietf-oauth-security-topics-24](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#section-2.5): \r\n\r\n> It is RECOMMENDED to use asymmetric (public-key based) methods for client authentication such as mTLS [[RFC8705](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#RFC8705)] or using signed JWTs (\"Private Key JWT\") in accordance with [[RFC7521](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#RFC7521)] and [[RFC7523](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#RFC7523)] (in [[OpenID.Core](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#OpenID.Core)] defined as the client authentication method private_key_jwt). When such methods for client authentication are used, authorization servers do not need to store sensitive symmetric keys, making these methods more robust against a number of attacks.\r\n\r\nSo I guess my question is: Is it clear enough in the current wording whether \"strong client authentication method\" would include methods based on a shared secret such as `client_secret_jwt`? Or should we say something like:\r\n\r\n> [ADDED] Verify that the client is confidential and the authorization server requires the use of strong client authentication methods (based on public-key cryptography and resistant to replay attacks), i. e. 'mTLS' or 'private-key-jwt'.",
+          "recorded_at": "2024-10-09T11:07:36Z"
+        },
+        {
+          "body": "> There are examples given, so it's not just an abstract \"more precise\"\r\n\r\nWhat I meant was: Should the main part of the sentence (\"Verify that the client is confidential and the authorization server requires the use of strong client authentication methods\") somehow describe what are the features of these authentication methods which makes them strong in order to motivate the intent behind the requirement.\r\n\r\nI believe that important characteristics from the strong client authentication methods are that:\r\n\r\n1) they are resistant to replay attacks;\r\n2) the AS never has access to the client credentials (because they are based on public-key cryptography).\r\n\r\nIf we only consider (1) but not (2), then `client_secret_jwt` would be considered as a strong client authentication method.\r\n\r\nThe intent of the proposed wording is to disallow `client_secret_jwt` because this is not as safe as `private_key_jwt` because the AS must have access to the shared secret to validate the JWT.\r\n\r\nThis interpretation is consistent with [draft-ietf-oauth-security-topics-24](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#section-2.5): \r\n\r\n> It is RECOMMENDED to use asymmetric (public-key based) methods for client authentication such as mTLS [[RFC8705](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#RFC8705)] or using signed JWTs (\"Private Key JWT\") in accordance with [[RFC7521](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#RFC7521)] and [[RFC7523](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#RFC7523)] (in [[OpenID.Core](https://www.ietf.org/archive/id/draft-ietf-oauth-security-topics-24.html#OpenID.Core)] defined as the client authentication method private_key_jwt). When such methods for client authentication are used, authorization servers do not need to store sensitive symmetric keys, making these methods more robust against a number of attacks.\r\n\r\nSo I guess my question is: Is it clear enough in the current wording whether \"strong client authentication method\" would include methods based on a shared secret such as `client_secret_jwt`? Or should we say something like:\r\n\r\n> [ADDED] Verify that the client is confidential and the authorization server requires the use of strong client authentication methods (based on public-key cryptography and resistant to replay attacks), i. e. 'mTLS' or 'private-key-jwt'.",
+          "recorded_at": "2024-10-09T11:06:42Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,444 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nBasically, it must follow RFC 6266: \"Use of the Content-Disposition Header Field in the Hypertext Transfer Protocol (HTTP)\"\r\nhttps://tools.ietf.org/html/rfc6266#section-5\r\n\r\nProposal (2023-04-29 updated requirement text and added alternative category):\r\n* Category: V12.5 \"File and Resources > File Download\" OR \"V5.3 Output Encoding and Injection Prevention\"\r\n* Verify that when Content-Disposition header is used then filename and filename* attribute values are correctly sanitized and encoded.\r\n* Level: 1, 2, 3\r\n* CWE: ?\r\n  * [CWE-172](https://cwe.mitre.org/data/definitions/172.html) - CWE-172: Encoding Error\r\n\r\nNote: `Content-Disposition` header may be used with attachment or inline, so we can not limit requirement text only for \"download file\" functionality.\r\n\r\nWhy: if not converted correctly, it may give \"header injection\" possibility\r\n\r\nSomething like that (even this one is for mails):\r\n* https://github.com/PHPMailer/PHPMailer/security/advisories/GHSA-f7hx-fqxw-rvvj\r\n\r\nUpdate:\r\n* `filename` - only characters from ISO-8859-1 can be used, value bust be sanitized\r\n* `filename*` - can be presented in chosen charset (utf-8) and need to be: sanitized + encoded to charset + urlencoded",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5Rt_OB",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "I'm commenting because I have been researching this issue.\r\n\r\n----------\r\n\r\nBasically, it is better to conform to the RFC or WHAT WG.\r\nHowever, the WHATWG recommendation is URL Encode to `filename`.\r\n\r\nWHATWG HTML Spec:\r\nhttps://html.spec.whatwg.org/#multipart-form-data\r\n\r\n> For field names and filenames for file fields, the result of the encoding in the previous bullet point must be escaped by replacing any 0x0A (LF) bytes with the byte sequence `%0A`, 0x0D (CR) with `%0D` and 0x22 (\") with `%22`. The user agent must not perform any other escapes.\r\n\r\nChrome and Firefox use the URL Encode method.\r\n\r\n---------------\r\n\r\nHTTP Clinet and other systems basically used escaping with  `\\` .\r\nThe same is true of Email client. (e.g. Gmail)\r\n\r\n * `\"` --> `\\\"`\r\n * `\\n` --> `\\\\n`\r\n * `\\r` --> `\\\\r`\r\n\r\n`\"` escaping is necessary because field names, file extension, etc..  are tampered with when filenames such as the following are inserted into Content-Disposition.\r\n\r\n```\r\nInput filename:\r\nmalicious.sh\"; name=\"field2\"; dummy=\"abc.txt\r\n\r\n\r\nOutput Content-Disposition:\r\n\r\nContent-Disposition: form-data; name=\"field1\"; filename=\"malicious.sh\"; name=\"field2\"; dummy=\"abc.txt\"\r\n```\r\n\r\nSimilarly, I have confirmed that `filename*` can be RFD if it can generate the following Content-Disposition when URL Encoding is not done. (This is only valid in Firefox, though.)\r\n```\r\nContent-Disposition: attachment; filename*=utf-8''malicious.sh%00'normal.txt\r\n```\r\n\r\n\r\n--------------\r\n\r\nExamples of problematic cases include:\r\n\r\n- HTTP Request > multipart (HTTP Client & Browser)\r\n  * https://github.com/jnunemaker/httparty/security/advisories/GHSA-5pq7-52mg-hr42\r\n  * https://bugzilla.mozilla.org/show_bug.cgi?id=1556711\r\n- HTTP Response > HTTP Header (Web Framework)\r\n  * https://github.com/advisories/GHSA-8x94-hmjh-97hq \r\n  * https://security.snyk.io/vuln/SNYK-JAVA-IOKTOR-2980134\r\n- Email Client > multipart \r\n  * https://github.com/python/cpython/issues/100612\r\n\r\n90% of the problems were either a lack of escaping of the `\"` in `filename` or a lack of escaping of CRLF.\r\nOnly `Ktor` had a problem with RFD due to missing escaping of `filename*` .\r\n\r\n-------------\r\n\r\nImplimentetion example\r\n\r\nSpring:\r\nhttps://github.com/spring-projects/spring-framework/blob/4cc91e46b210b4e4e7ed182f93994511391b54ed/spring-web/src/main/java/org/springframework/http/ContentDisposition.java#L259-L267\r\n\r\nSymphony:\r\nhttps://github.com/symfony/symfony/blob/123b1651c4a7e219ba59074441badfac65525efe/src/Symfony/Component/Mime/Header/ParameterizedHeader.php#L128-L133\r\n\r\nGolang:\r\nhttps://github.com/golang/go/blob/1e7e160d070443147ee38d4de530ce904637a4f3/src/mime/multipart/writer.go#L132-L136\r\n\r\n--------------\r\n\r\nI looked at about 50-80 well-known modules, and about 20% of them retained this vulnerability, \r\nso I think it is very significant that clear requirements are stated in the ASVS.\r\n",
+      "createdAt": "2023-01-04T14:37:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-1371009921",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TVt4J",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps [CWE - CWE-838: Inappropriate Encoding for Output Context (4.9)](https://cwe.mitre.org/data/definitions/838.html) is more relevant.",
+      "createdAt": "2023-01-20T10:38:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-1398201865",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nXooy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As we now have RFC references in requirement texts, we can use it for this one as well.\r\n\r\nOne candidate for CWE is CWE-641 Improper Restriction of Names for Files and Other Resources. There are no good one as the requirement asks validation+sanitization+encoding.",
+      "createdAt": "2023-09-25T18:20:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-1734249010",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nb2qe",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "I have written a report on this issue.\r\nhttps://gist.github.com/motoyasu-saburi/1b19ef18e96776fe90ba1b9f910fa714\r\n\r\nAlso, I have read some RFCs in broad strokes, but the escaping requirement was not clearly stated.\r\n\r\n```\r\nhttps://datatracker.ietf.org/doc/html/rfc2231\r\nhttps://datatracker.ietf.org/doc/html/rfc2616\r\nhttps://datatracker.ietf.org/doc/html/rfc5987\r\nhttps://datatracker.ietf.org/doc/html/rfc6266\r\nhttps://datatracker.ietf.org/doc/html/rfc7578\r\nhttps://datatracker.ietf.org/doc/html/rfc8187\r\n```\r\n\r\nThe format of `form-data > filename` is described in the following RFC.\r\n\r\nRFC2616 (obsolete)\r\nhttps://datatracker.ietf.org/doc/html/rfc2616#section-19.5.1\r\n```\r\nfilename-param = \"filename\" \"=\" quoted-string\r\n```\r\n\r\nRFC6266 (standard)\r\nhttps://datatracker.ietf.org/doc/html/rfc6266#section-4.1\r\n```\r\nfilename-param = \"filename\" \"=\" value\r\n                            | \"filename*\" \"=\" ext-value\r\n....\r\nvalue     = <value, defined in [RFC2616], Section 3.6>\r\n              ; token | quoted-string\r\n```\r\n\r\nI reported a same problem to Scala's Web Framework (Playframework), \r\nand the maintainer investigated the issue in considerable detail.\r\nhttps://github.com/playframework/playframework/pull/11571\r\n\r\nI hope this will be helpful.",
+      "createdAt": "2023-09-26T11:34:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-1735355038",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ndhjf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "that is interesting @motoyasu-saburi \r\n\r\nDo you think you could try and formulate a requirement based on the conclusions of your research?",
+      "createdAt": "2023-09-26T15:35:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-1735792863",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IFwKJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This was tagged as V5 but my inclination is to keep it as V12 as it is specific to files and V5 is a little overloaded :)\r\n\r\n@motoyasu-saburi it would be still be cool to get a suggested requirement draft from you :)",
+      "createdAt": "2024-08-12T06:40:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2283209353",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IGROm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's not a wording proposal, but just to throw some direction in:\r\n_Verify that when file names are served in an HTTP header (such as Content-Disposition), file names are encoded or sanitized (e. g. according to RFC6266)._",
+      "createdAt": "2024-08-12T08:09:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2283344806",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IQxW1",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "Sorry I have not been able to make suggestions.\r\n\r\nAdditional materials were prepared late last year and are listed in passing.\r\nhttps://codeblue.jp/2023/result/pdf/cb23%EF%BD%B0filename-in-content-disposition-is-a-landmine-vulnerability-caused-by-ambiguous-requirements-by-motoyasu-saburi.pdf\r\n\r\n------------\r\n> Verify that when file names are served in an HTTP header (such as Content-Disposition), file names are encoded or sanitized (e. g. according to RFC6266).\r\n\r\nI thought the text  here was generally good.\r\nPersonally, I think it is a difficult area to decide whether `RFC6266` should be listed or not.\r\nThe reason is that there is no double-quote escaping requirement in this RFC.\r\n\r\n(In fact, many services were implemented in accordance with the RFC and were vulnerable)\r\n\r\n",
+      "createdAt": "2024-08-13T12:11:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2286097845",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IQ4fB",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "Proposal for V5 side: \r\n_Ensure that filenames are encoded or escaped to prevent request tampering with multipart format. (e.g. https://html.spec.whatwg.org/#multipart-form-data)_ ",
+      "createdAt": "2024-08-13T12:24:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2286127041",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IQ7fo",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Why escaped? Typically I suggest we never use the submitted filename and to save files using an internal filename and not a user driven filename.",
+      "createdAt": "2024-08-13T12:29:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2286139368",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IaqSI",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "@jmanico \r\n> Why escaped?\r\nThis is because there is no clear standard requirement other than the WhatWG's HTMLSpec.\r\nTherefore, some application implementations use `\\` for escaping, while others use percent encoding (I personally recommend percent encoding because it is easier to implement and less prone to bugs).\r\n(Personally, I recommend percent encoding because it is easier to implement and less prone to bugs.)\r\n\r\nMy memory is a little fuzzy, \r\nbut I think in the case of Gmail, escaping was done with `\\`  ( `\"` --> `\\\"` ).\r\n\r\n> Typically I suggest we never use the submitted filename and to save files using an internal filename and not a user driven filename.\r\n\r\nThere are quite a few Web services that make requests including file names.\r\nFor example, e-mail services and e-commerce sites also have the ability to upload/send files such as images.\r\nSuch services may include the file name sent by the user in the request as it is.\r\n\r\nDoes this answer your question?",
+      "createdAt": "2024-08-14T13:06:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2288690312",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IauUk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Personally, I think it is a difficult area to decide whether RFC6266 should be listed or not.\r\n\r\n> The reason is that there is no double-quote escaping requirement in this RFC.\r\n\r\nIt must be encoded for `filename*` attribute, no?\r\n\r\nAlso the requirement is not limited here only for request tampering - correct encoding is also needed for the functionality to work correctly in every situation, not only when served filename is taken from user-request directly.",
+      "createdAt": "2024-08-14T13:13:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2288706852",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IbehH",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "Since some parts of the story are complicated, we will try to sort it out.\r\n\r\nContent-Disposition is used in two patterns.\r\n1. HTTP Response Header\r\n2. Multipart format\r\n   a. Email\r\n   b. HTTP Request  (multipart/form-data)\r\n\r\nThere are two attributes that specify the filename: `filename` and `filename*`\r\n\r\n`filename`:\r\n* It is used for both HTTP responses header and Multipart.\r\n* The only clear encoding requirement is the **browser standard** “WhatWG > HTML Spec > multipart/form-data”.\r\n    - Need to url encode the letter [ CRLF, Double-Quote ].\r\n*  There is no explicit requirement in the RFC to make [ CRLF,  Double-Quote]  harmless.\r\n   - Various services and OSS may URL Encode CRLF/Double-Quote, convert it to spaces, or escape it with BackSlash.\r\n* If CRLF/Double-Quote is not escaped, the following attack scenario may occur\r\n  - HTTP Response Header: \r\n      *  HTTP Header Injection (CRLF Injection by `\\` Back-Slash)\r\n      * Reflect File Downlaod ( Parameter Tampering by `\"` Double-Quote )\r\n  - Multipart Format:\r\n      - Form/Email Value Tampering (CRLF Injection by `\\` Back-Slash )\r\n      - Form/Email Value Tampering ( Parameter Name Tampering by `\"` Double-Quote )\r\n\r\n\r\n`filename*`\r\n* It is used for HTTP responses header.\r\n* The clear encoding requirement is the  RFC6266 / RFC5987\r\n* If URLEncode is not done, the following attacks may be possible\r\n   - Contend-Disposition Value Tampering ( Parameter Name Tampering by `;`, `\"`, `CRLF`)\r\n* `filename` and `filename*` may be used together. In such cases, filename* may take precedence over filename. (This is an unimportant specification in this Issue.)\r\n\r\nAs mentioned above, the fact that there may or may not be a standard to refer to makes the requirement very complicated.\r\n\r\nThe fact that Content-Dispotion is used in a variety of situations (Email / HTTP Request / Response) also complicates the situation.",
+      "createdAt": "2024-08-14T14:15:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2288904263",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IcWUf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The reason is that there is no double-quote escaping requirement in this RFC.\r\n\r\nDouble quotes must be sanitized in this situation. Sometimes there are no encloser marks used, which means that it is enough to use `;` in filename to have new attribute in the HTTP response header - it means, this one also must be sanitized.\r\n\r\nRethinking about it again, I still stand for my previous proposal (https://github.com/OWASP/ASVS/issues/1390#issuecomment-2283344806)\r\n> Verify that when file names are served in an HTTP header (such as Content-Disposition), file names are encoded or sanitized (e. g. according to RFC6266).\r\n\r\nWe may list here other situations to cover it more cases, but it can be specific here to hilight this one and certain problem. In general we can say, the problem is covered with current requirement 5.3.1 (encoding for `filename*`) + 5.2.2 (sanitization for `filename`) .",
+      "createdAt": "2024-08-14T15:36:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2289132831",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IlVsA",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Rethinking about it again, I still stand for my previous proposal\r\n\r\nI did not fully understand the current specifications.\r\nI think this wording is fine.\r\n\r\n\r\n> Double quotes must be sanitized in this situation. Sometimes there are no encloser marks used, which means that it is enough to use ; in filename to have new attribute in the HTTP response header - it means, this one also must be sanitized.\r\n\r\nAs an addendum, there is the problem that the specifications here are also ambiguous.\r\nAs for here, RFC may or may not say that it should be enclosed in a Double-Quote.`\r\nFor example, rfc6266 allows non-Quoted-String.\r\nHowever, RFC 2616 requires Quoted-String.\r\n\r\n> https://datatracker.ietf.org/doc/html/rfc6266#appendix-A\r\n> o  [RFC 2616](https://datatracker.ietf.org/doc/html/rfc2616) only allows \"quoted-string\" for the filename parameter.\r\n>      This would be an exceptional parameter syntax, and also doesn't\r\n>      reflect actual use.\r\n",
+      "createdAt": "2024-08-15T15:08:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2291489536",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K3Zwn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Previous proposal:\r\n\r\n> Verify that when file names are served in an HTTP header (such as Content-Disposition), file names are encoded or sanitized (e. g. according to RFC6266).\r\n\r\nOk, focus here is the technique to use. Maybe should put the focus to \"vector to mitigate\" and rephrase it to something like:\r\n\r\n> Verify that serving a file name (e. g. in HTTP response header, as email attachment) it is encoded or sanitized (e. g. according to RFC6266) to keep the document structure.\r\n\r\n(note: that I don't like the line above myself as it requires more work, I just try to put one additional direction to find solution here)",
+      "createdAt": "2024-09-04T19:04:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2329779239",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K6k9c",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction. How about:\n\nVerify that file names served (e.g., in HTTP response headers or email attachments) are properly encoded or sanitized (e.g., following RFC 6266) to preserve document structure and prevent injection attacks.\n",
+      "createdAt": "2024-09-05T05:12:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2330611548",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K6-MR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @motoyasu-saburi @tghosth @Sjord - any comments or thoughts?",
+      "createdAt": "2024-09-05T06:35:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2330714897",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K7BMW",
+      "author": {
+        "login": "motoyasu-saburi"
+      },
+      "authorAssociation": "NONE",
+      "body": "I agree with this direction myself.\r\n(At first I thought we should include detailed requirements, but this was a mistake)",
+      "createdAt": "2024-09-05T06:44:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2330727190",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K7Jtr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> At first I thought we should include detailed requirements, but this was a mistake\r\n\r\nIt is not a mistake - technical input gives an opportunity to validate the requirement, and does it cover all the cases. But we took an approach for the ASVS to put more abstract principles as requirements and leave technical or step-by-step guides to testing guides and cheat sheets.",
+      "createdAt": "2024-09-05T07:04:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2330762091",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K7mV9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I also re-open the section question for the proposed requirement:\r\n* V5.3 Output Encoding and Injection Prevention - by requirement decription it fits here.\r\n* V12.5 File Download - it already contains one similar (from functionality perspective) requirement and those fits together. At the moment it is the only requirement in this section. Maybe the section should be called \"Serving a File\"?",
+      "createdAt": "2024-09-05T08:07:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2330879357",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K7veC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like the idea of changing the section to \"serving a file\".\r\n\r\nSince this is very focused on file download, I would like to keep this requirement in v12. There are many requirements that fit into many sections. I would like v12 to be as complete as possible to help folks build file upload/download systems instead of having to look to many sections.\r\n\r\nOr at least have a section at the end of v12 that points to other requirements that are needed for file upload, but I think that is to messy and hard to maintain.",
+      "createdAt": "2024-09-05T08:26:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2330916738",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K8u28",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I like this direction. How about: Verify that file names served (e.g., in HTTP response headers or email attachments) are properly encoded or sanitized (e.g., following RFC 6266) to preserve document structure and prevent injection attacks.\r\n\r\nThis looks good to me\r\n\r\nI think it should stay in V12.5",
+      "createdAt": "2024-09-05T10:31:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2331176380",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K9IiU",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'll handle the PR for the requirement and opened a separate issue (#2066) for discussing the section title, as there is a bit larger picture to keep in mind.",
+      "createdAt": "2024-09-05T11:29:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1390#issuecomment-2331281556",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-09-30T16:35:31Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSfggFQ",
+      "name": "V5 (prev V12)",
+      "description": "",
+      "color": "7412BF"
+    }
+  ],
+  "number": 1390,
+  "state": "CLOSED",
+  "title": "proposal/new requirement - served filename in content-disposition header must follow correct encoding",
+  "url": "https://github.com/OWASP/ASVS/issues/1390"
+}

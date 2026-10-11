@@ -1,0 +1,177 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "There are 18 requirements in these sections. They feel repetitive and sometimes are confusing. I would like to clear them up.\n\nThe first thing I have done is to try and see patterns or repetition.\n\n|  | **Lookup<br>secret** | **Push/<br>SMS OTP** | **TOTP** |\n|---|---|---|---|\n| **Use once** | 2.6.1 | 2.7.3 | 2.8.4 |\n| **Store hashed** | 2.6.2 |  |  |\n| **Randomly generated** | 2.6.3 | 2.7.6 | 2.8.3 |\n| **Long enough token** | 2.6.4 | 2.7.7 |  |\n| **Expire** |  | 2.7.2 | 2.8.1 |\n| **Revocable** |  |  | 2.8.6 |\n\nThere are then another six that seem relatively unique:\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.7.1** | [MODIFIED] Verify that authentication mechanisms using the Public Switched Telephone Network (PSTN) to deliver One-time Passwords (OTPs) via phone or SMS are offered only when alternate stronger methods (such as push notifications) are also offered and when the service provides information on their security risks to users. | 1 | 287 |\n| **2.7.4** | [GRAMMAR] Verify that the secondary communications channel being used is secure and independent of the primary channel. | 1 | 523 |\n| **2.7.8** | [ADDED] Verify that, where push notifications are used for multi-factor authentication, rate limiting or number matching is used to prevent push bombing attacks. | 3 | |\n| **2.8.2** | [GRAMMAR] Verify that symmetric keys used to verify submitted time-based, one-time passwords are highly protected, such as by using a hardware security module or secure operating system based key storage. | 2 | 320 |\n| **2.8.7** | [MODIFIED, LEVEL L2 > L3] Verify that biometric authentication mechanisms are only used as secondary factors together with either something you have or something you know. | 3 | 308 |\n| **2.8.8** | [ADDED] Verify that time-based OTPs are checked based on a time source from a trusted service and not from an untrusted or client provided time. | 3 | 367 |",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6duF-p",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "~~My overall proposal is to reduce this down to less sections. My thought is to have one section for token based MFA, one section for crypto MFA and one section for general considerations.~~\n\n~~I want to remove repetition with some general points that are relevant for all types and then maybe another section of specific requirements.~~\n\n**Edit:** I think this is too difficult, I am going to instead focus on deduplication and will add a new section for this which should eventually come before the specific sections.",
+      "createdAt": "2025-02-09T07:25:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2646106025",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6duKe7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would suggest to start with the following which brings us down from 18 requirements to 14 more specific requirements.\n\n## V2.6 General Multi-factor authentication requirements\n\nThis section provides general guidance that will be relevant to various different multi-factor authentication methods.\n\nThe mechanisms include:\n\n* Lookup Secrets\n* Out-of-Band mechanisms\n* Time based One-time Passwords (TOTPs)\n\nLookup secrets are pre-generated lists of secret codes, similar to Transaction Authorization Numbers (TAN), social media recovery codes, or a grid containing a set of random values. This type of authentication mechanism is considered \"something you have\" since the codes are random so you need to have stored them somewhere.\n\nMore details on out-of-band mechanisms and time based One-time Passwords (TOTPs) mechanism will be provided in subsequent sections.\n\nThe requirements in these sections mostly relate to sections [5.1.2](https://pages.nist.gov/800-63-3/sp800-63b.html#-512-look-up-secrets), [5.1.3](https://pages.nist.gov/800-63-3/sp800-63b.html#-513-out-of-band-devices), [5.1.4.2](https://pages.nist.gov/800-63-3/sp800-63b.html#5142-single-factor-otp-verifiers), [5.1.5.2](https://pages.nist.gov/800-63-3/sp800-63b.html#5152-multi-factor-otp-verifiers), [5.2.1](https://pages.nist.gov/800-63-3/sp800-63b.html#521-physical-authenticators), and [5.2.3](https://pages.nist.gov/800-63-3/sp800-63b.html#523-use-of-biometrics) of [NIST's Guidance](https://pages.nist.gov/800-63-3/sp800-63b.html).\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.6.1** | [MODIFIED, MERGED FROM 2.8.4, SPLIT FROM 2.7.3, COVERS 2.2.6] Verify that lookup secrets, out-of-band authentication requests or codes, and time-based, one-time passwords (TOTPs) are only usable once. | 2 | 308 |\n| **2.6.2** | [MODIFIED, SPLIT TO 2.6.4] Verify that, when being stored in the application's back-end, lookup secrets with less than 112 bits of entropy (19 random alphanumeric characters or 34 random digits) are hashed with an approved password storage hashing algorithm that incorporates a 32-bit random salt. A standard hash function can be used if the secret has 112 bits of entropy or more. | 2 | 330 |\n| **2.6.3** | [MODIFIED, MERGED FROM 2.8.3, SPLIT FROM 2.7.6] Verify that lookup secrets, out-of-band authentication code, and time-based, one-time password seeds, are generated using a Cryptographically Secure Pseudorandom Number Generator (CSPRNG) to avoid predictable values. | 2 | 310 |\n| **2.6.4** | [ADDED, SPLIT FROM 2.6.2, 2.7.6] Verify that lookup secrets and out-of-band authentication codes have a minimum of 20 bits of entropy (typically 4 random alphanumeric characters or 6 random digits is sufficient). | 2 | 330 |\n| **2.6.5** | [ADDED, MOVED FROM 2.7.2, MERGED FROM 2.8.1] Verify that out-of-band authentication requests, codes, or tokens, as well as time-based, one-time passwords (TOTPs) have a defined lifetime. For out of band this should be 10 minutes and for TOTP this should be as short as possible, usually 30 seconds. | 1 | 287 |\n\n## V2.7 Out-of-Band authentication mechanisms\n\nThis will generally involve the authentication server communicating with a physical device over a secure secondary channel. Examples include push notifications to mobile devices and One-time Passwords (OTPs) sent to a user via SMS. This type of authentication mechanism is considered \"something you have\".\n\nUnsafe out-of-band authentication mechanisms such as e-mail and VOIP are not permitted. PSTN and SMS authentication are currently \"restricted\" by NIST and should be deprecated in favor of push notifications or similar. If you need to use telephone or SMS out-of-band authentication, please see NIST SP 800-63B &sect; 5.1.3.3.\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.7.1** | [MODIFIED] Verify that authentication mechanisms using the Public Switched Telephone Network (PSTN) to deliver One-time Passwords (OTPs) via phone or SMS are offered only when alternate stronger methods (such as push notifications) are also offered and when the service provides information on their security risks to users. | 1 | 287 |\n| **2.7.2** | [MOVED TO 2.6.5]  | | |\n| **2.7.3** | [MODIFIED, SPLIT TO 2.6.1] Verify that out-of-band authentication requests, codes, or tokens are only usable for the original authentication request. | 1 | 287 |\n| **2.7.4** | [GRAMMAR] Verify that the secondary communications channel being used is secure and independent of the primary channel. | 1 | 523 |\n| **2.7.5** | [DELETED, INSUFFICIENT IMPACT] | | |\n| **2.7.6** | [SPLIT TO 2.6.3, 2.6.4] | | |\n| **2.7.7** | [ADDED] Verify that a code based out-of-band authentication mechanism is protected against brute force attacks by using either rate limiting or a code with at least 64 bits of entropy. | 2 | 307 |\n| **2.7.8** | [ADDED] Verify that, where push notifications are used for multi-factor authentication, rate limiting or number matching is used to prevent push bombing attacks. | 3 | |\n\n## V2.8 Time based One-time Passwords\n\nTime based One-time Passwords (TOTPs) are physical or soft tokens that display a continually changing pseudo-random one-time challenge. This type of authentication mechanism is considered \"something you have\".\n\nMulti-factor TOTPs are similar to single-factor TOTPs, but require a valid PIN code, biometric unlocking, USB insertion or NFC pairing or some additional value (such as transaction signing calculators) to be entered to create the final OTP.\n\n| # | Description | Level | CWE |\n| :---: | :--- | :---: | :---: |\n| **2.8.1** | [MERGED TO 2.6.5] | | |\n| **2.8.2** | [GRAMMAR] Verify that symmetric keys used to verify submitted time-based, one-time passwords are highly protected, such as by using a hardware security module or secure operating system based key storage. | 2 | 320 |\n| **2.8.3** | [MERGED TO 2.6.3] | | |\n| **2.8.4** | [MERGED TO 2.6.1] | | |\n| **2.8.5** | [DELETED, INSUFFICIENT IMPACT] | | |\n| **2.8.6** | [MODIFIED, LEVEL L2 > L3] Verify that physical single-factor OTP generators can be revoked in case of theft or other loss. Ensure that revocation is immediately effective across logged in sessions, regardless of location. | 3 | 613 |\n| **2.8.7** | [MODIFIED, LEVEL L2 > L3] Verify that biometric authentication mechanisms are only used as secondary factors together with either something you have or something you know. | 3 | 308 |\n| **2.8.8** | [ADDED] Verify that time-based OTPs are checked based on a time source from a trusted service and not from an untrusted or client provided time. | 3 | 367 |",
+      "createdAt": "2025-02-09T08:29:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2646124475",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6duNKW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's move on with that.",
+      "createdAt": "2025-02-09T09:02:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2646135446",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d3yQS",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 2.7.3 - maybe it is easier when this \"once\" stays in this requirement?\n\nFor 2.7.3, the \"once\" aspect was split into 2.6.1 because it is a different problem.\n\nMaybe we could reword it to:\n\n\"_Verify that out-of-band authentication requests, codes, or tokens are only usable for the original authentication request for which they were generated and not a previous or subsequent one._\"\n\n\n",
+      "createdAt": "2025-02-10T16:48:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2648646674",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d34jJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We may reach to term \"transaction specific\" here? See the requirement 51.1.2",
+      "createdAt": "2025-02-10T16:57:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2648672457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4A4G",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't love that wording for this case, unlike with OAuth/OIDC, the implementation is a little less clear here. I prefer what I [wrote above](https://github.com/OWASP/ASVS/issues/2587#issuecomment-2648646674), do you really not like that?",
+      "createdAt": "2025-02-10T17:10:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2648706566",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6d4WBa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's go with that to get it in. If someone has better idea we can improve it (again).",
+      "createdAt": "2025-02-10T17:45:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2648793178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6eDHPC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Pretty sure this got merged",
+      "createdAt": "2025-02-11T18:04:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2587#issuecomment-2651616194",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-02-09T07:22:40Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 2587,
+  "state": "CLOSED",
+  "title": "Clean up V2 MFA requirements (2.6-2.8)",
+  "url": "https://github.com/OWASP/ASVS/issues/2587"
+}

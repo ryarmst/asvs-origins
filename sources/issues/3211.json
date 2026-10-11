@@ -1,0 +1,285 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "> Verify that the application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual command line output encoding.\n\nThe term \"**Parameterized OS queries**\" is somewhat non-standard and can be considered misleading for several reasons:\n* The term \"**Parameterized OS queries**\" is not commonly used in security or programming. In contrast, terms like \"**parameterized command execution**\", \"**safe API usage**\", or \"**argument separation**\" are more widely used when discussing OS command injection prevention.\n* The word \"**queries**\" suggests a structured request to a system, like querying a database or API. OS commands, however, are typically imperative instructions (e.g., ping, ls, rm) rather than queries retrieving data. This can mislead developers into thinking the requirement involves a database-like query mechanism, which is not applicable.\n* The term doesn’t clearly convey the best practice of using safe APIs, that separate commands from user input. \n* There is no universal, platform-agnostic standard for escaping shell arguments that guarantees safety across all operating systems. It’s dangerous if misused. \n \nOutput encoding for shell is not as robust or standardized as HTML/JS encoding. So relying on encoding here is dangerous — it’s not practical or testable guidance unless a specific, reliable escaping function is provided.\n\nPlease improve clarity and standardization of the terms to improve developer understanding to reduce the ambiguity.\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM67dwbK",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think your comments here make sense overall. \n\n> There is no universal, platform-agnostic standard for escaping shell arguments that guarantees safety across all operating systems. It’s dangerous if misused...\n\nThis was the reason for the phrase \"contextual command line output encoding\" \n\nNevertheless, I am open to suggestions on how to improve this requirement without making it too long.",
+      "createdAt": "2025-08-01T16:33:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3145139914",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67fWfx",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> There is no universal, platform-agnostic standard for escaping shell arguments that guarantees safety across all operating systems. It’s dangerous if misused...\n\nYou are right! There is no one universal escaping function to escape shell arguments. There IS os-specific escaping methods you can use, but there are even better ways.\n\n**1) Prefer APIs that bypass the shell entirely.**\n\nUse language-level facilities (e.g., subprocess.run([...], shell=False) in Python, ProcessBuilder in Java, std::process::Command in Rust, ProcessStartInfo.ArgumentList in .NET) so the OS receives an argument vector instead of a flat shell string.\n\n**2) If you must invoke a shell, apply an OS- and shell-specific escaping/quoting function after validating the user input’s semantics.**\n\n- POSIX / bash / sh: sh -c + shlex.quote() (Python) or posix_spawn with a fixed argv.\n- PowerShell: --% stop-parsing marker or System.Management.Automation.Language.CodeGeneration.EscapeSingleQuotedStringContent.\n- cmd.exe: wrap each arg in ^\" … ^\" and double embedded quotes.\n\n**3) Never concatenate user-controlled strings into a shell command without rigorous, positive validation (allow-list or structural checks).** \n- Reject or normalize anything outside the expected character set or pattern.\n\n**4) Apply the principle of least privilege: run the child process as a non-privileged account, drop unneeded capabilities, and constrain with seccomp/AppContainer/jail where available.**\n",
+      "createdAt": "2025-08-01T19:26:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3145558001",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67fXGJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico I think we know it is complicated :) what I was looking for was a suggestion for the requirement text :)",
+      "createdAt": "2025-08-01T19:27:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3145560457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67fZyq",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I hear you, I am just starting with the complete defense info to figure out the best requirement text. I just want to make sure we are all on the same page first. But I am with you Josh.",
+      "createdAt": "2025-08-01T19:32:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3145571498",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67famS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So, he is right. I don't see the term Parameterized OS Queries used a lot. It's more about using \"safe OS API's in languages\".\n\n_Use safe language-level facilities (e.g., subprocess.run([...], shell=False) in Python, ProcessBuilder in Java, std::process::Command in Rust, ProcessStartInfo.ArgumentList in .NET) so the OS receives an argument vector instead of a flat shell string._",
+      "createdAt": "2025-08-01T19:33:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3145574802",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67iCB0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Maybe this change to focus on the essentials but fix the terminology issue:\n\n**_Verify that the application is protected against OS command injection by invoking operating-system commands through language-specific APIs that pass command arguments as separate parameters, rather than by concatenating strings. If shell invocation via concatenating strings is unavoidable, strictly validate/allow-list each argument and apply, OS-specific escaping routines._**",
+      "createdAt": "2025-08-02T06:18:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3146260596",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67ioxz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the proposal goes to cheat sheet area. In case we want to keep all the details, the style must be changed for this.\n\nWe should use style:\n> Verify that the application is protected against OS command injection. + it can be achieved by -list of options-\n\nI think we can not provide **the one and only** way to achieve that, so achievement is an informative recommendation, rather than a requirement. Otherwise, there is a risk that if there is a valid way for mitigation that is not listed in the requirement text, it is interpreted as not satisfying the requirement.",
+      "createdAt": "2025-08-02T10:23:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3146419315",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM675w18",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> **_Verify that the application is protected against OS command injection by invoking operating-system commands through language-specific APIs that pass command arguments as separate parameters, rather than by concatenating strings. If shell invocation via concatenating strings is unavoidable, strictly validate/allow-list each argument and apply, OS-specific escaping routines._**\n\nI like this though. It seems way better than the previous requirement we had. ",
+      "createdAt": "2025-08-04T21:40:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3152481660",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM675xYm",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > There is no universal, platform-agnostic standard for escaping shell arguments that guarantees safety across all operating systems. It’s dangerous if misused...\n> \n> You are right! There is no one universal escaping function to escape shell arguments. There IS os-specific escaping methods you can use, but there are even better ways.\n> \n> **1) Prefer APIs that bypass the shell entirely.**\n> \n> Use language-level facilities (e.g., subprocess.run([...], shell=False) in Python, ProcessBuilder in Java, std::process::Command in Rust, ProcessStartInfo.ArgumentList in .NET) so the OS receives an argument vector instead of a flat shell string.\n> \n> **2) If you must invoke a shell, apply an OS- and shell-specific escaping/quoting function after validating the user input’s semantics.**\n> \n> * POSIX / bash / sh: sh -c + shlex.quote() (Python) or posix_spawn with a fixed argv.\n> * PowerShell: --% stop-parsing marker or System.Management.Automation.Language.CodeGeneration.EscapeSingleQuotedStringContent.\n> * cmd.exe: wrap each arg in ^\" … ^\" and double embedded quotes.\n> \n> **3) Never concatenate user-controlled strings into a shell command without rigorous, positive validation (allow-list or structural checks).**\n> \n> * Reject or normalize anything outside the expected character set or pattern.\n> \n> **4) Apply the principle of least privilege: run the child process as a non-privileged account, drop unneeded capabilities, and constrain with seccomp/AppContainer/jail where available.**\n\n@elarlang, you mean these details should go to a cheatsheet against OS command injections, right? I think those are great details for defenses/preventing those issues, honestly and would be a shame to lose them. ",
+      "createdAt": "2025-08-04T21:41:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3152483878",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM676dPs",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think we can not provide **the one and only** way to achieve that, so achievement is an informative recommendation, rather than a requirement. Otherwise, there is a risk that if there is a valid way for mitigation that is not listed in the requirement text, it is interpreted as not satisfying the requirement.\n\nIf we do not give enough detail then the requirement is high-level and not very actionable. That's even worse than an incomplete defense. Also, we already explain defenses (in detail) in many requirments but have chosen not to in others.\n\nI think defensive detail here - or or at least more detail that we have now - is critical to make these requirements understandable and actionable.\n",
+      "createdAt": "2025-08-04T22:50:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3152663532",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM676jBK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think we can not provide **the one and only** way to achieve that...\n\nI are not suggesting that here. I am suggesting that developers use the native safe shell functions all languages provide. All languages. And if for some reason that is not enough, then validate/escape parameters.\n\nThis is clear guidance and covers all cases that developers run into.\n",
+      "createdAt": "2025-08-04T22:54:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3152687178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM68Bd2f",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Here is the same suggestion in the format requested by @elarlang \n\n_Verify that the application is protected against OS command injection. This defense can be achieved by by invoking operating-system commands through language-specific APIs that pass command arguments as separate parameters, rather than by concatenating strings. If shell invocation via concatenating strings is unavoidable, strictly validate each command or argument and apply OS-specific escaping routines._",
+      "createdAt": "2025-08-05T10:01:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3154501023",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69H5Bp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I would consider refining as follows:\n\n\"_Verify that the application is protected against OS command injection, ideally by only invoking operating-system commands through language-specific APIs that pass command arguments as separate parameters, rather than by concatenating strings. If shell invocation via concatenating strings is unavoidable, apply strict and OS-specific escaping routines to each each command or argument._\"",
+      "createdAt": "2025-08-10T23:23:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3172962409",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69iHPs",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> So I would consider refining as follows:\n> \n> \"_Verify that the application is protected against OS command injection, ideally by only invoking operating-system commands through language-specific APIs that pass command arguments as separate parameters, rather than by concatenating strings. If shell invocation via concatenating strings is unavoidable, apply strict and OS-specific escaping routines to each each command or argument._\"\n\nThis requirement doesn’t clearly state that untrusted input is the primary threat, which means testers or developers might not fully understand the risk or know where to focus their efforts. Also, using the word “**ideally**” can weaken the requirement and make it seem optional.\n\n**Here is a rephrased requirement suggestion:**\n\n_\"Verify that untrusted input is never passed into shell command strings. Must use language-native APIs that run system commands by passing arguments as separate parameters. Avoid invoking shells or using string concatenation to build commands. If shell invocation is absolutely necessary, use  OS-specific escaping routines, and strictly validate all inputs using allowlists.\"_\n",
+      "createdAt": "2025-08-12T15:26:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3179836396",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DHF1A",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am familiar with the meaning of the word ideally. Whilst I see your point, saying \"must\" seems to the contradict saying \"If shell invocation is absolutely necessary\" later on.\n\nI am not sure I understood the reasons behind your other changes.",
+      "createdAt": "2025-09-10T05:53:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3273416000",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7EFT64",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I am familiar with the meaning of the word ideally. Whilst I see your point, saying \"must\" seems to the contradict saying \"If shell invocation is absolutely necessary\" later on.\n\nOkay, then it’s good to use words like “should” or “recommended,” as you have mentioned other ticket.\n\n",
+      "createdAt": "2025-09-14T17:58:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3211#issuecomment-3289726648",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-07-06T09:48:28Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3211,
+  "state": "OPEN",
+  "title": "Clarification: V1.2.5 \"Parameterized OS queries\"",
+  "url": "https://github.com/OWASP/ASVS/issues/3211"
+}

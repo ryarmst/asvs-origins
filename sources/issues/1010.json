@@ -1,0 +1,297 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjMyNDMzNTc1",
+    "is_bot": false,
+    "login": "ThunderSon",
+    "name": ""
+  },
+  "body": "In [v5.3](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v53-output-encoding-and-injection-prevention), requirement 5.3.6, the following is mentioned:\r\n> Verify that the application protects against JavaScript or JSON injection attacks, including for eval attacks, remote JavaScript includes, Content Security Policy (CSP) bypasses, DOM XSS, and JavaScript expression evaluation.\r\n\r\nNow in 5.3.3, output escaping is mentioned. In 5.5.4, `JSON.parse` is mentioned. These 2 examples are better examples of what a requirement is than 5.3.6.\r\n\r\nA requirement that says \"Don't have vulnerabilities\" is not enough. I am a security engineer and I am confused on what I should do. How do I counter CSP bypasses?! How do I do that? Isn't CSP the defense in depth to something else? What are remote JS includes? What's the attack called? Has anyone googled remote JS includes before in their lives?\r\n\r\n1. Dangerous functions can be one thing, and have a link to JS sinks and `eval`\r\n2. Remote JS includes, again, what exactly are we talking about? Loading another page's JS on top of the content, another file's content?\r\n3. CSP bypasses: Are we saying that we are implementing a weak CSP? Or are we saying \"Test the CSP you implement\"? Or are we saying that we should be writing secure code? If it's the last, then CSP is not related to this requirement.\r\n4. DOM XSS and JS expression evaluation, isn't that more \"Review JS sources and the sinks they're being fed to\"?\r\n\r\nAll these are being mentioned in 1 requirement.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTc3MTE4Nw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "+1 I agree this needs to be fixed, thank you for this submission",
+      "createdAt": "2021-05-27T16:26:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-849771187",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTc5ODU3OQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My first feeling is, that it's mostly duplicate to 5.3.3 and I think I have reported it somewhere long time ago, but probably it was before re-numeration and I did not find it at the moment.\r\n\r\nFirst, related requirements:\r\n\r\n  * 5.3.1 Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, URL parameters, HTTP headers, SMTP, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara).\r\n  * 5.3.3 Verify that context-aware, preferably automated - or at worst, manual - output escaping protects against reflected, stored, and DOM based XSS.\r\n  * 5.5.4 Verify that when parsing JSON in browsers or JavaScript-based backends, JSON.parse is used to parse the JSON document. Do not use eval() to parse JSON.\r\n\r\nBefore removing requirement, we need to check, that all the meaning in requirement are covered or deprecated:\r\n\r\n* _Verify that the application protects against JavaScript_\r\n  * for me it is already covered by 5.3.1 and 5.3.3\r\n*  _or JSON injection attacks_\r\n   * if we don't take this as JavaScript injection, then this one is not covered directly\r\n* _including for eval attacks_\r\n  * use JSON.parse instead, covered by 5.5.4\r\n* _remote JavaScript includes, Content Security Policy (CSP) bypasses_\r\n  * Content-Security-Policy topic, covered by 14.4.3\r\n  * for remote JavaScript files with good purpose, it's covered by 14.2.3\r\n* _DOM XSS_\r\n  * again, covered by 5.3.3\r\n* _and JavaScript expression evaluation_\r\n  * not 100% sure on this one, but I would say it's covered with JavaScript injection or eval issues\r\n\r\nCWE for 5.3.6 is incorrect as well:\r\n> CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')\r\n\r\n\r\n",
+      "createdAt": "2021-05-27T17:09:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-849798579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTgxOTcwNA==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm going to use digits for every bit you're tackling so we can discuss them easier:\r\n1. _JS injection_: Agreed\r\n2. _JSON injection_: then the requirements should be elevated to say \"Prevent JSON injections\". That can still be part of 5.5.4, but generalized with JS as an example.\r\n3. _eval attacks_: I'd say this should be replaced with sinks. 5.5.4 only covers JSON injection, and not variable injection. But this affects for example `setTimeout` as well. Something to the lines of \"Don't feed user-input into sinks/dangerous-functions\".\r\n4. _JS includes, CSP_: agreed with a caveat. They discuss injection prevention, but from a config perspective, so something needs to link back there. Or maybe another way to look at this?\r\n5. _DOM XSS and JS expression evaluation_: agreed, should be already covered in sinks requirement and non-verified script loads.",
+      "createdAt": "2021-05-27T17:44:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-849819704",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg0OTgzMDUxOA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": ".2. JSON injection should not be part of Deserialization (5.5.4) or eval, but it's clearly 5.3 problem. I interpret \"JSON injection\" when someone have _The Best Idea Ever_ to build JSON manually instead of using some built-in JSON-encoder library/function.\r\n\r\n.4. config part I should keep away from here, even they are all related. Otherwise we need to have in this section \"You must have correct Content-Type set\" as well, but we have another categories for that.\r\n\r\n.3. and 5. maybe current requirement (5.3.6) need to change to \"do not execute userinput as HTML and/or JavaScript\", this means DOM XSS (classical \"write as text\" vs \"write as HTML\"), `eval`, `setTimeout` etc.\r\n\r\nCurrent requirement with clearly duplicate parts removed:\r\n> Verify that the application protects against ~~JavaScript or~~ JSON injection attacks, including for eval attacks, ~~remote JavaScript includes, Content Security Policy (CSP) bypasses,~~ DOM XSS, and JavaScript expression evaluation.",
+      "createdAt": "2021-05-27T18:01:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-849830518",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg3OTM4MjcyNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@ThunderSon - any proposals for improving current situation or we just make quick-fix with removing clear duplicates like I showed in previous comment?",
+      "createdAt": "2021-07-13T20:32:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-879382727",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42M53-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This requirement is a mess. I'm deleting it now.",
+      "createdAt": "2021-08-31T15:39:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-909352446",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44oee-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal for v4.0.3:\r\nVerify that the application protects against JSON injection attacks, including for eval attacks, and JavaScript expression evaluation.",
+      "createdAt": "2021-10-23T10:57:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-950134718",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44oouL",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "A little wordsmithing:\r\n\r\nVerify that the application protects against JSON injection attacks, JSON eval attacks, and JavaScript expression evaluation.",
+      "createdAt": "2021-10-23T16:25:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-950176651",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44o5Fl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "PR https://github.com/OWASP/ASVS/pull/1097 brings this requirement back with new simplified text resolving this issue for good, I hope! :)",
+      "createdAt": "2021-10-24T01:33:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-950243685",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44o_x0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal for v4.0.3 was not to goal to bring it back for 4.* or 5.0 release. But please do not touch it now anymore before v4.0.3 is out.",
+      "createdAt": "2021-10-24T06:49:40Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-950271092",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5HUsms",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am reopening this issue.\r\n\r\nThe current requirement is:\r\n\r\n> **5.3.6** Verify that the application protects against JSON injection attacks, JSON eval attacks, and JavaScript expression evaluation. \r\n\r\n- I don't know why we need to mention eval here is as well as in 5.2.4.\r\n- I am not sure what \"_JavaScript expression evaluation_\" is but it also sounds like eval...\r\n\r\nTo me it feels like both these items can be removed although JSON injection is clearly still correct and should be specifically included.\r\n\r\nAny comments @ThunderSon, @jmanico or @elarlang ?\r\n\r\n\r\n\r\n",
+      "createdAt": "2022-07-27T11:29:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-1196607916",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5H_8pm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "5.3.6 was shortened/fixed for v4.0.3. Agree, current 5.3.6 is duplicate of 5.2.4.\r\n\r\n5.2.4 also covers [JavaScript expression evaluation](https://silentmatt.com/javascript-expression-evaluator/).",
+      "createdAt": "2022-08-08T10:29:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-1207945830",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5JEFJd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang I opened #1341",
+      "createdAt": "2022-08-24T14:30:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-1225806429",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5JJt1K",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current state, after update:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.3.1** | [MODIFIED] Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, CSS, URL parameters, HTTP headers, SMTP, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara). ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 116 |\r\n| **5.3.6** | [MODIFIED] Verify that the application protects against JSON injection attacks. ([C4](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 75 |\r\n\r\nWe have removed duplicates, but maybe it makes sense to put JSON into 5.3.1 list and we can get rid of 5.3.6 completely. I don't think JSON injection needs separate requirement, and if it does, we should make separate requirements for everything listed in 5.3.1.",
+      "createdAt": "2022-08-25T13:45:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-1227283786",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Jbkp2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang to my mind, JSON injection is something slightly different to the items in 5.3.1 so I am not sure if it really fits there... It isn't a context for some from of XSS but rather it is the ability to inject additional JSON entities into a JSON object.",
+      "createdAt": "2022-08-30T17:35:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-1231964790",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Jdwul",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I close this one.",
+      "createdAt": "2022-08-31T06:58:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1010#issuecomment-1232538533",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-05-27T16:15:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 1010,
+  "state": "CLOSED",
+  "title": "v5.3.6 Security requirement against XSS too generic",
+  "url": "https://github.com/OWASP/ASVS/issues/1010"
+}

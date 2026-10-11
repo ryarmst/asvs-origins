@@ -1,0 +1,193 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjY0MDgzNzY5",
+    "is_bot": false,
+    "login": "jackgates73",
+    "name": ""
+  },
+  "body": "Hi all,\r\n\r\nI'm trying to wrap my head around the requirements around MFA / forgotten password on an application I'm trying to ensure adheres to L2 requirements but services older / less tech savvy users.\r\n\r\n- So it is made clear in the document that MFA is optional for apps of this level \"Previously, the ASVS has required mandatory MFA. NIST does not require mandatory MFA. Therefore, we have used an optional designation in this chapter to indicate where the ASVS encourages but does not require a control\"\r\n- While the ASVS does not mandate the inclusion of a \"Forgot Password\" feature, if such a feature is implemented, it must adhere to asvs standards. Personally, a method for recovering accounts, whether built into the app or done via a help desk, is a basic service that should be mandatory for any organisation that allows it's customers to create accounts.\r\n- It is clear that any forgotten password process must specifically use MFA \"Verify forgotten password, and other recovery paths use a secure recovery mechanism, such as time-based OTP (TOTP) or other soft token, mobile push, or another offline recovery mechanism.... Unsafe out of band authenticators such as e-mail and VOIP are not permitted. PSTN and SMS authentication are currently \"restricted\" by NIST and should be deprecated in favor of push notifications or similar.\"\r\n- Sure PSTN can be used, but being RESTRICTED and likely to be phased out means that it isn't really an option worth implementing at this point. Therefore it really sounds like MFA is not optional and is a requirement for all apps, L2 and even L3.\r\n- Requiring newer authentication methods like time-based OTP (TOTP), soft tokens, or mobile push notifications in an application primarily serving older, less tech-savvy users for example, presents challenges, and a large portion of our user base would not accept this being mandatory.\r\n\r\nBasically the TLDR version is:\r\n- MFA is optional\r\n- Account recovery is required\r\n- Account recovery needs MFA\r\n- Specific types of MFA are required\r\n- These forms of MFA are not accesible to all users of L3/L2 apps\r\n\r\nI'm submitting this as a potential issue, although maybe I'm overlooking something, if so it would be good to hear where. Thank you!",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6X5iQ5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Have you read through the \"bleeding edge\" version of [chapter V2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x11-V2-Authentication.md) where we have tried to start clarifying things? Also did you see the discussion in #2457 which is specifically about forgot password?",
+      "createdAt": "2024-12-17T13:19:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2548442169",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X53Hz",
+      "author": {
+        "login": "jackgates73"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks for linking those resources as I wasn't aware of them but have skimmed through them. So this makes it clear that a second factor authentication is necessary for the forgotten password process only if that user has opted in to do this. But what would a secure forgotten password journey look like for a user that does not opt-in to use MFA just as an example? I looked through the forgotten password cheat sheet and I couldn't see a method that this can be done that doesn't use either a second factor authentication (that isn't 'something you know', excluding sec questions of course which is no longer considered secure), or a side-channel that is still considered secure enough.",
+      "createdAt": "2024-12-17T13:55:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2548527603",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X7Wv9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So if you are talking about the fact that [the cheatsheet](https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html) refers to using email as an out of band channel, I'm pretty sure that when NIST says that email is not allowed as an out of band authenticator, it is talking as a primary authentication factor and not as a recovery mechanism. Clearly the use of email as a recover mechanism for a password is pretty universal. ",
+      "createdAt": "2024-12-17T16:16:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2548919293",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6X7XQc",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Also bear in mind that there is an updated NIST draft which is supposed to be clearer in general...\r\nhttps://pages.nist.gov/800-63-4/sp800-63b.html",
+      "createdAt": "2024-12-17T16:17:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2548921372",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YENt4",
+      "author": {
+        "login": "jackgates73"
+      },
+      "authorAssociation": "NONE",
+      "body": "Under the 2.7 summary it says:\r\n\r\n\"In the past, a common out-of-band authentication mechanism would have been an email or SMS containing a password reset link. Attackers use this weak mechanism to reset accounts they don't yet control, such as taking over a person's email account and re-using any discovered reset links. There are better ways to handle out-of-band verification.....\r\n\r\nUnsafe out-of-band authentication mechanisms such as e-mail and VOIP are not permitted. PSTN and SMS authentication are currently \"restricted\" by NIST and should be deprecated in favor of push notifications or similar. If you need to use telephone or SMS out-of-band authentication, please see NIST SP 800-63B § 5.1.3.3.\"\r\n\r\nSo I think it was the talk of email/SMS containing a password reset link being weak, followed shortly by e-mail not being permitted as an out-of-band authentication factor is what led to my confusion here.\r\n\r\n\r\nI still don't compeltely understand the logic by NIST here though. \"when NIST says that email is not allowed as an out of band authenticator, it is talking as a primary authentication factor and not as a recovery mechanism.\" It sounds like NIST is saying that email tokens are are too weak to be considered primary authentication, but not as a means of resetting the primary authentication. Ideally the reset process has to be just as robust as primary authentication so as to not be used as a bypass. \r\n\r\nAppreciate the help with my questions!",
+      "createdAt": "2024-12-18T12:48:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2551241592",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YE4bf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Did you check what the updated NIST draft says about this?",
+      "createdAt": "2024-12-18T14:08:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2551416543",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YHELJ",
+      "author": {
+        "login": "jackgates73"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hey, I skimmed through but I couldn't find anything that explicitly explains why one should be allowed and the other disallowed - maybe I missed it?",
+      "createdAt": "2024-12-18T18:20:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2551988937",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6YMEKv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, so section 2.7 refers to NIST 5.1.3 but I think that is talking about something slightly different than reset password.\r\n\r\nPractically speaking, draft 4 seems to specifically allows credential recovery via various options : \r\nhttps://pages.nist.gov/800-63-4/sp800-63b.html#issued-recovery-codes\r\n\r\n![image](https://github.com/user-attachments/assets/85f1f11a-d4a9-492b-9eb8-6648c054de1e)\r\n",
+      "createdAt": "2024-12-19T10:03:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2553299631",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Y2EwT",
+      "author": {
+        "login": "ishowta"
+      },
+      "authorAssociation": "NONE",
+      "body": "The requirement to use equally strong authentication pathways isn’t required under L1, which I think aligns with the rest of the documents.\r\n\r\n(On the other hand, NIST appears to require this requirement for all AALs.)\r\n> To satisfy the requirements of a given AAL and be recognized as a subscriber, a claimant SHALL authenticate to an RP or IdP as described in [[SP800-63C]](https://pages.nist.gov/800-63-4/sp800-63c.html#introduction) with a process whose strength is equal to or greater than the requirements at that level.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.2.4** | [MODIFIED, SPLIT TO 2.2.11] Verify that, if the application includes multiple authentication pathways, these are all documented together with the security controls and authentication strength which should be consistently enforced across them. | | ✓ | ✓ | 306 |\r\n\r\nHowever, I do not see the benefit of disallowing email-based authentication when there is already a loophole allowing password resets via email.\r\nIt might be more practical if L1 also adopted 1.2.4 while allowing passwordless email based single-factor authentication mechanism (e.g., magic links).\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **2.2.2** | [MODIFIED] Verify that email is not used as either a single-factor or multi-factor authentication mechanism. | ✓ | ✓ | ✓ | 304 |",
+      "createdAt": "2024-12-28T12:21:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2564312083",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Y3Sl3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> However, I do not see the benefit of disallowing email-based authentication when there is already a loophole allowing password resets via email.\r\n\r\nI think there is a benefit to having a password reset as an exceptional event compare to magic link authentication from an alerting and monitoring perspective.",
+      "createdAt": "2024-12-29T06:43:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2475#issuecomment-2564630903",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-12-17T13:14:17Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 2475,
+  "state": "OPEN",
+  "title": "6.4.3 / v5.0.be-2.5.6 Verify forgotten password\" / MFA issue",
+  "url": "https://github.com/OWASP/ASVS/issues/2475"
+}

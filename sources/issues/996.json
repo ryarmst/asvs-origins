@@ -1,0 +1,1149 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQwMDI3NjU=",
+    "is_bot": false,
+    "login": "csfreak92",
+    "name": "Ralph Andalis"
+  },
+  "body": "**Ed note:** This issue was originally called \"_v3.5 Token-based Session Management addition_\"\r\n\r\n---\r\n\r\n**Ed note 2:** If you are just joining us, the draft chapter is currently here: [V51 OAuth 2.0 Protocol](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x51-V51-OAuth2.md)\r\n\r\nBefore you review it, read through this issue thread to collect the context and then feel free to open separate issues if you have specific questions or suggestions.\r\n\r\n---\r\n\r\n_Original text starts here:_\r\n\r\n<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nI think we need to add a control that validates the incoming HTTP request in an API endpoint which issues new access and refresh tokens. Usually this is with the refresh endpoint, but in some weirdly built applications, there were some implementations that every response would contain the new tokens that could be used for the next authenticated and authorized calls to the API. The requirement would be for the refresh token endpoints to have a validation of the requests, URL and request body must be validated before issuing the new set of tokens. \r\n\r\nThe rationale about this thought came to me when I was testing a few recent applications that either have refresh endpoints or a few ones that do not have refresh endpoints but the next authenticated tokens are coming from the HTTP responses. This is a bit of an old way of doing it as I understood and a bit uncommon. However, I noticed a pattern of accepting the request even if it was malformed or missing the object id or any reference for a resource (e.g. http://www.example.com/12345 but I the request was http://www.example.com/ralph; second URL is invalid and should be rejected). The application returns no valuable data except the new set of tokens which can be used for the succeeding calls to the API. I think it was a bad design, but for defense in depth purposes and preventing an attacker for prolonging their usage of the compromised account (which would be cut short had the application been following proper OIDC flow), the application should check for incoming HTTP requests to be correct in format, parameters, etc. and if anything is wrong then reject the request and never send back new tokens. \r\n\r\nI would place this under v3.5 Token-based Session Management. I don't know whether this is still an acceptable thing to worry about and whether the threat model is too low to bother about this control, but I think it just seems like a basic thing that developers should have placed some sort of validation for requests before allowing the scenario described to happen. If this is too low risk, then we could scrap it. \r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM43Nk4p",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this, but do we need a new OAuth2 section that covers https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-18 ?",
+      "createdAt": "2021-09-24T03:02:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-926305833",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44Wc2L",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "That is a great question though.. In wishful thinking I think we should add something OAuth2 best practices as well. I believe a lot of developers are not aware how to properly implement this on their applications. ",
+      "createdAt": "2021-10-18T06:35:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-945409419",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44YJYa",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "OAuth2 is a special protocol for just delegation and is often misused. But a dedicated section for OAuth in 5.0 is a great idea!",
+      "createdAt": "2021-10-18T14:48:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-945853978",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM45iYUh",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, would you like me to draft a proposal for OAuth2 dedicated section? I believe that also deals with the original issue I opened here. ",
+      "createdAt": "2021-11-10T14:49:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-965313825",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM45jDn3",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Mr. @csfreak92 absolutely yes. And we can a get few of the OAuth2 security group folks to review. You can extract a lot from https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics to help you",
+      "createdAt": "2021-11-10T16:09:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-965491191",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM45oOf4",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Sounds good, let me thoroughly read it and then draft something soon (might be a bit later). :) ",
+      "createdAt": "2021-11-12T05:58:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-966846456",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5CVxxz",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just an update. I'm still actively working on this over spare time, please do not close the issue. ",
+      "createdAt": "2022-04-29T08:09:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1113005171",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P8AQx",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @csfreak92, any update on this, would like to get this prepared for 5.0\r\n\r\n@set-reminder 1 month consider closing this issue",
+      "createdAt": "2022-12-07T15:24:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1341129777",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P8ARx",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nSaturday, January 7, 2023 12:00 AM (GMT+01:00)\r\n> consider closing this issue",
+      "createdAt": "2022-12-07T15:24:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1341129841",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RoH0M",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, @jmanico, as promised here is my initial draft for the OAuth requirements (with some references to OpenID Connect) as I have derived from the RFC: (https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics). \r\n\r\nI still need to add the CWE mappings and more details for the explanatory paragraphs about each of them. I have two questions how we wish to present these new to be added requirements: \r\n\r\n1. I propose a section 3.8.x to keep all OAuth requirements separate and easier for anyone using ASVS for security audits. If that is good for you guys, then shall I keep it like this where there's a separating subsection as per the security threats presented RFC that I followed? Also, shall I add separate explanatory paragraphs each or do you prefer all those explanations about Authorization Servers, Clients, Resource Servers, PKCE, etc. all in one huge chunk of paragraphs right after 3.8.x section title? Which one do you think is better? \r\n2. If having a separate section for OAuth requirements seem quite too much and redundant (as we have token-based session management requirements), then I will need further help with splitting them to other 3.x sections. \r\n\r\nI am sure I might be missing a few more things, but I just pushed my initial draft so that I don't keep holding this issue from moving forward and start the year right. :) ",
+      "createdAt": "2023-01-03T07:50:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1369472268",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RobLJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have not yet went into details, but first impression is - 18 requirements on one topic is a bit too much and maybe we need some abstraction.\r\n\r\nI don't think we need all related OAuth requirements in one category if the same point is covered in general somewhere else. To have easy to follow \"checklist\" is maybe more testing guide approach.\r\n\r\nMaybe we should have discussion in the issue first, not discussion over PR's. From PR's it's hard to follow later, why some requirements got in or why some changes were made.\r\n\r\nReally nice input to work on!",
+      "createdAt": "2023-01-03T09:30:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1369551561",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RopxG",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, yeah I do agree that 18 requirements for one topic is quite too much, honestly. I have this dilemma too, but there's another dilemma if I will cut them down. \r\n\r\nAn example is if you look at `3.8.12` - `3.8.14` in that draft, those all pertain to IDORs and ACLs which are covered somewhere in ASVS. However, OAuth-specific ones kind of make sense if our main objective in this issue is to teach developers and engineers how to properly use OAuth. This is one of my dilemmas which had been paralyzing me for a while what to do with it. I'd like to hear it from the community so that I can finally get that off my head. :) \r\n\r\nAll of these 18 are derived from the OAuth RFC which is quite comprehensive. Great yeah, having a discussion about the issue would be very helpful too, at least in my view for trimming down the PR. ",
+      "createdAt": "2023-01-03T10:33:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1369611334",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RqTk0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "OAuth is complex. 18 requirements are critical. https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics has many more and is recent...",
+      "createdAt": "2023-01-03T17:34:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1370044724",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RqTnn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I love this work! Steallar!",
+      "createdAt": "2023-01-03T17:34:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1370044903",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rsx4u",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Another topic is category - I don't think session management is the best place for covering OAuth. If it is 18 requirements (or even 10+) with splitting to different topics, it may be worth separate main category.",
+      "createdAt": "2023-01-04T09:39:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1370693166",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Ruznx",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "OAuth is so important for _access delegation and _API access_ that I do think it's critical for a new category. \r\n\r\nOnce we have the initial batch I can loop in some top tier experts to review.\r\n\r\nAnd please be sure to include the requirements from the OAuth 2.0 BCP (Best Current Practice) for the most up to date requirements.",
+      "createdAt": "2023-01-04T17:35:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1371224561",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R6SjI",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/996#issuecomment-1341129777) @tghosth\n> consider closing this issue",
+      "createdAt": "2023-01-06T23:00:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1374234824",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R7CJz",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, almost those 18 requirements I have drafted there were straight from the RFC's best current practice. I may have left some out, which I will do another few passes to ensure at least the critical ones are included. \r\n\r\nAlso, if this will be a new category, what number shall I assign to it? Should it be next to Session Management category so that it stays relative? ",
+      "createdAt": "2023-01-07T10:01:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1374429811",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R8t6_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @csfreak92,\r\n\r\nThis is really fantastic work, I can see how much effort you have put into it.\r\n\r\nHowever, I am a little nervous that the level of detail is significantly more that we should probably have in the ASVS. The level of detail feels more like an OWASP cheatsheet. (I think this point could also be accurately made about parts of V2 but that is a different discussion for another day).\r\n\r\n@jmanico what do you think?\r\n\r\n@csfreak92 Do you think there is any way it could be trimmed down to key essentials?\r\n\r\nFor now I have created a dedicated branch for it.",
+      "createdAt": "2023-01-08T16:09:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1374871231",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5R9mao",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks @tghosth, @jmanico and @elarlang for chiming in your thoughts and praises! It is still draft at first stages, but I had a lot of dilemmas presenting these requirements as I said earlier that some of them may have been covered by ASVS in other sections (in some ways or another). \r\n\r\n@tghosth, I have the same worry too as the level of detail was taken straight from the RFC which makes it too strict of an implementation guideline including the `Authorization Server`, `Resource Server` and other components that make up an OAuth setup. \r\n\r\nI'll see what I can do to trim them down to the key essentials and push another commit soon. I'll add the subsection explanatory paragraphs too to explain such terms and their meaning. ",
+      "createdAt": "2023-01-09T04:45:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1375102632",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5SShee",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "thanks, I think it deserves it's own section and I think it should obsolete 3.5.1",
+      "createdAt": "2023-01-12T15:44:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1380587422",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5T_aN0",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Still doing some clean-up and trimming it down. Any number for the new section that I should use, @tghosth? I agree that the current 3.5.1 should be obsolete after this new section. ",
+      "createdAt": "2023-01-30T18:37:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1409131380",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5T_vvH",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Also, combing through the RFCs and related documents together with searching the net for any CWEs that I can map the new OAuth 2.0 requirements and could not piece them together. Any ideas how else I can do that? Or shall we leave them blank for now and add those later? ",
+      "createdAt": "2023-01-30T19:31:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1409219527",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5UCGqp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it does not make sense to waste time for CWE mapping at the moment as there is quite big chance that we will remove this mapping.\r\n\r\nhttps://github.com/OWASP/ASVS/issues/1481",
+      "createdAt": "2023-01-31T06:30:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1409837737",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ZFiM3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Agree that there is no need for a CWE mapping right now.\r\n\r\nI remain concerned by the number and complexity of the requirements and still think it needs cutting down. I would also urge you to create a cheatsheet because I think the information you have provided is super valuable, just too in-depth for this use case.\r\n\r\nCan we cut this down to a few requirements that an OAuth2 client needs to consider and a few requirements that a Resource Server needs to consider. Presumably implementing an Authorization Server is a much more niche situation.\r\n\r\nWhat do you think @csfreak92? ",
+      "createdAt": "2023-04-03T16:22:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1494623031",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hGxjh",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, I did not add anymore CWE mapping for the draft pull request. \r\n\r\nRegarding the complexity of requirements, I agree with you that maybe we should just focus on OAuth2 client needs as the implementation of an Authorization Server is a niche situation. Although, just out of curiosity, what are the chances and scenarios where an organization would implement their own Authorization Server? \r\n\r\nAbout the cheatsheet, for sure I can do that. Where shall I place those? I presume appendix somewhere? ",
+      "createdAt": "2023-07-10T15:10:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1629165793",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hHBgR",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hey @csfreak92, good to see you 😀👋\r\n\r\n> Regarding the complexity of requirements, I agree with you that maybe we should just focus on OAuth2 client needs as the implementation of an Authorization Server is a niche situation.\r\n\r\nWould be great if you could do this, yes :)\r\n\r\n> Although, just out of curiosity, what are the chances and scenarios where an organization would implement their own Authorization Server?\r\n\r\nI am not sure to be honest but I think it is a little unusual.\r\n\r\n> About the cheatsheet, for sure I can do that. Where shall I place those? I presume appendix somewhere?\r\n\r\nSuggest you put it into the cheatsheets project. I would suggest you [open an issue](https://github.com/OWASP/CheatSheetSeries/issues) and ask them whether you should add it to [the existing cheatsheet](https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/Authentication_Cheat_Sheet.md#oauth) or create a new one.",
+      "createdAt": "2023-07-10T15:48:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1629231121",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hHF6c",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@tghosth, apologies for being MIA. Conferences and work travel has taken over the past few months. If we have an instant messaging channel/system we use, please add me there too :) \r\n\r\nOk, will rework my pull request and submit an update before I fly again in 4 days. \r\n\r\nIf the implementation of an Authorization Server is quite unusual, then yeah I agree we have to trim those down from the OAuth 2.0 requirements for ASVS, but I'll retain these on the cheatsheet. \r\n\r\nOh, ok let me do that cheatsheet project separately. For a second I thought you wish to add that in ASVS, good to know I clarified. ",
+      "createdAt": "2023-07-10T16:00:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1629249180",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hHyLY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> apologies for being MIA. Conferences and work travel has taken over the past few months.\r\n\r\nDidn't mean that :) Just pleased to see you, I was worried we had scared you off 😂\r\n\r\n> If we have an instant messaging channel/system we use, please add me there too :)\r\n\r\nWe will probably speak further about this, is LinkedIn messaging the best way to get in contact with you?\r\n\r\n> Ok, will rework my pull request and submit an update before I fly again in 4 days.\r\n\r\nFantastic, thanks!\r\n\r\n> Oh, ok let me do that cheatsheet project separately. For a second I thought you wish to add that in ASVS, good to know I clarified.\r\n\r\nExcellent :)\r\n",
+      "createdAt": "2023-07-10T17:46:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1629430488",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hIKhx",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "No scare at all! Just got flying to different places and cities for work recently and got a breather. \r\n\r\nYes please, for now we can use LinkedIn messaging until the leaders and core team agrees on an instant comms channel. I look forward to your message! :) \r\n\r\n@tghosth, quick question: won't it be overwhelming for folks out there that there's bunch of OWASP cheatsheets we have? I checked it out and there's a lot for different things which I would argue most are covered either by ASVS, OTG or Top 10. Anyway, that's not very important, just curious about it. ",
+      "createdAt": "2023-07-10T18:54:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1629530225",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hKZqe",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> quick question: won't it be overwhelming for folks out there that there's bunch of OWASP cheatsheets we have? I checked it out and there's a lot for different things which I would argue most are covered either by ASVS, OTG or Top 10. Anyway, that's not very important, just curious about it.\r\n\r\nI think it is intentional that there are a lot of OWASP cheatsheets, the idea is that cheatsheets go into far more detail than the ASVS is able to.",
+      "createdAt": "2023-07-11T04:57:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1630116510",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5hOdrR",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I don’t understand your question. One more time please?",
+      "createdAt": "2023-07-11T17:05:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1631181521",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p1sHY",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don’t understand your question. One more time please?\r\n\r\nIs this for me, @jmanico? ",
+      "createdAt": "2023-10-23T17:31:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1775682008",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p2W9k",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I’m not 100% certain, please ignore.",
+      "createdAt": "2023-10-23T19:08:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1775857508",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qAzjt",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I renamed this as it is more about OAuth now.\r\n\r\nI preserved the original name in: https://github.com/OWASP/ASVS/issues/996#issue-889784907",
+      "createdAt": "2023-10-25T06:27:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1778596077",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ulOnn",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have merged this into a [dedicated branch](https://github.com/OWASP/ASVS/tree/master-v51-oauth) and moved the content to a dedicated chapter. I will make more changes and post here with updates.",
+      "createdAt": "2023-12-14T06:57:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1855252967",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5umFVk",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @csfreak92, thanks for the updates, appreciate your hard work!\r\n\r\nTwo tasks right now:\r\n* Review my changes here and make sure you are comfortable with them or propose changes if you are not. (This link deliberately prevents the change view from being disrupted by me moving it to a dedicated chapter and making some whitespace changes) https://github.com/OWASP/ASVS/pull/1804/files/852a9f8d37f590b9581ea126e9c39edf3a606431..0f605d668cd1e24f995da7a191b67931829ac518\r\n* Respond/action the comments I added here: https://github.com/OWASP/ASVS/pull/1804#pullrequestreview-1781161033",
+      "createdAt": "2023-12-14T09:23:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1855477092",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5uyn-e",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I open a bit wider question.\r\n\r\nShould we really be limited with OAuth 2.0 or should take direction to OAuth 2.1:\r\n* https://oauth.net/2.1/\r\n* https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-09\r\n\r\nYes, it's draft, yes, it's not released etc.. but.. it is a patch for OAuth 2.0 known weaknesses.\r\n\r\nFor software components we have requirement:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.2.1** | Verify that all components are up to date, preferably using a dependency checker during build or compile time. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 1026 |\r\n\r\n\r\nI interpret, that using features provided by OAuth 2.0 is using component with known weaknesses. There are reasons why OAuth 2.1 is proposed and for it makes sense to require to use technical solutions without known weaknesses.\r\n\r\nIn this context it means - can we just require everyone to use only PKCE flow for public OAuth clients (so-called \"Standard Authorization Code flow\" is not good enough). It also disallows using implicit flow and password grant.\r\n\r\nTake into account, that it takes time to release v5.0 and then it takes years to release v6.0, between them we can not have breaking or major changes, we going to set the situation for years. I don't want to go with a solution, which is deprecated from the start.\r\n",
+      "createdAt": "2023-12-16T08:49:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1858764702",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5u8krl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@csfreak92 do you think targeting OAuth2.1 is possible. I agree that conceptually it would make for a good aim and better to be ahead of the curve. \r\n\r\n",
+      "createdAt": "2023-12-18T19:10:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1861372645",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5wdIlw",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @elarlang and @tghosth, let me take a look at adding OAuth 2.1 as well. Good idea if we can put it on ASVS 5.0 and be ahead. Let me do more research on it and push changes soon. ",
+      "createdAt": "2024-01-11T09:13:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1886685552",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM51ns_K",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> @csfreak92 do you think targeting OAuth2.1 is possible. I agree that conceptually it would make for a good aim and better to be ahead of the curve.\r\n\r\nThe requirements that came from the [OAuth 2 BCP](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-25) is essentially what is being moved to OAuth 2.1",
+      "createdAt": "2024-03-01T14:55:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1973342154",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM51ntvk",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I open a bit wider question.\r\n> \r\n> Should we really be limited with OAuth 2.0 or should take direction to OAuth 2.1:\r\n> \r\n> * https://oauth.net/2.1/\r\n> * https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-09\r\n> \r\n> Yes, it's draft, yes, it's not released etc.. but.. it is a patch for OAuth 2.0 known weaknesses.\r\n> \r\n> For software components we have requirement:\r\n> \r\n> #\tDescription\tL1\tL2\tL3\tCWE\r\n> **14.2.1**\tVerify that all components are up to date, preferably using a dependency checker during build or compile time. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering))\t✓\t✓\t✓\t1026\r\n> I interpret, that using features provided by OAuth 2.0 is using component with known weaknesses. There are reasons why OAuth 2.1 is proposed and for it makes sense to require to use technical solutions without known weaknesses.\r\n> \r\n> In this context it means - can we just require everyone to use only PKCE flow for public OAuth clients (so-called \"Standard Authorization Code flow\" is not good enough). It also disallows using implicit flow and password grant.\r\n> \r\n> Take into account, that it takes time to release v5.0 and then it takes years to release v6.0, between them we can not have breaking or major changes, we going to set the situation for years. I don't want to go with a solution, which is deprecated from the start.\r\n\r\nFor sure. Here are the main differences between OAuth 2.0 and 2.1 and topics we should cover to address 2.1.\r\n\r\n- PKCE is required for all OAuth clients using the authorization code flow\r\n- Redirect URIs must be compared using exact string-matching\r\n- The Implicit grant (response_type=token) is omitted from this specification\r\n- The Resource Owner Password Credentials grant is omitted from this specification\r\n- Bearer token usage omits the use of bearer tokens in the query string of URIs\r\n- Refresh tokens for public clients must either be sender-constrained or one-time use",
+      "createdAt": "2024-03-01T14:57:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1973345252",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM51oDKm",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \n> The requirements that came from the [OAuth 2 BCP](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-25) is essentially what is being moved to OAuth 2.1\n\nYup, that's why I was still double checking if I missed something on the Best Current Practices from our current draft though most seems to cover OAuth 2.1 as you have pointed out @jmanico. There were some that we have omitted in the current OAuth 2.0 draft as it is covered in other ASVS chapters like the URL redirect handling (which is also in OAuth 2.1 exact string matching that maybe we should call out?). ",
+      "createdAt": "2024-03-01T15:53:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-1973432998",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM53ZFkA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi everyone,\r\n\r\nIf you are just joining us, the draft chapter is currently here: [V51 OAuth 2.0 Protocol](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x51-V51-OAuth2.md)\r\n\r\nWe'd love people to review the chapter and provide feedback. Before you review it, please read through this issue thread to collect the context and then feel free to open separate issues if you have specific questions or suggestions.",
+      "createdAt": "2024-03-18T07:06:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2003065088",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM53ZKqU",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I had some of my OAuth2 friends review this, this morning. Here are a \nfew suggestions:\n\n* *PKCE Requirement:* Originally, PKCE was advised for public clients. \nNow, it's a best practice for all OAuth clients, including confidential \nclients, to prevent authorization code interception attacks. This \nrecommendation needs clear emphasis.\n\n\n* *Refresh Token Strategy:* Implement rotating and expiring refresh \ntokens to avoid long-term misuse. This should be done in conjunction \nwith sender-constraining mechanisms for enhanced security.\n\n* *Avoid Resource Owner Password Credentials Grant:* This grant type is \nnot recommended due to security concerns. Instead, use the authorization \ncode grant with PKCE.\n\n* *Consistent Terminology*: Use \"Authorization Server\" and \"Resource \nServer\" consistently throughout the document to avoid confusion, \nespecially for newcomers.\n\n* *Clarify OAuth vs. OpenID Connect*: Emphasize that OAuth 2.0 focuses \non authorization delegation, while OpenID Connect deals with \nauthentication federation. Expand on this to help readers understand \ntheir distinct purposes.\n\n** Prevent Authorization Server Mix-Up Attacks:* Include up-to-date \nstrategies for mitigating mix-up attacks in environments with multiple \nAuthorization Servers. Detail the use of the \"iss\" parameter and \nrecommend additional checks like verifying the \"aud\" claim.\n\n**Detailed Scope and Audience Implementation:* Provide concrete examples \nof how to implement and validate access token restrictions based on \nscope and audience to offer actionable guidance.",
+      "createdAt": "2024-03-18T07:21:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2003085972",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM54O-Cx",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I had some of my OAuth2 friends review this, this morning. Here are a few suggestions: * \r\n\r\nThanks Jim! I'll take a look and create a PR to address these and bundle the OAuth 2.1 additions that are needed. \r\n",
+      "createdAt": "2024-03-25T04:30:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2017190065",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55qo3O",
+      "author": {
+        "login": "TmmmmmR"
+      },
+      "authorAssociation": "NONE",
+      "body": "It's a wonderful addition to have a dedicated section for OAuth.\r\n\r\nRegarding section 51.1.4 token rotation can mitigate token replay attacks, it cannot entirely prevent them. \r\n\r\nConsider the scenario where an attacker exploits an XSS in a client-side JS application that performs silent token refresh. This allows the attacker to intercept all token refresh operations. In this case, the attacker simply waits until the client becomes inactive and then catch the latest refresh token to obtain fresh tokens. So, as long as the attacker don't use the stolen refresh tokens immediately, the authorization server's detection mechanisms remain inactive. \r\n\r\nThis article describe this scenario with more details : https://www.pingidentity.com/en/resources/blog/post/refresh-token-rotation-spa.html\r\n\r\n",
+      "createdAt": "2024-04-06T22:24:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2041220558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55vc2t",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Hi! I would like to contribute with feedback and have a few initial questions to get better understanding of goals, level of detail etc, before adding feedback as more specific issues.\r\n\r\nTo start with, I think it is good that ASVS adds guidance on OAuth and OIDC, since many web applications built today use OAuth/OIDC in some way and technically detailed guidance/requirements are a little bit \"hidden\" in specs and RFCs. But a concern is that it will be challenging for ASVS to summarize and highlight the most important things, get the right amount of detail and align with all \"best current practices\" as they change...    \r\n\r\nPerhaps this will make my thoughts clearer:\r\n\r\nIn the first section it is stated that this \"summarizes the best current security practices for OAuth 2.0 as derived from its RFC 6750 and 6749\" and OIDC is also is mentioned.\r\n\r\nTwo set of specs for OAuth2/OIDC that are often referenced and used for guidance when building and testing OAuth2/OIDC solutions are https://oauth.net/2.1/ (in particular https://datatracker.ietf.org/doc/html/draft-ietf-oauth-browser-based-apps) and https://openid.net/wg/fapi/specifications/ (in particular https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html, applicable for domains with high security requirements like finance and healthcare etc). \r\n\r\nHave you considered adding additional requirements and recommended mitigations found there?\r\n\r\nFor example, FAPI 2.0 defines about 30 verifications for the authorization server while ASVS currently has 6, in particular ASVS does not mention PAR. And if we compare FAPI and ASVS guidance for resource servers ASVS has 3 requirements while FAPI has 5, which looks like this, some overlap, but also differences.\r\n\r\n> 5.3.4. Requirements for resource servers\r\n> The FAPI 2.0 endpoints are OAuth 2.0 protected resource endpoints that return protected information for the resource owner associated with the submitted access token.\r\n> Resource servers with the FAPI endpoints\r\n> \r\n> 1. shall accept access tokens in the HTTP header as in Section 2.1 of OAuth 2.0 Bearer Token Usage [RFC6750];\r\n> 2. shall not accept access tokens in the query parameters stated in Section 2.3 of OAuth 2.0 Bearer Token Usage [RFC6750];\r\n> 3. shall verify the validity, integrity, expiration and revocation status of access tokens;\r\n> 4. shall verify that the authorization represented by the access token is sufficient for the requested resource access and otherwise return errors as in Section 3.1 of [RFC6750]; and\r\n> 5. shall support and verify sender-constrained access tokens using one or both of the following methods:\r\n> - MTLS as described in [RFC8705],\r\n> - DPoP as described in [RFC9449].\r\n\r\nI understand if it is hard to answer this open question, but it would be interesting if you could elaborate some more on this, for example why there are differences and what role ASVS is meant to play in addition to guidance and requirements found at  https://oauth.net/2.1/ and https://openid.net/wg/fapi/specifications/\r\n\r\nThanks for all work with ASVS, it is a great resource! \r\nPlease let me know if you would like me to submit more concrete feedback in issues.",
+      "createdAt": "2024-04-08T11:15:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2042482093",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55v0u9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @TmmmmmR - I have addressed the issue from another perspective, such as do not allow any refresh tokens to the browser at all. See https://github.com/OWASP/ASVS/issues/1916#issue-2207465783 # Discussion/Proposal 1.\r\n\r\nIf you agree it is the same topic and the same problem, please continue the discussion in the other issue.\r\n",
+      "createdAt": "2024-04-08T12:08:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2042579901",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55v5SE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi, @TobiasAhnoff - I agree with your point of view and (y) for the attitude to understand the situation first.\r\n\r\nThe situation at the moment:\r\n* The entire OAuth paragraph is the first draft. It is published to get feedback and based on that to validate and improve requirements.\r\n* If ASVS already has requirements to address certain issues, such as validating JWT, then those requirements are not duplicated to the OAuth section.\r\n\r\nThe action plan here can be - if you feel, that the OAuth paragraph is missing some requirement, then just point it out. If it is covered somewhere else, we can then say it. For me it's probably faster to say is it covered than for you to investigate the entire ASVS for each potential proposal.",
+      "createdAt": "2024-04-08T12:17:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2042598532",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM55w0JY",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Hi, @TobiasAhnoff - I agree with your point of view and (y) for the attitude to understand the situation first.\r\n> \r\n> The situation at the moment:\r\n> \r\n>     * The entire OAuth paragraph is the first draft. It is published to get feedback and based on that to validate and improve requirements.\r\n> \r\n>     * If ASVS already has requirements to address certain issues, such as validating JWT, then those requirements are not duplicated to the OAuth section.\r\n> \r\n> \r\n> The action plan here can be - if you feel, that the OAuth paragraph is missing some requirement, then just point it out. If it is covered somewhere else, we can then say it. For me it's probably faster to say is it covered than for you to investigate the entire ASVS for each potential proposal.\r\n\r\n👍 I will structure my feedback and add some issues during this week, some of it might be covered in other parts of ASVS, but faster if you note if it is covered or not, thank you!",
+      "createdAt": "2024-04-08T14:01:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2042839640",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56hUlK",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I have added two Github issues, hope this will be a good way to provide feedback on the OAuth chapter\r\nhttps://github.com/OWASP/ASVS/issues/1924\r\nhttps://github.com/OWASP/ASVS/issues/1925",
+      "createdAt": "2024-04-15T06:24:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2055555402",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56hn1I",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I have added two Github issues, hope this will be a good way to provide feedback on the OAuth chapter #1924 #1925\r\n\r\nThank you, I'll take a look in few days.",
+      "createdAt": "2024-04-15T06:42:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2055634248",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM56sPJw",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@csfreak92 would be good to get your feedback as well!",
+      "createdAt": "2024-04-16T07:27:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2058416752",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM57Rchi",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @tghosth, will get back to this thread once I got back home from traveling. For sure will review all the feedback from the community for the OAuth 2.0 section. Cheers! ",
+      "createdAt": "2024-04-21T19:16:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2068170850",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-JhNZ",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Updates from my end evaluating @jmanico's comments with my comments. Will push a PR with the OAuth 2.1 draft together with updates and notes from these comments :) @elarlang, @TobiasAhnoff, @jsherm-fwdsec, @tghosth. \r\n\r\n> I had some of my OAuth2 friends review this, this morning. Here are a few suggestions: \r\n\r\n* *PKCE Requirement:* Originally, PKCE was advised for public clients. Now, it's a best practice for all OAuth clients, including confidential clients, to prevent authorization code interception attacks. This recommendation needs clear emphasis. \r\n_**---> [Covered with 51.2.2, but adding this for more emphasis]**_\r\n\r\n* *Refresh Token Strategy:* Implement rotating and expiring refresh tokens to avoid long-term misuse. This should be done in conjunction with sender-constraining mechanisms for enhanced security. \r\n_**---> [Covered with 51.1.4]**_\r\n\r\n* *Avoid Resource Owner Password Credentials Grant:* This grant type is not recommended due to security concerns. Instead, use the authorization code grant with PKCE. \r\n_**---> [Covered and added to the ### Resource Owner Password Credentials Grant paragraph explanation at the bottom]**_\r\n\r\n* *Consistent Terminology*: Use \"Authorization Server\" and \"Resource Server\" consistently throughout the document to avoid confusion, especially for newcomers. \r\n_**---> [Covered in the whole chapter unless I am missing something?? Can someone point anything that was not consistent so that I can fix it with an updated PR :) ]**_\r\n\r\n* *Clarify OAuth vs. OpenID Connect*: Emphasize that OAuth 2.0 focuses on authorization delegation, while OpenID Connect deals with authentication federation. Expand on this to help readers understand their distinct purposes. \r\n_**---> [This is ongoing work with other folks during the meeting regarding OAuth 2.0 and OpenID Connect. Noted and will be kept in mind]**_\r\n\r\n* *Prevent Authorization Server Mix-Up Attacks:* Include up-to-date strategies for mitigating mix-up attacks in environments with multiple Authorization Servers. Detail the use of the \"iss\" parameter and recommend additional checks like verifying the \"aud\" claim. \r\n_**---> [Covered with 51.2.1 and reference links at the bottom. Noted about the \"aud\" claim and will keep it in mind in the updated PR that is on the works with the other folks during the meeting :) ]**_  \r\n\r\n* *Detailed Scope and Audience Implementation:* Provide concrete examples of how to implement and validate access token restrictions based on scope and audience to offer actionable guidance. \r\n_**---> [This is ongoing work with other folks during the meeting regarding OAuth 2.0 and OpenID Connect. Noted and will be kept in mind for creating a further concrete example and guidance for this in the updated PR. :) ]**_ \r\n\r\n\r\n",
+      "createdAt": "2024-05-17T00:31:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2116424537",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-j-Pq",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Hey all 👋 \r\nGreat work on this piece. As I have interest and expertise in OAuth and OIDC, I'll give this a look in the coming week(s)\r\n\r\nMy first question if you don't mind, why is everything L3? Is there a basis for how we are setting them?\r\nI can see several of those can be split between L1->3 based on priority and conformance with the protocols at hand and profile required.\r\n\r\nLooking forward to better understand the work set here behind this :)",
+      "createdAt": "2024-05-21T20:08:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2123359210",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-mQS0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hey @ThunderSon - we are waiting for your input :) As it is valid for every opened issue, but on the topic, all OAuth/OIDC related issues are with label https://github.com/OWASP/ASVS/labels/V51\r\n\r\nLevels - I can not see L3, everything is L1 at the moment. But anyhow, we still don't have levels defined and time should not be wasted at the moment for the discussion of levels. In the big picture, the same is for chapter texts - let's get necessary requirements in first, rest of it comes later (as a result of requirements and how those are divided into chapters).",
+      "createdAt": "2024-05-22T06:25:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2123957428",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-3kSl",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Update from @jmanico's comments on OAuth 2.1: \r\n\r\n> Should we really be limited with OAuth 2.0 or should take direction to OAuth 2.1:\r\n> \r\n> For sure. Here are the main differences between OAuth 2.0 and 2.1 and topics we should cover to address 2.1.\r\n> \r\n\r\n* PKCE is required for all OAuth clients using the authorization code flow ---> _**[Covered and added some verbiage for OAuth 2.1 coverage in 51.2.2]**_\r\n\r\n* Redirect URIs must be compared using exact string-matching  ---> _**[Added new requirement numbers 51.2.5 and 51.1.7 to cover for this ]**_\r\n\r\n**ADDED on my PR #1971** \r\n51.2.5 Verify that Clients do not expose URLs that forward the user's browser to arbitrary URIs obtained from a query parameter (\"open redirectors\") and any URI redirects must be compared using exact string-matching.  \r\n\r\n51.1.7 Verify that the Authorization Server does not expose URLs that forward the user's browser to arbitrary URIs obtained from a query parameter (\"open redirectors\") which can enable exfiltration of authorization codes and access tokens. Redirect URIs must be compared using exact string-matching.  \r\n\r\n* The Implicit grant (response_type=token) is omitted from this specification  ---> _**[Should we add some language to say this is a big no, no thing to use? In my initial pull requests, it was pointed out by Josh that we should have language as \"use this instead of avoid using this...\" I can always add that to my pull request, but just want to make sure we are all on the same page. What are everyone's thoughts about this? ]**_\r\n\r\n* The Resource Owner Password Credentials grant is omitted from this specification  ---> _**[Covered by adding some sentence at the end of the ### Resource Owner Password Credentials Grant]**_\r\n\r\n* Bearer token usage omits the use of bearer tokens in the query string of URIs  ---> _**[NEED HELP to research on how this helps and what it prevents... I am not sure about this part]**_\r\n\r\n* Refresh tokens for public clients must either be sender-constrained or one-time use ---> _**[Covered already with 51.1.4]**_\r\n\r\nPing @elarlang, @TobiasAhnoff, @tghosth and @jsherm-fwdsec",
+      "createdAt": "2024-05-24T04:23:46Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2128495781",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kc9Xg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As related PR was 2 months old, outdated and causing conflicts, I closed it.\r\n\r\nRequirement 51.1.7 is added via #1965 / #2020\r\n\r\n---\r\n\r\nProposed change for \"Resource Owner Password Credentials Grant\":\r\n\r\nAside from this grant type can leak credentials in more places than just the Authorization Server, adapting the Resource Owner password credentials grant to two-factor authentication, authentication with cryptographic credentials (e.g. WebCrypto, WebAuthn) and authentication processes that require multiple steps can be hard or impossible. **This grant type is not recommended in general due to security concerns. Instead, use the authorization code grant with PKCE. This grant type is omitted from OAuth 2.1 specification.**\r\n\r\nIt was proposed to finetune the added text, \"Maybe swap the two sentences?\" by @randomstuff.\r\n\r\n---\r\n\r\nPlease let's find agreement on the issues before making PR and leaving it hanging there. It wastes quite some time to re-work it again and again to understand, what is the latest state.",
+      "createdAt": "2024-08-31T09:55:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2322847200",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MK53J",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@csfreak92 @randomstuff - I think we will have some clean-up and ironing for all the texts. So at the moment, open a PR to fix only this last proposed sentense.\r\n\r\nThis monster issue has served it's goal and we are not in state to planning what to do with OAuth - base level is done and a lot work is still in progress.",
+      "createdAt": "2024-09-15T16:38:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2351668681",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MM_lJ",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "By last proposed sentence, @elarlang you mean this, `Instead, use the authorization code grant with PKCE. This grant type is omitted from OAuth 2.1 specification.` from above? Which is the whole block of intro/text info for: \r\n\r\n\r\n`Proposed change for \"Resource Owner Password Credentials Grant\":`\r\n\r\n`Aside from this grant type can leak credentials in more places than just the Authorization Server, adapting the Resource Owner password credentials grant to two-factor authentication, authentication with cryptographic credentials (e.g. WebCrypto, WebAuthn) and authentication processes that require multiple steps can be hard or impossible. This grant type is not recommended in general due to security concerns. Instead, use the authorization code grant with PKCE. This grant type is omitted from OAuth 2.1 specification.`\r\n\r\nIs that what you mean we need to fix? I think I can whip out a quick PR if this is the one you are referring to. ",
+      "createdAt": "2024-09-16T07:43:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2352216393",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MNByX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, let's solve that and move on.\r\n\r\nIt is the subject to discuss, how much educative text we want to keep there, as it is all written in the referenced specifications.",
+      "createdAt": "2024-09-16T07:48:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2352225431",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NEuhx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The proposed text is now updated and I close this issue. If there is some new topic to discuss, it makes sense to open a new issue for that.",
+      "createdAt": "2024-09-22T14:58:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/996#issuecomment-2366826609",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-05-12T07:49:49Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 996,
+  "state": "CLOSED",
+  "title": "Add OAuth2 requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/996"
+}

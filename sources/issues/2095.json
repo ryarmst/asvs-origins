@@ -1,0 +1,191 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Currently there is this verification:\r\n\r\n> **51.3.1** Verify that when an OAuth Client can interact with more than one Authorization Server, Clients should verify that the issuer \"iss\" parameter value is what it expected from the authorization response to prevent against mix-up attacks. In the absence of \"iss\" parameter, Clients may instead use distinct redirect URIs to identify authorization endpoints and token endpoints.\r\n\r\ni.e. if the \"iss\" parameter is included in the authorization response the client must check it. **By the client can proceed if the \"iss\" parameter is missing.**\r\n\r\nHowever, there is no verification for making sure that the authorization server actually included this parameter in the authorization response.\r\n\r\nWhy is this important: Verification of the issuer mitigates mix-up attacks as [described in draft-ietf-oauth-security-topics-27](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-security-topics-27#section-4.4).\r\n\r\nProposition:\r\n\r\n> Verify that the Authorization Server includes the \"iss\" parameter in authorization responses for the code grant in order to mitigate mixup-attacks.\r\n\r\nThis is not strictly necessary if the authorization server knows that the client will **never** talk to another authorization server but is it helpful to include this exception?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6M2MIv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the Authorization Server includes the \"iss\" parameter in authorization responses for the code grant in order to mitigate mixup-attacks.\r\n\r\nFor this proposed requirement I think we should not go to the functionality testing field. We also don't have a requirement a'la verify that the \"state\" value is presented in the access token or something like that, although this is a pre-condition to implement some other requirement.\r\n\r\nWe also have issues like:\r\n* #2003 \r\n* #1969 (proposal 5)\r\n\r\nI think those issues should be solved together with the focus to \"Verify that there is defense against mixup-attacks.\"",
+      "createdAt": "2024-09-20T07:27:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2363015727",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqD_e",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note, this is about [Authorization Server Issuer Identification](https://www.rfc-editor.org/rfc/rfc9207).",
+      "createdAt": "2024-09-26T10:54:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2376613854",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqFQq",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think those issues should be solved together with the focus to \"Verify that there is defense against mixup-attacks.\"\r\n\r\nYes. It would probably be good to explicitly mention that the authorization server should include the \"iss\" in some way or another (possibly as part of a more general verification).",
+      "createdAt": "2024-09-26T10:57:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2376619050",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N11VS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, as I said, I prefer to not go to the AS functionality testing field with a separate requirement, so I try to \"inject\" this need into to the current/replacement for 51.3.1\r\n> Verify that if the OAuth Client can interact with more than one authorization server it has a defense against mix-up attacks, for example, by requiring that the authorization server returns the 'iss' parameter value and validating it.\r\n\r\n(validating it can be technically more descriptive)",
+      "createdAt": "2024-09-27T16:57:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2379699538",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N4d0k",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would add:\r\n\r\nVerify that if the OAuth Client can interact with more than one authorization server it has a defense against mix-up attacks, for example, by requiring that the authorization server returns the 'iss' parameter value and validating **_it in both in the authorization response and in the token response_**.\r\n\r\n",
+      "createdAt": "2024-09-28T03:44:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2380389668",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N4d-P",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And if you want an even more beefy version of this, consider the text before. Clients that can interact with more than one auth server should also verify the client id.\r\n\r\n**_Verify that if the OAuth Client interacts with more than one authorization server, it implements defense mechanisms against mix-up attacks. For example, the client should require that the authorization server includes the 'iss' (issuer) parameter in both the authorization response and token response. The client must then validate that the 'iss' value matches the expected authorization server to prevent confusions between different servers. Additionally, consider verifying the client_id and other key parameters to further strengthen security, as recommended in RFC 9207._**",
+      "createdAt": "2024-09-28T03:47:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2380390287",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OgKDf",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think all 3 suggestions would work, but perhaps this (from @jmanico)  aligns best with detail-level in other OAuth requirements?\r\n\r\n> Verify that if the OAuth Client can interact with more than one authorization server it has a defense against mix-up attacks, for example, by requiring that the authorization server returns the 'iss' parameter value and validating it in both in the authorization response and in the token response. ",
+      "createdAt": "2024-10-03T08:13:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2390794463",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Or8G4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Slightly modifed:\r\n> Verify that if the OAuth Client can interact with more than one authorization server it has a defense against mix-up attacks, for example, by requiring that the authorization server returns the 'iss' parameter value and validating it in the authorization response and the token response.",
+      "createdAt": "2024-10-04T14:46:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2393883064",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6OsCfc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Will be updated via #2095\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.3.1** | [ADDED] Verify that if the OAuth Client can interact with more than one authorization server it has a defense against mix-up attacks, for example, by requiring that the authorization server returns the 'iss' parameter value and validating it in the authorization response and the token response. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-10-04T15:00:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2095#issuecomment-2393909212",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-19T21:42:15Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2095,
+  "state": "CLOSED",
+  "title": "V51, Verify usage of the \"iss\" parameter in by the authorization server",
+  "url": "https://github.com/OWASP/ASVS/issues/2095"
+}

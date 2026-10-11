@@ -1,0 +1,643 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwOTExOTc1",
+    "is_bot": false,
+    "login": "deleterepo",
+    "name": "Jordan Sherman"
+  },
+  "body": "As per the discussion in https://github.com/OWASP/ASVS/issues/1969, the nonce claim is a specific OIDC claim to bind an ID token to a client, to mitigate replay attacks. See here: https://openid.net/specs/openid-connect-core-1_0.html#IDToken \r\n\r\nWe can have a requirement such as this:\r\n\r\nVerify that the nonce parameter sent in the authorization request is included in the nonce claim of the issued ID token, and that the client ensures that the nonce claim value is equal to the original value sent in the authorization request.\r\n\r\n@elarlang ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Gb357",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We also have requirement\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.2** | [ADDED] Verify that the Client is using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. | ✓ | ✓ | ✓ |\r\n\r\nI prefer the requirement to say clearly, what security problem it solves. E g for be sure that the ID-token is sent to the same client that started the auth* process, check the nonce parameter before accepting the token.",
+      "createdAt": "2024-07-29T09:34:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2255453819",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LvGwB",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, some input for feedback and wordsmithing. Terminology and grammar needs validation as well:\r\n> Verify that the OAuth Client mitigates the replay attack by validating the nonce claim in the ID-token to be the same value as it was sent via nonce parameter in the authentication request to the authorization server.\r\n\r\nping @deleterepo @randomstuff @TobiasAhnoff",
+      "createdAt": "2024-09-11T18:24:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2344381441",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Lvu39",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Suggestion:\n\nVerify that the OAuth client mitigates replay attacks by ensuring that the `nonce` claim in the ID token matches the `nonce` value sent in the authentication request to the authorization server.",
+      "createdAt": "2024-09-11T19:30:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2344545789",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MK93T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So the proposal is delete current 51.2.2 and add new requirement to OIDC Client section (not made yet):\r\n> Verify that the OAuth client mitigates replay attacks by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n\r\nShould be in the requirement also OIDC client?\r\n\r\nping @randomstuff @TobiasAhnoff",
+      "createdAt": "2024-09-15T17:16:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2351685075",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MSiyb",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "A thing to note here is that when implementing the code flow according to FAPI2 there seems to be no need to verify the ID token in the same way as when using other OIDC flows, see\r\nhttps://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.5\r\n\r\nA suggestion to align with that is to have\r\n\r\n > Verify that the OAuth client mitigates replay attacks by using code and PKCE with a confidential client or ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n\r\nBut from reading OIDC specs, at this point, I´m not 100% sure that all 3 conditions are a requirement for skipping the nonce and signature check as FAPI2 states? So perhaps just have (as suggested in previous comments)\r\n\r\n> Verify that the OAuth client mitigates replay attacks by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.",
+      "createdAt": "2024-09-16T18:51:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2353671323",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MTykZ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> But from reading OIDC specs, at this point, I´m not 100% sure that all 3 conditions are a requirement for skipping the nonce and signature check as FAPI2 states?\r\n\r\n@TobiasAhnoff, when receiving the ID token directly from the backend (authorization code flow), OpenID Connect allows you to skip the signature verification. This is explained in [3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation) (6) :\r\n\r\n> **If the ID Token is received via direct communication** between the Client and the Token Endpoint (which it is in this [the Authorization code] flow), the TLS server validation MAY be used to validate the issuer **in place of checking the token signature**.\r\n\r\nAs for skipping the nonce signature, this is because using PKCE is considered to already protect against replay attacks and ensure freshness.\r\n\r\nIf this is good enough for FAPI 2.0, I believe this might be good enough for ASVS (right?). (However, as the `nonce` parameter is required anyway there is not much benefit in not verifying it…)\r\n",
+      "createdAt": "2024-09-16T20:45:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2353998105",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MWO0U",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If we are not sure what is the latest-latest-latest technical solution or we are not sure how mature is the latest spec and will it be used in practice, then we should not take the risk and write it to the requirement as \"hard-coded one-way to do things\".\r\n\r\nWe can go with requirements like: Verify that OAuth client mitigates ID-token replay attacks. For example, by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server OR /using something else/.\r\n\r\nFrom the defense point of view, we should only care, that it is not possible to do the attack. How it is achieved, is not that important.",
+      "createdAt": "2024-09-17T06:27:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2354638100",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MX2Nh",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> This is explained in [3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation) (6)\r\n\r\n@randomstuff thank you, there are a lot of specs to read! \r\n\r\nPerhaps this is enough for an ASVS verification?\r\n\r\n> Verify that OAuth client mitigates ID-token replay attacks. For example, by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n",
+      "createdAt": "2024-09-17T09:38:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2355061601",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MX8l_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This simplicity works for me, everything that must be said by ASVS is said, and the rest is the responsibility for projects like testing guides or cheat sheet series.",
+      "createdAt": "2024-09-17T09:49:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2355087743",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M2waa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What should be the chapter name for this one?",
+      "createdAt": "2024-09-20T08:29:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2363164314",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M44B7",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would suggest \"OAuth Replay Attack Prevention\"",
+      "createdAt": "2024-09-20T13:17:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2363719803",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-ljU",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Since ID Tokens are OIDC (not OAuth) a suggestion is to use terminology from the OIDC spec (see https://openid.net/specs/openid-connect-core-1_0.html#CodeIDToken), perhaps:\r\n\r\n> Verify that the Client mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider.\r\n\r\nAnd the chapter name \"OIDC ID Token Replay Attack Prevention\"\r\n\r\nOr should we keep using some OAuth terminology e g \"authorization request\" and \"authorization server\"?",
+      "createdAt": "2024-09-21T14:58:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2365216980",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M-8c2",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Since ID Tokens are OIDC (not OAuth) a suggestion is to use terminology from the OIDC spec\r\n\r\nThen, it should be \"Verify that the **Relying Party** mitigates ID token replay attacks. […]”",
+      "createdAt": "2024-09-21T20:27:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2365310774",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NBQJm",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, but maybe we should also clarify that for ID Tokens the Relying Party is the client, not the OAuth Resource Server (which sometimes also is referred as a relying party, and the OIDC spec use the term Client\r\n\r\n>if a nonce value was sent in the Authentication Request, a nonce Claim MUST be present and its value checked to verify that it is the same value as the one that was sent in the Authentication Request. The Client SHOULD check the nonce value for replay attacks. The precise method for detecting replay attacks is Client specific.\r\n\r\n@randomstuff Maybe this better captures the OIDC terminology? \r\n(without the risk of confusing resource servers as the relying party)\r\n\r\n> Verify that the Client (as the Relying Party) mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider.",
+      "createdAt": "2024-09-22T08:02:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2365915750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE1iw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's go with that, propose section name for that as well.",
+      "createdAt": "2024-09-22T16:12:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2366855344",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NFaM_",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@TobiasAhnoff, yes you are right OpenID Connect uses the term \"client\" throughout so maybe there was no need to ass the \"relying party\" wording in there after all.",
+      "createdAt": "2024-09-22T23:05:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2367005503",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NVY31",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Asking feedback for the idea (the last sentence in brackets)\r\n> Verify that the Client (as the Relying Party) mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider **(that was sent in the authorization request to the OAuth Authorization Server)**.\r\n\r\nChapter \"OIDC Client\"?",
+      "createdAt": "2024-09-24T12:54:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2371194357",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NsYoR",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think the chapter/section heading should be \"OIDC Client\", but I´m not sure on the \"bracket sentence\"....\r\n\r\nOne argument is that is should not be needed, the reader should understand how OIDC and OAuth terminology overlaps.\r\nOn the other hand it could be good to clarify that the  \"Authentication Request to the OpenID Provider\" and  \"authorization request to the OAuth Authorization Server\" is the same request...(even if ID Tokens is not part of OAuth)\r\n\r\nI´m not sure if this is better but an alternative is to have:\r\n>  Verify that the Client (as the Relying Party) mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider (in OAuth2 refereed to as the Authorization request sent to the Authorization Server).\r\n\r\nPerhaps this will be easier to decide when we see the full OAuth/OIDC chapter?",
+      "createdAt": "2024-09-26T14:59:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2377222673",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NxKQi",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Added into **V51.5 OIDC Client** as\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.5.1** | [ADDED] Verify that the Client (as the Relying Party) mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider (in OAuth2 refereed to as the Authorization request sent to the Authorization Server). | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-09-27T06:11:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2378474530",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QFXlT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, with adding new requirement I did not delete the previous version (https://github.com/OWASP/ASVS/issues/2002#issuecomment-2351685075),\r\n\r\nIn **V51.3 OAuth Client** section (in the beginning we did not have OIDC section and everything were together)\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.3.2** | [ADDED] Verify that the Client is using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token. | ✓ | ✓ | ✓ |\r\n\r\nEveryone agree that it is duplicate?",
+      "createdAt": "2024-10-16T16:27:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2417326419",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRIT6",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We have:\r\n\r\n> [ADDED] Verify that the Client is using the PKCE flow or alternatively the OpenID Connect \"nonce\" parameter and the respective Claim in the ID Token.\r\n\r\nThe [current FAPI 2.0 draft](https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#name-general-requirements-3) have:\r\n\r\n> nonce/signature check can be skipped by clients, PKCE cannot (security improvement)\r\n\r\nShould we align with this and require the usage of PKCE at least for L3 (even if `nonce` is used)?\r\n",
+      "createdAt": "2024-10-17T19:56:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2420409594",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QRSGY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just in case saying, that the referenced requirement was proposed to be deleted and now is deleted.",
+      "createdAt": "2024-10-17T20:07:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2420449688",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QiJzf",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Should we align with this and require the usage of PKCE at least for L3 (even if nonce is used)?\r\n\r\nYes, I think so, maybe 51.51. should be a mix with the deleted 51.3.2? \r\n(there are other ASVS requirements mandating PKCE when code is used)\r\n\r\n>Verify that the Client (as the Relying Party) mitigates ID Token replay attacks by using PKCE or alternatively (when code is not used) by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider (in OAuth2 refereed to as the Authorization request sent to the Authorization Server).",
+      "createdAt": "2024-10-20T11:43:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2424872159",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qitn-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "PKCE is becoming fairly standard. I suggest level 2.\n",
+      "createdAt": "2024-10-20T14:40:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425018878",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Qiw4y",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, Actually usage of PKCE is [mostly required by the OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-countermeasures) so I think it would make sense to require it in L1:\r\n\r\n> To prevent injection of authorization codes into the client, **using code_challenge and code_verifier is REQUIRED for clients**",
+      "createdAt": "2024-10-20T15:02:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425032242",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QixEz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I support that as well.",
+      "createdAt": "2024-10-20T15:03:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425033011",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjHAc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The scope for this issue is 51.5.1. The goal of the requirement is to mitigate ID token replay attacks.\r\n\r\nWith PKCE you take down the vector, that the client can not ask for tokens from AS, with ID token nonce you take down the vector, that the client does not accept ID token, if it is not from the user's own authorization flow/transaction.\r\n\r\nFrom a testing/verifying point of view - I would say, that the nonce solution, that is made for exactly that, is the first preferred option. If in practice I can not do the replay attack, then whatever defense works, including PKCE.\r\n\r\nWhere I'm wrong?\r\n\r\nThere is some discussion about levels. ID token replay, requirement 51.5.1, and PKCE usage, requirement 51.2.3 - both are level 1 at the moment.",
+      "createdAt": "2024-10-20T17:01:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425122844",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjKTv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "PKCE was originally designed to prevent authorization code injection bit it does have an indirect benefit of stopping some replay attacks. PKCE adds valuable security, but it shouldn’t be seen as the main line of defense for ID token replay in the context of 51.5.1.\r\n\r\nFrom a testing perspective, the nonce solution seems preferred - since it directly stops ID token replay. But as you said, if a defense (like PKCE) blocks the replay attack in practice, it’s still valid, even if it's not targeted a lot.\r\n\r\nBoth requirements (51.5.1 for ID token replay and 51.2.3 for PKCE) are level 1 because they address serious risks but in slightly different contexts. I'd say this makes sense.\r\n\r\nI am just trying to see if I can reading your comments right, are we in sync?",
+      "createdAt": "2024-10-20T17:20:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425136367",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjLXG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Your translation from my comments is ok. But I can not understand the problem to solve here.\r\n\r\nThis is the requirement as it stands:\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.5.1** | [ADDED] Verify that the Client (as the relying party) mitigates ID token replay attacks. For example, by ensuring that the 'nonce' claim in the ID token matches the 'nonce' value sent in the authentication request to the OpenID provider (in OAuth2 refereed to as the authorization request sent to the authorization server). | ✓ | ✓ | ✓ |\r\n\r\nFrom the comments above, I'm not convinced we need to change the requirement to have PKCE focus as the 1st option. PKCE is required for code flow anyway from level 1 by 51.2.3.",
+      "createdAt": "2024-10-20T17:29:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425140678",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjL9W",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would consider adding this to the end of 51.5.1\r\n\r\n_Additionally, while PKCE primarily protects against authorization code injection, it can also provide an extra layer of defense by securing the authorization code exchange, indirectly helping to mitigate some replay attacks._",
+      "createdAt": "2024-10-20T17:31:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425143126",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjMbJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It is already long and it's going to cheat sheet side already. The only required part of the requirement is:\r\n> Verify that the Client (as the relying party) mitigates ID token replay attacks.\r\n\r\nIf the requirement is not wrong or we are not against any best practices or recommendation, I prefer to stay with that requirement as it is.\r\n\r\nping @randomstuff @TobiasAhnoff ",
+      "createdAt": "2024-10-20T17:35:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425145033",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QjNTn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think that's fair Elar. I do not think it really needs to be added. I was just throwing that in there in case you or others want it.",
+      "createdAt": "2024-10-20T17:44:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425148647",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q1EB9",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "51.5.1 may not need to change, but I still feel it is unclear that when using a backend client with code+PKCE there is no need to validate ID Token nonce, a suggestion is to have\r\n\r\n> If ID token in front-channel, verify that the Client (as the relying party) mitigates ID token replay attacks. For example, by ensuring that the 'nonce' claim in the ID token matches the 'nonce' value sent in the authentication request to the OpenID provider (in OAuth2 refereed to as the authorization request sent to the authorization server).",
+      "createdAt": "2024-10-22T17:13:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2429829245",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Q5Xju",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think my comment (https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425122844) is still valid. If I lack some important nuances here, please explain this during the meeting.",
+      "createdAt": "2024-10-23T05:41:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2430957806",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-07-26T01:44:08Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2002,
+  "state": "CLOSED",
+  "title": "Proposal/discussion: OIDC nonce claim requirement",
+  "url": "https://github.com/OWASP/ASVS/issues/2002"
+}

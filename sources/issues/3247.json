@@ -1,0 +1,60 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "<!---\nBEFORE YOU OPEN AN ISSUE:\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\n- Please search the issues in case your question has been discussed before.\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\n- When you reference requirements, please include them as a link, similarly to this:\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\n\nOTHER NOTES:\n- Please do not open a pull request without first opening an associated issue.\n- Please carry out all discussion in the associated issue only.\n-->\n\n> Verify that deserialization of untrusted data enforces safe input handling,\nsuch as using an allowlist of object types or restricting client‑defined object\ntypes, to prevent deserialization attacks. Deserialization mechanisms that\nare explicitly defined as insecure must not be used with untrusted input.\n\nAttackers can abuse \"**gadget chains**\" of already-allowed classes. A simple allowlist might not be enough. \nwhat is \"**insecure**\" in ASVS context? As per me to identifying insecure requires continuous security research and knowledge, which is not possible easily.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7Asmgb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Overall I just suggest not deserializing untrusted binary data and stick to JSON and similar. Even with class allow-lists, DOS is still often an exploitable vector with corrupted static Hashtables and similar.",
+      "createdAt": "2025-08-28T10:27:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3247#issuecomment-3232917531",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qHBRl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree the wording could be stronger to make clear what \"safe\" actually looks like in practice. A loose allowlist is not enough and we could be clearer about that.\n\nAs Jim says, the ideal is to avoid native/binary deserialization of untrusted data and use safer formats like JSON. But since we can't require that universally (there are legitimate use cases for native serialization), I'd suggest we tighten the guidance for cases where it is used.\n\n**Proposed wording:**\n\n\"_Verify that deserialization of untrusted data enforces safe input handling, such as using a strict allowlist limited to the specific object types expected for that functionality combined with limits on object depth and graph size, to prevent deserialization attacks. Deserialization mechanisms that are explicitly defined as insecure must not be used with untrusted input._\"\n\nThe key changes:\n- **\"strict allowlist limited to the specific object types expected for that functionality\"** — makes clear this means a narrow, scoped allowlist, not a broad one\n- **\"combined with limits on object depth and graph size\"** — captures the structural controls needed to mitigate both gadget chains and DoS (e.g. hash collision attacks on deserialized collections), expressed in language-agnostic terms.",
+      "createdAt": "2026-02-19T14:39:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3247#issuecomment-3927708773",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-08-26T19:17:31Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAACYnQLAA",
+      "name": "requires change control",
+      "description": "",
+      "color": "aaaaaa"
+    }
+  ],
+  "number": 3247,
+  "state": "OPEN",
+  "title": "Clarification: 1.5.2 \"insecure\"",
+  "url": "https://github.com/OWASP/ASVS/issues/3247"
+}

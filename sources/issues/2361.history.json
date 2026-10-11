@@ -1,0 +1,52 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2466218066",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "I don't think it is JWT or token specific requirement - those who have worked with V6 maybe can hint is this covered there already.\r\n\r\nAlso it is on the limit with the scope. You need to have access to issuer setup that is a bit out of scope from application point of view. And if you have access, then I think it is more a question of handling keys in general? (ping @randomstuff @danielcuthbert )\r\n\r\nFor tokens we additionally have or will have requirement for validating the 'iss' claim.",
+          "recorded_at": "2024-11-11T18:00:07Z"
+        },
+        {
+          "body": "I don't think it is JWT or token specific requirement - those who have worked with V6 maybe can hint is this covered there already.\r\n\r\nAlso it is on the limit with the scope. You need to have access to issuer setup that is a bit out of scope from application point of view. And if you have access, then I think it is more a question of handling keys in general? (ping @randomstuff @danielcuthbert )\r\n\r\nFor tokens we additionally have of will have requirement for validating the 'iss' claim.",
+          "recorded_at": "2024-11-09T13:35:55Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2481061264",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Some more clarifications to document:\r\n1) how do you test/verify it?\r\n2) how it is different from 3.5.7?\r\n  * _V3.5.7 Verify that key material that is used to validate cryptographically secured tokens is from trusted pre-configured sources for the token issuer, preventing attackers from specifying untrusted sources and keys. For JWTs and other JWS structures, headers such as 'jku', 'x5u', and 'jwk' must be validated against an allowlist of trusted sources._",
+          "recorded_at": "2024-11-17T09:08:18Z"
+        },
+        {
+          "body": "Some more clarifications to document:\r\n1) how do you test/verify it?\r\n2) how it is different from 3.5.7 (_Verify that key material that is used to validate cryptographically secured tokens is from trusted pre-configured sources for the token issuer, preventing attackers from specifying untrusted sources and keys. For JWTs and other JWS structures, headers such as 'jku', 'x5u', and 'jwk' must be validated against an allowlist of trusted sources._))",
+          "recorded_at": "2024-11-17T09:07:55Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2483955750",
+      "author": "ryarmst",
+      "previous_versions": [
+        {
+          "body": "Just focusing on key confusion, if we look at the key confusion example from the [WSTG](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens), there are potentially two issues:\r\n\r\n1. The JWT library permits verification without explicitly specifying an algorithm. \r\n2. The application does not validate against an allow list of algorithms. \r\n\r\nIn theory, key confusion could still occur with (2) in place if an application needed to accept both symmetric and asymmetric algorithms. The issue can also occur even if the application uses a trusted key from a trusted source, so I think it should be separate from 3.5.7. @randomstuff I like the idea of abstracting this to ensure that keys are only used for intended purposes, but I think abstracting it will make it more challenging to implement and test as a requirement, so here is a first attempt just focusing on key confusion with JWTs as an example: \r\n\r\n> Verify that key material is only used with algorithms intended for it to prevent key confusion attacks. For JWTs, ensure that token verification operations explicitly specify which algorithm is to be used. \r\n\r\nConcerning 3.5.5:\r\n\r\n> ...If both symmetric and asymmetric are needed, additional controls should prevent key confusion.\r\n\r\nI think it is worthwhile to have a more precise requirement instead of \"additional controls should\". As is, the core of 3.5.5 addresses (2) from my points above and then appends that last phrase to address (1).",
+          "recorded_at": "2024-11-18T19:47:04Z"
+        },
+        {
+          "body": "Just focusing on key confusion, if we look at the key confusion example from the [WSTG](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens), there are potentially two issues:\r\n\r\n1. The JWT library permits verification without explicitly specifying an algorithm. \r\n2. The application does not validate against an allow list of algorithms. \r\n\r\nIn theory, key confusion could still occur with (2) in place if an application needed to accept both symmetric and asymmetric algorithms. The issue can also occur even if the application uses a trusted key from a trusted source, so I think it should be separate from 3.5.7. @randomstuff I like the idea of abstracting this to ensure that keys are only used for intended purposes, but I think abstracting it will make it more challenging to implement and test as a requirement, so here is a first attempt just focusing on key confusion with JWTs as an example: \r\n\r\n> Verify that key material is only used with algorithms intended for it to prevent key confusion attacks. For JWTs, ensure that token verification operations explicitly specify which algorithm is to be used. \r\n\r\nConcerning 3.5.5:\r\n\r\n> ...If both symmetric and asymmetric are needed, additional controls should prevent key confusion.\r\n\r\nI think it is worthwhile to have a more precise requirement instead of \"additional controls should\". As is, the core of 3.5.5 addresses (2) from my points above.",
+          "recorded_at": "2024-11-18T19:46:29Z"
+        },
+        {
+          "body": "Just focusing on key confusion, if we look at the key confusion example from the [WSTG](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens), there are potentially two issues:\r\n\r\n1. The JWT library permits verification without explicitly specifying an algorithm. \r\n2. The application does not validate against an allow list of algorithms. \r\n\r\nIn theory, key confusion could still occur with (2) in place if an application needed to accept both symmetric and asymmetric algorithms. The issue can also occur even if the application uses a trusted key from a trusted source, so I think it should be separate from 3.5.7. @randomstuff I like the idea of abstracting this to ensure that keys are only used for intended purposes, but I think abstracting it will make it more challenging to implement and test as a requirement, so here is a first attempt just focusing on key confusion with JWTs as an example: \r\n\r\n> Verify that key material is only used with algorithms intended for it to prevent key confusion attacks. For JWTs, ensure that token verification operations explicitly specify algorithms to be used. \r\n\r\nConcerning 3.5.5:\r\n\r\n> ...If both symmetric and asymmetric are needed, additional controls should prevent key confusion.\r\n\r\nI think it is worthwhile to have a more precise requirement instead of \"additional controls should\". As is, the core of 3.5.5 addresses (2) from my points above.",
+          "recorded_at": "2024-11-18T19:45:23Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,400 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "5.3.1 | Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, JavaScript, URL parameters, HTTP headers, SMTP, and others as the context requires, especially from untrusted inputs (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara). (C4)\r\n-- | --\r\n\r\n\r\n\r\n5.3.3 | Verify that context-aware, preferably automated - or at worst, manual - output escaping protects against reflected, stored, and DOM based XSS. (C4)\r\n-- | --\r\n\r\n\r\n\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM49Q8cC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "related issue from past (before v4.0 release, numbers are different):\r\nhttps://github.com/OWASP/ASVS/issues/524",
+      "createdAt": "2022-02-02T11:37:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-1027852034",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5HV0Rv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Gosh, I can see this has been through a few iterations and I am inclined to agree with Jim that this looks a bit like a duplication. \r\n\r\n@elarlang do I understand correctly that the 5.3.1 is talking about generally encoding to make things render correctly whereas 5.3.3 is about encoding to specifically prevent XSS?",
+      "createdAt": "2022-07-27T15:21:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-1196901487",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RgXpj",
+      "author": {
+        "login": "sseelmann"
+      },
+      "authorAssociation": "NONE",
+      "body": "To me it seems the recently added 5.3.11 is redundant too:\r\n\r\n\r\n5.3.11 | [MOVED FROM 1.5.4] Verify that output encoding occurs close to or by the interpreter for which it is intended. (C4)\r\n-- | --\r\n\r\n\r\n\r\n",
+      "createdAt": "2022-12-29T16:15:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-1367439971",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Rgbug",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It's not recently added, it has been there since v4.0, just moved to different number (from 1.5.4 to 5.3.11 like the label says)\r\n\r\nRelated issue: https://github.com/OWASP/ASVS/issues/1484",
+      "createdAt": "2022-12-29T16:45:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-1367456672",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Too9H",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I guess I need to go through the history of these requirements, @elarlang do you think they should be separate?",
+      "createdAt": "2023-01-25T06:39:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-1403162439",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5To9gR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm ok with 5.3.1.\r\n\r\nRequirement 5.3.3 needs some update, but I think it's not duplicate.\r\n\r\nGoals here (not covered by 5.3.1):\r\n* clearly cover defence against JavaScript injection (expected defence - escaping e.g. `\\'` OR (covered by 5.3.1) converting to unicode e.g. `\\u0027`)\r\n* when userinput is applyed to DOM as HTML instead of text (`.createTextNode()` vs `document.write()`, `.innerHTML` etc) - in theory you can fix it with encoding, but it's unnecessary as actually you should use different method to display the data.\r\n\r\nThe term XSS is just... crap, bubble and clearly deprecated (25+ years). Not a single part is true with the name (think about _Stored HTML injection_ - no cross-site, no scripting) and we should not use it anywhere. The term _Site_ in the name is nowadays clear term (eTLD+1) and from JavaScript execution perspective, so-called XSS is more Same-Origin Scripting. And what is DOM XSS? It can be reflected, it can be stored.\r\n\r\nWe should say instead:\r\n* how the payload is stored or delivered (reflected, stored)\r\n* where payload affects the application (client-side, server-side)\r\n* in what syntax is the problem (HTML, JavaScript, JSON)\r\n* what is the problem (injection or execution)\r\n\r\nSummary - 5.3.3 needs more work and analyze, are all the \"XSS\" cases covered with other requirements or not.",
+      "createdAt": "2023-01-25T08:22:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-1403246609",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IFvjG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang \r\n\r\nCircling back to this issue.\r\n\r\nI feel like Javascript encoding is covered by 5.3.1 which clearly talks about context relevant encoding for multiple locations including Javascript:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.3.1** | [MODIFIED] Verify that output encoding for an HTTP response/HTML document/XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, JavaScript, CSS, or HTTP headers, to avoid changing the message or document structure. | ✓ | ✓ | ✓ | 116 |\r\n\r\nAs such, I wonder whether we should rework 5.3.3 to focus on your second point, safe sinks.\r\n\r\nFor example:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.3.3** | [MODIFIED] Verify that safe functions are used to write potentially dynamic content to a web page to avoid the risk of Cross-site Scripting (XSS) vulnerabilities. | ✓ | ✓ | ✓ | 79 |\r\n\r\nWhereas 5.3.1 is a little more generic, this gives us a standard and actionable XSS prevention requirement.\r\n\r\nWhat do you think?",
+      "createdAt": "2024-08-12T06:38:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2283206854",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IGIkr",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think 5.3.3 should concentrate for defense against JavaScript injection.\r\n\r\nYour proposed new requirement as 5.3.3 should be separate requirement (I need to check, maybe we have it covered but need to make it more clear, similar to https://github.com/OWASP/ASVS/issues/1998). It is against HTML execution by mistakes in front-end JavaScript due to incorrect functions in use. Can cover also with front end eval() calls.",
+      "createdAt": "2024-08-12T07:49:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2283309355",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IH4W6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think 5.3.3 should concentrate for defense against JavaScript injection.\r\n\r\nTo be clear, you are talking about injection into any context which results in client-side JavaScript being executed? (i.e. what people usually mean when they talk about XSS?)\r\n\r\n> Your proposed new requirement as 5.3.3 should be separate requirement (I need to check, maybe we have it covered but need to make it more clear, similar to #1998). It is against HTML execution by mistakes in front-end JavaScript due to incorrect functions in use. Can cover also with front end eval() calls.\r\n\r\nNot sure I agree that it should be a separate requirement, is it not just another mechanism to prevent JavaScript injection/XSS?\r\n\r\n@elarlang ",
+      "createdAt": "2024-08-12T11:54:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2283767226",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IPANt",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Not sure I agree that it should be a separate requirement, is it not just another mechanism to prevent JavaScript injection/XSS?\r\n\r\nXSS is not about just JavaScript injection. HTML, SVG, JavaScript and HTML can all cause XSS-centric injection. I know many of you including @tghosth and @elarlang know this already and I mean no disrespect. I just want to explain why I do not think we need a separate requirement for just JavaScript injection.",
+      "createdAt": "2024-08-13T08:13:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2285634413",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ij1C_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Discussed the following draft but @elarlang is going to think about it more \r\n\r\n[MODIFIED] Verify that output encoding or escaping are used to write potentially dynamic content to HTML, SVG and JavaScript documents to avoid the risk of Cross-site Scripting (XSS) vulnerabilities.\r\n\r\n",
+      "createdAt": "2024-08-15T11:16:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2291093695",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LZc5Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We have \"make the output correctly requirements\"\r\n* HTML injection / encoding - covered by 5.3.1\r\n* JavaScript injection / escaping or encoding - let's say it is targeted by 5.3.3, but the requirement itself requires some work\r\n\r\nWhat we need to address separately is when incorrect method is used for displaying the data to the output - e. g. applied as HTML instead (`document.write()`, `.innerHTML`) of as text (`.createTextNode()`).\r\n\r\n\r\nWe have requirement 5.2.4\r\n> V5.2.4 Verify that the application avoids the use of eval() or other dynamic code execution features. Where there is no alternative, any user input being included must be sanitized or sandboxed before being executed.\r\n\r\nI would say it is not covering this issue, as the expected defense in this case is not to modify the content to be safe for given usage, but to use correct method for displaying it.\r\n\r\nSo my proposal is:\r\n\r\n* to modify current 5.3.3 to address JavaScript related dynamic content building (defense methods encoding and escaping)\r\n* add new separate requirement to \"V50.5 Unintended Content Interpretation\" to address incorrect method problem\r\n  * alternative is to use more general \"avoid content execution\" somewhere \"V10\"",
+      "createdAt": "2024-09-09T17:40:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2338704984",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LeO06",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@elar 5.3.3 suggestion \r\n\r\n5.3.3: Verify that context-aware output encoding or escaping is used, preferably automated but at least manual, when writing dynamic content to HTML, SVG, and inline JavaScript values to prevent reflected, stored, and DOM-based Cross Site Scripting (XSS) attacks.\r\n",
+      "createdAt": "2024-09-10T08:06:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2339958074",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LeUz8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This 5.3.3 is just full of useless noise. It should just say that \"escape or encode for JavaScript\".\r\n\r\nIf we do that, we should remove the word \"JavaScript\" from 5.3.1 and I think it can be merged with 5.3.6 (JSON injection attacks).",
+      "createdAt": "2024-09-10T08:17:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2339982588",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LeWXb",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Less noise:\r\n\r\n5.3.3: Ensure that dynamic content written to HTML, SVG, and inline JavaScript is properly encoded or escaped to prevent XSS attacks. This should be automated when possible.",
+      "createdAt": "2024-09-10T08:20:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2339988955",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LeWvn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'd like to keep 5.3.3 separate from 5.3.1 since they really do handle different risks at different parts of software architecture.\r\n",
+      "createdAt": "2024-09-10T08:21:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2339990503",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LeZMA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I proposed (see https://github.com/OWASP/ASVS/issues/1195#issuecomment-2338704984) to have 3 requirements\r\n* current 5.3.1, without JavaScript\r\n* current 5.3.3 - clearly only encoding and escaping when building JavaScript dynamically\r\n* new requirement to address correct output method to use (e.g. text vs HTML) - in this case **encoding or sanitization is not the correct defense**, so current 5.3.3 is not the correct defense and can not cover that problem",
+      "createdAt": "2024-09-10T08:25:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2340000512",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LjRI0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang let's discuss on Thursday",
+      "createdAt": "2024-09-10T15:34:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2341278260",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L2VSH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I discussed with @elarlang the possibility of merging two of the above ideas for 5.3.3:\r\n\r\n> Verify that safe functions are used to write potentially dynamic content to a web page to avoid the risk of Cross-site Scripting (XSS) vulnerabilities.\r\n\r\nand\r\n\r\n> Verify that output encoding or escaping are used to write potentially dynamic content to HTML, SVG and JavaScript documents to avoid the risk of Cross-site Scripting (XSS) vulnerabilities.\r\n\r\nI agree that we need to keep this requirement as short as possible but to comprehensively cover \"Cross-site Scripting\" (I know Elar doesn't like this phrase :) )\r\n\r\n\r\n> new requirement to address correct output method to use (e.g. text vs HTML) - in this case encoding or sanitization is not the correct defense, so current 5.3.3 is not the correct defense and can not cover that problem\r\n\r\nI agree with this point and it sounds like it needs to be V50 as it relates to how a particular document or fragment is rendered.\r\n\r\n@elarlang to work on this",
+      "createdAt": "2024-09-12T13:24:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2346275975",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MktdJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang ping :)",
+      "createdAt": "2024-09-18T13:11:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2358433609",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MnCnj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Attempt n+1, the last one.\r\n\r\nRequirements in v4.0.3:\r\n* V5.3.3 Verify that context-aware, preferably automated - or at worst, manual - output escaping protects against reflected, stored, and DOM based XSS.\r\n* V5.3.6 Verify that the application protects against JSON injection attacks, JSON eval attacks, and JavaScript expression evaluation.\r\n\r\nRequirements at the moment:\r\n* V5.3.3 Verify that context-aware, preferably automated - or at worst, manual - output escaping protects against reflected, stored, and DOM based XSS.\r\n* V5.3.6 Verify that the application protects against JSON injection attacks.\r\n\r\n\r\nCurrent V5.3.3 is talking about outout encoding and escaping, and XSS. By this wording it does not add much to the 5.3.1, just the word escaping and this is \"a hint\" to set the focus for JavaScript\r\n\r\n* context-aware - if we limit the requirement to JavaScript, we can skip it\r\n* \"preferably automated - or at worst, manual\" - what is the \"manual encoding\" in a web application? Noise.\r\n* \"against reflected, stored, and DOM based XSS\" - from encoding does not matter, from where the source data came, output must be done correctly anyway.\r\n\r\nIn a not clearly communicated way we have here 2 requirements:\r\n\r\n* when building JavaScript dynamically (including JSON), then escaping and encoding must be in place\r\n* \"context-aware\" + \"against DOM XSS\" means we need to use correct methods to use (e. g. display) the input data\r\n\r\nThe second part was also proposed here https://github.com/OWASP/ASVS/issues/1195#issuecomment-2283206854):\r\n> V5.3.3 Verify that safe functions are used to write potentially dynamic content to a web page to avoid the risk of Cross-site Scripting (XSS) vulnerabilities.\r\n\r\nAnd my comment was, that it is a separate problem: https://github.com/OWASP/ASVS/issues/1195#issuecomment-2283309355\r\n\r\nGoing through all that, I can say that my previous proposal (https://github.com/OWASP/ASVS/issues/1195#issuecomment-2338704984 + https://github.com/OWASP/ASVS/issues/1195#issuecomment-2340000512) is still valid.\r\n\r\n---\r\n\r\nProposal 1 - remove JavaScript from 5.3.1, as it is covered new 5.3.3:\r\n\r\n> V5.3.1 Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments~~, JavaScript~~~, CSS, or HTTP headers, to avoid changing the message or document structure.\r\n\r\nAlthough it is not wrong if it stays there, this overlap may cause confusion.\r\n\r\n---\r\n\r\nProposal 2 - make 5.3.3 to concenentrate to JavaScript syntax, including JSON (merge 5.3.6).\r\n\r\nWordsmithing needed, but idea is this:\r\n\r\n> V5.3.3 Verify that output encoding or escaping is used when presenting data in JavaScript, including JSON, to avoid changing the message or document structure (to avoid JavaScript and JSON injection).\r\n\r\nremove current 5.3.6 as merged to 5.3.3.\r\n\r\n---\r\n\r\nProposal 3 - a separate requirement to \"V50.5 Unintended content interpretation\"\r\n\r\nOne may say, that if you apply user-controlled data with `element.innerHTML=input;`, then you need to HTML-encode the input to avoid input being executed as HTML. But it is an incorrect solution, as the clear intent was to display the input as plain text and it means that such a solution to display the data must be used.\r\n\r\nParallel example - when an API presents JSON content, but with the header `content-type: text/html` then the browser is commanded to execute the content. The solution here is not to convert the JSON output to be HTML-displaying friendly but to use the correct `content-type` - it means the correct way to display it.\r\n\r\nThe requirement addresses \"display method to use from JavaScript or from your UI framework\".\r\n\r\nAgain, wordsmithing needed but I share the idea:\r\n\r\n> V50.5.* Verify that context-aware methods are used when handling the untrusted data to avoid unintended content execution, such as executing content as HTML instead of displaying it as text.\r\n\r\n---\r\n\r\nI hope this time it was a clear enough explanation. Also, \"content injection\" and \"content execution\" are different things that require different defenses.",
+      "createdAt": "2024-09-18T17:33:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2359044579",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NEsCT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's talk through on Thursday",
+      "createdAt": "2024-09-22T14:33:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2366816403",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqEds",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposed requirements:\r\n\r\n> V5.3.1 [MODIFIED] Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevant characters for HTML elements, HTML attributes, HTML comments, CSS, or HTTP headers, to avoid changing the message or document structure.\r\n\r\n> V5.3.3 [MODIFIED, SPLIT TO 50.5.*] Verify that output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or document structure (to avoid JavaScript and JSON injection).\r\n\r\n> V5.3.6 [DELETED, DUPLICATE of 5.3.3]\r\n\r\n> V50.5.* [ADDED, SPLIT FROM 5.3.3] Verify that context-aware methods are used when handling untrusted data to avoid unintended content execution, such as executing content as HTML instead of displaying it as text.\r\n\r\n\r\n@elarlang to open PR",
+      "createdAt": "2024-09-26T10:55:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1195#issuecomment-2376615788",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-02-02T11:28:13Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    }
+  ],
+  "number": 1195,
+  "state": "CLOSED",
+  "title": "5.3.1 and 5.3.3 seem duplicate",
+  "url": "https://github.com/OWASP/ASVS/issues/1195"
+}

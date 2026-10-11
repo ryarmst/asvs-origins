@@ -1,0 +1,440 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEwNTgwMTE=",
+    "is_bot": false,
+    "login": "narfbg",
+    "name": "Andrey Andreev"
+  },
+  "body": "[V6.5 General Multi-factor authentication requirements (as of time of this issue)](https://github.com/OWASP/ASVS/blob/67100a95f382d7bae8058c6f63fe07680b21e34f/5.0/en/0x15-V6-Authentication.md#v65-general-multi-factor-authentication-requirements):\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| 6.5.7 | Verify that biometric authentication mechanisms are only used as secondary factors together with **either** something you have **or something you know**. | 3 |\n\nNIST SP 800-63B-4; 3.2.3. Use of Biometrics:\n_(last paragraph, no changes between [2nd public draft](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63B-4.2pd.pdf) and [final](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-63B-4.pdf))_\n\n> **Biometrics SHALL only be used as part of multi-factor authentication with a physical\n> authenticator (i.e., “something you have”).** The biometric characteristic SHALL be\n> presented and compared for each authentication operation. An alternative non-\n> biometric authentication option SHALL always be provided to the subscriber. Biometric\n> data SHALL be treated and secured as sensitive personal information.\n\nI have bolded only the direct contradiction above, but the full paragraph adds more context to NIST's rationale, which I'm happy to extrapolate if necessary, but it seems obvious enough.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7UTCuy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note that version 4 of NIST SP 800-63 was released after ASVS v5.0.0 was released.\n\nBut when I look into [version 3](https://pages.nist.gov/800-63-3/sp800-63b.html#523-use-of-biometrics), it had pretty much the same message\n\n> Biometrics SHALL be used only as part of multi-factor authentication with a physical authenticator (something you have).\n\n\nThe current requirement comes from v4.0.3-2.8.7\n> Verify that biometric authenticators are limited to use only as secondary factors in conjunction with either something you have and something you know.\n\nFrom the issue https://github.com/OWASP/ASVS/issues/1421 and the [proposal](https://github.com/OWASP/ASVS/issues/1421#issuecomment-1368550085), it seems to be resulted in the commit https://github.com/OWASP/ASVS/commit/bea3a23e0a7121f37fd2cef0e05462bbac40420d as\n\n> Verify that biometric authenticators are only used as secondary factors together with either something you have and something you know.\n\nLater, only the word \"mechanism\" was added:\n\n> Verify that biometric authentication mechanisms are only used as secondary factors together with either something you have or something you know.\n\n---\n\nSo the summary is, I don't see the argumentation or rationale why it should not be aligned with NIST, and it should be fixed for the next (major) release.\n\nThe problematic part here is that it could be a breaking change and can not be done with a patch release. See https://github.com/OWASP/ASVS/blob/master/CONTRIBUTING.md#release-strategy",
+      "createdAt": "2025-11-21T07:20:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3561761714",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7UVPAM",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yeah, SemVer rules are inconvenient like that. Many software projects eventually end up releasing major versions every other month because of this.\n\nI would say though, I highly doubt that there is any knowledge+biometric implementation in existence, especially not one already ASVS5-compliant. There are people who may claim to have that, but not realizing that whatever OTS biometric authenticator they have is actually unlocking a TPM-backed private key (something you have).  \nThat's where _\"Biometric data SHALL be treated and secured as sensitive personal information.\"_ comes handy as additional context - that's mere alignment with privacy laws, and vendors don't play loose with the law where it categorizes data as \"sensitive\".",
+      "createdAt": "2025-11-21T10:14:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3562336268",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7VKqNB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@narfbg can you propose updated wording here and then when we figure out how we are going to handle breaking changes we can try and get it in",
+      "createdAt": "2025-11-25T15:51:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3576341313",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7VNWk6",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Just taking out the conflicting part should suffice, and keeping it as simple as possible is also a benefit IMO:\n\n> Verify that biometric authentication is only used as secondary factor to something you have.",
+      "createdAt": "2025-11-25T18:39:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3577047354",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Ve7hs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Maybe:\n\n\"_Verify that biometric authentication is only used as secondary factor together with something you have._\"",
+      "createdAt": "2025-11-26T14:46:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3581655148",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7VjHFh",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I might be unnecessarily nitpicking, but _\"together with\"_ has a slight chance of misinterpretation: something you know still alowed as the primary factor as long as both biometrics and something you have are used as secondary factors.",
+      "createdAt": "2025-11-26T18:45:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3582751073",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Vy8zj",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\nTechnically, it does *not* conflict, right? In the sense that your application *can* comply with both ASVS 6.5.7 and NIST SP 800-63B-4; 3.2.3.",
+      "createdAt": "2025-11-27T17:41:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3586903267",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7X54j5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I might be unnecessarily nitpicking, but _\"together with\"_ has a slight chance of misinterpretation: something you know still alowed as the primary factor as long as both biometrics and something you have are used as secondary factors.\n\nDoes that matter? I mean, as long as the biometric and the something you have are used together, does it matter if there is also another \"something you know\" factor?",
+      "createdAt": "2025-12-07T14:50:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3622275321",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7X-xV6",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Well, yes because \"together with\" can mean multiple things in terms of a sequence, including (after password authentication) a biometric check first and only then \"something you have\", whereas the intent is for biometrics to be secondary to a possession factor.\n\nI can't immediately think of a convincing reason why such misinterpretations of \"together with\" can lead to bad things, but in my experience the lack of clarity alone is often the cause of poor decisions.\n\n@randomstuff Yes, you are right on that - you can be compliant with both as is. However, ASVS explicitly allows something forbidden by NIST, even though SP 800-63B is the primary source for the V6 rules in ASVS. To my point, another example of how a single word can result in completely opposite interpretations. :)",
+      "createdAt": "2025-12-07T22:05:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3623556474",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7Y_gUl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Well, yes because \"together with\" can mean multiple things in terms of a sequence, including (after password authentication) a biometric check first and only then \"something you have\", whereas the intent is for biometrics to be secondary to a possession factor.\n\nNIST itself says \"_Biometrics SHALL only be used as part of multi-factor authentication **with** a physical authenticator (i.e., “something you have”)._\" (emphasis mine)\n\nIs that not basically the same as \"together with\"?",
+      "createdAt": "2025-12-11T07:00:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3640526117",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7ZDGlS",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "On its face it is, keyword \"basically\". But NIST's wording is part of a 118-page document that is a lot more nuanced and descriptive, and mentions the word \"biometric\" 142 times - that's a lot to accurately distill into the single sentence we're discussing.\n\nThat being said, I didn't expect this detail to be contentious and the _\"together with\"_ version is still a clear improvement, so I'd be happy with it too and maybe we can debate further details in a separate thread. I've actually held back on some related, but secondary issues (L3 bar, biometrics validity as SFA, etc).",
+      "createdAt": "2025-12-11T11:24:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3641469266",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7cOtY7",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok @narfbg, please can you confirm you are comfortable with the following wording and we will consider it when we are ready for requirement changes:\n\n\"_Verify that biometric authentication is only used as secondary factor together with something you have._\"",
+      "createdAt": "2025-12-28T15:51:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3694843451",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7cOw3q",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Just a brief note here. \r\n\r\nBiometric authentication is often a good replacement for a username. So it’s not just a credential. It’s also another identity factor.\r\n\r\nI’m not sure it’s worth changing the requirement. I just want to put that out there for consideration.",
+      "createdAt": "2025-12-28T16:12:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3694857706",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7cPEX1",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@tghosth Yes, confirming.\n\n@jmanico Biometric data is in many ways similar to usernames indeed, but it's definitely not a good direct replacement because of data sensitivity.",
+      "createdAt": "2025-12-28T18:19:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-3694937589",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIhtNeQ",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I would like to point out that it is not unusual to combine biometric authentication with a PIN (something you know) (see: https://www.yubico.com/products/yubikey-bio-series/). \n\nI know this from experience, as I have one of these.",
+      "createdAt": "2026-07-02T15:02:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4867181945",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIjuI2Q",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@sydseter I'm sure that they do, in the sense that you have both fingerprint and PIN, but they should be alternatives to one another, not a combination. Even if you could combine them, that would be 3FA because you know ... it's a hardware device, possession is always the first factor.\n\nThat's consistent with NIST's guidelines.",
+      "createdAt": "2026-07-02T18:27:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4869294297",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIlW8Jw",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "That is why we call it MFA and not 2FA and yes, I have to use the fingerprint together with the PIN.\nThat said, under normal circumstances it’s enough to use 1 of them, but for some administrative tasks, yes, I do end up having to use the pin as well.",
+      "createdAt": "2026-07-02T22:34:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4871011367",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIn-dog",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Right, and all of that is fine (with a small caveat) because possession is invariably the first factor, which is what this issue is about.\n\nThe caveat I mentioned is this:\n> Biometrics SHALL only be used as part of multi-factor authentication with a physical\n> authenticator (i.e., “something you have”). The biometric characteristic SHALL be\n> presented and compared for each authentication operation. **An alternative non-\n> biometric authentication option SHALL always be provided to the subscriber.** Biometric\n> data SHALL be treated and secured as sensitive personal information.\n\nThat's because people can lose fingerprints, and because biometric matching is inherently probabilistic, therefore requiring both a fallback for false-negatives and protection against brute force attacks. Yubico's [design (official bio series docs)](https://docs.yubico.com/hardware/yubikey/yk-tech-manual/yk5-bio-specifics.html) is consistent with all of that:\n\n*(just one example)*\n> If the YubiKey cannot match fingerprint to template three times in a row, fingerprint recognition is blocked. The YubiKey Bio falls back to PIN.\n\nThat doesn't prevent an application from being configured to require 3 factors (and redundancies), and I'm curious to know the exact scenario where that's required for you, but like you said - that's not what happens under normal circumstances.",
+      "createdAt": "2026-07-03T07:21:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4873756066",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIo2fRA",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "It's often not as clear-cut as you might think. In the case of hardware authenticators like the Yubikey Bio, you can often choose to use it as an MFA mechanism only. In that case, you log in with your password, then use the Yubikey Bio as a second and third factor by combining biometric verification with passkey authentication. In the case of the Yubikey, the website can ask for User Verification (UV) through WebAuth, which then mandates that the user either authenticate using their fingerprint or their PIN. Thereby, you combine the use of the possession factor with an inherence or additional knowledge factor. The WebAuth standard does, in this case, not inform the application about which verification method was used, only that it was used. That said, practically speaking, you use \"something you know\" as the primary factor and combine a possession factor with either an inherence factor or a knowledge factor as your MFA option.\n\n~~The intent behind the ASVS text is that, for level 3, it is not enough only to ask for User Presence (UP) (e.g., button press); you also need User Verification (UV) when combining this with an inherence factor (passkeys).~~\n\nI'll retract my statement. It's perhaps more wishful thinking from my side, as the intent here is to follow NIST. The text is completely fine as it is.\n\nIt is important to note that in the case of User Verification (UV) WebAuth, which I believe 100% of all projects use these days, it is not even possible to see which factor was used for User Verification (UV).  And according to FIDO, the abstract encrypted biometric identifiers are designed to never leave the security boundary of the security module (chip). I believe there are no real business reasons for creating an implementation that is not compatible with the current standards. ",
+      "createdAt": "2026-07-03T09:15:13Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4874673988",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIpm8OA",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think there's some confusion about what primary and secondary means here. As long as the biometrics are *bound* to the possession factor, they are secondary to it. That's relative; it doesn't forbid a prior knowledge factor. Still in line with everything you described.",
+      "createdAt": "2026-07-03T11:01:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4875467832",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIsL-WQ",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "The point I am trying to make is that you won’t see projects where web developers try to implement biometric authentication without inherence as a primary factor because there is no precedence for it. There will always either be a inherence factor or a password used as primary method. NIST is just trying to kill off any specialized systems using server-side biometrics. The companies that still invest in those kind of solutions where biometrics are used as a primary factor follow completely different compliance and security frameworks.\nTherefore it doesn’t matter how this requirement is formulated.",
+      "createdAt": "2026-07-03T16:56:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4878171737",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIsawlQ",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "After thinking about it, the best would be to remove this requirement in order to make sure ASVS doesn’t become more bloated.",
+      "createdAt": "2026-07-03T17:45:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4878413973",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABIsoxZg",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Just as I thought we're reaching consensus ... Fair enough on the precedence point, I've actually noted that in response to this being a breaking change: https://github.com/OWASP/ASVS/issues/3305#issuecomment-3562336268\n\nBut consider this:\n1. Application uses passwords as 1st factor, because legacy (largely the reason why that happens, it's not popular for good reasons)\n2. Syncable passkeys are added as 2nd factor; most (if not all) standards classify syncable passkeys as the equivalent of a single factor. Now you have knowledge+inherence.\n3. Remember that an alternative-to-biometric factor has to be offered as backup, which will practically always be a PIN. Now you have knowledge+knowledge.\n\nIt might *feel* like MFA to the end user, because we made them jump through hoops, but it's not proof of 2 unique factors.",
+      "createdAt": "2026-07-03T18:34:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4878643558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABItYYMg",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Sure, but you never see biometrics delivered without the use of passkeys or a physical device with a pin fallback within web development. It’s just how the world works so yeah, sometimes you end up with knowledge+posession+knowledge. Nothing wrong with that, you still have the possession factor in there that makes it into a secure method.\n\nI think NIST is a bit too old fashion when they specifically mention that biometric only can be used as a secondary factor. \nThe world has moved on. We don’t think about does things anymore.",
+      "createdAt": "2026-07-03T21:30:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-4879423538",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABK2F20A",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Picking this back up, sorry for the gap. Let me record where we landed, because it got lost. @narfbg confirmed this wording on 28 December:\n\n> *Verify that biometric authentication is only used as a secondary factor together with something you have.*\n\nNobody has proposed different wording since, though @sydseter has since argued the requirement should go entirely, which I come to below.\n\nI want to go ahead with this. One correction to what I said earlier: this does not need to wait for a major release. Making a requirement stricter is `[I:STRENGTHENED]`, which is fine for a minor release.\n\nOn the more recent discussion, I don't think the case for deleting 6.5.7 holds up, and it rests on treating WebAuthn as the whole picture.\n\n6.5.7 applies to any use of biometrics, not just FIDO. Web applications can do biometric matching on the server or through a vendor service, using the camera or microphone in the browser, with no authenticator involved. Face matching on step up, voice authentication, and identity checks at onboarding all work this way.\n\nThat matters for both arguments raised:\n\n**On testability.** @sydseter is right that with WebAuthn User Verification the site is told the check happened but not which method was used. But that is a limit of one implementation path. Where the application or its vendor does the matching, a tester can see exactly which factors are in play.\n\n**On what we would lose.** Deleting the requirement removes any constraint on how biometrics are used, including as a factor on their own. Server side matching makes that possible to build, so the rule still has something to hold down.\n\nSo I would rather fix the requirement than drop it.\n\nProposed next steps:\n\n1. I will raise a PR at some point against bleeding edge with the agreed wording, tagged `[I:STRENGTHENED]`, and relabel this issue to match.\n2. @sydseter, if you still want to make the case for removing 6.5.7, please open a separate issue for it. It is a bigger decision than this thread and deserves its own discussion.\n3. @narfbg, you held back some related topics in December: the L3 bar, and whether biometrics can stand alone as a single factor. Feel free to open those.\n",
+      "createdAt": "2026-07-20T13:27:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-5022774992",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABK_pOng",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thanks for the summary @tghosth and sorry that I'll now potentially make it not as a simple as \"just needs a PR\". 🥲 This was my very first issue opened, so I was rather eager to [agree on an incremental improvement](https://github.com/OWASP/ASVS/issues/3305#issuecomment-3641469266) with the assumption that it would move fast.\n\nI'm still ok with the wording agreed on back in December, as a start, and don't want to hold it hostage to a further agenda. If you don't mind, I'll open the PR myself too.\nHowever, since then I've also developed a stronger preference for stricter wording, so I want to make sure that this isn't one of those situations where a *\"no further action needed\"* mindset is adopted simply because something was already agreed on. Would an immediate follow-up be (truly) welcome, or should I argue my case here?",
+      "createdAt": "2026-07-21T10:19:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3305#issuecomment-5032791710",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-11-20T21:22:13Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAACYnQLAA",
+      "name": "requires change control",
+      "description": "",
+      "color": "aaaaaa"
+    }
+  ],
+  "number": 3305,
+  "state": "OPEN",
+  "title": "v5.0.0: 6.5.7 conflict with NIST SP 800-63B-4",
+  "url": "https://github.com/OWASP/ASVS/issues/3305"
+}

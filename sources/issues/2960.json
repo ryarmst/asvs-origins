@@ -1,0 +1,261 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirements:\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **15.4.1** | Verify that only thread-safe types are used in multi-threaded contexts, or that non-thread-safe types are synchronized to prevent race conditions. | 3 | v5.0.be-10.7.1 |\n| **15.4.2** | Verify that concurrent access to shared resources is controlled using synchronization primitives (e.g., locks, mutexes, semaphores) to prevent race conditions and ensure atomic operations on these resources. | 3 | v5.0.be-10.7.2 |\n| **15.4.3** | Verify that all access to shared resources is consistently checked and accessed in a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions, ensuring resource state consistency between check and use. | 3 | v5.0.be-10.7.3 |\n| **15.4.4** | Verify that resource acquisition uses a consistent locking strategy to avoid circular dependencies and ensure forward progress, preventing both deadlocks and livelock scenarios. | 3 | v5.0.be-10.7.4 |\n| **15.4.5** | Verify that resource allocation policies prevent thread starvation by ensuring fair access to resources, such as by leveraging thread pools, allowing lower-priority threads to proceed within a reasonable timeframe. | 3 | v5.0.be-10.7.5 |\n| **15.4.6** | Verify that locking primitives are only accessible to the owning class or module and are not publicly modifiable, ensuring that locks cannot be inadvertently or maliciously modified by external classes or code. | 3 | v5.0.be-10.7.6 |\n\nWe have 6 \"feels similar\" requirements that found it's way into the repo during Summit. Follow-up for issue #2231 to be sure that we can distinguish the requirements from each other and re-check potential overlap with other requirements.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6m5N_q",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think they can all be collapsed into one requirement. I don't think this level of detail is necessary.",
+      "createdAt": "2025-04-13T16:22:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2800017386",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6elT",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "paging @cronchie, do we think there is any way we could squeeze these down to fewer requirements? I think trying to go 6 requirements to 1 requirement would be hard but maybe we can at least go for fewer.",
+      "createdAt": "2025-04-20T11:26:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2817124691",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oSmLL",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm open to merging these. While they're distinct problems with distinct solutions, I could see condensing 15.4.1.-2 into one requirement, as they both deal with race conditions:\n\n> Verify that shared resources in multi-threaded code are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nTOC/TOU is also a type of race condition, so we could merge that too, but I think it sounds cleaner in its own requirement so we don't end up with a run-on sentence. Here's the same requirement with the language tightened up:\n\n> Verify that checks on a resource’s state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions.\n\nSince 15.4..4-6 all deal with non-race concurrency issues, they could all fit together like so:\n\n> Verify that locks are used consistently to avoid threads getting stuck, whether by waiting on each other or retrying endlessly, and that locking logic stays within the code responsible for managing the resource.\n\nThoughts? This seems more concise (and in plainer English) while still covering the same amount of guidance.",
+      "createdAt": "2025-04-23T08:15:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2823447243",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oSrxZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "First I clarify, for me the \"problem to solve\" is not amount of requirements, but just clarification as the first priority.\n\nFor example the update proposed requirement:\n> Verify that shared resources in multi-threaded code are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nI would add here example, what kind of resource are \"shared resources\" to make it easier to understand the target of the requirement.\n\nAnother problem to solve for me is, that for situations, such as \"selecting a seat in a cinema\", or \"putting any limited resource in e-shop to shopping cart\" we should have a L2 requirement. So most likely it means toctou requirement.",
+      "createdAt": "2025-04-23T08:24:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2823470169",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oS9hA",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thanks; this is helpful. How about this for specificity:\n\n> Verify that shared objects in multi-threaded code—such as caches, files, or in-memory objects accessed by multiple threads—are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nIt sounds like we're aligned on TOC/TOU as its own requirement. How about this revised version with specific examples:\n\n> Verify that checks on a resource’s state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions—for example, checking if a file exists before opening it, or verifying a user’s access before granting it.",
+      "createdAt": "2025-04-23T08:51:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2823542848",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6omD5h",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that shared objects in multi-threaded code—such as caches, files, or in-memory objects accessed by multiple threads—are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores.\n\nIf you could reword it to the pattern \"Verify that X is done to avoid Y from happening,\" what would the result be?\n\n---\n\nTOCTOU - so far I think it should be a separate requirement, as we also had previously. I struggle a bit with those examples, as they are maybe quite close to the other requirement, but maybe I just don't get it somehow. For me it is more something I wrote in previous comment:\n> Another problem to solve for me is, that for situations, such as \"selecting a seat in a cinema\", or \"putting any limited resource in e-shop to shopping cart\" we should have a L2 requirement. So most likely it means toctou requirement.\n\nOr do you see it differently?",
+      "createdAt": "2025-04-24T18:38:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2828549729",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qUFcw",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "That makes sense, and I’m definitely on board with keeping TOCTOU as a separate L2 requirement.\n\nI do think the “seat selection” and “shopping cart” examples are important concurrency risks, but they might not be TOCTOU in the strict sense. TOCTOU usually involves a local check followed by an unsafe action — like checking if a file exists, then opening it, or checking permissions before accessing a resource — where the state can change between those steps.\n\nThe business examples feel more like multi-user contention or missing transactional guarantees, which are absolutely valid concerns, but might be better captured by something like optimistic locking or consistency requirements, rather than TOCTOU specifically. That said, totally happy to clarify the examples in the requirement or call out those kinds of risks elsewhere if they’re not already covered.\n\nHow is this for rewording the other piece? \n\n> Verify that shared objects in multi-threaded code are accessed using thread-safe types or synchronization mechanisms to avoid race conditions and data corruption.",
+      "createdAt": "2025-05-07T07:18:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2857391920",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qUJ8w",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "If you're looking for real world analogies for TOC/TOU, I got you; how about these:\n\n- You check that a door is unlocked and start pushing it open, assuming it will still be unlocked, but someone locks it between the check and the push. Now you're blocked or even caught in the door.\n- You check that a parking spot is free and tell someone you're pulling in, but someone else claims it before you can physically occupy it, because your check didn’t hold the spot.\n- A restaurant host checks that a table is available and assigns it to you, but doesn’t mark it as taken. Before you get there, someone else is seated there.\n\nI still like the seat selection and e-shop scenarios, but I think they reflect a slightly different kind of concurrency issue. More about multi-user contention and the need for transactional integrity or reservation mechanisms, rather than classic TOC/TOU, which is typically about local state checks that get invalidated between check and use. Still totally worth covering, but maybe under a separate requirement or with a different lens.",
+      "createdAt": "2025-05-07T07:26:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2857410352",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qUP1H",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I do think the “seat selection” and “shopping cart” examples are important concurrency risks, but they might not be TOCTOU in the strict sense.\n\nvs\n\n> You check that a parking spot is free and tell someone you're pulling in, but someone else claims it before you can physically occupy it, because your check didn’t hold the spot.\n\nFor me, those examples are exactly the same, and that's why I have used TOCTOU for reporting such things in the past. If now the intention for TOCTOU is to cover something else, then it requires clarification or limitation for the scope, and most likely we need to cover the \"seat selection\" scenario with a separate requirement.\n\nThe multi-user example also exists for door locking or parking spot occupying. The problem does not exist if there is only one user using those resources.",
+      "createdAt": "2025-05-07T07:34:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2857434439",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6qUaq3",
+      "author": {
+        "login": "cronchie"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "That’s a good point, and I think we’re aligned on the general pattern: checking some state, then acting on it, and something changes in between. That’s definitely a shared shape between TOCTOU and multi-user contention scenarios. The examples I just gave focused on the timing aspect, but they don’t highlight the attacker-driven nature that tends to define TOCTOU more precisely.\n\nI still think there's a meaningful difference--in a classic TOCTOU vulnerability, the assumption is that an attacker can intentionally change the state between the check and the use. For example, they might swap out a file, change a symbolic link, or modify permissions in between. The fix in these cases usually involves making the check and the use atomic by using a single system call or operation. That could mean using open() with flags like `O_CREAT | O_EXCL` instead of calling exists() and then open(), or using APIs like openat() that operate relative to a directory file descriptor and reduce race windows. Other times, it's about using access controls or file handles that cannot be swapped out by the attacker between steps.\n\nIn contrast, the seat selection and shopping cart scenarios involve multiple legitimate users trying to act on the same resource at nearly the same time. These are real concurrency risks, but the fix is usually about coordination at the system level. That might involve database transactions, row-level locks, or a reservation mechanism that prevents double booking. The race is still real, but it's not attacker-driven in the same way.\n\nI’m not too attached to how we categorize it in the document — if we call both TOCTOU, that’s cool — but I think it’s worth flagging the difference in attacker control versus normal contention. That can matter a lot for how we threat model and fix it.",
+      "createdAt": "2025-05-07T07:52:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2857478839",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rmr6m",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\nThanks both for your useful thoughts on these points. I think there are two key areas under discussion here.\n\n### Low Level Concurrency requirements\n\nRegarding the requirements in this section, having reviewed I think they can be restructured as follows:\n\n#### Combined 15.4.1 and 15.4.2\n\n\"_Verify that shared objects in multi-threaded code (such as caches, files, or in-memory objects accessed by multiple threads) are accessed safely by using thread-safe types and synchronization mechanisms like locks or semaphores to avoid race conditions and data corruption._\"\n\n#### 15.4.3\n\n\"_Verify that checks on a resource's state, such as its existence or permissions, and the actions that depend on them are performed as a single atomic operation to prevent time-of-check to time-of-use (TOCTOU) race conditions. For example, checking if a file exists before opening it, or verifying a user’s access before granting it._\"\n\n#### 15.4.4 and 15.4.6\n\n\"_Verify that locks are used consistently to avoid threads getting stuck, whether by waiting on each other or retrying endlessly, and that locking logic stays within the code responsible for managing the resource to ensure locks cannot be inadvertently or maliciously modified by external classes or code._\"\n\n#### 15.4.5\n\nI think this can stay as it is\n\n\"_Verify that resource allocation policies prevent thread starvation by ensuring fair access to resources, such as by leveraging thread pools, allowing lower-priority threads to proceed within a reasonable timeframe._\"\n\n----\n\n### Low-level TOCTOU vs Business Logic TOCTOU\n\nI think @cronchie is distinguising between TOCTOU on low level resources in an application (which feels like an L3 concern) and higher level, business logic style TOCTOU involving parking spaces and theatre seats :)\n\nI think this separation makes sense and I think the business logic level is more relevant for the business logic chapter.\n\nWe currently have:\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **2.3.3** | Verify that transactions are being used at the business logic level such that either a business logic operation succeeds in its entirety or it is rolled back to the previous correct state. | 2 | v5.0.be-11.1.9 |\n\nTo me, it feels like we need to incorporate these shopping cart style concerns into this requirement.\n\n---\n\nAny further thoughts on any of the above @elarlang @cronchie?",
+      "createdAt": "2025-05-14T07:31:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2879045286",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6rtlIK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "A few notes:\n* I'm ok with wording proposals\n* Previously, the TOCTOU requirement was in the business logic section\n* Transaction is an independent and separate topic from this",
+      "createdAt": "2025-05-14T16:28:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2880852490",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6r0hC8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang do you agree with my differentiation between Low-level TOCTOU vs Business Logic TOCTOU?",
+      "createdAt": "2025-05-15T06:08:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2882670780",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6r0iZh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that in practice, TOCTOU in the business logic area has higher risk, and that is why I want to see it as an L2 requirement, but low-level TOCTOU can be L3. At the same time, by principle or abstract \"way of thinking\" point of view, they are the same.",
+      "createdAt": "2025-05-15T06:11:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2882676321",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6r15u2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I agree that in practice, TOCTOU in the business logic area has higher risk, and that is why I want to see it as an L2 requirement, but low-level TOCTOU can be L3. At the same time, by principle or abstract \"way of thinking\" point of view, they are the same.\n\nSo I think we should update these requirements and decide whether we want an L2 business logic TOCTOU requirement added to there relevant section",
+      "createdAt": "2025-05-15T08:39:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2960#issuecomment-2883034038",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-13T09:19:41Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVPYWDg",
+      "name": "V15 (prev V10)",
+      "description": "",
+      "color": "C7195F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2960,
+  "state": "CLOSED",
+  "title": "V15.4 \"Concurrency\" requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/2960"
+}

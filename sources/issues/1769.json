@@ -1,0 +1,171 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "I think [12.1 File Upload](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V12-Files-Resources.md#v121-file-upload) should focus on the mechanics around file upload and [12.2 File Integrity](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V12-Files-Resources.md#v122-file-integrity) should be renamed to \"File Integrity and Content\" and focus on file type related requirements.\r\n\r\n12.1.2 and 12.1.4 should then be moved to 12.2.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **12.1.2** | Verify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum number of files before uncompressing the file. | | ✓ | ✓ | 409 |\r\n| **12.1.4** | [ADDED] Verify that the application does not allow uploading compressed files containing symlinks unless this is specifically required (in which case it will be necessary to enforce an allow list of the files that can be symlinked to). | | ✓ | ✓ | 61 |\r\n\r\nThis is following a discussion here: https://github.com/OWASP/ASVS/issues/1740#issuecomment-1775145602\r\n\r\n@elarlang do you agree?",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5p1k5p",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I tried to remember the logic how to put requirement to different subcategories. We can put them all together, but maybe there is better way and before we do those changes, let's look the options.\r\n\r\nSimplified file upload process.\r\n\r\nFirst step - file upload, file reached to the server and now the actions before going to check file actual content\r\n\r\n* maximum allowed size should be checked (12.1.1)\r\n* is it known virus (12.4.2) - kept separately from file upload, as you actually need to check viruses also when serving the file\r\n* archive bomb (12.1.2) - you need to check \"is it acrhive\" and if it is, what is packing ratio. It is before content check, a lot of files are archives, like xlsx, odt.\r\n\r\n\r\n2nd step - Is it expected file by content (format)?\r\n\r\n* is this file expected and allowed by business logic rules (12.2.1)\r\n\r\n\r\n3rd step - now, file is expected type and content - do it contain something malicious + can server handle it?\r\n\r\n* one can argue - that 12.1.2 belongs here\r\n* 12.1.4 - we need to check inside archive file, is there symlink\r\n* proposed pixel bomb - we need to check image dimensions\r\n\r\n\r\nNow the question is - do we put them all together or is there good and easy to understand naming to keep them separately?",
+      "createdAt": "2023-10-23T17:15:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1775652457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p52rm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Overall, I think it is easier to split into sections wherever possible. (Please remember to use the [Chapter > Section > Requirement](https://github.com/OWASP/ASVS#how-to-reference-asvs-requirements) terminology, I know I am terrible at remembering this as well 🙃)\r\n\r\nI would separate them as follows:\r\n\r\n### File upload process:\r\n\r\n file reached to the server and now the actions before going to check file actual content\r\n\r\n* maximum allowed size should be checked (12.1.1)\r\n\r\n###  File Integrity:\r\n\r\n Is it expected file by content (format)?\r\n\r\n* is this file expected and allowed by business logic rules (12.2.1)\r\n\r\n### File Content:\r\n3rd step - now, file is expected type and content - do it contain something malicious + can server handle it?\r\n\r\n* is it known virus (12.4.2) - kept separately from file upload, as you actually need to check viruses also when serving the file\r\n* archive bomb (12.1.2) - you need to check \"is it acrhive\" and if it is, what is packing ratio. It is before content check, a lot of files are archives, like xlsx, odt.\r\n* 12.1.4 - we need to check inside archive file, is there symlink\r\n* proposed pixel bomb - we need to check image dimensions\r\n\r\nWe could make these 3 sections or maybe we should combine the first two into 1 section as they both relate to general expectations about uploaded files as opposed to malicious content",
+      "createdAt": "2023-10-24T08:40:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1776773862",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5p6K8Y",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's put \"V12.3 File execution\" in to the game. Entire this section needs work (https://github.com/OWASP/ASVS/issues/1427), but there we have requirement, like zip slip (12.3.7).\r\n\r\nIf we protect the application, then pixel flood requirement belongs here.\r\n\r\nSo the outcome from this issue should be - which sections we have and what are the criterias for requirements to belong to some section.",
+      "createdAt": "2023-10-24T09:32:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1776856856",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhLY8",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hmm, @elarlang do you think we have enough different V12 issues that we should defer to the rework stage?",
+      "createdAt": "2023-10-31T12:00:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1787082300",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qhRKs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think I can not understand the question.\r\n\r\nFirst priority should be to get requirements in, then we can see what are the needs or possibility for making sections out of those.",
+      "createdAt": "2023-10-31T12:16:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1787105964",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qik7_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I mean, is this issue now affecting pretty much the whole chapter and therefore best left to when we are working on the whole chapter together at the rework stage?",
+      "createdAt": "2023-10-31T15:26:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1787449087",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qioii",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, this issue is not priority and is logical outcome when we get more requirements in.\r\n\r\n> First priority should be to get requirements in, then we can see what are the needs or possibility for making sections out of those.\r\n\r\n... and I start hating the phrase \"rework stage\" already :)",
+      "createdAt": "2023-10-31T15:33:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1787463842",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5qi85c",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> ... and I start hating the phrase \"rework stage\" already :)\r\n\r\nI hear that but I think it helps us come to some sort of conclusion on issues and set ourselves up for the actual rewrite.",
+      "createdAt": "2023-10-31T16:17:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-1787547228",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K1zTX",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This comment thread is getting a little wild.\r\n\r\nI agree that we should change 12.2 from \"File Integrity\" to \"File Integrity and Content\" and I'd like to close this out.",
+      "createdAt": "2024-09-04T15:20:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1769#issuecomment-2329359575",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-10-23T14:21:10Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSfggFQ",
+      "name": "V5 (prev V12)",
+      "description": "",
+      "color": "7412BF"
+    }
+  ],
+  "number": 1769,
+  "state": "CLOSED",
+  "title": "Rename 12.2 \"File Integrity\" to \"File Integrity and Content\"",
+  "url": "https://github.com/OWASP/ASVS/issues/1769"
+}

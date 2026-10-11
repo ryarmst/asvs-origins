@@ -1,0 +1,370 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nspin-off from https://github.com/OWASP/ASVS/issues/1739#issuecomment-1816882008\r\n\r\nProblem to solve: if a user controls input that is sent to the server via request header (token) value, it must be validated or sanitized to not be longer than the \"max header field size\" allowed by server configuration, usually it is 8kB.\r\n\r\nClassical functionality: cookies, authorization headers (including access_token JWT's)\r\n\r\nIf an attacker controls the value and can set it to the client browser, this client will have error 413 or 400 as a response for each request and can not use the service.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM50T35e",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is input validation or sanitization of content going into an HTTP request, it is basically an expansion of https://github.com/OWASP/ASVS/issues/1739#issuecomment-1816882008 where instead of a cookie we are talking about any header entry, correct?",
+      "createdAt": "2024-02-18T15:47:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-1951366750",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM50T9Ff",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is input validation or sanitization of content going into an HTTP request, it is basically an expansion of [#1739 (comment)](https://github.com/OWASP/ASVS/issues/1739#issuecomment-1816882008) where instead of a cookie we are talking about any header entry, correct?\r\n\r\nyes, the same problem is for every HTTP **request** header (field) which contains user-controlled input",
+      "createdAt": "2024-02-18T17:08:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-1951387999",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM50UJvm",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Please note this is more of a Webserver issue than an application issue. For example, Apache has a default 8k limit for the total size of the request header. NGINX is 4K.\n",
+      "createdAt": "2024-02-18T20:42:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-1951439846",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM50ULGa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Statement in the issue:\r\n> Problem to solve: if a user controls input that is sent to the server via request header (token) value, it must be validated or sanitized to not be longer than the \"max header field size\" allowed by server configuration, usually it is 8kB.\r\n\r\nComment from @jmanico \r\n> Please note this is more of a Webserver issue than an application issue. For example, Apache has a default 8k limit for the total size of the request header. NGINX is 4K.\r\n\r\nSo, yes it is a webserver configuration question, but at the same time, the application needs to take this limit into account, and do not build longer values than it (a web server) can handle.",
+      "createdAt": "2024-02-18T21:07:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-1951445402",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM50VumK",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok can you prepare a requirement text for this @elarlang ?",
+      "createdAt": "2024-02-19T07:30:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-1951852938",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM50xJa_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Not ready yet to propose requirement text, just pieces to take into account:\r\n* situation: if user input is sent to the server automatically by the browser\r\n* problem: if automatically sent content length is larger than the server accepts (examples `Cookie`, `Authorization`, or any custom header that is always sent automatically by the frontend)\r\n* outcome (issue to avoid): then it can cause a client-based denial of service attack - the browser automatically sends too long value and the server always responds with an error",
+      "createdAt": "2024-02-22T09:31:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-1959040703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AS84S",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think this is good stuff, @elarlang and I think we are close to a requirement for this. Perhaps:\r\n\r\n_Verify that the application must validate that user-controlled input in HTTP request headers does not exceed the server's maximum header field size limit (e.g., 8kB for Apache, 4kB for NGINX) to prevent client-based denial of service attacks._",
+      "createdAt": "2024-06-06T13:17:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2152451602",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AwCVV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application must validate that user-controlled input in HTTP request headers does not exceed the server's maximum header field size limit (e.g., 8kB for Apache, 4kB for NGINX) to prevent client-based denial of service attacks.\r\n\r\nNot sure this solves the problem Elar mentioned here: https://github.com/OWASP/ASVS/issues/1867#issuecomment-1959040703\r\n\r\n@elarlang didn't we discuss another requirement related to ensuring a request doesn't get too large, e.g. via cookies?",
+      "createdAt": "2024-06-11T08:12:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2160076117",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6IH3Ks",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang where do you think we go with this?",
+      "createdAt": "2024-08-12T11:51:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2283762348",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6KlstG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang ping :)",
+      "createdAt": "2024-09-02T17:35:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2325138246",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LZUu_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Although I have seen it often enough to make the issue, I feel that the level of details is a bit edge-case for ASVS.\r\n\r\nIn a way it is covered by validation and sanitization requirements, but without pointing out the problem itself.\r\n\r\nIn case we want to have the requirement, we can finetune the wording proposed by Jim https://github.com/OWASP/ASVS/issues/1867#issuecomment-2152451602.",
+      "createdAt": "2024-09-09T17:26:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2338671551",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LdcVl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I do think it is covered in other requirements although maybe only indirectly.\r\n\r\nDo you think it would be useful to either mention in the intro text for 5.1 or within the body of [5.1.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v51-input-validation) @elarlang ?",
+      "createdAt": "2024-09-10T06:12:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2339751269",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L2jlQ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang to work more on this",
+      "createdAt": "2024-09-12T13:46:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2346334544",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mktt_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang ping :)",
+      "createdAt": "2024-09-18T13:11:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2358434687",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MmESn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To just solve this, we can go further with:\r\n> Verify that the application must validate that user-controlled input in HTTP request headers does not exceed the server's maximum header field size limit (e.g., 8kB for Apache, 4kB for NGINX) to prevent client-based denial of service attacks.\r\n\r\nMaybe with 2 changes:\r\n* \"Verify that the application must validate that\" > \"Verify that the application validates that\"\r\n* \"(e.g., 8kB for Apache, 4kB for NGINX)\" > \"(usually 4kB or 8kB)\"",
+      "createdAt": "2024-09-18T15:28:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2358789287",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MnnKr",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction, Elar.\n",
+      "createdAt": "2024-09-18T18:57:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2359194283",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MqqYY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current proposal (note also changed \"request headers\" to \"request header fields\"):\r\n> Verify that the application validates that user-controlled input in HTTP request header fields does not exceed the server's maximum header field size limit (usually 4kB or 8kB) to prevent client-based denial of service attacks.\r\n\r\nSection 5.1, level 1.",
+      "createdAt": "2024-09-19T05:14:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2359993880",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NExXg",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Current proposal (note also changed \"request headers\" to \"request header fields\"):\r\n> \r\n> > Verify that the application validates that user-controlled input in HTTP request header fields does not exceed the server's maximum header field size limit (usually 4kB or 8kB) to prevent client-based denial of service attacks.\r\n> \r\n> Section 5.1, level 1.\r\n\r\nPR it in please :)",
+      "createdAt": "2024-09-22T15:26:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2366838240",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NExcE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you have a good reference link to add somewhere I think that would also be good",
+      "createdAt": "2024-09-22T15:27:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2366838532",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE2Bp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If you have a good reference link to add somewhere I think that would also be good\r\n\r\nNope, but entire world can reference to me here :)\r\n\r\n",
+      "createdAt": "2024-09-22T16:15:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2366857321",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE8SG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "PR made (#2108). I used since level 2 and without a CWE.\r\n\r\nNote for the future - if to make few steps make and invent really abstract requirement, it can be merged with \r\n> Verify that untrusted input is validated for length before being included in a cookie (including as part of a JWT) and that the cookie name and value length combined are not over 4096 bytes.\r\n\r\nBoth are a bit too detailed requirements in their niche.",
+      "createdAt": "2024-09-22T17:26:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1867#issuecomment-2366882950",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-02-08T12:16:51Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABRKEdKw",
+      "name": "next meeting",
+      "description": "Filter for leaders",
+      "color": "006B75"
+    }
+  ],
+  "number": 1867,
+  "state": "CLOSED",
+  "title": "client should not send longer request headers than server can accept",
+  "url": "https://github.com/OWASP/ASVS/issues/1867"
+}

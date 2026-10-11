@@ -1,0 +1,605 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "There are over 25 requirements in ASVS 5.0 that use the word _documentation_ or _documented_. While many are well-meaning, most are extremely difficult for developers to act on because they:\n\n- Assume documentation exists when in many cases it does not (e.g., session strategy, retry policies, TLS posture).\n- Span concerns outside a developer's domain, such as privacy law compliance, DevOps controls, or cryptographic roadmaps.\n- Imply _governance-level responsibility_ but are embedded in a _standard pitched as a verification checklist_ for developers.\n- _Cannot be verified in a running system_, making them hard to _audit, test, or enforce automatically_.\n\n**I Support Documentation Where It's Truly Necessary**\n\nFor topics where the behavior can be tested from configuration/code (e.g., session lifetimes, TLS, cookie flags), requiring documentation as a gating step creates friction and lowers the standard’s utility. \n\nI want to be clear: I support the inclusion of documentation requirements where implementation is non-obvious or likely to be business-specific. These are not standardized across applications and must be captured somewhere. Specifically:\n\n- Access control documentation (e.g., field-level, contextual, and tenant-based rules)\n- Business logic\n\n**Proposed Options**\n\nI know we are close to release, and I do not want to block the standard’s progress. But I believe we can still course-correct here with one or more of the following approaches:\n\n- Tag these requirements as \"Governance-Oriented\" or \"Process-Based\". \n→ Let users filter these out when focusing on application security verification at the code/config level.\n\n- Refactor Requirements to Focus on Behavior First, Documentation as Fallback\n→ _“Verify that session timeouts align with risk and re-authentication policy. If this cannot be tested directly, ensure this behavior is documented.”_\n\n- Defer Some Requirements to an ASVS Governance Profile\n→ Preserve the guidance, but separate it from developer-focused checklists.\n\n**List of All Requirements That Reference Documentation**\n\nBelow is the complete list of requirements that explicitly contain \"documentation\" or \"documented\" in ASVS 5.0. These are candidates for refactoring or reclassification. I marked ones I support with a ✅ \n\n**V2 – Validation and Business Logic**\n2.1.2 – Input validation rules are documented\n2.1.3 – Business logic limits and validations are documented ✅ \n\n**V3 – Web Frontend Security**\n3.1.1 – Documentation defines expected browser security features and fallback behavior\n\n**V5 – File Handling**\n5.1.1 – Documentation defines file types, extensions, size limits, and handling for malicious files\n\n**V6 – Authentication**\n6.1.1 – Documentation defines rate limiting, anti-automation, adaptive response\n6.1.2 – Context-specific banned words for passwords are documented\n6.1.3 – All authentication pathways and associated controls are documented\n\n**V7 – Session Management**\n7.1.1 – Session inactivity and max lifetime values are documented\n7.1.2 – Concurrent session behavior is documented\n7.1.3 – Federated session behavior is documented\n\n**V8 – Authorization**\n8.1.1 – Function/data access rules are documented ✅\n8.1.2 – Field-level access rules are documented ✅\n8.1.3 – Environmental/contextual factors are documented ✅\n8.1.4 – Authorization decisions consider documented context factors ✅\n\n**V11 – Cryptography**\n11.1.1 – Documented key management policy\n11.1.2 – Cryptographic inventory is documented\n11.1.4 – Documented PQC migration plan\n\n**V13 – Configuration**\n13.1.1 – Communication needs are documented\n13.1.2 – Max connection pool sizes and handling are documented\n13.1.3 – Resource failure strategies are documented\n13.2.6 – Services follow documented connection config\n\n**V14 – Data Protection**\n14.1.2 – Each data classification level has documented protection controls\n\n**V15 – Secure Coding**\n15.1.1 – Risk-based remediation timelines are documented\n15.1.2 – SBOM maintained with trusted sources\n15.1.3 – Documentation identifies resource-intensive operations\n15.1.4 – Documentation highlights risky third-party libraries\n15.1.5 – Documentation highlights risky operations in the codebase ✅ \n\n**V16 – Logging and Error Handling**\n16.1.1 – Documentation of what’s logged, where, how, and for how long\n\n**Final Note**\nThis feedback is not meant to undermine the effort put into the standard — especially by @elarlang  and @tghosth. I know many of these requirements were written to raise the bar on security maturity.\n\nBut without adjusting their framing or classification, I worry these requirements will have the opposite effect: discouraging adoption, overwhelming implementers, and leaving developers and testers unsure how to proceed.\n\nHappy to work collaboratively on a fix or compromise.\n\nRespectfully,\n@jmanico ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6n5eRU",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The concept of documentation requirements has been extensively discussed over the last ~year since we started preparing them including being specifically highlighted and discussed back at the project summit in November.\n\nThey tend to exist for a couple of reasons.\n\nThere are certain things that will need to be decided strategically across the application and not just by individual developers as they write the code. An application will have a centrally planned UX strategy, an application will have a centrally definited unit testing strategy, an application's architecture will be centrally planned, etc. The same will be true with security and often we use documentation requirements in these cases to make it clear that an well designed application will need to centrally plan these aspects.\n\nIn other cases, it may be unreasonably restrictive to provide a hard and fast rule for a security control. E.g. \"you must enforce a 10 minute inactivity time out\", \"you must block an IP address that sends more than 100 requests in a minute.\" Such requirements are likely to lead to an unpleasant showdown between the person trying to implement security controls and the business. In these cases, we want to allow application developers to come to a risk based decision that can be agreed by all sides, and often this manifests through documentation requirements.\n\nWhere an application is not at the level of maturity for some form of documentation or centralised process, they are likely only meeting ASVS L1 anyway where as many of the documentation requirements are L2+. Reaching a more mature level of software security requires a more deliberate and top down planned approach. An absence of that is a signal to the verifier and anyone reviewing a verification report.\n\nFinally, from an implementation/developer perspective, as opposed to a verification perspective, the ASVS has always been clear that this is not a one size fits all standard but rather a basis on which to build their software coding capability.\n\nSome organisations may use this as the impetuous to take a more organised approach to their security documentation, perhaps an internal guide which sets expectations for timeouts, permissions, input validation, etc. Other organisations may skip the documentation requirements in favour of internally mandating more specific requirements for the corresponding implementation requirements. These more specific requirements become the documentation from a verification perspective.",
+      "createdAt": "2025-04-19T20:47:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2816861268",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n5gaS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "You’re right that we’ve talked about documentation for the better part of a year - **but the sheer volume has crept up quietly**. We’re now at 25 separate documentation controls, and that number feels out of proportion to the rest of the standard. \n\nA few points to consider:\n\n- When one chapter (or control category) starts to outweigh others, developers perceive the whole standard as paperwork‑heavy—even if the technical controls are solid.\n- Twenty‑five doc requirements dilute focus; the truly critical policies get buried in a sea of “must document X.”\n- Every requirement is a future upkeep cost: wording updates, examples, translations, tool‑chain changes. Trimming even a handful reduces that overhead significantly.\n- Teams already skeptical of security “process” will tune out as soon as they see two dozen+ doc mandates. We risk losing the very developers we want to help.\n\nPossible Remedies:\n\n- Merge & De‑duplicate: Combine overlapping items (timeouts, session management, and auth flow docs could live in a single Security Parameters Guide).\n- Prioritize: Flag ~5–7 core documentation requirements ; demote the rest to guidance notes.\n- Tiered Mandates: Keep all 25 as reference, but require only the core set for L2.\n- Template‑Driven: Provide a single templated security architecture doc; each “requirement” becomes a section, eliminating the need to verify 25 separate artifacts.\n\nI’m not arguing that documentation isn’t needed—just that 25 individual checkpoints is _**unsustainable**_. I suggest we pick the few that move the security needle and streamline the rest.\n\nHappy to propose a concrete merged list if that would help.",
+      "createdAt": "2025-04-19T21:18:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2816870034",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n5hHp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "1) Did you mean to rename this issue or a different issue?\n\n2) Can you confirm the level of each of the ones above which you are concerned about?",
+      "createdAt": "2025-04-19T21:28:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2816872937",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n5iFf",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> 1. Did you mean to rename this issue or a different issue?\n> 2. Can you confirm the level of each of the ones above which you are concerned about?\n\nFixed the title, I'll address your other comment soon.",
+      "createdAt": "2025-04-19T21:41:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2816876895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6CfM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As the initiator of the concept, I have some words to say.\n\nThose requirements exist for 2 reasons:\n* Precondition for implementing and testing a certain security feature\n* A flexibility mechanism for situations where we can not ask \"one size fits everyone\" parameters\n\nThe point for documentation requirements - those must be taken into account in the analysis step and should be ready as input for developers before they start work. That is why those are grouped in the beginning of the chapters. All the blame about \"developers don't like documenting\" can be skipped here.\n\nI point it out often, but those requirements should be taken as **security decisions**. How you document it, it does not matter too much. It must be clear to a developer and for tester what those decisions are.\n\nEvery security decision we ask, must have a reason to exist - we don't ask anything just to exist - those are pre-conditions to be able to develop and test certain functionality.\n\nIn a way, it is not new in ASVS. You can take a look at v4.0.3 chapter V1. Some of those requirements were removed to be out of scope, some of them were made to be more clear and actionable. For example, instead of asking for high-level communication architecture documentation, we ask for precise parameters that are required to implement and test certain functionality. That all makes it more actionable and clear, despite the opposite claims.\n\nJosh already described the need for a flexibility mechanism, I'll not duplicate it here.",
+      "createdAt": "2025-04-20T05:46:09Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817009612",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6Fz7",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "No one was ever hacked because of missing documentation.\n\nI appreciate the intention behind introducing documentation requirements as preconditions for secure implementation and testing. That said, I want to push back on this direction a bit.\n\nWe now have 25 separate documentation requirements, and to me, this feels like bloat. Developers already struggle with standards fatigue, and we risk making ASVS feel like a governance framework instead of an implementation standard. That’s a major problem if we want broad adoption among engineers.\n\nI agree that security decisions need to be documented somewhere, but mandating these as individual requirements in a normative standard seems excessive and out of proportion with their practical impact. These aren’t always security features—they’re often meta-constructs around how security is discussed or planned. That may be valuable in some orgs, but not something we can expect every project to formalize, **especially in agile or lean environments**.\n\nWe also have to consider the tradeoff between precision and usability. A bloated requirement set—even if technically justified—makes the standard less actionable in practice. If our goal is to enable secure development at scale, we need to be careful about where we draw the line.\n\nI’d prefer we roll most of these documentation requirements into guidance or link them to specific technical controls where they’re truly required and not list them as standalone “musts” in the standard.",
+      "createdAt": "2025-04-20T06:31:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817023227",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6Jyy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> No one was ever hacked because of missing documentation.\n\nI am currently working with a company who currently have constant AuthZ gaps because they won't maintain a simple confluence page which explains how their internally developed authn/authz should be implemented and instead the devs do their own thing each time.\n\nSome strategic documentation requirements can have an outsized impact compared to playing whack-a-mole to try and ensure that developers managed to find the correct guidance by themselves. \n\n---\n\n\nAnyway, I think the important thing is to focus on how to make sure we are more comfortable with these requirements so we can still review the requirements and see whether any refinements can be made.\n\nI think the first thing to decide whether there are L1 documentation requirements that you think need to addressed. @jmanico could you open issues focussing on those and then we can start deciding how to approach them.",
+      "createdAt": "2025-04-20T07:24:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817039538",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6Kfg",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "As I have said several times before, access control is one of the few areas I think documentation is prudent.\n\nThe rest I think should go into an appendix. We need to remove some of the bloat, and documentation should be the first to go, IMO.",
+      "createdAt": "2025-04-20T07:33:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817042400",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6KtE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> think the first thing to decide whether there are L1 documentation requirements that you think need to addressed. @jmanico could you open issues focussing on those and then we can start deciding how to approach them.\n\nMy proposal is simple. Move all the doc requirements (except for access control and business logic) to an appendix and fix the many requirements that say \"read the docs\" except for access control and business logic.\n\nThis will both remove about 23 bloated requirements and clear up a lot of vague/abstract requirements. ",
+      "createdAt": "2025-04-20T07:36:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817043268",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6LKC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817009612\n\n> The point for documentation requirements - those must be taken into account in the analysis step and should be ready as input for developers before they start work. **That is why those are grouped in the beginning of the chapters.** ",
+      "createdAt": "2025-04-20T07:41:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817045122",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6Ln_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am certainly open to discussion on each of these requirements, as I noted above. However, each of these requirements was carefully worded over several iterations and each of them exist for a particular and well discussed reason. For obvious reasons we have tried to avoid them wherever possible.\n\nI don't think that taking them and sweeping them en-masse out of the standard is respectful to the effort and input it took to get them to this point.",
+      "createdAt": "2025-04-20T07:47:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817047039",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6MY0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> The point for documentation requirements - those must be taken into account in the analysis step and should be ready as input for developers before they start work. **That is why those are grouped in the beginning of the chapters.\n\nThe penetesters I work with almost never ever get these kinds of documents but still they can do their verification work.",
+      "createdAt": "2025-04-20T07:57:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817050164",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6MqD",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I am certainly open to discussion on each of these requirements, as I noted above. However, each of these requirements was carefully worded over several iterations and each of them exist for a particular and well discussed reason. For obvious reasons we have tried to avoid them wherever possible.\n> \n> I don't think that taking them and sweeping them en-masse out of the standard is respectful to the effort and input it took to get them to this point.\n\nI do. I have tried to shut down the documentation flood gates n ASVS for a while now but kept getting shut down. This is just not the way modern software is built. We are in an agile age.\n\nFile upload is another example. In 30 years I have never seen these file upload docs, but have still built, secured and verified many many apps. Take DropBox and similar who support file upload of every single file type and still have good security histories.",
+      "createdAt": "2025-04-20T08:01:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817051267",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n63yZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don't think that taking them and sweeping them en-masse out of the standard is respectful to the effort and input it took to get them to this point.\n\nI add that it is not about the time spent, but how the ASVS is built up. The fundamental and first step in are security decisions, which may be a result of threat modeling.\n\nWe have another issue where we just discussed the file upload topic. I think it got clarified.\n\nIn general, I have worked as a developer, and I work as a pentester, in both roles for 2-digit years, and I know from both roles that those security decisions are required to have the application implemented according to business and/or security needs.\n\nThose are ideas that I verify and discuss with the \"other side\", our clients who order pen tests. Those are not invented from the blue, this is experience from the field.\n\nThis is the vision we have put into ASVS. This is so much discussed and agreed upon from every angle.\n\nAt the current stage, when we are painting the walls for the house, it is not the time to change the construction of the house.",
+      "createdAt": "2025-04-20T15:43:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817227929",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n66UW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I want to address something that has weighed on me for a long time now.\n\nWhen we attended the summit together, you did not ask for my perspective on the direction of ASVS. Instead, you made it clear that you were going to “teach me what ASVS is”—and imposed your vision unilaterally. Since then, I’ve experienced multiple instances where my input has been ignored or dismissed outright. I’ve also witnessed a leadership style that has been rigid to the point of driving away valuable contributors. This is not just my perception - several others have raised similar concerns privately.\n\nI fully understand and respect the importance of foundational security decisions. But the way those decisions are communicated and enforced matters deeply. Collaboration requires consent, not just consensus declared after the fact.\n\nTo your analogy: if we are painting the house and realize a major structural flaw, we absolutely should stop and address it. Building a security standard is not about protecting past assumptions - it’s about getting it right, for the developers who rely on it and the users who depend on secure software.\n\nWe all bring years of experience to this table. I’m asking that we respect each other’s perspectives and contributions in both tone and substance. I want ASVS to succeed, but not at the cost of alienating the community that makes it possible.",
+      "createdAt": "2025-04-20T16:12:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817238294",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n68wW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I read from here that the problem is not that much about the documentation requirements, but something else.\n\nAs it is written in public, there is something to clarify with context: \"teach me what ASVS is\" - the meaning depends really how it is said, and it was said with joking tone to introduce scope and requirement philosophy what we had used for that time long ago already, but to get everyone on the same page with that info.\n\nAll the claims that you have been ignored need to be solved on a per-issue basis, where you felt that way. To through such claims without any context does not really match with a respectful communication tone.\n\nI'm sure the construction is strong.",
+      "createdAt": "2025-04-20T16:40:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817248278",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6_oc",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The point I am trying to make that is relevant to this thread is that the philosophy to go so hard on documentation requirements (in the middle of an agile low documentation era) is not something we all agreed on, but it's something that I feel was very rigidly forced on us.\n\nAnd even now, every single little change I'm suggesting, even when several other volunteers agree with me, is hard to get through.\n\nWe have such a bloated standard now, IMO, we need to make some tough choices to reduce this standard to a more meaningful and actionable level.\n\nNobody was ever - in all of security history - hacked because of missing documentation so I want to start by reducing those.",
+      "createdAt": "2025-04-20T17:12:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817260060",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7AL0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I highlight here one of my previus comment https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817009612\n\nMore precisely\n> I point it out often, but those requirements should be taken as **security decisions**. How you document it, it does not matter too much. It must be clear to a developer and for tester what those decisions are.\n\nWith the message: it's not about documenting things, it is about security decisions to make.",
+      "createdAt": "2025-04-20T17:19:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817262324",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7Ao2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> And even now, every single little change I'm suggesting, even when several other volunteers agree with me, is hard to get through.\n\nTo be fair, just today a bunch of changes got pushed through, most of which involved your input and agreement.\n\nAs I noted above, we can certainly start looking at the criticality of L1 documentation requirements in the context of the requirements they support if you want to open or reopen the relevant issues.",
+      "createdAt": "2025-04-20T17:25:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817264182",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7Bsa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I will open more issues soon.\n\nOkay cool, would it make sense to close this issue or do you prefer to open your new issues as sub issues of this one",
+      "createdAt": "2025-04-20T17:38:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817268506",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7DyH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I highlight here one of my previus comment [#2996 (comment)](https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817009612)\n> \n> More precisely\n> \n> > I point it out often, but those requirements should be taken as **security decisions**. How you document it, it does not matter too much. It must be clear to a developer and for tester what those decisions are.\n> \n> With the message: it's not about documenting things, it is about security decisions to make.\n\n **What I Agree With**\n\n- Yes, security decisions must be made early and consistently.\n- Yes, documentation can help clarify those decisions.\n- Yes, mature organizations often benefit from maintaining those artifacts.\n\n**Where I Disagree**\n\n- We have 26+ separate requirements that mandate documentation as the primary verification mechanism.\n\n**Many of these**\n\n- Are not enforceable in code or config\n- Are rarely available to testers or developers in real-world environments\n- Assume SDLC maturity that simply doesn’t exist for most teams\n\nThis is not a philosophical quibble — it’s a usability and adoption issue.\n\nIn my experience teaching and verifying secure software in hundreds of environments:\n\n- Too many documentation checkpoints turn off developers\n- They dilute the focus from the core implementation security controls\n- They make ASVS feel like a governance framework, not a developer security standard\n\n",
+      "createdAt": "2025-04-20T18:04:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817277063",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7E6x",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The information from the _security decision_ requirements is needed for _implementation_ requirements.\n\nReasons to have them separately (outside of implementation requirement content)\n* More **actionable** on the planning stage - it does not matter what the development style, a la agile or not\n* If many requirements need the same base info (e.g, definition of what is sensitive data), it avoids duplication in the requirements",
+      "createdAt": "2025-04-20T18:17:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817281713",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7F6H",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > I will open more issues soon.\n> \n> Okay cool, would it make sense to close this issue or do you prefer to open your new issues as sub issues of this one\n\nPlease leave this open.",
+      "createdAt": "2025-04-20T18:30:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817285767",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7GEs",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "For those reading this thread, here are the current requirements as of 4/20/2025 that refer to documenation.\n\n- 11.1.1, Verify that there is a documented policy for management of cryptographic keys and a cryptographic key lifecycle that follows a key management standard such as NIST SP 800-57., Level 2\n- 11.1.2, Verify that a cryptographic inventory is performed, maintained, regularly updated, and includes all cryptographic keys, algorithms, and certificates used by the application. It must also document where keys can and cannot be used in the system, and the types of data that can and cannot be protected using the keys., Level 2\n- 11.1.4, Verify that a cryptographic inventory is maintained. This must include a documented plan that outlines the migration path to new cryptographic standards, such as post-quantum cryptography, in order to react to future threats., Level 3\n- 13.1.1, Verify that all communication needs for the application are documented. This must include external services which the application relies upon and cases where an end user might be able to provide an external location to which the application will then connect., Level 2\n- 13.1.2, Verify that for each service the application uses, the documentation defines the maximum number of concurrent connections (e.g., connection pool limits) and how the application behaves when that limit is reached, including any fallback or recovery mechanisms, to prevent denial of service conditions., Level 3\n- 13.1.3, Verify that the application documentation defines resource‑management strategies for every external system or service it uses (e.g., databases, file handles, threads, HTTP connections). This should include resource‑release procedures, timeout settings, failure handling, and where retry logic is implemented, specifying retry limits, delays, and back‑off algorithms. For synchronous HTTP request–response operations it should mandate short timeouts and either disable retries or strictly limit retries to prevent cascading delays and resource exhaustion., Level 3\n- 13.1.4, Verify that the application's documentation defines the secrets that are critical for the security of the application and a schedule for rotating them, based on the organization's threat model and business requirements., Level 3\n- 13.2.6, Verify that where the application connects to separate services, it follows the documented configuration for each connection, such as maximum parallel connections, behavior when maximum allowed connections is reached, connection timeouts, and retry strategies., Level 3\n- 14.1.2, Verify that all sensitive data protection levels have a documented set of protection requirements. This must include (but not be limited to) requirements related to general encryption, integrity verification, retention, how the data is to be logged, access controls around sensitive data in logs, database-level encryption, privacy and privacy-enhancing technologies to be used, and other confidentiality requirements., Level 2\n- 15.1.1, Verify that application documentation defines risk based remediation time frames for 3rd party component versions with vulnerabilities and for updating libraries in general, to minimize the risk from these components., Level 1\n- 15.1.2, Verify that an inventory catalog, such as software bill of materials (SBOM), is maintained of all third-party libraries in use, including verifying that components come from pre-defined, trusted, and continually maintained repositories., Level 2\n- 15.1.3, Verify that the application documentation identifies functionality which is time-consuming or resource-demanding. This must include how to prevent a loss of availability due to overusing this functionality and how to avoid a situation where building a response takes longer than the consumer's timeout. Potential defenses may include asynchronous processing, using queues, and limiting parallel processes per user and per application., Level 2\n- 15.1.4, Verify that application documentation highlights third-party libraries which are considered to be \"risky components\"., Level 3\n- 15.1.5, Verify that application documentation highlights parts of the application where \"dangerous functionality\" is being used., Level 3\n- 15.2.1, Verify that the application only contains components which have not breached the documented update and remediation time frames., Level 1\n- 15.2.2, Verify that the application has implemented defences against loss of availability due to functionality which is time-consuming or resource-demanding, based on the documented security decisions and strategies for this., Level 2\n- 15.2.4, Verify that the application implements additional protections around parts of the application which are documented as containing \"dangerous functionality\" or using third-party libraries considered to be \"risky components\". This could include techniques such as sandboxing, encapsulation, containerization or network level isolation to delay and deter attackers who compromise one part of an application from pivoting elsewhere in the application., Level 3\n- 16.1.1, Verify that an inventory exists documenting the logging performed at each layer of the application's technology stack, what events are being logged, log formats, where that logging is stored, how it is used, how access to it is controlled and how long logs are kept for., Level 2\n- 16.2.3, Verify that the application only stores or broadcasts logs to the files and services that are documented in the log inventory., Level 2\n- 16.3.3, Verify that the application logs attempts to bypass the security controls defined in the design documentation such as input validation., Level 2\n- 16.3.4, Verify that the application can detect and log unusual activity, including business logic anomalies and abnormal or excessive request patterns, such as by IP, user, total per hour or day, based on documented limits., Level 3\n- 3.1.1, Verify that application documentation states the expected security features browsers must support and behavior if not supported., Level 2\n- 5.1.1, Verify that the documentation defines permitted file types, size limits, and behavior when a malicious file is detected., Level 2\n- 6.1.1, Verify that application documentation defines how controls such as rate limiting, anti-automation, and adaptive response are used., Level 2\n- 6.1.2, Verify that a list of context specific words are documented to prevent their use in passwords., Level 2\n- 6.1.3, Verify that all authentication pathways are documented together with the security controls., Level 2\n- 7.1.1, Verify that the user's session inactivity period and maximum session lifetime before re-authentication are documented, appropriate in combination with other controls, and that documentation includes justification for any deviations from NIST SP 800-63B re-authentication requirements., Level 2\n- 7.1.2, Verify that the documentation defines how many concurrent authenticated sessions are allowed, whether they are shared across different platforms and devices, and what happens when that limit is reached., Level 2\n- 7.1.3, Verify that all systems that create and manage user sessions, including federated systems and protocols, are documented., Level 2\n- 8.1.1, Verify that authorization documentation defines rules for restricting function-level and data-specific access based on identity, roles, ownership, and the sensitivity of the action or resource., Level 2\n- 8.1.2, Verify that authorization documentation defines rules for field-level access restrictions, including rules for sensitive and non-sensitive data., Level 2\n- 8.1.3, Verify that authorization documentation defines a consumer's environmental and contextual attributes (such as IP, device, network, or request context) to make contextual access decisions., Level 2",
+      "createdAt": "2025-04-20T18:32:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817286444",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n7GTY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For those reading this thread, here are the current requirements as of 4/20/2025 that refer to documenation.\n\nRefer to documentation sounds like implementation requirements that points to the documentation requirements.\n\nYou have mix of them here. Documentation requirements are only X.1.Y, but not every chapter have them.\n\nTo just list documentation requirements has only value \"so many of them\", in practice, the value must be checked in pairs with related implementation requirements that need information from them. And all of them are created for some reason.\n",
+      "createdAt": "2025-04-20T18:35:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2817287384",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oCq4q",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "One principle I would like to see in ASVS is to make each requirement actionable without requiring _RTM (read the manual)_ or having to read other documents that typically do not exist. Documentation is the not the job of developers or testers - our main audience. That's a job for governance and business requirement staff. From a software-building perspective, only the technology-specific controls are impactful to the products’ actual security posture. \n\nSo I suggest we move most requirements that require documentation into a \"Governance\" appendix to preserve the (excellent) work that has been done in this area. \n\nWhat will be left is ASVS that is leaner and more focused on actionable requirements.\n\n",
+      "createdAt": "2025-04-21T19:01:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2819272234",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oCuIS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> > For those reading this thread, here are the current requirements as of 4/20/2025 that refer to documenation.\n> \n> Refer to documentation sounds like implementation requirements that points to the documentation requirements.\n> \n> You have mix of them here. Documentation requirements are only X.1.Y, but not every chapter have them.\n> \n> To just list documentation requirements has only value \"so many of them\", in practice, the value must be checked in pairs with related implementation requirements that need information from them. And all of them are created for some reason.\n\nI consider documentation requirements and requirements that depend on documentation to all be part of the same problem. _Un-actionable requirements._",
+      "createdAt": "2025-04-21T19:08:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2819285522",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oCxBa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Developers are not the only audience. There is one important role for the \"main audience\" list - it is the software/product owner. A company or organization.\n\nThis is where the ASVS is taken into use, requires the usage of ASVS from developers and verifiers. In their role, the separate list of documentation requirements that are actionable on expected content. Every uncertainty will be asked of them anyway, and this is the gap we filled here.\n\nI don't find it reasonable to state that all the mentioned requirements are not actionable just because those are related to \"documentation\", which I still recommend to translate to \"security decisions\".",
+      "createdAt": "2025-04-21T19:13:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2819297370",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oDFKV",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Developers are not the only audience. There is one important role for the \"main audience\" list - it is the software/product owner. A company or organization.\n> \n> This is where the ASVS is taken into use, requires the usage of ASVS from developers and verifiers. In their role, the separate list of documentation requirements that are actionable on expected content. Every uncertainty will be asked of them anyway, and this is the gap we filled here.\n> \n> I don't find it reasonable to state that all the mentioned requirements are not actionable just because those are related to \"documentation\", which I still recommend to translate to \"security decisions\".\n\nI agree that ASVS serves more audiences - developers, verifiers and, product owners who must oversee security work. Your point about making every requirement actionable for that “main audience” is well taken. At the same time, I worry that having 25 discrete “documentation” controls - even rebranded as “security decisions”. This will overwhelm product owners as much as developers. It's a large documentation burden in the era of agile development. \n",
+      "createdAt": "2025-04-21T19:57:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2819379861",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oFEn1",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The gravity of this thread has pulled me in to leave my thoughts and then quickly leave.\n\nI agree that the standard feels quite large (and personally I would axe some other, non-documentation requirements 😆), but I actually think that the solution to that should not come from the ASVS itself, which IMO must be focused on identifying what is required of secure applications. Application security is not simple and the ASVS reflects that.\n\nFor the most part, the existing requirement set has gone through several iterations and discussions/debates. That is not to say that every requirement has been equally scrutinized, but I do agree that removal of any requirement should necessitate focusing on each individually. \n\nLooking again at the various doc/decision requirements, I do see a few challenges. There is a lack of documentation templates and standards. This is where I think a separate project to the ASVS could be helpful. Funny enough, when searching to see if there are security doc standards:\n\n![Image](https://github.com/user-attachments/assets/c27ceb11-89ff-4417-86f0-6764f2606d0a)\n\nRegarding both usability and maintainability, I was able to quickly identify a challenge with the current requirement content and structure (and this one is probably my fault as I was heavily involved here). Looking at V7, requirement 7.1.1 maps to 7.3.1 and 7.3.2, but there is no clear link between the decision (7.1.1) and the subsequent requirements dependent on it. Even the terminology is different; the word \"timeout\" only appears in 7.3.\n\nIt may be beneficial to implement a more explicit mapping, because there is a dependency between requirements here and in some cases (as in this), the linkage may not be immediately obvious from terminology. \n\nRegarding challenges in adoption, I don't think the ASVS should be primarily concerned with _elective_ adoption by developers. If developers and organizations were primarily concerned with developing secure applications, the state of appsec would be quite different than it is. The ASVS should lay out what is required of secure applications. There need to be other forces and incentives that drive the adoption. \n\n> Nobody was ever - in all of security history - hacked because of missing documentation so I want to start by reducing those.\n\nWhile technically true, security is a complex system of interactions. So too could you say no one has been hacked because they did not get a pentest. They got hacked because their app was vulnerable, but regular security testing as a practice aids in the discovery and ultimately mitigation. I suspect that by requiring or incentivizing security documentation, a likely outcome would be an increased security posture (speculation). \n\n@jmanico I would be very interested in learning more about the burden that would be posed in agile environments. \n\nUltimately, however, I think the requirements around documentation look burdensome because our present application security practices and expectations are low. \n",
+      "createdAt": "2025-04-22T02:31:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2819901941",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oMXxc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Few more things to clarify here.\n\n> This will overwhelm product owners as much as developers.\n\nI don't share that concern, it is the opposite - it is a clear step from where they need to start.\n\nThere is also important to say, that not every requirement is meant to be actionable for developers - precisely getting security decisions and expected documentation done. It must be actionable for business analysts, architects etc. Developers need result from those requirements as input for being able to implement their requirements. Otherwise developers may figure out later, that \"hey, here is some requirement but I don't have decision or information, how to achieve that\".\n\n---\n\n> So I suggest we move most requirements that require documentation into a \"Governance\" appendix to preserve the (excellent) work that has been done in this area.\n\nWhen we picked the direction to use documentation requirements, or in a way, made v4.0.3 requirements more precise and actionable, then the question how to organize them was on table and appendix was obviously one version there.\n\nWith the appendix, we could re-create exactly the same problem that we removed from v4.0.3 chapter V1 - duplicating the structure and splitting requirements on the same topic to different places. Now we have a clear solution, all related requirements are in one chapter.",
+      "createdAt": "2025-04-22T16:09:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2821815388",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oNtww",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What about adding a column for \"audience\" so we can flag requirements as helpful for developers, testers, managers, governance or a combo of these? That would help filter out the types of requirements for the different audiences and alleviate most of my concern's without having to move much around.",
+      "createdAt": "2025-04-22T18:37:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2822167600",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oNyI8",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What about adding a column for \"audience\" so we can flag requirements as helpful for developers, testers, managers, governance or a combo of these?\n\nI'd be very wary about that: some requirements can be mostly for one audience but still be relevant to other audiences in some cases. These would be categorized as \"not for me\" and ignored by people who should still check them.\n\nI would even argue than a lot of requirements could be in this case.\n\n(Not to mention the extra work, disagreement and nitpicking to classify all the requirements 😄)",
+      "createdAt": "2025-04-22T18:46:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2822185532",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6oN4nQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What about adding a column for \"audience\" so we can flag requirements as helpful for developers, testers, managers, governance or a combo of these? That would help filter out the types of requirements for the different audiences and alleviate most of my concern's without having to move much around.\n\nThe \"column\" is the section title that contains \"Documentation\" and applies to this role or person who is responsible for those tasks in this project.\n\nFor me, this is grouping requirements or dictating who needs to fill some task is away from the ASVS scope - we just concentrate to the requirements that must be achieved.",
+      "createdAt": "2025-04-22T18:59:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2822212048",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pMN5Z",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think the scope of this is longer term than RC1 so I have marked as non blocker. If there are immediate concerns over specific requirements then these should be captured in their own issues.",
+      "createdAt": "2025-04-29T12:01:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2838552153",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pQYMv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed, Josh. This is no longer a blocker and I am 100% on board to release 5.0 on the timeline you and @elarlang have set. Thank you for keeping it open so we can discuss it more after the 5.0 release.",
+      "createdAt": "2025-04-29T17:17:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2996#issuecomment-2839642927",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-19T19:15:14Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    }
+  ],
+  "number": 2996,
+  "state": "CLOSED",
+  "title": "Documentation Concerns and ASVS",
+  "url": "https://github.com/OWASP/ASVS/issues/2996"
+}

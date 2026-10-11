@@ -1,0 +1,136 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nRequirement [3.4.4](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md#v34-cookie-based-session-management)\r\n\r\n> 3.4.4 Verify that cookie-based session tokens use \"__Host-\" prefix **(see references)** to provide session cookie confidentiality.\r\n\r\nProposal: cleanup, remove \"(see references)\", and change \" to ' for `__Host-`, as other technical terms seems to use `'` as well.\r\n\r\n3.4.4 Verify that cookie-based session tokens use '__Host-' prefix to provide session cookie confidentiality.\r\n\r\nPhrase \"to provide session cookie confidentiality\" is confusing for me. `__Host-` prefix sets some limitation for setting a cookie, like cookie must be host-only (no Domain attribute set), Path with value `/` and `Secure` attribute used. How those limitations have the meaning \"provide confidentiality\"?\r\n\r\nUsing `__Host-` for a cookie means, that you can not write competitive cookie (many cookies with the same name) - from another subdomain or with another domain value or with different path value.",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzU4NzEyNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I almost never use __Host- because of it's limits. I agree this is a problematic requirement. How about...\r\n\r\n_3.4.4 Verify that cookie-based session tokens use` '__Host-`' prefix when the cookie should be limited to that one host only to provide session cookie confidentiality.__",
+      "createdAt": "2021-05-06T14:52:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/986#issuecomment-833587127",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzU5NzYzMQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Examples:\r\n```\r\nSet-Cookie: A=1; Path=/; Secure\r\nSet-Cookie: __Host-B=1; Path=/; Secure\r\n```\r\n\r\nCookie `__Host-B` does not have any extra benefit on confidentiality here over cookie `A`.\r\n\r\nBut it has extra benefits on integrity:\r\n\r\n  * you can not override `__Host-B` from another subdomain, but you can create cookie with name `A`, which is matching for your domain\r\n  * you can not create competitive for `__Host-B` using different value for `Path` attribute, but you can cause a lot of mess with setting cookie name `A` with more precise path, and cause client-side based DoS attack for example - browser sends usually cookies with more precise path first and server usually takes the first one. So you can block some functionality.\r\n\r\n`__Host-` prefix improving integrity, but does not make it bullet-proof.\r\n\r\nWith `__Host-` prefix cookie application can be sure, that this cookie is written by the same host and with using secure connection.",
+      "createdAt": "2021-05-06T15:06:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/986#issuecomment-833597631",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzMzYxMzc1Ng==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree confidentiality is not the right word for this requirement. Something like:\r\n\r\n_3.4.4 Verify that cookie-based session tokens use `'__Host-'` prefix when the cookie should be limited to sending host only so cookies do not span different subdomains or protocols._",
+      "createdAt": "2021-05-06T15:27:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/986#issuecomment-833613756",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzNTI5MjIyMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just link to another cookie-related issue, as those need be looked together #978 ",
+      "createdAt": "2021-05-08T10:56:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/986#issuecomment-835292220",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzNTM4MzM1OQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> _3.4.4 Verify that cookie-based session tokens use `'__Host-'` prefix when the cookie should be limited to sending host only so cookies do not span different subdomains or protocols._\r\n\r\nCookie can be \"host-only\" also without `__Host-` prefix.\r\n\r\nTo say it all out, it would be something like that (language improvement):\r\n3.4.4 Verify that cookie-based session tokens use '__Host-' prefix to provide confidence for the application that cookie is written by the same host using secure connection and the cookie does not have any competitive cookies with the same name but with different Host or Domain and Path combinations.\r\n\r\nI'm also ok with \"3.4.4 Verify that cookie-based session tokens use '__Host-' prefix.\"",
+      "createdAt": "2021-05-08T14:25:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/986#issuecomment-835383359",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40k_t3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Need wordsmithing help here as well to create valid and correct requirement text from my points in previous comment.\r\n\r\nOr we can be happy with \"3.4.4 Verify that cookie-based session tokens use '__Host-' prefix.\"?",
+      "createdAt": "2021-07-18T20:34:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/986#issuecomment-882113399",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM42MxrW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Finished. https://github.com/OWASP/ASVS/pull/1047",
+      "createdAt": "2021-08-31T15:00:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/986#issuecomment-909318870",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-05-05T07:23:46Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    }
+  ],
+  "number": 986,
+  "state": "CLOSED",
+  "title": "3.4.4 requirement cleanup and improvement",
+  "url": "https://github.com/OWASP/ASVS/issues/986"
+}

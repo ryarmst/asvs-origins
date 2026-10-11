@@ -1,0 +1,791 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "For updated situation, jump here: https://github.com/OWASP/ASVS/issues/2072#issuecomment-2351529509\r\n\r\n---\r\n\r\nFor V1 cleanup from implementation requirements (#1063) I propose to move those requirements to V14.7 Web or Application Server Configuration\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.2.2** | [MODIFIED] Verify that communications between back-end application components, including APIs, middleware and data layers, are authenticated and use individual user accounts. | | ✓ | ✓ | 306 |\r\n| **1.14.1** | [MODIFIED] Verify the segregation of back-end components of differing trust levels through well-defined security controls, firewall rules, API gateways, reverse proxies, cloud-based security groups, or similar mechanisms. | | ✓ | ✓ | 923 |\r\n| **1.14.7** | [MODIFIED, MOVED FROM 1.2.1] Verify the use of unique or special low-privilege operating system accounts for all back-end application components, services, and servers. | | ✓ | ✓ | 250 |\r\n\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6L2flb",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that 1.2.2 and 1.14.7 make sense in V14.\r\n\r\nI think that 1.14.1 is explicitly talking about components that are no in scope for ASVS so I would support removing this requirement.\r\n\r\n@meghanjacquot @jmanico what do you think?",
+      "createdAt": "2024-09-12T13:39:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346318171",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L2i83",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think that 1.2.2 is more of a session management requirement (v3) that a configuration requirement (v14). 1.2.2 is about session management (and not authentication) architecture.\r\n\r\nSo I suggest move 1.2.2 to v3 and change it so say:\r\n\r\n1.2.2 | [MODIFIED] Verify that communications between back-end application components, including APIs, middleware and data layers, **_use active sessions of individual user accounts_**. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\n\r\n",
+      "createdAt": "2024-09-12T13:45:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346331959",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L2jJU",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> I think that 1.14.1 is explicitly talking about components that are no in scope for ASVS so I would support removing this requirement.\r\n\r\nI agree. For severals reasons I think 1.14.1 can go.",
+      "createdAt": "2024-09-12T13:45:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346332756",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L2jg2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think 1.14.7 should be moved to v14, it's definitely a configuration requirement.",
+      "createdAt": "2024-09-12T13:46:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346334262",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L29HZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I think that 1.2.2 is more of a session management requirement (v3) that a configuration requirement (v14). 1.2.2 is about session management (and not authentication) architecture.\r\n\r\nHow is the requirement to ask individual user accounts for application components related to **application** session management?",
+      "createdAt": "2024-09-12T14:20:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346439129",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L3CFq",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "**Session Context:** The verification emphasizes ensuring that authenticated communications use individual user accounts, implying that there is a mechanism in place for managing user-specific sessions or credentials. This aligns with session management, where individual user identities and their associated permissions are tracked and used to authenticate actions across various components.\r\n\r\n**Authentication and Identity:** The focus is on authenticating communications and ensuring that individual user accounts are used. Authentication is a core aspect of session management, as it directly impacts how user sessions are created, maintained, and validated across distributed systems.\r\n\r\n**Dynamic Authentication:** In a microservices or distributed architecture, authenticated communication often relies on session tokens, OAuth tokens, or similar mechanisms tied to a user's session. The requirement to use individual user accounts in these back-end communications points to a session-driven model, where session tokens (rather than static configuration settings) dictate access and communication rules.\r\n\r\nWhile configuration plays a role in setting up the security mechanisms, such as defining authentication protocols or ensuring encryption between components, **_the active authentication and management of individual sessions_** is what places this more in the session management domain than in static configuration.",
+      "createdAt": "2024-09-12T14:27:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346459498",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L3EOI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You can tell to AI that the context is to have a bit of separation to \"application logic session\" for end users and authentication between underlying application components. :)",
+      "createdAt": "2024-09-12T14:30:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346468232",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L3Zsx",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My AI overload then says to you : \"Then you need to do a better job in this requirement with a more clear distinction between the application logic session for end users and the authentication between underlying application components\"\r\n\r\nIt's the \"use individual user accounts\" that makes me think of session management. If you talking intra-service security (with things like mTLS and similar) then these would not be user accounts, they would be *service* accounts.\r\n\r\n\r\n:) ",
+      "createdAt": "2024-09-12T15:04:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346556209",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L6mXF",
+      "author": {
+        "login": "meghanjacquot"
+      },
+      "authorAssociation": "NONE",
+      "body": "\r\n\r\n\r\n> I think that 1.2.2 and 1.14.7 make sense in V14.\r\n\r\nMoving 1.14.7 to be in 14.7 makes sense as well due to the verification part with servers. \r\n\r\nWith Jim's modified language, in this [comment](https://github.com/OWASP/ASVS/issues/2072#issuecomment-2346331959), I can see where 1.2.2 would be best placed into V3. If the emphasis is on \"active\" than maybe V3.3 would be best? \r\n\r\n> \r\n> I think that 1.14.1 is explicitly talking about components that are no in scope for ASVS so I would support removing this requirement.\r\n\r\nIf 1.14.1 is out of scope removal makes sense to me. \r\n> \r\n> @meghanjacquot @jmanico what do you think?\r\n\r\n\r\n\r\n\r\n",
+      "createdAt": "2024-09-12T23:14:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2347394501",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L9ATm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Oeh. There is no session context. It was Jim's AI confusion. The requirement is at the moment in 1.2 which is \"V1.2 Authentication Architecture\"\r\n\r\nCurrent 1.2.2 will get modification and will be moved to V14.7\r\n\r\n> Verify that communications between back-end application components, including APIs, middleware, and data layers, are authenticated and use individual **service** accounts.\r\n",
+      "createdAt": "2024-09-13T04:49:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348025062",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAAyG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "A bit of rough and tumble in this thread but I think Jim correctly pointed out that this requirement was a little confusingly worded as I agree with Elar's interpretation of the requirement and so for that reason I think this should be in V14.\r\n\r\nI think we all agree once we all understand each other so I will open a draft PR but will request approval from all 3 of you before it gets merged :)",
+      "createdAt": "2024-09-13T12:14:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348813446",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MADuk",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "However, based on another discussion we had related to V4, I have made the following modification to the new 14.6.4:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.6.4** | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components, including APIs, middleware and data layers, are authenticated and use **either the original user's session or individual service accounts**. | | ✓ | ✓ | 306 |",
+      "createdAt": "2024-09-13T12:20:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348825508",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAEDz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This topic is way more than service accounts and has nothing to do with users sessions. \r\n\r\nSetting up authentication for intra-service security is not at all easy. Sometimes you just use mTLS. Sometimes you use tokens and OAuth tech. You might need integration with key managers. You need to set up least privilege access. You need to handle token rotation.\r\n\r\nI can see this topic in v14 (Configuration), Crypto (v6), Authentication(v2), Session Management (v3) and more.\r\n\r\nI do admit if you are using a modern service like Istio, it's more in v14. But intra-service authN is way more complex that just configuration and requires quite a few steps to set up right.\r\n\r\nI lean to putting this in V2 - Authentication or V3 - Session Management.\r\n\r\nPS: This post was approved by my AI overlord.",
+      "createdAt": "2024-09-13T12:21:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348826867",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAE4H",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "As a side note I think the users session (typically a JWT) should still be propagated server-to-service regardless of how you do intra-service security. (ie the \"Pass the Jot\" session pattern)",
+      "createdAt": "2024-09-13T12:23:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348830215",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAFZ-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Setting up authentication for intra-service security is not at all easy. Sometimes you just use mTLS. Sometimes you use tokens and OAuth tech. You might need integration with key managers. You need to set up least privilege access. You need to handle token rotation.\r\n\r\nSo this is the kind of complication I would prefer to abstract away for service to service issues :)\r\n\r\n> As a side note I think the users session (typically a JWT) should still be propagated server-to-service regardless of how you do intra-service security. (ie the \"Pass the Jot\" session pattern)\r\n\r\nI have alluded to this in the [updated requirement that I copied above](https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348825508).\r\n\r\n",
+      "createdAt": "2024-09-13T12:24:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348832382",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAF-i",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Then I suggest we drop the service account part and aim for something like:\r\n\r\n14.6.4 | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components, including APIs, middleware and data layers, are authenticated using some form of intra-service authentication that is independent of individual user sessions. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\n\r\n",
+      "createdAt": "2024-09-13T12:26:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348834722",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAHy9",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico in your proposal do we not lose this element?\r\n\r\n> As a side note I think the users session (typically a JWT) should still be propagated server-to-service regardless of how you do intra-service security. (ie the \"Pass the Jot\" session pattern)\r\n",
+      "createdAt": "2024-09-13T12:30:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348842173",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAIFD",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Or if you want a manicode-beefy(tm) version I would actually suggest:\r\n\r\n\r\n14.6.4 | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components, including APIs, middleware, and data layers, are authenticated using strong intra-service authentication mechanisms, such as mutual TLS, OAuth tokens, or signed JWTs, which are independent of individual user sessions. Ensure that these mechanisms include secure key management, regular credential rotation, and audit logging to detect unauthorized access, and are implemented following the principle of least privilege to minimize attack surface. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\n\r\n\r\n\r\n",
+      "createdAt": "2024-09-13T12:30:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348843331",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAIXE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> @jmanico in your proposal do we not lose this element?\r\n> \r\n> > As a side note I think the users session (typically a JWT) should still be propagated server-to-service regardless of how you do intra-service security. (ie the \"Pass the Jot\" session pattern)\r\n\r\nI think the idea of \"passing the session all the way down the pipe of various services\" should be an independent v3 requirement and it's a super important one.",
+      "createdAt": "2024-09-13T12:31:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348844484",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAJPl",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And regarding pass the JWT I suggest a V3 requirement along these lines:\r\n\r\n3.5.8 | [ADDED] Verify that user session tokens, such as JWTs, are securely propagated between services as part of service-to-service communication, ensuring that session tokens are validated at each service layer. |  | ✓ | ✓ |\r\n-- | -- | -- | -- | -- | --",
+      "createdAt": "2024-09-13T12:33:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348848101",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAJnH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I see it as 2 layers: service-to-service and user-to-service. I think you mix them and/or miss the service-to-service layer.\r\n\r\nExample: the database user for the application is unique for the application and not shared with n+1 other applications.",
+      "createdAt": "2024-09-13T12:34:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348849607",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAKWP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree @elarlang so I suggest 14.6.4 stick to service-to-service auth, and a new 3.5.8 that discusses \"pass the JWT\".\r\n\r\n14.6.4 | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components, including APIs, middleware, and data layers, are authenticated using strong intra-service authentication mechanisms, such as mutual TLS, OAuth tokens, or signed JWTs, which are independent of individual user sessions. Ensure that these mechanisms include secure key management, regular credential rotation, and audit logging to detect unauthorized access, and are implemented following the principle of least privilege to minimize attack surface. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\n3.5.8 | [ADDED] Verify that user session tokens, such as JWTs, are securely propagated between services as part of service-to-service communication, ensuring that session tokens are validated at each service layer. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\n",
+      "createdAt": "2024-09-13T12:35:51Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348852623",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MALCz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Also, stay in topic. If the discussion here was about 3 requirement, please open separate issues for separate topic or proposals.",
+      "createdAt": "2024-09-13T12:37:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348855475",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAMBT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'll propose 3.5.8 in a new issue and drop it from this conversation. I'm with you Elar. See https://github.com/OWASP/ASVS/issues/2079",
+      "createdAt": "2024-09-13T12:39:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348859475",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAOdS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "So there are two suggestions for clarifying 1.2.2\r\n\r\n(beefy)\r\n\r\n14.6.4 | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components, including APIs, middleware, and data layers, are authenticated using strong intra-service authentication mechanisms, such as mutual TLS, OAuth tokens, or signed JWTs, which are independent of individual user sessions. Ensure that these mechanisms include secure key management, regular credential rotation, and audit logging to detect unauthorized access, and are implemented following the principle of least privilege to minimize attack surface. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\nor\r\n\r\n(less beef)\r\n\r\n14.6.4 | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components, including APIs, middleware and data layers, are authenticated using some form of intra-service authentication that is independent of individual user sessions. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\n\r\n\r\n",
+      "createdAt": "2024-09-13T12:42:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348869458",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MAPNL",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "... and since this is setting up service authentication, which is complex, I'd rather see this as 2.10.4 under the \"V2.10 Service Authentication\" section. So my final proposal here is:\r\n\r\n\r\n2.10.4 | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components, including APIs, middleware, and data layers, are authenticated using strong intra-service authentication mechanisms, such as mutual TLS, OAuth tokens, or signed JWTs, which are independent of individual user sessions. Ensure that these mechanisms include secure key management, regular credential rotation, and audit logging to detect unauthorized access, and are implemented following the principle of least privilege to minimize attack surface. |   | ✓ | ✓ | 306\r\n-- | -- | -- | -- | -- | --\r\n\r\n\r\n",
+      "createdAt": "2024-09-13T12:44:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2348872523",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MJyLu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I see it as 2 layers: service-to-service and user-to-service. I think you mix them and/or miss the service-to-service layer.\r\n\r\nI agree that we are mixing them and that it becomes confusing.\r\n\r\n> I'd rather see this as 2.10.4 under the \"V2.10 Service Authentication\" section.\r\n\r\nI also agree with this as I think it is the original intention of the requirement to focus on components that we did not specifically build and therefore do not support our user session mechanism.\r\n\r\n\r\nI think the \"beefy\" requirement is too large so I would suggest the following:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.6.4** | [MODIFIED, MOVED FROM 1.2.2] Verify that communications between back-end application components which don't support the applications standard user session mechanism, including APIs, middleware and data layers, are authenticated and use individual service accounts. | | ✓ | ✓ | 306 |",
+      "createdAt": "2024-09-15T05:08:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2351375086",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MJ1FC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If current 1.2.2 should to go 2.10 service authentication, then it makes sense to create also \"4.4 service authorization\" and move 1.14.7 (v4.0.3-1.2.1) and 14.6.2 (... potential duplicate to 1.14.7 - #2082).\r\n\r\n... or we will move those under current \"Configuration\" (the title can be widened) sections as \"V14.X service authentication\" and \"V14.Y service authorization\". Why I would like this - those sections are different from the application end-user authentication and authorization (It is not a clear proposal, it is described as one option)",
+      "createdAt": "2024-09-15T05:44:49Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2351386946",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MJ9bp",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I would just suggest we drop the service account term because it’s only one of a few types of intra-service authentication.\r\n",
+      "createdAt": "2024-09-15T07:04:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2351421161",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MKX4l",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Update - as there is a lot of discussion on topic and off-topic, I make an update.\r\n\r\nProposed to move requirements:\r\n\r\n  * 1.2.2 - requirement text is under discussion (last proposal https://github.com/OWASP/ASVS/issues/2072#issuecomment-2351375086))\r\n    * the question is, to move to V2.10 or to V14.6\r\n  * 1.14.1 - removed as out of scope (#2083)\r\n  * 1.14.7 - agreed to move to V14.6, but if authentication requirements end up in V2.10 \"service authentication\", it could be aligned to have such section for authrozation as well (https://github.com/OWASP/ASVS/issues/2072#issuecomment-2351386946)\r\n    * Let's handle the 1.14.7 requirement and it's location in the other issue, as the requirement itself may be duplicate of 14.6.2 (see #2082)\r\n    \r\n**So the focus for this issue is only the wording and the section choice for 1.2.2**\r\n ",
+      "createdAt": "2024-09-15T10:39:52Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2351529509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MhVw4",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So my suggestion was:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.2.2** | [MODIFIED] Verify that communications between back-end application components which don't support the applications standard user session mechanism, including APIs, middleware and data layers, are authenticated and use individual service accounts. | | ✓ | ✓ | 306 |\r\n\r\nAt this point, I wonder if we have missed the obvious option which is to merge this into 2.10.1:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.10.1** | Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 | |\r\n\r\nThere is a long unresolved discussion on 2.10.1 here:\r\nhttps://github.com/OWASP/ASVS/issues/1032\r\n\r\nAt this point I would suggest we reference 1.2.2 in that discussion and don't try and and deal with it here.\r\n\r\n@jmanico @elarlang @meghanjacquot what do you think?",
+      "createdAt": "2024-09-18T05:42:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2357550136",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mharp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I do wonder though whether for communication between services that is outside our standard authentication/session management mechanism we should move it all to configuration as that we have less control over the specifics but rather it becomes a config question",
+      "createdAt": "2024-09-18T05:59:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2357570281",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mhlfg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I do wonder though whether for communication between services that is outside our standard authentication/session management mechanism we should move it all to configuration as that we have less control over the specifics but rather it becomes a config question\r\n\r\n... which was my exact reason to propose this move.",
+      "createdAt": "2024-09-18T06:31:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2357614560",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mk02Q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder tomorrow @tghosth to come up with a proposal to merge 1.2.2 and 2.10.1.\r\n\r\nThe decision to move to V14 should then move to #1032",
+      "createdAt": "2024-09-18T13:23:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2358463888",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Mk04T",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nThursday, September 19, 2024 12:00 AM (GMT+02:00)\r\n> @tghosth to come up with a proposal to merge 1.2.2 and 2.10.1.",
+      "createdAt": "2024-09-18T13:23:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2358464019",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MntDv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I can see why this is a configuration item but as started below I think the term “service account” is too specific.\r\n\r\n",
+      "createdAt": "2024-09-18T19:11:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2359218415",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MosqW",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/2072#issuecomment-2358463888) @tghosth\n> @tghosth to come up with a proposal to merge 1.2.2 and 2.10.1.",
+      "createdAt": "2024-09-18T22:00:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2359478934",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NExCD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> | # | Description | L1 | L2 | L3 | CWE |\r\n> | :---: | :--- | :---: | :---: | :---: | :---: |\r\n> | **1.2.2** | [MODIFIED] Verify that communications between back-end application components which don't support the applications standard user session mechanism, including APIs, middleware and data layers, are authenticated and use individual service accounts. | | ✓ | ✓ | 306 |\r\n> \r\n> At this point, I wonder if we have missed the obvious option which is to merge this into 2.10.1:\r\n> \r\n> | # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n> | :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n> | **2.10.1** | Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 | |\r\n\r\nThese are the suggested contents of 1.2.2 and the actual contents of 2.10.1.\r\n\r\nI would suggest merging these as follows and then dealing with the update to 2.10.1 in issue #1032\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.10.1** | [MODIFIED, MERGED FROM 1.2.2] Verify that communications between back-end application components which don't support the application's standard user session mechanism, including APIs, middleware and data layers, are authenticated and use individual service accounts and not unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 | |\r\n\r\nWhat do we think @jmanico @elarlang ?",
+      "createdAt": "2024-09-22T15:24:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2366836867",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NE70-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm not really fan of this merge, and also not a fan to say, that password for database connection for a level 2 application is not acceptable.",
+      "createdAt": "2024-09-22T17:19:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2366881086",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NGSbW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Password-only controls for production database access are fairly low security and pose a significant security risk. I typically suggest network controls and network segmentation for all production databases, even for level 1 applications, given the historical vulnerabilities and misconfigurations in database software. \n\nI also strongly recommend discouraging password-only authentication for any production database systems.\n",
+      "createdAt": "2024-09-23T04:53:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2367235798",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NLp9k",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The requirement says: \r\n\r\n>  use individual service accounts and **not** unchanging credentials such as passwords, API keys or shared accounts with privileged access.\r\n\r\nSo I think this is inline with what you are saying, no?",
+      "createdAt": "2024-09-23T15:28:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2368642916",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NMSJK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Politely, no. Other options like short term tokens or certificates are just as valid as service accounts. I think the term \"service accounts\" is way too specific. \r\n\r\n",
+      "createdAt": "2024-09-23T16:37:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2368807498",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Ncaz0",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so as an alternative:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE | [NIST &sect;](https://pages.nist.gov/800-63-3/sp800-63b.html) |\r\n| :---: | :--- | :---: | :---: | :---: | :---: | :---: |\r\n| **2.10.1** | [MODIFIED, MERGED FROM 1.2.2] Verify that communications between back-end application components which don't support the application's standard user session mechanism, including APIs, middleware and data layers, are authenticated. Authentication should use individual service accounts, short-term tokens or certificate based authentication and not unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | ✓ | ✓ | 287 | |\r\n\r\n@jmanico what do you think?",
+      "createdAt": "2024-09-25T05:14:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2373037300",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NeIZv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it 👍🏼 \r\n",
+      "createdAt": "2024-09-25T09:00:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2373486191",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqF4X",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@set-reminder in 2 days @tghosth to open PR",
+      "createdAt": "2024-09-26T10:58:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2376621591",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NqF5n",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "⏰ **Reminder**\r\nSaturday, September 28, 2024 12:00 AM (GMT+02:00)\r\n> in @tghosth to open PR",
+      "createdAt": "2024-09-26T10:58:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2376621671",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6N3ltk",
+      "author": {
+        "login": "octo-reminder"
+      },
+      "authorAssociation": "NONE",
+      "body": "[🔔](https://github.com/OWASP/ASVS/issues/2072#issuecomment-2376621591) @tghosth\n> in @tghosth to open PR",
+      "createdAt": "2024-09-27T22:00:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2380159844",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6O_Sm5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2126 to resolve this",
+      "createdAt": "2024-10-08T06:26:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2072#issuecomment-2398955961",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-09-12T05:12:18Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 2072,
+  "state": "CLOSED",
+  "title": "move configuration related requirements from V1 to V14.6",
+  "url": "https://github.com/OWASP/ASVS/issues/2072"
+}

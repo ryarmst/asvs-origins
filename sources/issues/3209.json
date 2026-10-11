@@ -1,0 +1,164 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "> Verify that format strings which might resolve in an unexpected or malicious\nway when used are sanitized before being processed\n\n### “sanitized before being processed”\nThe statement doesn’t emphasize stronger practices, such as using hardcoded format strings or validating against an allowlist of expected patterns. As “Sanitized” is not the right verb to use, as the vulnerability lies in structure not in special characters. The statement should be – “Ensure untrusted input is never used as a format string, only as a value for formatting.”\n \n### “Might Resolve in an Unexpected or Malicious Way”\nThis is ambiguous, as \"unexpected\" or \"malicious\" depends on the context (e.g, programming language, framework or function used), The requirement doesn’t specify the types of risks. Without clear definitions developers might apply insufficient checks.\n\nThe requirement should clarify the context and risks\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM67dqoa",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please review the previous issue regarding this but in general I am open to suggestions here about what could be added to clarify without making the requirement overly long.",
+      "createdAt": "2025-08-01T16:23:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3145116186",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67vHNQ",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I did review, but did not find anything useful related to the reported concern.\n\nRequirement Suggestion:\n**Verify that user-controlled input is never used directly as a format string in string formatting functions, logging APIs, or templating engines. Format strings must be hardcoded or sourced from trusted, read-only configurations, and validated against an allowlist of safe patterns. User input must always be treated strictly as data and passed only as arguments to these functions.**\n\nI will update here if I can make this requirement more precise.\n\n\n\n",
+      "createdAt": "2025-08-04T08:50:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3149689680",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69H4MN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current wording of [1.3.10](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md#v13-sanitization):\n\n\"_Verify that format strings which might resolve in an unexpected or malicious way when used are sanitized before being processed._\"\n\nWhat do you think about:\n\n\"_Verify that format strings being used are either hardcoded, sourced from trusted, read-only configurations, validated against an allowlist of safe patterns, or as a final resort, carefully sanitized._\"\n\nI think the first and third sentences in your suggestions are less necessary but I would be interested in adding a sentence which better captures the risk so I would appreciate your suggestions on that.\n\n",
+      "createdAt": "2025-08-10T23:17:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3172958989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69hpye",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> What do you think about:\n>\n> \"Verify that format strings being used are either hardcoded, sourced from trusted, read-only configurations, validated against an allowlist of safe patterns, or as a final resort, carefully sanitized.\"\n\nNot mention of treating input as data and it doesn’t clearly specify the APIs or contexts where format string misuse can create security risks.\n\n> I think the first and third sentences in your suggestions are less necessary but I would be interested in adding a sentence which better captures the risk so I would appreciate your suggestions on that.\n\nI would say it is not precisely written to cover what I am trying to address in the requirement. Thanks for pointing that out. I have rephrased the requirement suggestion, please review it and share your feedback.\n\n\n**Verify that user input is always treated strictly as data and passed only as arguments to formatting functions, logging APIs, or templating engines, never embedded directly into format strings or templates. Format strings and templates must be hardcoded or sourced from trusted, read-only configurations, and validated against an allowlist of safe patterns.**\n\nThe first sentence expresses the secure approach (treat input as data and pass it as arguments) and core rule (don’t use untrusted input as format strings). the second defines trusted sources. \n\n\n**Why formatting functions, logging APIs, or templating engines are mentioned?**\nThese specific function types are mentioned because the requirement address key vulnerability classes, such as format string attacks, log injection, and Server-Side Template Injection (SSTI).",
+      "createdAt": "2025-08-12T14:57:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3179715742",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69wuFK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I prefer dropping the sanitize part as well, since hardcoded data is typically not sanitized in these contexts. Its like config data.  So from the suggestions above, I prefer:\n\n_Verify that user input is always treated strictly as data and passed only as arguments to formatting functions, logging APIs, or templating engines, never embedded directly into format strings or templates. Format strings and templates must be hardcoded or sourced from trusted, read-only configurations, and validated against an allowlist of safe patterns._\n\n",
+      "createdAt": "2025-08-13T12:22:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3183665482",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DIly3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that user input is always treated strictly as data and passed only as arguments to formatting functions, logging APIs, or templating engines, never embedded directly into format strings or templates. Format strings and templates must be hardcoded or sourced from trusted, read-only configurations, and validated against an allowlist of safe patterns.\n\nThis now exceeds the scope of the original requirement and I believe we have separate requirements related to log injection and template injection.\n\n>  Verify that user input is always treated strictly as data and passed only as arguments\n\nThis is a very general statement that is not specific to this requirement and again we run into the \"what is untrusted input\" question.\n\nWe can remove the sanitize part and maybe clarify that this is to prevent injection attacks but otherwise I am not sure we need anything else for this specific requirement:\n\n\"_Verify that format strings being used are either hardcoded, sourced from trusted, read-only configurations, or validated against an allowlist of safe patterns, in order to prevent injection attacks._\"",
+      "createdAt": "2025-09-10T08:06:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3273809079",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7EFUXU",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> general statement\n\nI dont understand how the important statement \"**passed only as arguments**\" is general, please share more info.\n\n > \"_Verify that format strings being used are either hardcoded, sourced from trusted, read-only configurations, or validated against an allowlist of safe patterns, in order to prevent injection attacks.\"\n\nI think it's good write \"**prevent format string vulnerabilities**\" instead \"**prevent injection attacks**\". I would recommend to add this statement as well - \"**never embedded directly into format strings**\"",
+      "createdAt": "2025-09-14T18:01:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3289728468",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7qFT3m",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So how about:\n\n\"_Verify that format strings being used are either hardcoded, only having dynamic input included as arguments to the format string, sourced from trusted and read-only configurations, or validated against an allowlist of safe patterns, in order to prevent format string vulnerabilities._\"\n",
+      "createdAt": "2026-02-19T13:19:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3209#issuecomment-3927260646",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-07-06T09:39:22Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3209,
+  "state": "OPEN",
+  "title": "Clarification: V1.3.10 \"sanitized before being processed\"",
+  "url": "https://github.com/OWASP/ASVS/issues/3209"
+}

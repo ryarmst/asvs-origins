@@ -1,0 +1,1028 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "Please refer to this disucssion reference https://github.com/OWASP/ASVS/discussions/3184 , further input I am writing here as I think the current requirement may reqire some clarity and practical alignment.\n\nPlease refer the below code reference of Discourse & Ghost where they are storing encoded/sanitized data into the database, depending on architectural needs. There are lot of other popular opensource framework which are also storing the data, if needed i will share accordingly.\n* **Discourse** : [Code Reference](https://github.com/discourse/discourse/blob/main/app/models/post.rb#L359) -- Stores both raw and HTML (cooked) versions of user posts.\n* **Ghost** : [Code Reference](https://github.com/TryGhost/Ghost/blob/main/ghost/core/core/server/models/comment.js#L87) -- Stores Sanitized/Encoded data.\n\nHere is the brief summary of the attached link of the github discussion:\n\nQuoting and responding to a few points raised by @elarlang in his response.\n\n> it is not possible to encode data for HTML before saving it to the database\n\nEncoding before storage is common in edge cases and application-dependent, this totally depends on the application requirement. The above shared code example is enough to think on contradicting the absolute stance.\n\n>It ruins the integrity of the data - e.g., it was not the value that the user entered\n\n**Data Integrity**: When HTML sanitization happens, the data is intentionally changed by removing malicious parts (like <script> tags). This is a necessary security transformation. For user-generated HTML, the \"integrity\" we aim to preserve isn't the raw, potentially unsafe input; it's the safe, usable HTML. We successfully apply this principle in our own enterprise applications when dealing with potentially malicious user-provided HTML content.\n\n\n>It assumes that the only output encoding is HTML, but if it is to be used it in JSON, CSV, displayed as just text, or whatever other format, it is already in the incorrect format\n\nif certain fields are guaranteed to only ever be displayed in a single, fixed context like HTML, would it be acceptable — from an ASVS perspective — to encode once during write-time?\n\n\n> The problem to solve here is to use the correct caching mechanism.\n\nThe encoded data should be stored into the cache, if the data should be into the cache then would like to know the reason why we are stating that \"never store encoded data\". Does V1.1’s “stored” include caches, or is it database-specific?\n\n\nThe clarity and usability of the guidance are lacking, team should consider/think the following points:\n* Principles need context, blanket statements (like “never store encoded data”) can lead to confusion or overcorrection.\n* Clear usecases help avoid mistakes. When developers see good and bad usecases, they better understand the reason behind a rule—and they’re more likely to apply it the right way.\n* Clarify whether “stored” in the current rule applies to database only, or also includes caches.\n* The “**not stored in an encoded or escaped**” in the statement is too absolute, as there are niche cases where storing encoded or transformed values is justified,  it is good to think on Reinforce \"storing raw\" as the default and recommended best practice.\n\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6zCLeZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Quote precise text or requirement from the document that needs to be improved.\n\nYou are mixing encoding and sanitization here - they are different defence methods for different use-cases and also requires different flows when processing them.",
+      "createdAt": "2025-06-25T07:30:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3003692953",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zPJjl",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "The text below is copied from the V1.1 Encoding and Sanitization Architecture section.\n\n> They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or\nescaped form (e.g., HTML encoding), to prevent double encoding issues.\n\nMy concern on this \" **original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues**.\"\n\nDoes the value below, which is going to be stored in primary storage, violate the above statement?\n\n &lt;b&gt; OWASP \\&lt; &lt;/b&gt;\n\n**The user input value is** &lt;b&gt; OWASP &lt; &lt;/b&gt;\n\nI would like to know your thoughts on the question above.\n\nI will ask the remaining highlighted questions one by one after this is answered.\n\n\nNote: I have gone through all the requirements related to encoding and sanitization.",
+      "createdAt": "2025-06-26T05:21:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007092965",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zPqe8",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If user enters `<b> OWASP < </b>` - what is the logic behind it to be modified into `<b> OWASP &lt; </b>`?\n\nI assume there is encoding vs sanitization scenario confusion here.\n\n",
+      "createdAt": "2025-06-26T06:12:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007227836",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zRIMy",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I am not intentionally encoding < to \\&lt; . \n\nI’m using a popular package — the same one used by Ghost. I’ve already attached the code reference in the ticket for your review.\n\nPlease refer to the code snippet below. It automatically encodes special characters using the [sanitize-html](https://www.npmjs.com/package/sanitize-html) package and produces the same output I shared in my previous comment.\n\n```js\nconst sanitizeHtml = require('sanitize-html');\n\nconst html = '<b>OWASP < </b>';\nconsole.log(sanitizeHtml(html));\n\n// Output - <b> OWASP &lt; </b>\n```\n\nThe same output is produced when using [DOMPurify](https://www.npmjs.com/package/dompurify), which is another popular package based on download stats. Please refer to the code snippet below:\n\n```js\nimport DOMPurify from 'dompurify';\nconst html = '<b>OWASP < </b>';\nalert(DOMPurify.sanitize(html));\n\n// Output - <b> OWASP &lt; </b>\n```\n\n\nPlease refer to the following working examples for sanitize-html and DOMPurify:\n* sanitize-html ([Go to Code Reference](https://stackblitz.com/edit/stackblitz-starters-acemkiab?description=&file=package.json,index.js&title=Express%20Starter)) \n* dompurify ([Go to Code Reference](https://stackblitz.com/edit/vitejs-vite-zigh2oxd?file=src%2Fmain.js&terminal=dev)).\n\n\nWould like to know your inputs.\n\n\n\n\n",
+      "createdAt": "2025-06-26T08:16:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007611698",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zRKF3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Vol 3 - can you understand the difference between sanitization and encoding?",
+      "createdAt": "2025-06-26T08:19:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007619447",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zRQnI",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, I do understand the difference between sanitization and encoding completely. ",
+      "createdAt": "2025-06-26T08:29:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007646152",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zRSt_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, I doubt that, as you quote encoding from the ASVS and give examples of sanitization.\n\nFor your scenario, you should look to the requirement 1.3.1.",
+      "createdAt": "2025-06-26T08:31:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007654783",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zRfro",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "My point is about the specific conflict that arises when this sanitized output (containing HTML entities like &lt;) is then stored, in light of ASVS V1.1:\n\n**V1.1 Encoding and Sanitization Architecture**: They also aim to ensure that whenever data is stored, it remains in its **original state** and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent **double encoding issues**.\n\nMy scenario highlights that if we comply with V1.3.1 using standard, secure tools, the resulting data will contain HTML entities (&lt;). When this data is stored, it directly appears to contradict V1.1's explicit guidance against storing data in an \"encoded or escaped form.\"  also arise the double encoding issue (if generic or less careful output encoding is applied later).\n\nTherefore, the critical question, which directly impacts implementation, is:\n\nHow does ASVS reconcile V1.1's general principle of 'no encoding in storage' with V1.3.1's requirement for sanitization of HTML, where the sanitization process itself includes encoding literal characters (e.g., < to \\&lt;) to produce safe HTML?\n\nWhich rule takes precedence, or is there a specific interpretation of V1.1 for HTML content that allows for the storage of these specific HTML entities (e.g., \\&lt; for literal <) as part of its \"safe semantic original state,\" even though it's technically an encoded form?",
+      "createdAt": "2025-06-26T08:49:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007707880",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zRg6V",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In your examples, WYSIWYG or similar is in use.\n\nIn that case, the output from WYSIWYG is input for the application, the content is sanitized but never (additionally) encoded on the server side, as this is the original state to store, and this is also the exact value to use in the output.\n",
+      "createdAt": "2025-06-26T08:51:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007712917",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zRtyB",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> the content is sanitized but never (additionally) encoded on the server side\n\nThe content is sanitized and  **(partially) encoded by the sanitizer itself** on the server side. Please refer to the Ghost code reference I shared earlier — Ghost, a popular and reputable platform, directly stores HTML-entity-encoded data (e.g., \\&lt; for <) in its database.\n\nI have already shared both example server side as well as client side, the sanitize-html example is on server side and dompurify is on the client side. \n\n\n_Note:FYI, I have a concern regarding requirement 1.3.1, which I will address separately in another ticket._",
+      "createdAt": "2025-06-26T09:09:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007765633",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zR1zE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It is still the content from WYSIWYG you store, and it is the original state for that data.\n\nIf I have not been able to explain it so far, then most likely, additional comments do not help either.\n\nFor me, there is no problem to solve in the document from this issue.",
+      "createdAt": "2025-06-26T09:20:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007798468",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zVKpA",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "After our discussion, I’ve gained further insight from the responses shared. Below is a summary of why I believe V1.1 is currently ambiguous:\n\nIf ASVS V1.1 allows storing that data because it's considered the \"**original state**\" post-sanitization, then perhaps the rule could be clarified to reflect that. Otherwise, it reads as if storing such encoded data — even when safely produced and intended — is a violation.\n\nThe phrase \"**not stored in an encoded or escaped form (e.g., HTML encoding)**\" in V1.1 is ambiguous. It aims to prevent storing data that has been contextually encoded, but it doesn't clearly address HTML entities produced by sanitization as a necessary outcome of making HTML content safe.\n\nThe risk of **double-encoding** if sanitized data (with entities) is stored and then naively encoded again on output, aligning with V1.1’s concern but questioning its absolute stance.\n\nThe requirement should be simple to understand without needing extensive discussion to clarify specific edge cases, as has been necessary here. The goal of this issue is to request clarification. A simpler and more accurate version of the text might be:\n\n> Whenever data is stored, it should remain in its original state and not be stored in a context-specific encoded or escaped form (e.g., HTML-encoded for output), except where HTML entities are part of sanitized HTML content intended for direct rendering in HTML contexts.\n\nI am open for the discussion, would like to know the thoughts of the other core/community member.\n\n@elarlang would be great if you answer the asked question in the [first comment](https://github.com/OWASP/ASVS/issues/3206#issue-3173926843)  and in [this comment](https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007707880).",
+      "createdAt": "2025-06-26T14:19:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3008670272",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zVyef",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [@elarlang](https://github.com/elarlang) would be great if you answer the asked question in the [first comment](https://github.com/OWASP/ASVS/issues/3206#issue-3173926843) and in [this comment](https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007707880).\n\nCan you point out, what is the precise question?",
+      "createdAt": "2025-06-26T15:09:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3008833439",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zV70H",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "\n\nI am writing this message through my mobile phone, would be great if you refer The questions which are marked with a question (?).\n\n\nGet Outlook for iOS<https://aka.ms/o0ukef>\n________________________________\nFrom: Elar Lang ***@***.***>\nSent: Thursday, June 26, 2025 8:39:41 PM\nTo: OWASP/ASVS ***@***.***>\nCc: Ajay Ojha ***@***.***>; Author ***@***.***>\nSubject: Re: [OWASP/ASVS] Request for Clarification/Refinement: V1.1 \"not stored in an encoded or escaped\" Data Storage Principle (Issue #3206)\n\n[https://avatars.githubusercontent.com/u/47597707?s=20&v=4]elarlang left a comment (OWASP/ASVS#3206)<https://github.com/OWASP/ASVS/issues/3206#issuecomment-3008833439>\n\n@elarlang<https://github.com/elarlang> would be great if you answer the asked question in the first comment<https://github.com/OWASP/ASVS/issues/3206#issue-3173926843> and in this comment<https://github.com/OWASP/ASVS/issues/3206#issuecomment-3007707880>.\n\nCan you point out, what is the precise question?\n\n—\nReply to this email directly, view it on GitHub<https://github.com/OWASP/ASVS/issues/3206#issuecomment-3008833439>, or unsubscribe<https://github.com/notifications/unsubscribe-auth/AE3SS3RF5QFMOEEAQSNZ7TL3FQELLAVCNFSM6AAAAACAB7TIG2VHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZTAMBYHAZTGNBTHE>.\nYou are receiving this because you authored the thread.Message ID: ***@***.***>\n",
+      "createdAt": "2025-06-26T15:21:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3008871687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zXiaW",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> The problem to solve here is to use the correct caching mechanism.\n\nThe encoded data should be stored into the cache, if the data should be into the cache then would like to know the reason why we are stating that \"never store encoded data\". Does V1.1’s “stored” include caches, or is it database-specific?\n\n\nHow does ASVS reconcile V1.1's general principle of 'no encoding in storage' with V1.3.1's requirement for sanitization of HTML, where the sanitization process itself includes encoding literal characters (e.g., < to &lt;) to produce safe HTML?\n\nWhich rule takes precedence, or is there a specific interpretation of V1.1 for HTML content that allows for the storage of these specific HTML entities (e.g., \\&lt; for literal <) as part of its \"safe semantic original state,\" even though it's technically an encoded form?",
+      "createdAt": "2025-06-26T17:43:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3009291926",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zYz27",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > The problem to solve here is to use the correct caching mechanism.\n> \n> The encoded data should be stored into the cache, if the data should be into the cache then would like to know the reason why we are stating that \"never store encoded data\". Does V1.1’s “stored” include caches, or is it database-specific?\n\nI watch cache as a separate topic compared to storage (in the context of data integrity).\n\n> How does ASVS reconcile V1.1's general principle of 'no encoding in storage' with V1.3.1's requirement for sanitization of HTML, where the sanitization process itself includes encoding literal characters (e.g., < to <) to produce safe HTML?\n\nRepeated here many times - sanitization is a different flow. It is up to business logic rules, what and how it is allowed to sanitize. WYSIWYG output does not require any additional encoding, if the content already contains HTML encoded characters such as `<`, then this is part of the WYSIWYG content as the original state.\n\n> Which rule takes precedence, or is there a specific interpretation of V1.1 for HTML content that allows for the storage of these specific HTML entities (e.g., &lt; for literal <) as part of its \"safe semantic original state,\" even though it's technically an encoded form?\n\nI think the previous answer fits here as well.",
+      "createdAt": "2025-06-26T19:04:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3009625531",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zgu91",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I know you have excellent knowledge in this domain, and I’d like to ask for your perspective: How do you define “cache”, “stored”, “storage” and “double encoding”? What exactly is covered under each of these terms?\r\n\r\nGet Outlook for iOS<https://aka.ms/o0ukef>\r\n________________________________\r\nFrom: Elar Lang ***@***.***>\r\nSent: Friday, June 27, 2025 12:35:19 AM\r\nTo: OWASP/ASVS ***@***.***>\r\nCc: Ajay Ojha ***@***.***>; Author ***@***.***>\r\nSubject: Re: [OWASP/ASVS] Request for Clarification/Refinement: V1.1 \"not stored in an encoded or escaped\" Data Storage Principle (Issue #3206)\r\n\r\n[https://avatars.githubusercontent.com/u/47597707?s=20&v=4]elarlang left a comment (OWASP/ASVS#3206)<https://github.com/OWASP/ASVS/issues/3206#issuecomment-3009625531>\r\n\r\nThe problem to solve here is to use the correct caching mechanism.\r\n\r\nThe encoded data should be stored into the cache, if the data should be into the cache then would like to know the reason why we are stating that \"never store encoded data\". Does V1.1’s “stored” include caches, or is it database-specific?\r\n\r\nI watch cache as a separate topic compared to storage (in the context of data integrity).\r\n\r\nHow does ASVS reconcile V1.1's general principle of 'no encoding in storage' with V1.3.1's requirement for sanitization of HTML, where the sanitization process itself includes encoding literal characters (e.g., < to <) to produce safe HTML?\r\n\r\nRepeated here many times - sanitization is a different flow. It is up to business logic rules, what and how it is allowed to sanitize. WYSIWYG output does not require any additional encoding, if the content already contains HTML encoded characters such as <, then this is part of the WYSIWYG content as the original state.\r\n\r\nWhich rule takes precedence, or is there a specific interpretation of V1.1 for HTML content that allows for the storage of these specific HTML entities (e.g., < for literal <) as part of its \"safe semantic original state,\" even though it's technically an encoded form?\r\n\r\nI think the previous answer fits here as well.\r\n\r\n—\r\nReply to this email directly, view it on GitHub<https://github.com/OWASP/ASVS/issues/3206#issuecomment-3009625531>, or unsubscribe<https://github.com/notifications/unsubscribe-auth/AE3SS3W47LGULGN6XMA5ZLL3FQ767AVCNFSM6AAAAACAB7TIG2VHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHMZTAMBZGYZDKNJTGE>.\r\nYou are receiving this because you authored the thread.Message ID: ***@***.***>\r\n",
+      "createdAt": "2025-06-27T05:15:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3011702645",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zloGl",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I watch cache as a separate topic compared to storage (in the context of data integrity).\n\nThis is my interpretation — this opinion introduces a new concern: that anyone might treat caches as fundamentally less important for data integrity than databases. While this distinction might be valid in some simple architectures, in many real-world systems — especially in microservice or microfrontend architectures — caches are **not just optimization layers**, but often serve as **primary data sources** for performance-critical user flows.",
+      "createdAt": "2025-06-27T12:53:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3012985253",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zpKfV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is getting quite offtopic and a bit philosophical here.\n\nA \"Separate topic\" is a bit different than \"less important\"? You enter to cache poisoning area here, those are another set of requirements.",
+      "createdAt": "2025-06-27T17:46:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3013912533",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zqdly",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": ">This is getting quite offtopic and a bit philosophical here.\nA \"Separate topic\" is a bit different than \"less important\"? You enter to cache poisoning area here, those are another set of requirements.\n\nSorry, But I disagree that this discussion is 'off-topic' or merely 'philosophical.' As a standard intended for practical application in application security verification, the precise terms like 'stored', 'original state,' and 'encoding' are fundamental and highly practical concerns for anyone implementing and verifying security controls, especially in complex modern architectures.\nI am fully aware of cache poisoning as a distinct vulnerability. My concern is fundamentally different,It's not about malicious content entering the cache (which cache poisoning covers).\n\nmy concern is on asvs v1.1's use of word \"**stored**\" & \"**not stored in an encoded or escaped form**\" in light of your suggestion to use caches for encoded data. your earlier response \"_cache is a separate topic compared to storage (in the context of data integrity)_\" is not align with the **modern architectures realities** and it opens a gate to the developer to store anything in cache(not malicious content). your response also create **ambiguity** in rule v1.1 as the rule says \"not stored in an encoded or escaped form\".\nHappy to know your further thoughts on this if any.",
+      "createdAt": "2025-06-27T20:11:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3014252914",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zqpdk",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang  would be great if you answer the below questions:\n\n* I know you have excellent knowledge in this domain, and I’d like to ask for your perspective: How do you define “cache”, “stored”, “storage” and “double encoding”? What exactly is covered under each of these terms?\n* What do you think that in what scenarios should output encoding be skipped (e.g., when data is already sanitized and encoded)?\n\n\n_Note: Please consider this message in a way that inexperience developer asking you a question and please don't think that I may not have a knowledge of all these words or skipped cases. The overall objective is wanted to know your thought and perspective._  ",
+      "createdAt": "2025-06-27T20:39:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3014301540",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zte8h",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What I said in response for \"_**Repetitive UI rendering tasks** increase the risk of inconsistent encoding, as developers may forget or incorrectly apply output encoding._\"\n> To ruin the original data to **solve the caching problem** from one output format is clearly an incorrect solution and an anti-pattern.\n\nis not what you referred me to say\n> in light of **your suggestion to use caches for encoded data**\n\nThat is the second time in a row that I'm quoted or said to say something that I did not. I really don't like that. It also rises question, if those lines are misinterpreted as they are, what is the point or motivation to continue here. \n\n> Note: Please consider this message in a way that inexperience developer asking you a question and please don't think that I may not have a knowledge of all these words or skipped cases. The overall objective is wanted to know your thought and perspective.\n\nIt is 20+ comments here, and we have not moved anywhere. I'm happy to improve ASVS content, but this issue is playing with lines to provide free education. I don't feel the project/volunteer resources are well used here.",
+      "createdAt": "2025-06-28T07:10:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3015044897",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6zvkHf",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I believe your earlier message may have included only part of the full text. To ensure there’s no misunderstanding, here’s the full version you previously shared.\n\n> **The problem to solve here is to use the correct caching mechanism.** To ruin the original data to solve the caching problem from one output format is clearly an incorrect solution and an anti-pattern.\n\nMy interpretation — and I believe this is how many developers or architects might also interpret it:\n\n> **The problem to solve here is to use the correct caching mechanism.**\n\nCaching is acceptable in terms of \"correct caching mechanism\"(using the cache appropriately).\n\n> To ruin the original data to solve the caching problem from one output format is clearly an incorrect solution and an anti-pattern.\n\nI consider this as a warning about side effects of caching data in a transformed state and not a rejection to use of cache.\n\n**My Final Thought on the above quoted text:**\nI didn’t ask whether caching should be used or not in the initial GitHub discussion ticket, i just highlighted the concern on the absolute stance in v1.1, its was you suggestion which I quoted above and I was not expecting technical solution. \n\nMy overall goal was to write the note to get a more detailed answer, so that other readers can also find a well-explained response without any confusion. My apologies if the note disturbed you.  \n\nI would request you please answer the questions which is asked in in my previous comment to align with the OWASP ASVS team thought on the requirement.\n\n> I'm happy to improve ASVS content, but this issue is playing with lines to provide free education.\n\nIf you believe this issue is just playing with lines to provide free education, then I would suggest not improving the ASVS content. Free educational material is available elsewhere, but what developers may not find easily is guidance on how to make their modern applications OWASP ASVS-compliant—especially when they face confusion or challenges with the written requirement, like I am facing challenges on the terms which is missing in the document.   \n\nThe goal of this created ticket is request clarification which isn't clarified yet effectively because of the open questions based on real world challenges.",
+      "createdAt": "2025-06-28T15:57:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3015590367",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM60u83s",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I was planning to submit this comment after your response as I didn't want to mix two topics in the same conversation. However, I think it's helpful to share the below perspective to think that whether the change/clarification is required or not.\n\nThe below quoted statements are not aligned with the **modern micro-frontend or component-based architectures**, where the same content may be rendered in multiple contexts.\n\n> the output from WYSIWYG is input for the application, the content is sanitized but never (additionally) encoded on the server side, as this is the original state to store, and **this is also the exact value to use in the output**.\n\n> **WYSIWYG output does not require any additional encoding**, if the content already contains HTML encoded characters such as <, then this is part of the WYSIWYG content as the original state.\n\n\nThe above statement assumes a single rendering context(HTML body), which doesn't hold in large-scale distributed frontend systems. if needed, I can share examples of vulnerable code that arise by directly following the quoted response.\n\nPlease refer the two use-cases, but different approach on \"**original state**\". \n\n**Use Case 1 (Simple Application): An Insurance Quote Website**\nA lightweight quote generating application, only a few static pages are driven by content managed through an admin portal.\n* Storing the WYSIWYG output and rendering is as-is might be acceptable.\n* The usage context is controlled, and the HTML output goes directly to the DOM.\n\n_Note: It’s risky to rely entirely on the client-side editor’s value._\n\n**Use Case 2 (Medium.com-like Platform)**\nHere, millions of user interact with the platform and contribute HTML-rich content via WYSIWYG editors\n* Instead, I prefer to sanitize the WYSIWYG content server-side\n* I decode any encoded characters as part of custom logic.\n* I store the decoded, sanitized content. \n* at output time, I encode at the appropriate service layer based on the target context.\n\nI think the second approach is suitable for modern, high-risk application, there are lots of different ways to achieve the same security goal, the shared solution as per use case is one of them. but relying on the statement that \"WYSIWYG output needs no extra encoding\" is too broad and may lead to security anti-pattern.\n\nIn security, consistency and clarity are important, I believe a clarification/correction in the ASVS Document could benefit developers working in more complex architectures.\n\n@earlang, I would appreciate answers to the open questions whenever time permits.\n\n\n\n\n\n\n\n\n",
+      "createdAt": "2025-07-03T13:08:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3032206828",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM60vLEb",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I'm happy to improve ASVS content\n\n@elarlang, if you're still planning to update the content, it would be helpful if you could share what changes you're considering and the reasoning behind them.",
+      "createdAt": "2025-07-03T13:26:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3032264987",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM623M2E",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang, I [couldn’t find a definition for \"original state\" in the OWASP documentation](https://www.google.com/search?q=site%3Aowasp.org+%22original+state%22&sca_esv=a3e392cc0b6211b6&ei=w3J0aNb9E_if4-EP3vnIyQE&web_form_name=f&web_form_page=https%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3Dsite%253Aowasp.org%2B%2522interpreter%2522%26sca_esv%3Da3e392cc0b6211b6%26source%3Dhp%26ei%3Dt3J0aNWzGL7s4-EPjNrASA%26iflsig%3DAOw8s4IAAAAAaHSAxxSXrywd1SU1HQM5rYlGB0WUr0Qp%26web_form_name%3D%26web_form_page%3Dhttps%253A%252F%252Fwww.google.com%252F%26ved%3D0ahUKEwiV67vbrbuOAxU-9jgGHQwtEAkQ4dUDCBk%26uact%3D5%26oq%3Dsite%253Aowasp.org%2B%2522interpreter%2522%26gs_lp%3DEgdnd3Mtd2l6IhxzaXRlOm93YXNwLm9yZyAiaW50ZXJwcmV0ZXIiSJFEUABYiD9wAHgAkAEAmAHrAaABgxeqAQYwLjE0LjS4AQPIAQD4AQH4AQKYAgWgApYHwgILEAAYgAQYsQMYgwHCAg4QLhiABBixAxjRAxjHAcICERAuGIAEGLEDGIMBGNQCGIoFwgIREC4YgAQYsQMY0QMYgwEYxwHCAgUQLhiABMICCBAAGIAEGLEDwgIIEC4YgAQYsQPCAg4QABiABBixAxiDARiKBcICBRAAGIAEwgIEEAAYA8ICCxAuGIAEGNEDGMcBmAMAkgcFMC40LjGgB_Q2sgcFMC40LjG4B5YHwgcFMi00LjHIByU%26sclient%3Dgws-wiz&ved=0ahUKEwiW65PhrbuOAxX4zzgGHd48MhkQ4dUDCBA&uact=5&oq=site%3Aowasp.org+%22original+state%22&gs_lp=Egxnd3Mtd2l6LXNlcnAiH3NpdGU6b3dhc3Aub3JnICJvcmlnaW5hbCBzdGF0ZSJI22BQqC1YlFdwDHgAkAEAmAHhAaAB9xWqAQYwLjE1LjK4AQPIAQD4AQGYAgCgAgCYAwCIBgGSBwCgB_0FsgcAuAcAwgcAyAcA&sclient=gws-wiz-serp) (including main and subdomains) . It seems the term is only used in the ASVS document without sufficient clarification, leading to confusion. This is not the only one in the document there are a lot others which also requires clarifications.",
+      "createdAt": "2025-07-14T05:52:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3067923844",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67dofW",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So if I was to summarize what I understood here, the question is something along the lines of: \"Are there niche cases where encoding would happen before data is stored.\" \n\nI would agree that data stored from a WYSIWYG editor might meet that definition because by its nature it will only ever get used in a single way: to be rendered as UI.\n\nWe could potentially include an exception for this section for data that is only ever being used in a single way but I am not sure I see any other practical action from this issue. @ajayojha does that suggestion address your concern?",
+      "createdAt": "2025-08-01T16:19:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3145107414",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67u7Mn",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> @ajayojha does that suggestion address your concern?\nNo\n\nThank you @tghosth, I see multiple issues in the current V1.1 wording, but there are already ongoing discussions in  other tickets, I may not be able to give enough time right now to continue this thread with detailed use cases and the specific concerns I have identified.\nI would suggest we revisit this discussion after a week. In the meantime, it would be helpful if @elarlang or any other core team member could share their thoughts on the open questions already raised in this ticket.\n\nHere I am writing the questions:\n* How do you define “cache”, “stored”, “storage” and “double encoding”? What exactly is covered under each of these terms in ASVS context?\n* What do you think that in what scenarios should output encoding be skipped (e.g., when data is already sanitized and encoded)?\n* I [couldn’t find a definition for \"original state\" in the OWASP documentation](https://www.google.com/search?q=site%3Aowasp.org+%22original+state%22&sca_esv=a3e392cc0b6211b6&ei=w3J0aNb9E_if4-EP3vnIyQE&web_form_name=f&web_form_page=https%3A%2F%2Fwww.google.com%2Fsearch%3Fq%3Dsite%253Aowasp.org%2B%2522interpreter%2522%26sca_esv%3Da3e392cc0b6211b6%26source%3Dhp%26ei%3Dt3J0aNWzGL7s4-EPjNrASA%26iflsig%3DAOw8s4IAAAAAaHSAxxSXrywd1SU1HQM5rYlGB0WUr0Qp%26web_form_name%3D%26web_form_page%3Dhttps%253A%252F%252Fwww.google.com%252F%26ved%3D0ahUKEwiV67vbrbuOAxU-9jgGHQwtEAkQ4dUDCBk%26uact%3D5%26oq%3Dsite%253Aowasp.org%2B%2522interpreter%2522%26gs_lp%3DEgdnd3Mtd2l6IhxzaXRlOm93YXNwLm9yZyAiaW50ZXJwcmV0ZXIiSJFEUABYiD9wAHgAkAEAmAHrAaABgxeqAQYwLjE0LjS4AQPIAQD4AQH4AQKYAgWgApYHwgILEAAYgAQYsQMYgwHCAg4QLhiABBixAxjRAxjHAcICERAuGIAEGLEDGIMBGNQCGIoFwgIREC4YgAQYsQMY0QMYgwEYxwHCAgUQLhiABMICCBAAGIAEGLEDwgIIEC4YgAQYsQPCAg4QABiABBixAxiDARiKBcICBRAAGIAEwgIEEAAYA8ICCxAuGIAEGNEDGMcBmAMAkgcFMC40LjGgB_Q2sgcFMC40LjG4B5YHwgcFMi00LjHIByU%26sclient%3Dgws-wiz&ved=0ahUKEwiW65PhrbuOAxX4zzgGHd48MhkQ4dUDCBA&uact=5&oq=site%3Aowasp.org+%22original+state%22&gs_lp=Egxnd3Mtd2l6LXNlcnAiH3NpdGU6b3dhc3Aub3JnICJvcmlnaW5hbCBzdGF0ZSJI22BQqC1YlFdwDHgAkAEAmAHhAaAB9xWqAQYwLjE1LjK4AQPIAQD4AQGYAgCgAgCYAwCIBgGSBwCgB_0FsgcAuAcAwgcAyAcA&sclient=gws-wiz-serp) (including main and subdomains) . It seems the term is only used in the ASVS document without sufficient clarification, leading to confusion. Please clarify with some usecases.\n",
+      "createdAt": "2025-08-04T08:33:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3149640487",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM68uTTV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> How do you define “cache”, “stored”, “storage” and “double encoding”? What exactly is covered under each of these terms in ASVS context?\n\nDouble encoding simply means doing an encoding operation twice meaning that when decoded once, the content will still appear with the encoding symbols instead of the unencoded form when rendered.\n\nStored/storage is generally referring to storing data in the application's data store.\n\nI am not sure I see the relevance of caching here.\n\n> What do you think that in what scenarios should output encoding be skipped (e.g., when data is already sanitized and encoded)?\n\nIf WYSIWYG content has been sanitized using something like DOM sanitizer then it doesn't require further output encoding. Otherwise, I am not sure I see a scenario when output encoding should be skipped.\n\n> I couldn’t find a definition for \"original state\" in the OWASP documentation...\n\nI think this just means the form in which the data was received into the system",
+      "createdAt": "2025-08-08T00:56:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3166254293",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM69uAA1",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "concerning statement - \"**original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues**\"\n\n> If WYSIWYG content has been sanitized using something like DOM sanitizer then it doesn't require further output encoding.\n\nConsider a case where a user has entered a value in the editor: `1 < \" 2`, and the written value is transformed after sanitization to `1 &lt \" 2`. The sanitized value is stored in the database field called content.\n\nNow, while rendering on the UI, the developer is using the [Bootstrap library to show the HTML content in a popover](https://getbootstrap.com/docs/5.3/components/popovers/). As per the Bootstrap popover documentation, the value needs to be passed through an attribute property called `data-bs-content`.\n\nHere is the HTML code with the `content` property value binding (the property value binding code is written in PHP)\n\n```html\n<button type=\"button\" \n        class=\"btn btn-primary\" \n        data-bs-toggle=\"popover\" \n        data-bs-placement=\"right\" \n        data-bs-html=\"true\" \n        title=\"Popover with HTML\" \n        data-bs-html=\"true\"\n        data-bs-content=\"<?php content ?>\"> <!-- Server Side Rendering -->\n  Click to toggle popover\n</button>\n\n```\nDo you think the above-mentioned sanitized value will perfectly bind to the attribute in the above code?\n\n\n**According to me** \n1. The client-side sanitized content isn't the final one, isn't the right practice to suggest anyone.\n2. Writing that HTML sanitized content doesn't require output encoding isn't true unless the exact use case is known.\n3. Writing “**never encode or escape the data at store because of the double encoding issue**”: Will the issue be solved by performing output encoding or something else or will be the double encoding issue prevent in the above highlighted case? So the absolute stance “**never encode or escape data at store**” isn't correct without knowing the exact use case.\n4. The term “**Original State**” is not used in OWASP except in the ASVS V5 document. Let the project architect should decide how they want to safely handle the data. Saying that whatever data comes from a WYSIWYG editor is the original state isn't true.\n5. “**Stored**” - In modern application development, the data is stored in cache, permanent storage, temporary storage, messaging channels, etc., so writing “never store” isn't true. there are multiple use cases where this is required in different channels.\n\nIf data integrity is the primary concern, then frame the sentence in that way instead of writing \"original state.\"\n\nFor the use case, please refer to [this comment](https://github.com/OWASP/ASVS/issues/3206#issuecomment-3032206828).\n\n\n\n\n\n\n",
+      "createdAt": "2025-08-13T09:27:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3182952501",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DHYPE",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > If WYSIWYG content has been sanitized using something like DOM sanitizer then it doesn't require further output encoding.\n\n> Consider a case where a user has entered a value in the editor: 1 < \" 2, and the written value is transformed after sanitization to 1 &lt \" 2. The sanitized value is stored in the database field called content.\n\nIt occurs to me that in the original quote I meant \"[DOM purifier](https://github.com/cure53/DOMPurify)\" and not \"DOM sanitizer\". \n\nIn the case you have given, the input is being encoded which should not happen before storing in the database.\n\nWhen I talk about WYSIWYG sanitization I am talking about something like `<img src=x onerror=alert(1)//>');`  being turned into `<img src=\"x\">`. That can happen before being saved into a database but it is pretty much the only edge case I think.\n\n",
+      "createdAt": "2025-09-10T06:29:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3273491396",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DzGdq",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Here is the example from TinyMCE. If a user types `2 < \"`, the editor transforms it to:\n\n```html\n<p>2 &lt; \"</p>\n```\n\nThis shows that WYSIWYG “sanitization” isn’t just removing dangerous markup, it also encodes certain characters before storage. If we then apply output encoding again at render time, the value becomes 2 &amp;lt; \", which is clearly not what the user intended.\n\n<img width=\"953\" height=\"239\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/bbfe750e-7cc6-4b2c-bc73-c1ad9b63ad68\" />\n\nSanitization makes HTML safe to render as HTML, but it doesn’t make the value safe for all sinks (attributes, JS strings, JSON, URLs), which still require context-specific encoding.\nReal editors/sanitizers (TinyMCE/DOMPurify) also emit entities like `&lt;`; treating “sanitized” as “no encoding needed” causes either double-encoding or XSS, depending on where it’s used.",
+      "createdAt": "2025-09-12T11:44:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3284952938",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7D_To4",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> This shows that WYSIWYG “sanitization” isn’t just removing dangerous markup, it also encodes certain characters before storage. If we then apply output encoding again at render time, the value becomes 2 &lt; \", which is clearly not what the user intended.\n\nThis is 100% correct in DOMPurify as well as the OWASP HTML Sanitizer and the PHP Purifier project.\n\n- Jim",
+      "createdAt": "2025-09-13T11:53:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3288152632",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7HT43p",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For what it's worth, it looks like that TinyMCE control is client side only which makes it more of a usability control than anything else. Nevertheless, I take your point about storing data encoded, although once again this only applies to full HTML data which is going to be stored and only ever rendered back as HTML.\n\nSo it sounds like we need a wider ranging exclusion to the original statement based on this.\n\nAs I understand it, the original statement discussed was:\n\n\"_They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues._\"\n\nIt sounds like we need to refine to:\n\n\"_They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues, unless the data itself is sanitized HTML which is only ever going to be rendered back as HTML._\"",
+      "createdAt": "2025-09-28T16:57:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3343879657",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7HmQWv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> For what it's worth, it looks like that TinyMCE control is client side only which makes it more of a usability control than anything else. \n\nIn DOMPurify 3.2.7, here is an example of a sanitizer that does both encoding and removal to back up what @ajayojha is trying to say above:\n\nInput: `<h1 id=\"<script>\">Test</h1><script>`\nOutput: `<h1 id=\"&lt;script&gt;\">Test</h1>`\n\nSo just to be clear, sanitizers do a combo of character removal, encoding and HTML tidying to make HTML safe.",
+      "createdAt": "2025-09-29T19:20:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3348694447",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7q4_gs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So just to be clear, sanitizers do a combo of character removal, encoding and HTML tidying to make HTML safe.\n\nThanks @jmanico I think this reinforces the need for the refinement I proposed above?\n\nI'd like to push forward with the following alteration to the V1.1 text. The current text is:\n\n_They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues._\n\nThe proposed text would be:\n\n_They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues, unless the data itself is sanitized HTML which is only ever going to be rendered back as HTML._\n\n@ajayojha does this address your concern?\n",
+      "createdAt": "2026-02-22T12:05:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3940808748",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7q5Q71",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "That seems technically fine in the context of this discussion, but let's not forget broader implications and how people tend to interpet guidance. I assume we've all seen many examples of someone believing some content is only ever going to be rendered as HTML, only for it later to be repurposed.\n\nI'd just add this instead:\n\n_These requirements don't apply to content that is pre-rendered in short-term cache storage._\n\nI'm sure someone would ask why short-term cache only if it's pre-rendered anyway. Well, new attack vectors do appear, web standards and browsers change, and what's safely escaped today is not guaranteed to be safe tomorrow.",
+      "createdAt": "2026-02-22T12:44:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3940880117",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7q5bzv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think your modification is a little too specific in this case",
+      "createdAt": "2026-02-22T13:16:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-3940924655",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vV_lZ",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> to prevent double encoding issues,\n\nThe phrase “**to prevent double encoding issues**” may not be necessary in the text itself.\n\nHow about wording it like this (based on the suggestion in the [earlier comment](https://github.com/OWASP/ASVS/issues/3206#issuecomment-3008670272)):\n\n**Whenever data is stored, it should remain in its original state and not be stored in a context-specific encoded or escaped form (e.g., HTML-encoded for output), except where HTML entities are part of sanitized HTML content intended for direct rendering in HTML contexts.**",
+      "createdAt": "2026-03-07T04:30:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4015520089",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vXjL1",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is more of an architectural principle around functionality and not security. Double encoding is very secure, it just breaks functionality, sometimes.\n\nAnd storing content encoded is meaningful in many frameworks as described above.\n\nI would suggest:\n\n1) The topic of double encoding be dropped, that's more of a functionality issue than a security one.\n2) Drop the issue of stored encoded data. This is a complex architectural issue. Sometimes it's a bad idea, sometimes it's not. There is more nuance here than the requirement lets on.\n3) So long as the data is *somehow* encoded correctly before use, we get safety.",
+      "createdAt": "2026-03-07T08:15:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4015928053",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vYSfk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Double encoding is very secure, it just breaks functionality, sometimes.\n\nIncorrect double encoding kills the data integrity. It is very much a security issue.\n\nNot working functionality kills the availability. It is very much a security issue.\n\n\"I'm frustrated that I need to debate about those basic things\"?",
+      "createdAt": "2026-03-07T09:49:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4016121828",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vYgpK",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Double encoding does not inherently create an injection vulnerability. In most cases, it is a data handling problem that leads to broken display, malformed output, or incorrect semantics at the point of use.\n\nIt can become security-relevant when it contributes to a downstream failure, such as filter bypass, path traversal, authorization bypass, or unsafe decoding behavior. But by itself, double encoding is usually not treated as a standalone vulnerability class. That is why I think the current ASVS wording is trying to resolve an architectural concern that is more often about correctness and safe handling, not always a direct security defect in itself.\n\nAlso, double encoding in web UI leads developers to a state called \"Mojibake\" or display corruption. **While the visual integrity is gone, the data integrity is technically preserved (you can reverse it).**\n\nDouble *decoding* is a major problem and there are CWE's for that. Less so with double encoding. It's rarely an serious security issue.",
+      "createdAt": "2026-03-07T10:18:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4016179786",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7vYseD",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I did a little more digging of historical security events just to be sure.\n\nThe historical issues were not double encoding from developer code. The historical issues were inconsistent **decoding**/canonicalization in developer code where attackers used double-encoded payloads to trigger double-decoding flaws. CVE-2001-0333 is probably the most famous.\n\nThe double encoding here was from attacker payloads that triggered vulnerable double-decoding in developer code. \n\nBut again, I do not see any historical issues or events where developer code doing double *encoding* caused an event. ",
+      "createdAt": "2026-03-07T10:42:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4016228227",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7we2Ip",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Even if double encoding doesn't directly cause security issues, it is a symptom of insecure design.\n\nThe side-effects that it causes push developers to do hacky things like double+ decoding, which result in vulnerabilities. Also, the special characters and patterns that do need encoding (or the encoder's behavior itself) may change over time, which makes the whole thing not future proof.\n\nOverall, good security controls are always symbiotic with other functionality and don't create conflicts, so I've never liked the idea of \"we achieve the security goal, the rest isn't our problem.\"",
+      "createdAt": "2026-03-10T21:34:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4034617897",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7whzoZ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @narfbg I agree with your statement 100% when it comes to general software engineering. But for a security standard, there is not one incident in history that was caused by double **_encoding_**. So from a strict security POV (the focus of ASVS) I struggle to see why double-encoding is a security problem. It does not cause injection in any context, ever.\n\nBut I do agree, double encoding shows that the code is low quality, typically. And double **_decoding_** has definitely led to major security issues.",
+      "createdAt": "2026-03-11T00:38:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4035394073",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wnoNT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> ... there is not one incident in history that was caused by double encoding. \n\nHow this can be stated as a fact?\n\n>  I struggle to see why double-encoding is a security problem. It does not cause injection in any context, ever.\n\nInjection is not the only security problem; data integrity here is to be addressed. To say that double encoding is ok because it does not cause injection is ... not very well argued. If not to say, spreading such a message from a co-leader is misleading advice.",
+      "createdAt": "2026-03-11T06:51:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4036920147",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wo2gw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Last 2 proposals:\n\n@tghosth https://github.com/OWASP/ASVS/issues/3206#issuecomment-3940808748\n\n> They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues, unless the data itself is sanitized HTML which is only ever going to be rendered back as HTML.\n\n@ajayojha https://github.com/OWASP/ASVS/issues/3206#issuecomment-4015520089\n\n> Whenever data is stored, it should remain in its original state and not be stored in a context-specific encoded or escaped form (e.g., HTML-encoded for output), except where HTML entities are part of sanitized HTML content intended for direct rendering in HTML contexts.\n\n> The phrase “to prevent double encoding issues” may not be necessary in the text itself.\n\n---\n\nI think it makes sense to keep the phrase _to prevent double encoding issues_ as it extra clarifies, why the sentence exists.\n\nThe exception part should be generalized to not be limited in the WYSIWYG functionality, as there may be other accepted needs and edge-cases.\n\nProposal based on the last version from Josh (wording may need finetuning):\n\n> They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or escaped form (e.g., HTML encoding), **to prevent double encoding issues**, unless **it is the expected behaviour by the application, such as** the data itself is sanitized HTML which is only ever going to be rendered back as HTML.",
+      "createdAt": "2026-03-11T07:59:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4037240880",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wxof0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> ... there is not one incident in history that was caused by double encoding.\n> How this can be stated as a fact?\n\nI could not find an example and I was looking for one with sincerity. \n\n> Injection is not the only security problem; data integrity here is to be addressed. \n\nDouble-encoding is not a integrity problem. You can decode and get right back to the original data. The original data is not corrupted. It's only a display issue.\n\n> To say that double encoding is ok because it does not cause injection is ... not very well argued. If not to say, spreading such a message from a co-leader is misleading advice.\n\nI think it's argued quite well. I am certain that double encoding is not a security issue. I am eager for you to show me even one example or historical event where I am wrong. I could find a lot of examples of double _decoding_ being a problem, but never double _encoding_.",
+      "createdAt": "2026-03-11T14:18:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039542772",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wyFV5",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The original data is not corrupted. It's only a display issue.\n\nI recommend to investigate, what is the issue about. It is about storing the data in encoded form. That sets the context.\n\nStop talking about double-decoding, if it is not part of the issue.\n\nI don't need to prove anything, because you were not able to prove the fact you provided - I have not stated any \"facts\" on the topic. There is a clear difference between \"_... there is not one incident in history that was caused by double encoding._\" and \"_I did not find any_\". If you did not find it, it does not mean such an event never existed. It only means you don't know about it.\n\nEven one extra whitespace changes the integrity and checksums, but you are spreading the message, that double encoding is not a security problem...\n\nI prefer to keep developing the proposal, so please do not fill yet another issue with the invented facts.",
+      "createdAt": "2026-03-11T14:34:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039660921",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wya5E",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think we are mixing a few different concerns here, so let me clarify my position.\n\nFirst, I did not claim to have proven a universal negative. **_I said that after reviewing historical cases I could not find an example where developer-side double encoding itself directly caused a security incident._** That is a statement about available evidence, not an assertion that such a case is impossible.\n\nSecond, the main reason the ASVS text mentions avoiding encoded storage is architectural: storing context-encoded data frequently leads to fragile pipelines, display issues, or later decoding mistakes. Those are real engineering concerns.\n\n**_However, that is different from saying that double encoding is itself a primary security vulnerability. Historically, the real security failures have been inconsistent decoding or canonicalization (for example double-decoding issues), not developers encoding data twice._**\n\nThird, the purpose of V1.1 is architectural guidance about how data should generally flow through a system. My concern in this thread is that the current wording risks becoming overly prescriptive in an area where real systems show a lot of variation. **_Some frameworks store sanitized HTML, some store both raw and rendered forms, and some store encoded representations depending on the processing pipeline._**\n\nSo the key question for the document should be:\n\n**_Is the goal to enforce a strict storage rule, or to communicate the architectural principle that context-specific encoding should generally happen at the point of use rather than being baked into stored data?_**\n\nIf the goal is the latter, we should phrase the requirement in a way that communicates that principle clearly while acknowledging legitimate implementation patterns such as storing sanitized HTML.",
+      "createdAt": "2026-03-11T14:47:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039749188",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wysp9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Some frameworks store sanitized HTML, some store both raw and rendered forms, and some store encoded representations depending on the processing pipeline.\n\nWhy to give sanitization as an example if in the proposal it is already added as en excepction in a abstract way to open it up for all other \"intended cases\". So I recommend again to read, what is the issue about and what is the latest proposal before you come and oppose something.\n\n> If the goal is the latter, we should phrase **the requirement** in a way that communicates\n\nThe issue is about the **section text**...",
+      "createdAt": "2026-03-11T14:58:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039821949",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wy6ht",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "But I can give a double-encoding classical problem as well.\n\nIf to register a company with a name:\n```\nJim & facts\n```\n\nBefore storing it, the developer \"just in case\" HTML-encodes it, so it will be stored as:\n```\nJim &amp; facts\n```\n\nOn the display layer, data is (by process) correctly HTML encoded, and it displays the company name:\n```\nJim &amp; facts\n```\n\n(in HTML is)\n```\nJim &amp;amp; facts\n```\n\nNow, if you can modify the form where the company name is one of the fields, then with each save, you'll get another `&amp;` there into the name.\n\nNot a security issue?",
+      "createdAt": "2026-03-11T15:06:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039878765",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wy71V",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> The issue is about the section text...\n\nAn easy fix is to add this to the section text.\n\n_**Sanitization libraries may encode characters as part of safe normalization.**_\n\nThis is expected and does not conflict with V1.1.\n",
+      "createdAt": "2026-03-11T15:06:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039884117",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wzGCN",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> But I can give a double-encoding classical problem as well.\n> \n> If to register a company with a name:\n> \n> ```\n> Jim & facts\n> ```\n> \n> Before storing it, the developer \"just in case\" HTML-encodes it, so it will be stored as:\n> \n> ```\n> Jim &amp; facts\n> ```\n> \n> On the display layer, data is (by process) correctly HTML encoded, and it displays the company name:\n> \n> ```\n> Jim &amp; facts\n> ```\n> \n> (in HTML is)\n> \n> ```\n> Jim &amp;amp; facts\n> ```\n> \n> Now, if you can modify the form where the company name is one of the fields, then with each save, you'll get another `&amp;` there into the name.\n> \n> Not a security issue?\n\nNo. That example demonstrates a display issue, not a security vulnerability.\n\nWhat you describe is simply over-encoding, which is a correctness problem, not an injection risk.\n\nIf someone wants to call this an integrity issue, it is at most a very low-risk integrity problem. I am not aware of any public security incident where this kind of repeated HTML encoding, by itself, was the root cause of exploitation.\n\n**_This kind of defect is also usually caught through normal QA and functional testing because the user-visible breakage is obvious._** It is not the kind of issue typically identified through security testing, because it does not create interpreter execution or enable injection. That is why I see this as a functionality problem, not a security one.",
+      "createdAt": "2026-03-11T15:12:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039925901",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wzYF6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Display issue could be, if only the display layer works incorrectly, but that is not the case here.\n\nWhy to oppose \"not an injection risk\" - have I said it causes an injection risk? No, I have not. I again kindly ask you to stop inventing facts or quotes that do not exist.\n\n> If someone wants to call this an integrity issue, it is at most a very low-risk integrity problem.\n\nWhat is the risk level, is another discussion. Just the fact, that something is \"very low-risk\" does not mean, that there is no risk or it is not a security problem. In the standard we need to be quite close to be pedantic to also provide correct principles. And by principle - it is a security problem.\n\nMaybe you limit yourself with the definition of \"security\" only with injection and exploitation, but most likely there are other ways to compromise every CIA component.\n\nIf something is expected to come out with QA makes it less of security problem?\n\n> That is why I see this as a functionality problem, not a security one.\n\nRelated to my comment few lines above - functionality problem affects the availability component from the security, so it is also a security problem.",
+      "createdAt": "2026-03-11T15:23:19Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4039999866",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wzkb9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Display issue could be, if only the display layer works incorrectly, but that is not the case here.\n> \n> Why to oppose \"not an injection risk\" - have I said it causes an injection risk? No, I have not. I again kindly ask you to stop inventing facts or quotes that do not exist.\n> \n> > If someone wants to call this an integrity issue, it is at most a very low-risk integrity problem.\n> \n> What is the risk level, is another discussion. Just the fact, that something is \"very low-risk\" does not mean, that there is no risk or it is not a security problem.\n> \n> Maybe you limit yourself with the definition of \"security\" only with injection and exploitation, but most likely there are other ways to compromise every CIA component.\n> \n> If something is expected to come out with QA makes it less of security problem?\n> \n> > That is why I see this as a functionality problem, not a security one.\n> \n> Related to my comment few lines above - functionality problem affects the availability component from the security, so it is also a security problem.\n\nASVS intentionally omits many issues that could be framed as very low-risk integrity or availability concerns. The standard has to focus on controls that materially reduce real security exposure.\n\n**_The double-encoding example described here is fundamentally a data representation / correctness defect, not a security control failure. It produces visible artifacts such as &amp; in the UI because the value is encoded twice. That is a functional issue in the rendering pipeline._**\n\nCalling this a “security problem” because it can be mapped abstractly to the CIA triad does not make it a meaningful security risk. **_If we follow that reasoning, almost any application bug could be classified as a security issue._**\n\nRisk and exploitability matter. Issues that are routinely detected during Q/A because they are visually obvious have very low exposure and very low security impact compared to the types of vulnerabilities ASVS is designed to address.\n\n**_For that reason I consider this out of scope for ASVS. It is a correctness issue that should be handled by normal testing and QA practices rather than by security verification requirements._**",
+      "createdAt": "2026-03-11T15:30:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4040050429",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wzq75",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As I see, despite provided arguments, you keep your agenda and there is no point to continue that.\n\nNote, that **writing things in bold does not make them more valid**.\n\nEdit: putting 👎 comments to others does also not make your comments more valid.\n\nFor others, latest proposal to work with is here: https://github.com/OWASP/ASVS/issues/3206#issuecomment-4037240880",
+      "createdAt": "2026-03-11T15:33:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4040077049",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7w2hWK",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang \n\n> For others, latest proposal to work with is here: https://github.com/OWASP/ASVS/issues/3206#issuecomment-4037240880\n\n> I think it makes sense to keep the phrase to prevent double encoding issues as it extra clarifies, why the sentence exists.\n\nDo you think that the proposed text is sufficient to prevent double encoding issue?\n\nI believe double-encoding issues usually don’t happen because encoded data is stored. They happen when encoding is done at the wrong layer, or when the output gets encoded more than once while being generated. \n\nI would suggest, please re-think on my suggestion if above paragraph is convincing - The phrase “**to prevent double encoding issues**” may not be necessary in the text itself.\n\nPlease share your inputs\n\n\n",
+      "createdAt": "2026-03-11T17:21:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4040824202",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7w4K0_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Do you think that the proposed text is sufficient to prevent double encoding issue?\n\nIf to read it as \"sufficient to prevent **all** double encoding issue**s in general**\", then it's up to someone's imagination how to create a double-encoding problem, and this is just one of them. So the boolean answer is no.\n\nIn this context, it is one example of a possible bad outcome. And yes, wording is not ideal to be clear that it is just an example outcome and not the only outcome. So there is a need to change that.\n\n\n> I believe double-encoding issues usually don’t happen because encoded data is stored.\n\nMy motivation to highlight that issue there is from the opposite experience as a pentester - something is attempted to make for one certain interpreter, but then it is used in a different one, where the added encoding causes a problem. For the context, we can say that mostly those applications with such problems can have labels \"oldschool\" or \"legacy\". But sometimes people try to be \"clever\" and do it also nowadays.\n\n---\n\nPrevious proposal:\n\n> They also aim to ensure that whenever data is stored, it remains in its original state and is not stored in an encoded or escaped form (e.g., HTML encoding), to prevent double encoding issues, unless it is the expected behaviour by the application, such as the data itself is sanitized HTML which is only ever going to be rendered back as HTML.\n\nSo we can split it to 3 parts:\n\n  * The main message: whenever data is stored, it remains in its original state\n  * an example of an incorrect solution and outcome: not stored in an encoded or escaped form for a potential interpreter (e.g., HTML encoding), as it may cause double encoding issues or send data in an incorrect format to another interpreter\n  * exception: unless it is the expected behaviour by the application, such as the data itself is sanitized HTML, which is only ever going to be rendered back as HTML.\n\nIf you agree with the messages, we can move to the actual wording.\n\nMotivation here is also to keep those texts as short as possible without going into the education area.\n",
+      "createdAt": "2026-03-11T18:29:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4041256255",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7w47ET",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> If you agree with the messages, we can move to the actual wording\n\nYes, Please.",
+      "createdAt": "2026-03-11T18:58:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4041453843",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7w5TOt",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> The main message: whenever data is stored, it remains in its original state\n\nI am assuming the overall goal of the above text is to preserve **data integrity**, It may help to explicitly mention **data integrity** in the final wording.",
+      "createdAt": "2026-03-11T19:14:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3206#issuecomment-4041552813",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-06-25T02:57:23Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3206,
+  "state": "OPEN",
+  "title": "Request for Clarification/Refinement: V1.1 \"not stored in an encoded or escaped\" Data Storage Principle",
+  "url": "https://github.com/OWASP/ASVS/issues/3206"
+}

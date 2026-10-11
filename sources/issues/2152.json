@@ -1,0 +1,82 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "In [OAuth RAR](https://datatracker.ietf.org/doc/html/rfc9396), the `authorization_details` in the authorization request can contain a lot of data. Should we add a requirement that sensitive information should not be exposed to the user this way?\r\n\r\nSee the related [privacy considerations](https://datatracker.ietf.org/doc/html/rfc9396#name-privacy-considerations) section:\r\n\r\n> Any sensitive personal data included in authorization_details must be prevented from leaking, e.g., through referrer headers. Implementation options include encrypted request objects as defined in [[RFC9101](https://datatracker.ietf.org/doc/html/rfc9101)] or transmission of authorization_details via end-to-end encrypted connections between client and AS by utilizing [[RFC9126](https://datatracker.ietf.org/doc/html/rfc9126)] and the request_uri authorization request parameter as defined in [[RFC9101](https://datatracker.ietf.org/doc/html/rfc9101)]. The latter does not require application-level encryption, but it requires another message exchange between the client and the AS.\r\n\r\nPAR or JAR can be used if this is a problem.\r\n\r\nStraw man wording:\r\n\r\n> Verify that the user cannot see confidential data in RAR requests. This can be achieved with PAR or JAR (JWE+JWS).\r\n\r\nArgument against: This requirement can be generalized to other requests (outside of OAuth) which is one reason for *not* including this requirement in the OAuth chapter. This is somewhat related to 8.1.10.\r\n\r\nNote: the `authorization_details` in the token response could contain sensitive information as well but usually won't be accessible to the end-user when using a server-side confidential client with the authorization code flow.\r\n\r\nContext: #2036 \r\n\r\nRelated to: #2151",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6QAGSD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Haha, I checked the RFC and commented on that to previous issue: https://github.com/OWASP/ASVS/issues/2151#issuecomment-2415936878\r\n\r\nI have tried to address this problem via:\r\n* V.8.1 Verify that all sensitive data created and processed by the application has been identified and classified into protection levels, and ensure that a policy is in place on how to deal with sensitive data. Note that this includes sensitive data that is being encoded in a recoverable form such as Base64 and JWT.\r\n* V8.3.1 Verify that sensitive data is only sent to the server in the HTTP message body or headers and that the URL and query string do not contain sensitive information, such as an API key or session token.",
+      "createdAt": "2024-10-16T07:26:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2152#issuecomment-2415944835",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QECUL",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, these requirements should be enough and there is probably no need to add the case covered by `authorization_details`.\r\n\r\n> But when watching the [RFC9396](https://datatracker.ietf.org/doc/html/rfc9396#name-authorization-request), it seems like another \"approved by RFC\" way to leak sensitive information (the content of authorization_details) via URL parameters.\r\n\r\nYes. I was going to say that you can use PAR or JAR to protect against this but that's not actually completely true. An attacker which would be able to intercept the authorization request from the URL parameters might possibly be able to see some authorization details from the authorization server's consent screen.",
+      "createdAt": "2024-10-16T14:15:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2152#issuecomment-2416977163",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6QOy6k",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "By principle we have it (session data leakage) covered.\r\n\r\nTo have a special case for \"if rar is used + if the public client is used + if sensitive data is used\" feels a bit too edge case and out of line compared to other requirements in the ASVS and feels more like a checklist-style testing guide area.\r\n\r\nSo the current proposal is - we know this edge case exists, by principle it is covered and we don't add a new separate requirement.",
+      "createdAt": "2024-10-17T15:02:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2152#issuecomment-2419797668",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-10-15T22:21:31Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2152,
+  "state": "CLOSED",
+  "title": "OAuth, Add Requirement about exposing data through authorization_details",
+  "url": "https://github.com/OWASP/ASVS/issues/2152"
+}

@@ -1,0 +1,327 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Discussion to make 10.5.5 more generic requirement for Authentication section.\n\n---\n\nedit: from placeholder to actual issue.\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **10.5.5** | Verify that, if specific authentication strength, methods, or recentness is required, the relying party (RP) verifies that the presented ID Token satisfies these constraints (using the 'acr', 'amr' and 'auth_time' claims respectively). | 2 | v5.0.be-51.5.5 |\n\nInitial goal for the issue: add abstract requirement to require require authentication strength, method or recentness from IdP.\n\nRequirement should belong to section \"V6.8 Authentication with an Identity Provider\"\n\n---\n\nAdditional goal comes from to issue: #2925 and with a problem statement, that IdP's may not provide or support such information change.\n\nFrom @sydseter in https://github.com/OWASP/ASVS/issues/2925#issuecomment-2789105581\n> Important to note that enforcement is not possible on the app side, today, as the amr claim not is available to apps using IDPs like Entra ID or Google Identity Platform. Should that be ignored? Given how long the next version of ASVS will live, I believe it should.\n\n\nMy proposal (https://github.com/OWASP/ASVS/issues/2925#issuecomment-2789160831) for additional requirement or \"problem to solve\" with the initial requirement:\n> I don't think we should ignore it, but ask something like \"if the strength or method of authentication is not verifiable from IdP, then it must be considered as single-factor and the application must require second factor verification\". For example, authenticating the user via Gmail and then asking additionally TOTP via Google Authenticator.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6mQfYE",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "So as you said:\n\nIf the strength or method of authentication not is verifiable through claims presented by the IdP, then it must be considered a  single-factor. A second factor verification must then be required of the user by the application.\n\nor\n\nVerify that a second factor verification is required of the user by the application if the strength or method of authentication not is verifiable through claims presented by the IdP.",
+      "createdAt": "2025-04-09T11:17:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2789340676",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mU-q9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@sydseter - can it be, that from Google Identity this information is not sent only for Tier 1, but maybe it is available with Tier 2 (OIDC and SAML)? Just picking it from: https://cloud.google.com/identity-platform/pricing#identity-platform-pricing",
+      "createdAt": "2025-04-09T17:55:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2790517437",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6mZyLd",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang We recently did an investigation into Google and Entra Identity solutions. None of them is returning amr claims neither for the enterprise solution, nor for the free tier, which makes it difficult to use these solution to enforce MFA on the app side. Enforcement is done on the IdP side. This means that MFA enforcement is dependent on paying for an enterprise IdP solution or implement your own Idp, It's unfortunate, but not that surprising. MFA isn't mandatory, today, after all, but making it so, may change this. Given how long it takes between releases of ASVS, I believe it must be so.  ",
+      "createdAt": "2025-04-10T07:11:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2791776989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nJ6Yb",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Initial goal for the issue: add abstract requirement to require require authentication strength, method or recentness from IdP.\n>\n> Requirement should belong to section \"V6.8 Authentication with an Identity Provider\"\n\nSounds good, maybe a new 6.8 requirement like this\n\n> Verify that, if specific authentication strength, methods, or recentness is required, this is verified by the application. For example, if OIDC is used, this might be achieved by validating ID Token claims such as 'acr', 'amr' and 'auth_time' (if present). \n\nOr do we want to avoid OIDC details in 6.8?\n",
+      "createdAt": "2025-04-15T09:18:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2804393499",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nOKhs",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I am thinking that it might be easier to bake it into to 10.5.5 text instead:\n\n--| Description | Level | #v5.0.be\n-- | -- | -- | --\n10.5.5 | Verify that, if specific authentication strength, methods, or recentness is required, the relying party (RP) verifies that the presented ID Token satisfies these constraints (using the 'acr', 'amr' and 'auth_time' claims respectively when these are presented by the Identity Provider) . | 2 | v5.0.---\n\nIn regards to the rest, I would go for the same opt-out approach as in: https://github.com/OWASP/ASVS/issues/2970#issuecomment-2805089646\n\nI'll repeat it here:\n\nNIST solves these kind of issues in the following way: https://pages.nist.gov/800-63-FAQ/#q-8 \n\nSo by adding the following you would also br covering that fact that the claims might be missing:\n\n_Verify, in situations where authentication requirements not is achievable or realistic, by demonstrating comparability of any chosen alternative, to include any compensating controls, when the complete set of applicable requirements not is implemented._\n\nor (to include the entirety of ASVS)...\n\n_Verify, in situations where application security requirements not is achievable or realistic, by demonstrating comparability of any chosen alternative, to include any compensating controls, when the complete set of applicable requirements not is implemented._\n",
+      "createdAt": "2025-04-15T14:35:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2805508204",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nQHOH",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I don't feel you need to generalize 10.5.5 more then you already have done or change 10.5.5 at all. After thinking about this through the day, I think you could leave 10.5.5 as it is as long as you open up for _compensating controls_ in the same way as NIST does.",
+      "createdAt": "2025-04-15T15:11:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2806018951",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nQo-T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Busy with other stuff at the moment, but for keeping momentum, then quick feedback:\n* thinking is good :)\n* The requirement in the general authentication IdP section should be technology-free; for example, the same requirement is needed when using CAS\n* Most likely, we are talking about 2 requirements here (but not fully sure yet, we'll figure out when starting to word them):\n  * verify that you got the expected acr (and other required info) back from IdP\n  * If one can not get info from IdP about identification method, then documented fallback must be used, and by default, it is \"single-factor username-password strength\"\n",
+      "createdAt": "2025-04-15T15:21:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2806157203",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nQvmO",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "Yes, something like that.",
+      "createdAt": "2025-04-15T15:23:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2806184334",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pMJkd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So having read the above, I am not convinced we need 2 requirements as Elar said but rather we should try and capture in one generic requirement.\n\nI would suggest\n\n\"_Verify that, if an application using an separate Identity Provider (IdP) expects specific authentication strength, methods, or recentness for specific functions, the application verifies this using the information returned by the IdP. For example, if OIDC is used, this might be achieved by validating ID Token claims such as 'acr', 'amr' and 'auth_time' (if present). If the IdP does not provide this information then a documented fallback mechanism must be used._\"\n\nL2\nSection 6.8\n\nIf we do this, do we still need the 10.5.5 requirement or does this new requirement eliminate the need?",
+      "createdAt": "2025-04-29T11:55:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2838534429",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pNG6J",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "This looks good. I am just a bit concerned with:\n\n> If the IdP does not provide this information then a documented fallback mechanism must be used.\n\nThere does not exist a fallback for 'acr' and 'amr' claims. The way it commonly works is that the IDP is configured according to the app's needs using IDP custom policies, which are managed by the IDP operator/engineer and not controlled by the app engineer.\nTaking that into account, it is fully possible for the IDP to enforce this. The idea is that such matters should be centrally managed by the organization as an organizational control and not on an app-by-app basis.\n\nThis, however, is very likely to change. Still, there has never been a strong need for it since social consumer logins like Google, Facebook, and their ilk earn money by selling enterprise identity solutions for such purposes.",
+      "createdAt": "2025-04-29T13:02:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2838785673",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pNVWI",
+      "author": {
+        "login": "sydseter"
+      },
+      "authorAssociation": "NONE",
+      "body": "I don't see the need for the 10.5.5 requirement, given that the text you propose is supposed to replace it. ",
+      "createdAt": "2025-04-29T13:13:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2838844808",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pOms6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> There does not exist a fallback for 'acr' and 'amr' claims. \n\nI think @elarlang mentioned documented fallback so maybe he can expand on this :)",
+      "createdAt": "2025-04-29T14:37:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2839178042",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6pdDEQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some grammarly-fixes:\n> Verify that, if an application using a separate Identity Provider (IdP) expects specific authentication strength, methods, or recentness for specific functions, the application verifies this using the information returned by the IdP. For example, if OIDC is used, this might be achieved by validating ID Token claims such as 'acr', 'amr', and 'auth_time' (if present). If the IdP does not provide this information, then a documented fallback mechanism must be used.\n\nWe don't need 10.5.5 additionally to this one.\n\nI feel that \"documented fallback\" is not clear enough to send the message \"if you can not verify how user was identified, assume the lowest option\". Basically the thing I stated in the issue description:\n> I don't think we should ignore it, but ask something like \"if the strength or method of authentication is not verifiable from IdP, then it must be considered as single-factor and the application must require second factor verification\". For example, authenticating the user via Gmail and then asking additionally TOTP via Google Authenticator.\n\n---\n\nedit, proposal for the last part:\n> If the IdP does not provide this information, then a documented fallback mechanism and default values must be used, such as authentication strength is by default single-factor authentication using username and password.",
+      "createdAt": "2025-04-30T18:45:01Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2842964240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0lsP",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think about:\n\n\"_Verify that, if an application using a separate Identity Provider (IdP) expects specific authentication strength, methods, or recentness for specific functions, the application verifies this using the information returned by the IdP. For example, if OIDC is used, this might be achieved by validating ID Token claims such as 'acr', 'amr', and 'auth_time' (if present). If the IdP does not provide this information, the application must have a documented fallback approach which assumes that the minimum strength authentication mechanism was used (for example, single-factor authentication using username and password.)_\"",
+      "createdAt": "2025-05-04T10:36:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2849135375",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0mPf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposal for small changes:\n> Verify that, if an application **uses** a separate Identity Provider (IdP) **and** expects specific authentication strength, methods, or recentness for specific functions, the application verifies this using the information returned by the IdP. For example, if OIDC is used, this might be achieved by validating ID Token claims such as 'acr', 'amr', and 'auth_time' (if present). If the IdP does not provide this information, the application must have a documented fallback approach that assumes that the minimum strength authentication mechanism was used (for example, single-factor authentication using username and password).",
+      "createdAt": "2025-05-04T10:41:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2849137631",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0vlF",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #3084",
+      "createdAt": "2025-05-04T11:59:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2849175877",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p0wP4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we need to add now some hint into V10.5 section text that \"take a look into V2.8\"",
+      "createdAt": "2025-05-04T12:03:56Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2849178616",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6p024s",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Made an attempt in #3085",
+      "createdAt": "2025-05-04T12:59:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2934#issuecomment-2849205804",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-09T09:40:16Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2934,
+  "state": "CLOSED",
+  "title": "10.5.5 to more generic (non-OAuth specific)",
+  "url": "https://github.com/OWASP/ASVS/issues/2934"
+}

@@ -1,0 +1,173 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUwMDY3ODQ=",
+    "is_bot": false,
+    "login": "streichsbaer",
+    "name": "Stefan Streichsbier"
+  },
+  "body": "Hello ASVS team!\r\n\r\nI've been reviewing ASVS categories against a list of specific SAST rules to understand what coverage exists and how low-level rules map against ASVS requirements. So far the correlation is quite good and I've only come across one requirement that I think is missing in the current bleeding edge (5.0), and that is [CWE-470: Unsafe Reflection](https://cwe.mitre.org/data/definitions/470.html).\r\n\r\nI propose adding it as a new requirement to [V5.1 Input Validation](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v51-input-validation), with the following details:\r\n\r\n- Requirement Id: 5.1.7\r\n- Requirement description: Verify that allow lists or indirect selection are applied when using reflection to load classes or code based on user input.\r\n- Requirement Verification Level: 1\r\n- Requirement CWE Mapping: 470\r\n\r\nLooking forward to your thoughts on this and whether you agree, or think it's already sufficiently covered in another requirement.\r\n\r\nThanks,\r\nStefan\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5J8CAb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi,\r\n\r\nfor me it seems to be combination of 2 problems which I would like to watch separately:\r\n* input validation - against allowlist\r\n* loading external resources - from allow-listed sources\r\n\r\nFrom input validation perspective - current V5.1.4 is covering allow-list part\r\n* _V5.1.4 Verify that structured data is strongly typed and validated against a defined schema including allowed characters, length and pattern (e.g. credit card numbers, e-mail addresses, telephone numbers, or validating that two related fields are reasonable, such as checking that suburb and zip/postcode match)._\r\n\r\nAdditionally you can apply \"file execution\" requirements like:\r\n* _V12.3.1 Verify that user-submitted filename metadata is not used directly by system or framework filesystems and that a URL API is used to protect against path traversal._\r\n* _V12.3.2 Verify that user-submitted filename metadata is validated or ignored to prevent the disclosure, creation, updating or removal of local files (LFI)._\r\n* _V12.3.3 Verify that user-submitted filename metadata is validated or ignored to prevent the disclosure or execution of remote files via Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks._\r\n* _V12.3.5 Verify that untrusted file metadata is not used directly with system API or libraries, to protect against OS command injection._\r\n* _V12.3.6 Verify that the application does not include and execute functionality from untrusted sources, such as unverified content distribution networks, JavaScript libraries, node npm libraries, or server-side DLLs._\r\n\r\nRelated opened issue on loading external resources (requirements 10.3.2, 14.2.3):\r\n* https://github.com/OWASP/ASVS/issues/1293\r\n\r\nAlso a bit related opened issue for documenting all allow-listed external source:\r\n* https://github.com/OWASP/ASVS/issues/993",
+      "createdAt": "2022-09-08T09:38:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1240473627",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5J8Lj2",
+      "author": {
+        "login": "streichsbaer"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thanks for the quick response, @elarlang!\r\n\r\nI was looking at [V5.1.4](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v51-input-validation), however, it doesn't work for unsafe reflection as an attacker may have access to other functions that would still pass the validation. \r\n\r\nTake for example the requirement _[V5.1.5](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x13-V5-Validation-Sanitization-Encoding.md#v51-input-validation) Verify that URL redirects and forwards only allow destinations which appear on an allow list, or show a warning when redirecting to potentially untrusted content._\r\nIt is specifically asking for a \"domain\" specific allowlist because the requirement 5.1.4 would not sufficiently cover this attack, e.g. applying a regex (for illustration purposes) such as `/^https:\\/\\/[a-zA-Z0-9.-]*/`. \r\n\r\nThe same logic applies to the unsafe reflection, where the application may have several functions but only wants to expose the `ReadCommand` and `ListCommand` functions to users, but not the `DeleteCommand` and `CreateCommand` functions.\r\n\r\nRegarding the file execution/loading external resource requirements, I don't think they directly apply to the unsafe reflection vulnerability class.\r\n\r\nBest regards,\r\nStefan",
+      "createdAt": "2022-09-08T10:14:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1240512758",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KhMZg",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I guess I don't get the actual problem here or I'm just thinking quite a different way on the topic - based on your example, isn't it more access control issue then? Something we should not solve with input validation?",
+      "createdAt": "2022-09-18T07:59:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1250215520",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Kjvha",
+      "author": {
+        "login": "streichsbaer"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "According to the potential mitigations in the [CWE reference](https://cwe.mitre.org/data/definitions/470.html), the following solutions are recommended.\r\n![image](https://user-images.githubusercontent.com/5006784/191004145-cbadefdd-e1ae-4564-95f9-1fee8e4893f8.png)\r\n\r\nHappy to hear other people's thoughts on where this would better fit as a requirement.\r\n\r\nI do agree that chapter 5 can do with some improvements, for example:\r\n\r\n1. _5.5.2 Verify that the application correctly restricts XML parsers to only use the most restrictive configuration possible and to ensure that unsafe features such as resolving external entities are disabled to prevent XML eXternal Entity (XXE) attacks._: This is part of the _V5.5 Deserialization Prevention_ category, but XXE is not related to deserialization.",
+      "createdAt": "2022-09-19T11:15:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1250883674",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KjzB6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just the fact that it has mapping in the CWE database, does not give guarantee that it is not deprecated.\r\n\r\nFor me, the problem description here and also in CWE seems deprecated as well - from the \"hyper-dynamic-php\" era problems, where entire application functionality and user-data (files) maybe kept together in the same directory and/or application included dynamically files and functionality without properly checking permissions.\r\n\r\nThis assumption is matching with \"Potential Mitigations\" section - it indicates, that architecture for this kind of application is so wrong, that you just need to rewrite it.\r\n\r\nIn general I think the issue is covered with access control requirement 4.1.3:\r\n_V4.1.3 Verify that the principle of least privilege exists - users should only be able to access functions, data files, URLs, controllers, services, and other resources, for which they possess specific authorization. This implies protection against spoofing and elevation of privilege._\r\n\r\nIf you still think it is up-to-date problem and needs separate requirement in ASVS, please provide some clear attack and mitigation example.\r\n\r\nFor other not-related problems please open separate issue(s).",
+      "createdAt": "2022-09-19T11:31:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1250898042",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Kj8Kh",
+      "author": {
+        "login": "streichsbaer"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree with you that _V4.1.3_ indeed fits this CWE much better than the _V5.1_ category.\r\n\r\nInterestingly, in the OWASP Top 10 2021, the CWE-470 is parked under A03-Injection, which could correlate with _V5.3 Output Encoding and Injection Prevention_.\r\n\r\nHas there been any discussion about referencing multiple CWEs to ASVS requirements? In my opinion, this would make sense as the mapping of one CWE for a given ASVS requirement is not always sufficient. Even more so when considering that there are often multiple ASVS requirements mapping to the same CWE.\r\n\r\nI guess there are 3 different questions now that need to be answered.\r\n1. Can we cover \"unsafe reflection\" under _V4.1.3_?\r\n2. Does it make sense to add multiple CWEs to a given ASVS requirement?\r\n3. Should _V5.5.2_ be moved out of Deserialization Prevention and into either _V14.1.2_ or _14.1.6_?\r\n\r\nBased on your answers, I can also create separate issues for points 2 and 3.\r\nNot sure what the process is regarding point 1.\r\n",
+      "createdAt": "2022-09-19T12:10:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1250935457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KkRAT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is also very similar to the deserialization issues we saw in 2015+\r\n\r\nUntrusted data should not drive object creation, in general.",
+      "createdAt": "2022-09-19T13:27:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1251020819",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5KkhCt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "1. based on this issue \"unsafe reflection\" is \"anti-pattern\" from ancient times and I don't see any need to cover that with this wording. The principle is covered with 4.1.3 wording.\r\n2. I see that there is need for many-to-many relation with CWE mapping, but realistically I can not see from where to take resources for creating and later maintaining this kind of mapping inside ASVS. There is separate mapping project for that in OWASP, so at the moment the answer is: we don't do it. (related issue https://github.com/OWASP/ASVS/issues/1167)\r\n3. Like Jim said, there is deserialization component involved when you \"translate\" XML to objects. So, it's not wrong at the moment. On the other hand, additionally to current 5.5.2 there are some other issues with processing XML, which is not covered at the moment - like XML bomb a'ka \"billion laughs attack\", allowing XIncludes etc.",
+      "createdAt": "2022-09-19T14:17:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1251086509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5LO0sg",
+      "author": {
+        "login": "streichsbaer"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Apologies for the radio silence & thanks for the new answers @jmanico and @elarlang.\r\n\r\n1. Alright, let's leave it as is.\r\n2. The management and maintenance is quite a challenging task indeed. It would make things easier in the long run because you can more accurately group different CWEs to the same requirement. This may be helpful, especially when you want to report security scan results against ASVS requirements.\r\n3. You are both right. It's just a bit challenging given that there is some ambiguity. It doesn't clearly map to a requirement.\r\n\r\nI'm not sure how relevant unsafe reflection is these days, will do some more research. \r\n\r\nFor now, we can close the issue and revisit it if there are any updates.\r\n\r\nThanks for the feedback!",
+      "createdAt": "2022-09-29T12:00:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1368#issuecomment-1262177056",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2022-09-08T09:07:46Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 1368,
+  "state": "CLOSED",
+  "title": "Adding ASVS requirement for CWE-470: Unsafe Reflection",
+  "url": "https://github.com/OWASP/ASVS/issues/1368"
+}

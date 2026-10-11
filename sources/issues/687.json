@@ -1,0 +1,150 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc1ODUyMA==",
+    "is_bot": false,
+    "login": "timhemel",
+    "name": ""
+  },
+  "body": "Hi, I am currently studying the ASVS 4.0 to be able to better explain it to developers. I am running into an issue with chapter V5 that could cause some confusion. The first section of V5 states that validation is preferred over sanitization.\r\n\r\nUsing my definition of validation and sanitization (validation results in input being accepted or rejected, whereas sanitization is removing malicious parts of the input; sanitization is clearly not escaping or output encoding), I can agree with this, although I would not recommend sanitization because of cases where it can be dangerous (such as removing `../` from path names that have `....//`).\r\n\r\nWhile V5.1 talks about input validation as mitigations, V5.2 mentions sanitization for specific situations. IMO, input validation could be a valid (and preferred over sanitization) mitigation for these. I was wondering why it does not mention validation explicitly. Is input validation not feasible here and do we have to resort to sanitization? Or should it have said 'validate or sanitize' like in 5.2.6?\r\n\r\nThanks,\r\n\r\nTim",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU0MTk1NDYyNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just sharing my ideas here.\r\n\r\nValidation - take it as business logic rule. You can check format (accepted/not accepted symbols, min/max length, format). But if you don't have this kind of rules?\r\n\r\nSanitize - if you need to accept whatever from user input / validation and you don't have proper encoding available for next component, you need to make it safe fot next step.\r\n\r\nClassical example, WYSIWYG editor - you need to accept some HTML from user, but accept only allowed elements with allowed attributes. For good user there is no difference, because with using WYSIWYG correctly, he/she never sends anything malicious. For security in this case you can not hope for user interface, you need to sanitize on the server side (again).",
+      "createdAt": "2019-10-14T22:16:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-541954627",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU0MTk2OTAyOQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "You can sanitize client side with DOMPurify as well. :)\n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On Oct 15, 2019, at 3:46 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> Just sharing my ideas here.\n> \n> Validation - take it as business logic rule. You can check format (accepted/not accepted symbols, min/max length, format). But if you don't have this kind of rules?\n> \n> Sanitize - if you need to accept whatever from user input / validation and you don't have proper encoding available for next component, you need to make it safe fot next step.\n> \n> Classical example, WYSIWYG editor - you need to accept some HTML from user, but accept only allowed elements with allowed attributes. For good user there is no difference, because with using WYSIWYG correctly, he/she never sends anything malicious. For security in this case you can not hope for user interface, you need to sanitize on the server side (again).\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2019-10-14T23:11:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-541969029",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU0MjEzNDYyMA==",
+      "author": {
+        "login": "timhemel"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi, thanks for your comments. The confusion of when to validate or sanitize is not with me, I understand that the circumstances determine this. Which is exactly why I was wondering why the ASVS requirements so explicitly say to sanitize without recommending validation explicitly. So unless I have missed something, I would suggest to rephrase some of these V5.2 requirements to say 'validate or sanitize' instead of just 'sanitize', with validation as the preferred technique.\r\n(again, just to eliminate any confusion, note that for me sanitization is different from escaping).\r\n\r\nSo here are my thoughts about this.\r\nThis may sound theoretic, but the issue with sanitizing is the question why you would continue processing input if you can somehow know that it is malicious. You can try to eliminate bad HTML elements or event handlers from HTML elements in your input, but you could just as well detect such event handlers and stop processing the input.\r\n\r\nDetecting whether it is malicious and stopping any processing not only sounds more secure, there are cases where it is more secure. Sanitizing `<script>...</script>` from `<scr<script></script>ipt>` will still produce `<script>`, to give a trivial example.  The `X-XSS-Protection` mechanism is another nice example of where sanitization made things less secure than validation (https://blog.innerht.ml/the-misunderstood-x-xss-protection/).\r\n\r\nIn ASVS-3.0.1, requirements 5.3 and 5.19 more or less suggested this: all input validation failures result in request rejection, and we choose positive validation over negative validation and sanitizing. In fact, I would recommend negative validation over sanitizing.\r\n\r\nThat being said, it is often more convenient or perceived to be more user friendly to modify the input and keep processing it. If your WYSIWYG editor would give errors all the time about invalid input because the server thinks you are entering malicious input while you were just making a mistake, that would be quite annoying. But that should not be a reason to rule out validation as a valid mitigation. The builders of the system to be aware of such trade-offs and make an informed decision. I think the ASVS can help them with this in section 5.2 in ASVS 4.0, by rephrasing the requirements slightly as suggested.\r\n\r\nThanks,\r\n\r\nTim",
+      "createdAt": "2019-10-15T09:54:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-542134620",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDU2Mjk4MzYxNQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My concern is that you cannot necessarilly assume that input that has reached the stages described in 5.2.x and 5.3.x has undergone validation, maybe it has and maybe it hasn't. It depends on the source. Similarly, by the time you get to those stages, e.g. inserting into eval or creating a dynamic query, it may be too late to just reject the input without causing significant user experience problems.\r\n\r\nTo me the important thing is that input validation should be enforced wherever possible but that sanitization/encoding should take place when content reaches that particular context.\r\n\r\nWhat do you think? How do you think we could make things as clear as possible here?",
+      "createdAt": "2019-12-08T19:27:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-562983615",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMTI1NTIxNQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @timhemel, any further comments on this?",
+      "createdAt": "2020-04-29T14:40:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-621255215",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMjI2NzQ5Ng==",
+      "author": {
+        "login": "timhemel"
+      },
+      "authorAssociation": "NONE",
+      "body": "Hi, sorry it took a while to respond. What I think would be most important is to:\r\n\r\n1. explain the difference between the four mitigation strategies of validation, sanitization, output encoding, sandboxing and parameterized queries a bit clearer,\r\n2. explain situations where these are appropriate and what is preferred.\r\n\r\nad 1.: validation involves rejecting or accepting input based on a list (containing either positive or negative input patterns). Sanitization modifies the input and is generally not reversible, i.e. it has no inverse function. Output encoding modifies the input but has an inverse function, i.e. the decoding. Sandboxing lets the system interpret input as code, but in a way that it cannot do any harm. Parameterized queries take away the issue of interpretation of input and ensure that the input is seen as data.\r\n\r\nad 2.: I would prefer input validation over sanitization, as the latter has its security caveats. A situation in which sanitization would be more logical is for example when processing HTML input from a rich text editor, where rejecting invalid input would be very inconvenient for the user. Combined with sandboxing (which I would list as a separate mitigation strategy) it can be effective and secure, albeit difficult. So input validation and sandboxing could still allow interpretable code, and if you want that to happen, then use these. If you don't want input to be interpreted, then use output encoding or parameterized queries. Input validation does not hurt in this case and may provide an extra defense, but it has its limitations.\r\n\r\nI think the above would make it clear when to apply which technique.\r\n",
+      "createdAt": "2020-05-01T06:24:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-622267496",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYyMjM4MjE5OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What a fantastic analysis. I agree. I'll take on cleaning this up before \nthe next release. Please assign to me! Here are my notes on the topic:\n\n  * Validation: Really important for URL's in Web UI's to stop\n    JavaScript and data URL's (XSS defense) - but often valid data is\n    still dangerous\n  * Santization: I see some doing JSON sanitizing before JSON parsers\n    are used, and of course HTML sanitization for XSS defense\n  * Escaping: Done in the UI when you want to preserve displaying\n    content as the user typed it in, also for some injection protection\n    like LDAP injection protection\n  * Parameterization: For SQL Injection, primarily\n  * Sandboxing:  When you can't sanitize HTML for some reason and need\n    to dump potentially active content on your web page, iFrame\n    sandboxing is critical. CSP has some sandboxing capabilities, too.\n\n- Jim\n\nOn 5/1/20 2:24 AM, timhemel wrote:\n>\n> Hi, sorry it took a while to respond. What I think would be most \n> important is to:\n>\n>  1. explain the difference between the four mitigation strategies of\n>     validation, sanitization, output encoding, sandboxing and\n>     parameterized queries a bit clearer,\n>  2. explain situations where these are appropriate and what is preferred.\n>\n> ad 1.: validation involves rejecting or accepting input based on a \n> list (containing either positive or negative input patterns). \n> Sanitization modifies the input and is generally not reversible, i.e. \n> it has no inverse function. Output encoding modifies the input but has \n> an inverse function, i.e. the decoding. Sandboxing lets the system \n> interpret input as code, but in a way that it cannot do any harm. \n> Parameterized queries take away the issue of interpretation of input \n> and ensure that the input is seen as data.\n>\n> ad 2.: I would prefer input validation over sanitization, as the \n> latter has its security caveats. A situation in which sanitization \n> would be more logical is for example when processing HTML input from a \n> rich text editor, where rejecting invalid input would be very \n> inconvenient for the user. Combined with sandboxing (which I would \n> list as a separate mitigation strategy) it can be effective and \n> secure, albeit difficult. So input validation and sandboxing could \n> still allow interpretable code, and if you want that to happen, then \n> use these. If you don't want input to be interpreted, then use output \n> encoding or parameterized queries. Input validation does not hurt in \n> this case and may provide an extra defense, but it has its limitations.\n>\n> I think the above would make it clear when to apply which technique.\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/687#issuecomment-622267496>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCIWXFOUKL4OSR5V6ULRPJTJZANCNFSM4JAOY4HQ>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-05-01T13:12:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-622382198",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40qGzw",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "After lengthy discussion with many in this thread, we have re-worked V5 to be more reflective of the points raised here and I'm closing the issue now. https://github.com/OWASP/ASVS/commit/26cbd67f7794864a07e697c00367f4727e54b434",
+      "createdAt": "2021-07-20T14:46:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/687#issuecomment-883453168",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-10-14T12:57:07Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxNDMyNTQwNzg=",
+      "name": "enhancement",
+      "description": "",
+      "color": "84b6eb"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 687,
+  "state": "CLOSED",
+  "title": "ASVS4.0-V5: confusion about when to validate or to sanitize",
+  "url": "https://github.com/OWASP/ASVS/issues/687"
+}

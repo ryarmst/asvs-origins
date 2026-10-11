@@ -1,0 +1,188 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE4NDg2MjY5",
+    "is_bot": false,
+    "login": "timurozkul",
+    "name": "Timur -"
+  },
+  "body": "Sanitization or/and Deny-listing should be added as supplementary recommendations.\r\n\r\nStarted the discussion on OWASP Cheatsheets however due lack of input and ASVS also not recommending a deny-list or sanitization it would worth discussing it here also. \r\n\r\nSummarizing the discussion https://github.com/OWASP/CheatSheetSeries/issues/1541:\r\nAll other recommendation on input validation require individual implementation making it high workload and more error prone vs implementing a sanitization library or deny-listing as middleware which is quick win. Sanitization/Deny-listing libraries help fend off a degree of attacks. \r\n\r\nI have not found one valid literature that explains why input sanitization / deny-listing is bad other then it gives a false sense of security and that it can strip out legitimate characters. Can someone explain why filtering out or blocking `; DROP TABLE` from an input field for `\"favorite food\"` would be considered a bad?\r\n\r\nI was asked to provide good use cases: All WAF providers utilize this method And why is html sanitization an exception? \r\n\r\nI suggest we put sanitization / deny-listing back on ASVS as supplementary recommendation unless there is a solid argument against it. ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6T-Doh",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "TLDR: I don't agree with this direction or proposal.\r\n\r\nFew things that come to mind:\r\n* The false sense of security, as you mentioned yourself - I have met the attitude \"we have defended by enterprise grade WAF, we are safe\"\r\n* Often bypassing those rules are as trivial as messing with lower-case vs upper-case letter, using different whitespace characters or encodings\r\n* I consider it not as a defense, but as a \"slowdowner\" - you need to fix underlying problems in your application anyway\r\n* Automatically blocking or modifying user-input is against integrity and it must be synchronized with business logic rules - can you do it or not. User input must reach to the application as it was written.\r\n* Deny-list is \"list of bad things you know\" and you can make the application secure against yourself. In case an attacker knows more bad things than you, attacker can bypass it. \r\n\r\n> Can someone explain why filtering out or blocking ; DROP TABLE from an input field for \"favorite food\" would be considered a bad?\r\n\r\nBut why you need to use deny-list instead of allow-list filtering? And even if you use sanitization, it does not replace the need to defend against SQL injection.\r\n\r\nIn short - you can consider this as a extra layer of \"defense\" to slow down attackers, but this is not actual defense that an application needs.\r\n\r\n> I suggest we put sanitization / deny-listing back on ASVS as supplementary recommendation unless there is a solid argument against it.\r\n\r\nPut it back? I rechecked and at least from ASVS v3.0.1 it has been only allow-list for input validation and for sanitization, there is no \"put it back\".\r\n\r\nSo, it's a \"no\" from me.",
+      "createdAt": "2024-11-18T10:08:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2482518561",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T-nnD",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "1) I agree with everything @elarlang wrote. We are looking to focus on leading practices in ASVS and positive allowlists for input validation are part of that. \r\n2) Semantically aware sanitization for certain dangerous sinks is mentioned in V5.2 so I think that is probably sufficient.",
+      "createdAt": "2024-11-18T10:48:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2482665923",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UAbaB",
+      "author": {
+        "login": "timurozkul"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang \r\nObviously whitelisting is prefer and if you have it, its not necessary to have sanitization / deny-listing. \r\nHowever, there are a lot of cases where that is not option since not all input fields are pick your weekday. \r\nThe **only argument i am reading is that it is easy to bypass hence it only slows down the attacker**. To however degree that is true, the fact is that having deny-list /sanitization **reduces your real attack surface** by not allowing certain char patterns since there are a finite input space. So technically it is not just to slow down the attacker. The logic am hearing is exactly matching this analogy the game of blackjack. Removing high-impact cards like 10s and Aces reduces your chances of reaching 21 by approximately 8-10% or more. 8-10% reduced attack space sounds like a win to me",
+      "createdAt": "2024-11-18T14:03:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483140225",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UAi7I",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If this was the only reason you read out from here, I recommend investigating the meaning of data integrity.",
+      "createdAt": "2024-11-18T14:16:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483171016",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UAzko",
+      "author": {
+        "login": "timurozkul"
+      },
+      "authorAssociation": "NONE",
+      "body": "Allow listing is just hardcore version of deny listing. Allow list deny's everything except a x,y,z. Not sure how your differentiating those. if the concern is change in user input then deny giving an error to the user (synchronization of business logic). \r\nI was expecting to hear an argument on that it doesn't reduce attack surface, as that is the key point here",
+      "createdAt": "2024-11-18T14:37:27Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483239208",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UA4RO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With arguments there is one tiny problem -  you ignore them :)\r\n\r\nIf explanations from different people and from different repositories is not enough for you, we can call it religion. For this kind of situation, I have standard recommendations:\r\n* Please recommend this defense for example for stack overflow\r\n* Give a talk at a security conference about that and see what kind of feedback you'll get",
+      "createdAt": "2024-11-18T14:45:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483258446",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UBEn9",
+      "author": {
+        "login": "timurozkul"
+      },
+      "authorAssociation": "NONE",
+      "body": "I guess I bring it up on Stackoverflow, the \"discussions\" here talk around the issue or dont have any depth to them. I have yet to hear an argument why it doesnt reduce the attack surface, i made a case for it. I challange your argument and you call it a religion. Feel free to close the issue then",
+      "createdAt": "2024-11-18T15:02:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483309053",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UBPTb",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Feel free to close the issue then\r\n\r\nThe issue is closed some time ago.\r\n\r\n> I have yet to hear an argument why it doesnt reduce the attack surface\r\n\r\nVol n+1 - you just can not automatically modify the user input by removing phrases or characters that you feel are \"not safe\". It is against integrity, and with the hope to reduce attack surface you going to create more security problems than you solve. You don't challenge my arguments, you just don't read and/or analyze them. And not only mine, but everyone's.",
+      "createdAt": "2024-11-18T15:18:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483352795",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UBnQV",
+      "author": {
+        "login": "timurozkul"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang \r\nAgain your making surface level statement without any explanation \r\n\r\n> It is against integrity, and with the hope to reduce attack surface you going to create more security problems than you solve.\r\n\r\nhow is it against integrity? and how does it create security problems? I disagree on the logic, lay out the reasoning for it and then no counter argument is given or this generic statement\r\n\r\n> It is against integrity, and with the hope to reduce attack surface you going to create more security problems than you solve.\r\n\r\nAgain please close this discussion. \r\nI suggest instead of stating that \"i don't read what is written in the discussion\" or patronizing me by stating its a religion. You can just state the majority is against your views so we will close the discussion. Maybe a finer way of handling it..",
+      "createdAt": "2024-11-18T15:55:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483450901",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UBtdn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Again please close this discussion.\r\n\r\nAgain, this discussion is closed long time ago.\r\n\r\n> how is it against integrity? \r\n\r\nFrom the very first response:\r\n> Automatically blocking or modifying user-input is against integrity and it must be synchronized with business logic rules - can you do it or not. User input must reach to the application as it was written.\r\n\r\nWhat is not understandable here?\r\n\r\n---\r\n\r\nThe explanation for \"_Please recommend this defense for example for stack overflow_\". My recommendation was not about to make a discussion there but to apply your understanding of \"defense\" to the system like stack overflow. Can you block a request containing \"`; DROP TABLE`\" or filter out from the request? You can not, it is legitimate content - the application must accept it, handle it, and display it correctly.",
+      "createdAt": "2024-11-18T16:05:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2381#issuecomment-2483476327",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-18T09:38:51Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 2381,
+  "state": "CLOSED",
+  "title": "V5 Why is Sanitation or Deny-list not recommended",
+  "url": "https://github.com/OWASP/ASVS/issues/2381"
+}

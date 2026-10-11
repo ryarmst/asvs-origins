@@ -1,0 +1,48 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1255#issuecomment-1348595278",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "So I think that 8.3.8 is quite general and doesn't exactly what fit the intention here. \r\n\r\nI agree that 8.3.6 should not be a sweeping requirement but maybe we could make it more specific and make it level 3.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---:| :---: | :---: |\r\n| **8.3.6** | Where a memory safe language is not being used or where the language specifically supports this ability, verify that sensitive information contained in memory is overwritten as soon as it is no longer required using zeroes or random data, to mitigate memory dumping attacks. | | | ✓ | 226 |\r\n\r\n@Sjord @jmanico what do you think about that?",
+          "recorded_at": "2022-12-13T13:45:52Z"
+        },
+        {
+          "body": "So I think that 8.3.8 is quite general and doesn't exactly what fit the intention here. \r\n\r\nI agree that 8.3.6 should not be a sweeping requirement but maybe we could make it more specific.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---:| :---: | :---: |\r\n| **8.3.6** | Where a memory safe language is not being used or where the language specifically supports this ability, verify that sensitive information contained in memory is overwritten as soon as it is no longer required using zeroes or random data, to mitigate memory dumping attacks. | | ✓ | ✓ | 226 |\r\n\r\n@Sjord @jmanico what do you think about that?",
+          "recorded_at": "2022-12-13T13:45:35Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1255#issuecomment-1357745595",
+      "author": "iloving",
+      "previous_versions": [
+        {
+          "body": "So this discussion has two components, and they need to be addressed separately:\r\n1. Is this a real risk? The short answer is yes.  If you are able to access processes memory in any way, you can get at this data.  Possible modes of access are, off the top of my head:\r\n - As already mentioned, direct exploits such as buffer overreads\r\n - Exploits that expose Ring 0 memory access\r\n - Accessed through swap file by forcing the process out of memory \r\n - If running in a VM, any exploits that grant access to the entire VM's memory space, or swaps the VM to host disk.\r\n \r\n2. How can it be mitigated?  This is entirely dependant on the language you are using, and how it manages memory.  For systems languages like C/C++ and Rust, you have guaranteed direct access to this memory so you have the ability to overwrite it in-place with nonsense before deallocation.  For other languages, one would have to dig deeply into the fundamentals of said language. But generally speaking, the same technique should work for any language unless it relies on copy-on-write mechanics.",
+          "recorded_at": "2022-12-19T14:21:13Z"
+        },
+        {
+          "body": "So this discussion has two components, and they need to be addressed separately:\r\n1. Is this a real risk? The short answer is yes.  If you are able to access processes memory in any way, you can get at this data.  Possible modes of access are, off the top of my head:\r\n - As already mentioned, direct exploits such as buffer overreads\r\n - Exploits that expose Ring 0\r\n - Accessed through swap file by forcing the process out of memory \r\n - If running in a VM, any exploits that grant access to the entire VM's memory space, or swaps the VM to host disk.\r\n \r\n2. How can it be mitigated?  This is entirely dependant on the language you are using, and how it manages memory.  For systems languages like C/C++ and Rust, you have guaranteed direct access to this memory so you have the ability to overwrite it in-place with nonsense before deallocation.  For other languages, one would have to dig deeply into the fundamentals of said language. But generally speaking, the same technique should work for any language unless it relies on copy-on-write mechanics.",
+          "recorded_at": "2022-12-19T14:20:28Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1255#issuecomment-1357775950",
+      "author": "tprynn",
+      "previous_versions": [
+        {
+          "body": "I disagree that this represents a real risk. Under a reasonable threat model of any system, there is always a line we can draw at which an attacker's capability so great that no realistic protection can prevent them from compromising the system. In the case of full memory access, we are clearly across the line. Evicting memory doesn't make any sense, the attacker can be assumed to read the memory before it's evicted (because why wouldn't they?).\r\n\r\nIn the case of a buffer overread vulnerability, I think someone would really need to come up with a particularly contrived example to mitigate the vulnerability by evicting a specific secret. In heartbleed, even if you evicted TLS secrets you're still going to have request/response data in memory. I still don't think it makes real, logical sense because at this level of assurance you should instead just recommend not using any memory unsafe language at all.\r\n\r\nAt a wider level, the presence of such requirements discourages me from using or recommending this methodology because it will create (at best) confusion and (at worst) new vulnerabilities, with an average expectation of wasting the time of both security team and engineers. More specifically, less-experienced practitioners rely on these methodologies to provide expert guidance, so they will follow them without deep introspection/experience on what changes are valuable or not. See https://tprynn.github.io/2022/12/06/cert-pinning-bad.html for more.",
+          "recorded_at": "2022-12-19T14:46:43Z"
+        },
+        {
+          "body": "I disagree that this represents a real risk. Under a reasonable threat model of any system, there is always a line we can draw at which an attacker's capability so great that no realistic protection can prevent them from compromising the system. In the case of full memory access, we are clearly across the line. Evicting memory doesn't make any sense, the attacker can be assumed to read the memory before it's evicted (because why wouldn't they?).\r\n\r\nIn the case of a buffer overread vulnerability, I think someone would really need to come up with a particularly contrived example to mitigate the vulnerability by evicting a specific secret. In heartbleed, even if you evicted TLS secrets you're still going to have request/response data in memory. I still don't think it makes real, logical sense because at this level of assurance you should instead just recommend not using any memory unsafe language at all.\r\n\r\nAt a wider level, the presence of such requirements discourages me from using or recommending this methodology because it will create (at best) confusion and (at worst) new vulnerabilities, with an average expectation of wasting the time of both security team and engineers. See https://tprynn.github.io/2022/12/06/cert-pinning-bad.html for more.",
+          "recorded_at": "2022-12-19T14:45:10Z"
+        }
+      ]
+    }
+  ]
+}

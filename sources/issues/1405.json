@@ -1,0 +1,474 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nRelated requirements:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.14.3** | Verify that the build pipeline warns of out-of-date or insecure components and takes appropriate actions. | | ✓ | ✓ | 1104 |\r\n| **14.2.1** | Verify that all components are up to date, preferably using a dependency checker during build or compile time. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | 1026 |\r\n\r\nCWE:\r\n* [CWE-1104](https://cwe.mitre.org/data/definitions/1104.html) - Use of Unmaintained Third Party Components\r\n* [CWE-1026](https://cwe.mitre.org/data/definitions/1026.html) - \"CWE VIEW: Weaknesses in OWASP Top Ten (2017)\"\r\n\r\nProposal:\r\n* remove 1.14.3 as duplicate. If needed, update 14.2.1.\r\n* use CWE-1104 for 14.2.1",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5TVqt2",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I think it is a good idea to merge them.\r\n\r\n> Verify that the build pipeline warns of out-of-date or insecure components\r\n\r\nChecking in the build pipeline is not always desired. This can block PRs because some unrelated package became outdated.\r\n\r\n> and takes appropriate actions.\r\n\r\nThis is pretty vague.\r\n\r\n> Verify that all components are up to date, preferably using a dependency checker during build or compile time.\r\n\r\nI don't think you necessarily need to run the latest version of software, especially if multiple major versions are supported. It's OK to be on Debian stable even though it has older software than Debian testing.",
+      "createdAt": "2023-01-20T10:26:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1398188918",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5TpwNu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this raises a can of worms.\r\n\r\nI agree in principle that these should be merged but I also noted the following [comment in chapter V14](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x22-V14-Config.md#v142-dependency):\r\n\r\n> Note: At Level 1, 14.2.1 compliance relates to observations or detections of client-side and other libraries and components, rather than the more accurate build-time static code analysis or dependency analysis. These more accurate techniques could be discoverable by interview as required.\r\n\r\nI think this comment makes a good point regarding the testability of L1 so I would be inclined to take a slightly more subtle approach to this change and hopefully render the comment unnecessary.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.14.3** | [DELETED] | | | | |\r\n| **14.2.1** | [MODIFIED, SPLIT TO 14.2.8] Verify that client-side components do not contain known vulnerabilities using a runtime dependency scan. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | **1104** |\r\n| **14.2.8** | [ADDED, SPLIT FROM 14.2.1] Verify that application components do not contain known vulnerabilities and are not exposed to other dependency risks, preferably using a dependency checker during build or compile time. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | **1104** |\r\n\r\n@elarlang @Sjord what do you think?",
+      "createdAt": "2023-01-25T11:17:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1403454318",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Tp1rC",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, if [we keep L1 testable](https://github.com/OWASP/ASVS/issues/1495) is makes sense to split this.\r\n\r\n> do not contain known vulnerabilities\r\n> warns of out-of-date\r\n> are up to date\r\n\r\nHow should we handle components that are not the latest version, but also do not contain known vulnerabilities? The existing requirements require that components are \"up to date\".\r\n\r\nI think it's not required to use the latest software, as long as it's possible to patch vulnerabilities in a reasonable time. That means using supported software that receives security updates, or having controls in place to perform those updates yourself. Should we put this in a requirement?\r\n\r\n> using a *runtime* dependency scan.\r\n\r\nThis is not really clear to me. Do you mean that the application needs to be scanned while running? Is this really required? Would scanning the package-lock.json also be acceptable instead?\r\n\r\n> and are not exposed to other dependency risks\r\n\r\nThis seems a bit too vague. Can you give some examples of which risks you are talking about?",
+      "createdAt": "2023-01-25T11:38:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1403476674",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5c8jcu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Yes, if [we keep L1 testable](https://github.com/OWASP/ASVS/issues/1495) is makes sense to split this.\r\n> \r\n> > do not contain known vulnerabilities\r\n> > warns of out-of-date\r\n> > are up to date\r\n> \r\n> How should we handle components that are not the latest version, but also do not contain known vulnerabilities? The existing requirements require that components are \"up to date\".\r\n\r\nI think \"up to date\" is vague and not strictly a security requirement so I am happy ignoring this.\r\n\r\n> I think it's not required to use the latest software, as long as it's possible to patch vulnerabilities in a reasonable time. That means using supported software that receives security updates, or having controls in place to perform those updates yourself. Should we put this in a requirement?\r\n\r\nI think the details are a little to subtle here although see \"dependency risks\"\r\n\r\n> > using a _runtime_ dependency scan.\r\n> \r\n> This is not really clear to me. Do you mean that the application needs to be scanned while running? Is this really required? Would scanning the package-lock.json also be acceptable instead?\r\n\r\nYes but the point is that at L1 we don't necessarily have access to that file but I could modify the wording.\r\n\r\n> > and are not exposed to other dependency risks\r\n> \r\n> This seems a bit too vague. Can you give some examples of which risks you are talking about?\r\n\r\nI will create an updated suggestion\r\n\r\n\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **1.14.3** | [DELETED] | | | | |\r\n| **14.2.1** | [MODIFIED, SPLIT TO 14.2.8] Verify that client-side components do not contain known vulnerabilities using a runtime or code level dependency scan. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering)) | ✓ | ✓ | ✓ | **1104** |\r\n| **14.2.8** | [ADDED, SPLIT FROM 14.2.1] Verify that application components do not contain known vulnerabilities and are not exposed to other dependency risks, (risks might include that dependencies are end of life, no longer supported or not maintained by a trusted maintainer). This should involve using some sort of dependency checker at build time. ([C2](https://owasp.org/www-project-proactive-controls/#div-numbering)) | | ✓ | ✓ | **1104** |\r\n\r\n@Sjord what do you think of this update and my responses above?",
+      "createdAt": "2023-05-23T13:35:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1559377710",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dTdvL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Proposed 14.2.1\r\n\r\n> Verify that client-side components do not contain known vulnerabilities using a runtime or code level dependency scan.\r\n\r\nI would not use phrase _\"using a runtime or code level dependency scan\"_ here, or if to use it then just as an example but not \"the only way to do it\". I think ASVS should say what must be achieved as end-results for an application, not that much say how you need to check it.\r\n\r\nProposed 14.2.8\r\n> Verify that application components do not contain known vulnerabilities and are not exposed to other dependency risks, (risks might include that dependencies are end of life, no longer supported or not maintained by a trusted maintainer). This should involve using some sort of dependency checker at build time.\r\n\r\nSecond part of the requirement feels a bit overlapping with other requirements (and maybe those can be merged):\r\n* V14.2.4 Verify that third party components come from pre-defined, trusted and continually maintained repositories.\r\n* V14.2.5 Verify that a Software Bill of Materials (SBOM) is maintained of all third party libraries in use.\r\n",
+      "createdAt": "2023-05-27T12:15:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1565383627",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5emb7I",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so let's add this to list to rework because I think this needs to be considered in the context of the rest of this chapter.",
+      "createdAt": "2023-06-12T11:23:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1587134152",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5oaHGO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do we have agreement, that 1.14.3 can be deleted anyway and the rest of the discussion here is (a bit offtopic) how to improve 14.2.1?",
+      "createdAt": "2023-10-07T10:24:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1751675278",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5odmih",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "yeah ok @elarlang ",
+      "createdAt": "2023-10-09T08:54:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-1752590497",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6AGlml",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I want to make one small suggestion on these requirements.\r\n\r\nI suggest we stop using the term \"dependency checker\", which is non-standard, and instead use the term \r\n\"Software Composition Analysis (SCA)\" which is the standard term in our industry for third party scanning tools. \r\n\r\nI also believe it's important to mention this tool category, since it's the defact way to address third party library security. We already address SBOM's and they are only so useful. What's useful is scanning and updating libraries.",
+      "createdAt": "2024-06-05T08:34:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2149210533",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BhONc",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico, just to throw a curve ball, sometimes people also confuse SCA with \"static code analyzer\" 🙃 which makes these acronyms confusing. But I agree with you, we have to use the \"standard term\" or most common term in our industry. Do we have this somewhere in our glossary of terms? ",
+      "createdAt": "2024-06-17T10:14:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2172969820",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BhqKz",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @csfreak92 I am with you. SCA used to refer to what we now call SAST. Yea this whole topic of the right acronyms is confusing at best. And yes we have a glossary here. https://github.com/OWASP/ASVS/blob/master/5.0/en/0x90-Appendix-A_Glossary.md",
+      "createdAt": "2024-06-17T11:00:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2173084339",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Bhqms",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And @csfreak92 would you mind submitting a PR for SCA? ",
+      "createdAt": "2024-06-17T11:01:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2173086124",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Bk7hV",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "No prob, I'll create a PR for it. ",
+      "createdAt": "2024-06-17T17:22:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2173941845",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LEu0J",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Seems that this issues has some side-jumps, initial topic is solved but there another discussion that is not solved yet: https://github.com/OWASP/ASVS/issues/1405#issuecomment-1559377710 + https://github.com/OWASP/ASVS/issues/1405#issuecomment-1565383627\r\n\r\nping @tghosth ",
+      "createdAt": "2024-09-06T05:41:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2333273353",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LK2PW",
+      "author": {
+        "login": "meghanjacquot"
+      },
+      "authorAssociation": "NONE",
+      "body": "What about an updated 14.2.1? I believe if this is agreed upon that it would also close out this issue. \r\n\r\n<img width=\"924\" alt=\"Screenshot 2024-09-06 at 18 14 05\" src=\"https://github.com/user-attachments/assets/0f7519ea-e73b-43ac-91af-bbb8ffc29668\">\r\n\r\n",
+      "createdAt": "2024-09-06T22:12:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2334876630",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LSHRd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK, I think the big question here is whether 3rd party library risk is definitely in scope for ASVS v5. We generally consider SSDLC activities and CI/CD processes to be out of scope.\r\n\r\nShould the requirements discussed in this issue therefore be out of scope @elarlang @meghanjacquot ?",
+      "createdAt": "2024-09-08T18:32:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2336781405",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L6rHJ",
+      "author": {
+        "login": "meghanjacquot"
+      },
+      "authorAssociation": "NONE",
+      "body": "> SSDLC\r\n\r\nIf we are removing SSDLC as part of scope, then I think we should rethink all of 14.2. It seems like that if those are out of scope, analyzing 3rd party risk could potentially be as well therefore making all of 14.2 out of scope. \r\n\r\nAlso, removal of 14.1.1 due to the CI/CD emphasis and 14.1.3 due to 3rd party references. \r\n\r\nHappy for some other ideas and thoughts @elarlang @tghosth @jmanico ",
+      "createdAt": "2024-09-12T23:38:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2347413961",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L-GQ-",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My only suggestion is that we have **one** clear requirement for ensuring that we keep libraries up to date from a security perspective. I like the language \"Verify that application components do not contain known vulnerabilities\" a lot. But I only think we need one (prominent) requirement for this at L1.",
+      "createdAt": "2024-09-13T08:11:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2348311614",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MK772",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So, sorry for the flip-flopping but I am thinking more about that this. It feels like 3rd party libraries are an inseparable part of writing the application which makes me think that we cannot ignore them entirely. \r\n\r\nI do however think that maybe we want the 14.2.x requirements to be as simple as possible. We previously considered splitting client-side and server-side dependency requirements because of testability but I no longer think that is worth two requirements. I also think that we should not be too prescriptive about the specific solution.\r\n\r\nOn 14.1.1, I think that is more process than code so I would be incline to drop it, I have opened a separate issue: #2084\r\n\r\nI actually think 14.1.3 should stay because 3rd party components might be an inseparable part of the app.\r\n",
+      "createdAt": "2024-09-15T16:57:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2351677174",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MK-sI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> If we are removing SSDLC as part of scope, then I think we should rethink all of 14.2. It seems like that if those are out of scope, analyzing 3rd party risk could potentially be as well therefore making all of 14.2 out of scope.\r\n\r\nIt is not that much analyzing 3rd party component risk, but using known vulnerability is definitely something to keep and hilight. \"Vulnerable and Outdated Components\" also climbed to position 6 in the Top 10 project. \r\n\r\nIt does not mean that the section does not have place for improvement, for sure there is, but please no \"let's delete all and problem solved\".",
+      "createdAt": "2024-09-15T17:25:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2351688456",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MLD24",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It is not that much analyzing 3rd party component risk, but using known vulnerability is definitely something to keep and hilight. \"Vulnerable and Outdated Components\" also climbed to position 6 in the Top 10 project.\r\n\r\nYeah hence my change of mind. Which requirements from 14.2.x do you think should stay/go?",
+      "createdAt": "2024-09-15T18:11:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2351709624",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MLMdC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can we please focus on one thing in one issue? If the 14.2.1 needs an update, then let's update, but let's chat about everything in the issue is just a nightmare to work through again and again, I waste days worth of hours on this every month.",
+      "createdAt": "2024-09-15T18:52:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2351744834",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MYpLv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Fair point @elarlang, I have pulled the wider point out to #2088.\r\n\r\nI don't think 14.2.1 can be considered separately to the rest of the section so maybe discussion should be continued there?",
+      "createdAt": "2024-09-17T10:39:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2355270383",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6MYsQt",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ultimately, I think I no longer agree with the points above about splitting the requirement and I don't agree we should split on testability but rather we should keep it simplified.",
+      "createdAt": "2024-09-17T10:43:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2355282989",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M7TGD",
+      "author": {
+        "login": "meghanjacquot"
+      },
+      "authorAssociation": "NONE",
+      "body": "Please correct me if I'm wrong here, but I think that the topic of this issue has been resolved and we have now moved on to additional discussion for 14.2.X in a different thread with #2088 and #2084 . So would it make sense to close this @tghosth @elarlang ? ",
+      "createdAt": "2024-09-20T19:04:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2364354947",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6M9yZq",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think @tghosth need to work through the issue again and collect points to discuss, I don't clearly understand, what is the latest direction with 14.2.1 or some added new requirements.",
+      "createdAt": "2024-09-21T05:19:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2365007466",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NLGB3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So I think the original point was that 1.14.3 was a duplicate and that was resolved long ago. I also think the approach [I described here](https://github.com/OWASP/ASVS/issues/1405#issuecomment-1403454318) and the discussion about testability is overkill for this section. As such, I agree with @meghanjacquot that was can keep the more general 14.2.x discussion in #2088 and close this.",
+      "createdAt": "2024-09-23T14:42:42Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1405#issuecomment-2368495735",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-10-21T18:59:46Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    }
+  ],
+  "number": 1405,
+  "state": "CLOSED",
+  "title": "proposal: remove 1.14.3 as duplicate of or merge to 14.2.1",
+  "url": "https://github.com/OWASP/ASVS/issues/1405"
+}

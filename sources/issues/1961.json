@@ -1,0 +1,395 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "This is a spinoff from #1589 with a focus on URLs.\r\n\r\nMy first question is, are we aiming this requirement at the dynamic generation of URLs or at the processor of URLs?\r\n\r\n@jmanico ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5-EFCc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Related: https://github.com/OWASP/ASVS/issues/1590#issuecomment-2103953573\r\n\r\nAlso related:\r\n> V5.5.5 [ADDED, MERGED FROM 13.1.1] Verify that different parsers used in the application for the same data type (e.g. JSON parsers, XML parsers, URL parsers), perform parsing in a consistent way and use the same character encoding mechanism to avoid issues such as JSON Interoperability vulnerabilities or different URI or file parsing behavior being exploited in Remote File Inclusion (RFI) or Server-side Request Forgery (SSRF) attacks.",
+      "createdAt": "2024-05-16T11:40:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2114998428",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-EYbY",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I believe both. However, I believe it’s not our job to set requirements for web servers in my opinion. I state with respect. I do believe we need to be aware of the differences between web servers.\r\n",
+      "createdAt": "2024-05-16T12:08:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2115077848",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-EvM2",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "One of my concerns around URL safety is that bad URL handling to lead to a variety of different major security issues. This includes XSS, SSRF and open redirects.\r\n\r\nJavaScript URL’s alone cause over a third of real world XSS attacks and is on the rise.\r\n\r\nIf we wish to aim for positive requirements in this area, I believe we need requirements for:\r\n\r\n1) safe complete URL output encoding (XSS)\r\n2) safe inserting of untrusted data into query string parameters and paths (url encoding and possibly base64encoding)\r\n3) url validation (SSRF and open redirects)",
+      "createdAt": "2024-05-16T12:52:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2115171126",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-On0i",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I believe both. However, I believe it’s not our job to set requirements for web servers in my opinion. I state with respect. I do believe we need to be aware of the differences between web servers.\r\n\r\nvs\r\n\r\n> One of my concerns around URL safety is that bad URL handling to lead to a variety of different major security issues. This includes XSS, SSRF and open redirects.\r\n\r\nI think those two statements are in conflict - if a web server handles URL incorrectly, it is exactly our goal to provide requirements for that and point to the specs, of how it must be done. It is not expected, that program on one web server is safe and on the other one is not just because they handle URL differently.\r\n\r\nThe provided topics are quite vague to comment on. For example, how \"URL output encoding\", \"complete URL output encoding\" and \"safe complete URL output encoding\" are different from the requirement we already have? Please provide example attacks or vulnerabilities that should be addressed.",
+      "createdAt": "2024-05-17T14:42:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2117762338",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-Sgnn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar,\n\nLike I demonstrated on my own server,  if you url encode untrusted data and place it on a path, path traversal is possible on some (popular) HTTP servers. So URL encoding untrusted data on a path is not universally safe. This is why the JWT standard opted for base64url encoding and not url encoding.\n",
+      "createdAt": "2024-05-18T11:07:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2118781415",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-ShZC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If it behaves like you have it implemented, it's done incorrectly. Recommended reading:\r\n\r\nhttps://datatracker.ietf.org/doc/html/rfc3986#section-2.4\r\n\r\n> Under normal circumstances, the only time when octets within a URI are percent-encoded is during the process of producing the URI from its component parts.\r\n> Once produced, a URI is always in its percent-encoded form.\r\n\r\n> When a URI is dereferenced, the components and subcomponents significant to the scheme-specific dereferencing process (if any) must be parsed and separated before the percent-encoded octets within those components can be safely decoded, as otherwise the data may be mistaken for component delimiters.\r\n\r\n> Implementations must not percent-encode or decode the same string more than once, as decoding an already decoded string might lead to misinterpreting a percent data octet as the beginning of a percent-encoding, or vice versa in the case of percent-encoding an already percent-encoded string.\r\n\r\nIn total, you listed 3 problems: please list examples for all of them, one by one, keeping the entire coverage of the risen problem.",
+      "createdAt": "2024-05-18T11:19:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2118784578",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-SpvT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Like I demonstrated on my own server,  if you url encode untrusted data and place it on a path, path traversal is possible on some (popular) HTTP servers. So URL encoding untrusted data on a path is not universally safe. This is why the JWT standard opted for base64url encoding and not url encoding.\r\n\r\nCorrect URL encoding in this situation is for functionality to work correctly.\r\n\r\nIf you have a path traversal vulnerability on the server side, you can not fix it with URL encoding for the client, it is not a trusted service layer in this context. You need to fix it on the server side - with validation and sanitization like every other user input.\r\n\r\nSo, your point of view (to say that path traversal on the server side is the result of encoding URL incorrectly for the client side) is also conceptually just wrong.",
+      "createdAt": "2024-05-18T13:00:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2118818771",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-SzTT",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The point I’m making is that it is poor url handling is reality (in both url parsing classes, servers and more)  that we must and should recognize, regardless of standards. \r\n\r\nMany of our other requirements would not be needed if dev’s and components just followed standards, but they do not.",
+      "createdAt": "2024-05-18T15:28:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2118857939",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-S1UI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The point I’m making is that it is poor url handling is reality (in both url parsing classes, servers and more) that we must and should recognize, regardless of standards. Many of our other requirements would not be needed if dev’s and components just followed standards, but they do not.\r\n> Many of our other requirements would not be needed if dev’s and components just followed standards, but they do not.\r\n\r\nThis is the first statement I agree with - I recommend you start from your own server :) We are not going to tolerate vulnerabilities just because they are widespread.\r\n\r\nAs with 3 attempts here and 10s of comments before, I was not able to get answers or understand, what is the problem with current requirements, or what the proposals are to improve them, then I'll give it over to @tghosth .\r\n\r\nMy summary:\r\n\r\n## Output encoding\r\n\r\nI stand for the statement, that the output encoding is covered with 5.3.1\r\n\r\n> 1) safe complete URL output encoding (XSS)\r\n> 2) safe inserting of untrusted data into query string parameters and paths (url encoding and possibly base64encoding)\r\n\r\nSafe inserting means that we need to transfer the data correctly to the next component. If the problem is in the next component, it can not be solved with output encoding.\r\n\r\nMore detailed comment for that is written here: https://github.com/OWASP/ASVS/issues/1589#issuecomment-2116829319\r\n\r\nTo use base64uri or whatever other \"URL-safe\" encoding, it is a question of application logic to transfer its data between its components. If URL encoding is done correctly, we can not require the use of base64uri instead.\r\n\r\n## Validation\r\n\r\n> JavaScript URL’s alone cause over a third of real world XSS attacks and is on the rise.\r\n\r\n> 3) url validation (SSRF and open redirects)\r\n\r\n\r\nWe have requirement 5.1.4 for validating the data from the user, we can mention URL to give it more spotlight (issue https://github.com/OWASP/ASVS/issues/1552)\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.4** | [GRAMMAR] Verify that structured data is strongly typed and validated against a defined schema including allowed characters, length and pattern (e.g. credit card numbers, e-mail addresses, telephone numbers, or validating that two related fields are reasonable, such as checking that suburb and zipcode match). | ✓ | ✓ | ✓ | 20 |\r\n\r\nIf validation is done and was not enough, the value must be sanitized.\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.2.2** | Verify that unstructured data is sanitized to enforce safety measures such as allowed characters and length. | ✓ | ✓ | ✓ | 138 |\r\n\r\n\r\nFor open redirect and SSRF we have:\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **5.1.5** | [MODIFIED, SPLIT TO 50.7.1] Verify that the application will only automatically redirect the user to a different URL directly from an application URL where the destination appears on an allow list. | ✓ | ✓ | ✓ | 601 |\r\n| **5.2.6** | Verify that the application protects against SSRF attacks, by validating or sanitizing untrusted data or HTTP file metadata, such as filenames and URL input fields, and uses allow lists of protocols, domains, paths and ports. | ✓ | ✓ | ✓ | 918 |\r\n\r\n",
+      "createdAt": "2024-05-18T16:00:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2118866184",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-S3Ku",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "It’s not “my server software” it’s a standard HTTP server used by millions of sites. \r\n",
+      "createdAt": "2024-05-18T16:31:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2118873774",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-TwTl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thanks both for the comments and direction.\r\n\r\n> However, I believe it’s not our job to set requirements for web servers in my opinion. I state with respect. I do believe we need to be aware of the differences between web servers.\r\n\r\nI think this is a subtle but important point. We are not writing requirements for how to write a web server (e.g. nginx or Apache or IIS or whatever), we are providing requirements for applications which run on these web servers.\r\n\r\nAs such, we need to advise on generating standards compliant URLs and how to manually process URLs in a safe way but I don't think we can necessarily account for every edge case or every instance where the underlying web server does not work in a standards compliant way.\r\n\r\nIn terms of the areas to cover:\r\n\r\n### 1) safe complete URL output encoding (XSS)\r\n\r\n@jmanico I would appreciate a more specific example of how this specific point should be covered. The way I understand it is that if a URL needs to be encoded for a web page based on the context where it is being written (HTML element, HTML attribute, Javascript, etc) in the same way that any content would need to be. I am not sure what is needed here in addition to what is in 5.3.1.\r\n\r\n### 2) safe inserting of untrusted data into query string parameters and paths (url encoding and possibly base64encoding)\r\n\r\nI agree with @jmanico that this has some specific points which would benefit from their own requirement. Do you think you could provide a suggested draft text for a requirement here @jmanico?\r\n\r\n### 3) url validation (SSRF and open redirects)\r\n\r\nIn this case I think I agree with @elarlang that we already have a number of requirements that handle these aspects, @jmanico I am not sure we need anything additional here unless you wanted to suggest specific changes to the requirements Elar noted above.\r\n\r\n\r\n",
+      "createdAt": "2024-05-19T05:31:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2119107813",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-T_uJ",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> 1) safe complete URL output encoding (XSS)\r\n\r\nOutput encoding complete URL’s in a src or href context is not a complete defense since JavaScript: URL’s still execute XSS even when encoded.\r\n\r\nThis is one of the only situations where encoding is not a complete XSS defense. \r\n\r\nValidating URL’s is critical for XSS, open redirects, SSRF and more.\r\n\r\n2) new requirements:\r\n\r\nThese clarifications are valid for redirects, SSRF and general safe url construction. There are generally two different needs to stop this family of server side url handling.\r\n\r\n2a) First, build dynamic URL’s safely. URL encode query string parameters and base64url encode path segments.\r\n\r\nThe following…\r\n\r\nSite.com?data=urlEncode(data)\r\nAnd\r\nSite.com/base64urlEncode(data)/\r\n\r\n…are by far the safest way to roll in a universal fashion. Again, this is why the JWT standard chose the base64url option for token encoding. It’s the only universally safe way to encode data on a path to stop path traversal.\r\n\r\n2b) Also ensure complete URL’s are valid. Also, validate host names and validate schemes/protocols using allow-list validation. This is necessary for SSRF, open redirects, and to stop XSS when it comes to JavaScript URL’s. This is super important. Over 1/3 of real world XSS is from JavaScript URL’s.\r\n",
+      "createdAt": "2024-05-19T09:39:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2119170953",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-UbYV",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Output encoding complete URL’s in a src or href context is not a complete defense since JavaScript: URL’s still execute XSS even when encoded.\r\n\r\nSpecifically, you mean that the JavaScript URL will execute when it is clicked on, i.e. it does not execute when the page is rendered but rather when the link is clicked (which is the theoretical purpose of the JavaScript URL anyway). Did I understand correctly?\r\n\r\n> First, build dynamic URL’s safely....\r\n\r\nIs there any OWASP cheatsheet for this as it feels like the rules here are going to be a little complicated?\r\n\r\n> Also, validate host names and validate schemes/protocols using allow-list validation.\r\n\r\nI am going to look to see how we currently talk about this related to SSRF and other stuff and whether we need to add more content to the existing requirements. (I will get back to you :) )",
+      "createdAt": "2024-05-19T15:56:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2119284245",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-xOqA",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Notes from call:\r\n\r\n> 1) Validating a complete URL to safely place in a webpage\r\n\r\nHandled in #1589\r\n\r\n> 2) Output encoding a complete URL when placing into a HTML document\r\n\r\nHandled in #1589\r\n\r\n> 3) Validation a complete URL for server side use (redirect/SSRF)\r\n\r\n@tghosth to check what requirements we already have for SSRF/redirects, i.e. where we have control over the interpreter.\r\n\r\n> 4) Assembling a dynamic URL safely\r\n> \t4a) Placing untrusted data in a querystring\r\n\r\nNeed a new requirement(s) @jmanico \r\n\r\n> \t4b) Placing untrusted data in the path of a URL (REST Style)\r\n\r\nNeed a new requirement(s) @jmanico \r\n\r\n> \t4c) Any other URL contexts?\r\n\r\nNeed a new requirement(s) @jmanico ",
+      "createdAt": "2024-05-23T11:05:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2126834304",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-yUxM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The point I’m making is that it is poor url handling is reality (in both url parsing classes, servers and more)  that we must and should recognize, regardless of standards.\r\n\r\nhttps://github.com/caddyserver/caddy/issues/1582 - worth reading in the context of what is expected and accepted behavior by a web server and what is not.\r\n\r\nMy point is - ASVS should not go and tolerate going against specifications.",
+      "createdAt": "2024-05-23T13:32:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2127121484",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-ylvP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is not just a caddy issue. Other servers have the same struggle. I understand your point, but I want to acknowledge the reality that URL encoding is not a universal defense. base64encoding is. \r\n\r\nI plan to build a requirement that suggests URL encoding and also suggests base64url encoding when URL encoding is not sufficient to address both of our concerns. Again, this is why the JWT standard uses base64url encoding. I'm not the only one who acknowledges this reality.",
+      "createdAt": "2024-05-23T13:58:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2127190991",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-4McR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "## URL handling\r\n\r\nSo, if I point to RFC - you say (https://github.com/OWASP/ASVS/issues/1589#issuecomment-2111271913) **your** understanding of the URL handling is still right. When I point to the Caddy issue, which describes the same behavior as a bug/security issue, you keep saying, that your own server, which handles the URL the same-incorrect way, is still right?\r\n\r\n> Other servers have the same struggle.\r\n\r\nPlease provide names and facts. We should only talk about facts and examples, not \"but The Others\". Also the reason and explanations, why they do so. Or... is it someones configuration issue.\r\n\r\n## URL building\r\n\r\n> I plan to build a requirement that **suggests** URL encoding and also suggests base64url encoding\r\n\r\nI'm waiting for your proposals, but note, that a suggestion or recommendation is not a security requirement.\r\n\r\nThis is what I have pointed out before - if you want to suggest, that it is easier for **the interpreter** to handle the URL, you can send the data in base64uri encoding. It is not a security hole, when someone does not use base64uri encoding instead of just using correctly URL encoding.",
+      "createdAt": "2024-05-24T06:28:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2128660241",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5-6dCM",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "We as developers do not always have the ability to fix the interpreter. We almost never do. And not all ASVS requirements can map neatly to a RFC. Most do not.\n\nI rest my case and will focus on the new requirements moving forward.",
+      "createdAt": "2024-05-24T10:59:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2129252492",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5_xuLf",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Hi @jmanico , I believe you have suggested the following requirements:\r\n\r\n> 1) If building dynamic urls, be sure to URL encode when placing\r\n> untrusted data in a querystring parameter and validate the complete URL\r\n> \r\n> and\r\n> \r\n> 2) If building dynamic urls, be sure to URL encode or base64url encode\r\n> when placing untrusted data in a path parameter and validate the\r\n> complete URL\r\n\r\nDo you think these could be merged?\r\nDo these cover all cases related to URLs? Do we need to consider javascript: urls or something as well?",
+      "createdAt": "2024-06-02T08:00:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2143740639",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ATFln",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I can live with these being merged. Perhaps:\r\n\r\n**_Verify that when building dynamic URLs, untrusted data is URL encoded or base64url encoded, and ensure the complete URL is validated to confirm it is legal and the protocol is safe._**",
+      "createdAt": "2024-06-06T13:25:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2152487271",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BDP9l",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that when dynamically building URLs, untrusted data is safely encoded based on context (e.g. URL encoded for query parameters, URL or ideally base64url encoded for path parameters) and only safe URL protocols are allowed (e.g. not javascript).\r\n\r\n@jmanico what do you think about this one?",
+      "createdAt": "2024-06-13T09:26:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2165112677",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BD2-P",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like it am am happy with it. Can I suggest a little cleanup just to make it a little more general?\r\n\r\n_Verify that when dynamically building URLs, untrusted data is safely encoded according to its context (e.g., URL encoding or base64url encoding for query or path parameters). Ensure that only safe URL protocols are permitted (e.g., disallow javascript: or data:)._",
+      "createdAt": "2024-06-13T10:36:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2165272463",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6BD62r",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that when dynamically building URLs, untrusted data is encoded according to its context (e.g., URL encoding or base64url encoding for query or path parameters). Ensure that only safe URL protocols are permitted (e.g., disallow javascript: or data:).\r\n\r\nI removed safely as it may be a little redundant but can you PR this for 5.3?\r\n\r\nShould be tagged as [ADDED, SPLIT FROM 5.3.1]",
+      "createdAt": "2024-06-13T10:44:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1961#issuecomment-2165288363",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-05-16T11:19:00Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 1961,
+  "state": "CLOSED",
+  "title": "URL Safety",
+  "url": "https://github.com/OWASP/ASVS/issues/1961"
+}

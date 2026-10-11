@@ -1,0 +1,440 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIwMzkyMzAy",
+    "is_bot": false,
+    "login": "ajayojha",
+    "name": "Ajay Ojha"
+  },
+  "body": "\n**In SPA + API architectures**, the implementation responsibilities shift between frontend and backend. Some requirements implicitly assume traditional server-side rendering or monolithic architectures, which don’t clearly apply to **Modern Single Page Applications (SPAs)**. Because of the complexity of an SPA's architecture makes it harder to verify and easier to implement incorrectly.\n\nSo far, I’ve reviewed the Encoding, Injection, and Sanitization requirements and would like to highlight the following concerns. I plan to report additional concerns for other requirements if they are similarly difficult to implement or verify in SPAs.\n\n### Concerns:\n\n> Rule: 1.1.1 - Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further\n\nSPAs often process input at multiple layers (client-side routing, component rendering, API calls, or state management). The requirement mandates decoding before processing, validation, or sanitization, but in an SPA, the boundaries between these steps can be blurred.\n\nThe requirement assumes the application can predict when encoded data is expected, but in an SPA, inputs are often processed in a decentralized way (across components, services, or state management), making it hard to enforce this condition uniformly.\n\n> Rule: 1.1.2 - Verify that the application performs output encoding and escaping either as a final step before being used by the interpreter for which it is intended or by the interpreter itself.\n\nSPAs have complex data flows ( from state management to components to APIs), and ensuring that encoding happens as the “**final step**” can be challenging.\n\n> Rule: 1.2.1 - Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required...”\n\nIn most of the cases the Output encoding is primary responsibility of the client-side JavaScript framework, not the backend.\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM65V84T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Entire issue buildup is contextually just wrong - for SPA you don't convert the content, but use correct method based on the needs - the content is rendered or not.\n\nWe have requirement for this:\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **3.2.1** | Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields (such as Sec-Fetch-\\*) indicate it is the correct context, using the sandbox directive of the Content-Security-Policy header field or using the attachment disposition type in the Content-Disposition header field. | 1 |\n\nedit - correct requirement to match the comment:\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **3.2.2** | Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of content such as HTML or JavaScript. | 1 |\n",
+      "createdAt": "2025-07-23T17:40:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3109539347",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65guK_",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks for the response. I will submit my detailed reply before this weekend.",
+      "createdAt": "2025-07-24T07:31:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3112362687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65lfn2",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Entire issue buildup is contextually just wrong - for SPA you don't convert the content, but use correct method based on the needs - the content is rendered or not.\n> \n> We have requirement for this:\n> \n> #\tDescription\tLevel\n> **3.2.1**\tVerify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e.g., when an API, a user-uploaded file or other resource is requested directly). Possible controls could include: not serving the content unless HTTP request header fields (such as Sec-Fetch-*) indicate it is the correct context, using the sandbox directive of the Content-Security-Policy header field or using the attachment disposition type in the Content-Disposition header field.\t1\n\nI am having trouble relating your response with the highlighted concerns. It would be great if you could address each concern individually from a technical standpoint, so I can respond more effectively.  ",
+      "createdAt": "2025-07-24T14:06:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3113613814",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65l1ty",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For SPA, you use element.innerText (or equivalent from any framework in use) if you need to display it as text, or you use element.innerHTML if you need to let the content be rendered as HTML.\n\nIf this is not understandable, maybe you should just not open issues on the topic.",
+      "createdAt": "2025-07-24T14:31:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3113704306",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65naN4",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Would it be possible for you to respond to each of the highlighted concerns individually? This is important for me and also for other users who may have similar concerns.\n\n> If this is not understandable, maybe you should just not open issues on the topic.\n\nAlso, is there a guideline in the open source community that states someone without basic technical knowledge is not allowed to create issues in open source projects like ASVS? If such a guideline exists, I would appreciate it if you could share the link. As a project lead of a well-known project, I assume you are familiar with such policies. Alternatively, is there an OWASP community guideline that suggests contributors or issue creators should be treated differently based on their level of knowledge? Please don’t treat this as a request for free education.\n",
+      "createdAt": "2025-07-24T16:32:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3114115960",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65n8sd",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is not you @ajayojha this is just @elarlang once again being very rude to our community. Keep charging. If you need more support let the rest of the leadership team know. I CC'ed them below.\n\ncc @danielcuthbert @tghosth ",
+      "createdAt": "2025-07-24T17:22:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3114257181",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65oIeA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I could put the timer on to see a comment from Jim :)\n\nThe leadership has some topic to discuss with Jim's undermining the project and willing in to point fingers towards me in any moment. At the same time, carring a \"co-lead\" title, without providing any project-improving or technical feedback.",
+      "createdAt": "2025-07-24T17:40:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3114305408",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65oNyM",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let me conclude the topic here:\n* Issues are opened with statements - the \"requirement is misleading,\" but from the content turns out, just the technical knowledge is not on the level to say that\n* The issues are stated, how things are in real world, without being able to analyze how things should work securely\n* Statements that \"As a Chief Software Architect, Hands on experience in design the large scale enterprise architecture/security solutions\" is not backed up with technical knowledge, but set a tone that \"I know things.\"\n* States that \"if you don't like my comments, it is your problem\" and at the same time says that \"the tone I get in response is not nice\"\n* Quoting me 2 times in a row incorrectly, we can say it is a pure lie\n* Clearly incorrect statements towards secure architecture patterns when terms encoding, sanitization, SPA, and JSON are involved.\n\nBut I'm happy to leave all issues from a certain author to sort out by other leaders (note that you have done exactly 0 efforts for this), and I'll get involved when technical things are explained and discussed and proposals are ready.\n\nOne Jim is enough.\n\nEdit: Only things Jim is doing as a co-leader, is using down-votes.",
+      "createdAt": "2025-07-24T17:47:24Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3114327180",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65oOC8",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@elarlang — statements like “maybe you should just not open issues on the topic” are not acceptable under the [OWASP Code of Conduct](https://owasp.org/www-policy/operational/code-of-conduct). Please keep discussion technical and respectful. Further personal remarks will be escalated to the leadership team and, if necessary, to the CoC process. Let’s keep this thread focused on the text of ASVS and the specific concerns @ajayojha raised.\n\n@ajayojha thanks for the detailed write‑up. Give me a moment and I'll suggest how we can handle can your three points.",
+      "createdAt": "2025-07-24T17:47:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3114328252",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65odNE",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think rule 1.1.1 is messy and confusing as is and should likely be clarified.\n\nHere is the current version.\n\n_1.1.1 | Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization. | 2_\n\nI would suggest something like this to clarify the point 1.1.1 is trying to make (which is canonicalization before use of data for security purposes)\n\nPerhaps:\n\n_1.1.1 | Verify that all input is decoded/unescaped and normalized to a single canonical form exactly once at the trust boundary, before any validation, security decision, or business logic, and that it is not re‑decoded later unless it is explicitly re‑interpreted for a different interpreter context (which MUST be separately validated/encoded). | 2_\n\nBut in general I agree that 1.1.1 could use better clarification to explain the purpose.\n ",
+      "createdAt": "2025-07-24T18:11:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3114390340",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65ydwW",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I think rule 1.1.1 is messy and confusing as is and should likely be clarified.\n> \n> Here is the current version.\n> \n> _1.1.1 | Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization. | 2_\n> \n> I would suggest something like this to clarify the point 1.1.1 is trying to make (which is canonicalization before use of data for security purposes)\n> \n> Perhaps:\n> \n> _1.1.1 | Verify that all input is decoded/unescaped and normalized to a single canonical form exactly once at the trust boundary, before any validation, security decision, or business logic, and that it is not re‑decoded later unless it is explicitly re‑interpreted for a different interpreter context (which MUST be separately validated/encoded). | 2_\n> \n> But in general I agree that 1.1.1 could use better clarification to explain the purpose.\n\nWill update you on this soon.",
+      "createdAt": "2025-07-25T09:11:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3117014038",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65zHWW",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Let me conclude the topic here:\n> \n> * Issues are opened with statements - the \"requirement is misleading,\" but from the content turns out, just the technical knowledge is not on the level to say that\n> * The issues are stated, how things are in real world, without being able to analyze how things should work securely\n> * Statements that \"As a Chief Software Architect, Hands on experience in design the large scale enterprise architecture/security solutions\" is not backed up with technical knowledge, but set a tone that \"I know things.\"\n> * States that \"if you don't like my comments, it is your problem\" and at the same time says that \"the tone I get in response is not nice\"\n> * Quoting me 2 times in a row incorrectly, we can say it is a pure lie\n> * Clearly incorrect statements towards secure architecture patterns when terms encoding, sanitization, SPA, and JSON are involved.\n> \n\n@elarlang  Fantastic, without going into the deep technical discussion you have concluded that I don't know even the basics of the software world (as per the tone of your message). For your information, the same person who “**doesn’t know the basics**” raised two earlier issues before this, and in both cases, the concerns were acknowledged that the corrections are required in the ASVS document, after a long discussion. I believe actions speak louder than assumptions.\n\nalmost every response from your side has included multiple personal attacks, mischaracterizations, dismissive statements, unprofessional and entirely off-topic. instead of addressing the original technical concerns.   \n\nFor SPA capability, I would be happy to share few links which gives you some insights about my basic technical knowledge on SPA:\n1. In 2016, I raised a [concern regarding the Angular.js guidelines](https://github.com/johnpapa/angular-styleguide/issues/758). Please read the submitted ticket content carefully, along with the response I received from a core community member.\n2. In 2018, I released the package [@rxweb/reactive-form-validators](https://www.npmjs.com/package/@rxweb/reactive-form-validators), which receives over 1 million downloads annually. This package is widely used, especially for SPA-grade enterprise applications. It is used by Fortune 500 companies and has been referenced in books written by Google Developer Experts.\n3. I highly respect Jim and other leaders, including you, as I believe writing a ASVS document of this level is not easy and it is not a days or months long job, it's more than this. The ASVS team has done an excellent job. For your kind note I was not aware that Jim had raised similar concerns(SPA or real world related) in the past. Please refer to my written articles([First](https://medium.com/angular-in-depth/new-way-to-validate-the-angular-reactive-form-2c4fe4f13373) & [Second](https://medium.com/@oojhaajay/quick-solution-conditional-required-validation-angular-reactive-forms-1957a8bbb853)) that I wrote in 2018 & 2019. While reading the article, you will see that I started a discussion around real-world problems and raised concerns about the existing Angular API structure, as well as about recommendations from top leaders in the Angular community, explaining why their suggestions are not effective solutions for large-scale enterprise applications. This has been my approach to highlighting real-world concerns for over a decade.\n\n\n> For SPA, you use element.innerText (or equivalent from any framework in use) if you need to display it as text, or you use element.innerHTML if you need to let the content be rendered as HTML.\nIf this is not understandable, maybe you should just not open issues on the topic.\n\nPlease refer to [this pull request](https://github.com/OWASP/CheatSheetSeries/pull/1729/files) that I created a few days ago, it should give you a better understanding of whether I have knowledge of innerText and innerHTML or not. I believe you missed mentioning **textContent**, which is actually the more widely recommended best practice in modern software development, especially when a client-side framework is not used. As per tone of your message that I lack basic knowledge, if you find any mistakes in the pull request, I would be happy to improve my understanding based on your input.\n\n**I have noted that you often avoid answering technical questions with detailed explanations and instead begin writing disrespectful comments. This always seems to happen in situations where a solid technical answer is required from you. After initiating the discussion, you stop responding to technical points with the excuse of \"free education,\" which I believe is entirely incorrect. I don’t see this as a collaborative discussion, which is typically expected in an open-source community. Please consider me a learner and I am happy to correct my knowledge if I have written anything incorrect or am carrying a false argument.**\n\nI again welcome you to start technical discussion. This way, both you and other readers can objectively assess whether I truly lack the basics of the software world based on whether your technical arguments are justified by real-world needs. Ignoring the conversation or giving a vague response is not a solution, as I will continue to raise more tickets than I have so far.\n",
+      "createdAt": "2025-07-25T10:10:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3117184406",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM65zmdL",
+      "author": {
+        "login": "karantekwani"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang I liked the way you reply with aggression and completely opposite the way @ajayojha and other members reply.\n\nThat said, I'm still confused about your initial comment. How exactly would adding the Content-Security-Policy or Content-Disposition or any other headers resolve the ticket author highlighted concern? From my understanding, these headers operate at the browser level, whereas the concern raised relates at a code-level.\n\nBTW I follow and admire both of you.",
+      "createdAt": "2025-07-25T10:45:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3117311819",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM650WGs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I have noted that you often avoid answering technical questions with detailed explanations and instead begin writing disrespectful comments. ...\n\nDo you think pure lies are allowed by any CoC? :)\n\nI did not plan to respond to you anymore, but this is a pure lie and BS. It was [not the first time](https://github.com/OWASP/ASVS/issues/3206#issuecomment-3015044897), and this is the reason for the responses in tone you get. It does not matter too much what is written - you read what you want to see.\n\nI always answer technical questions technically.\n\n> you stop responding to technical points with the excuse of \"free education,\"\n\nI have used \"free education\" exactly [once](https://github.com/OWASP/ASVS/issues/3206#issuecomment-3015044897), after 20+ comment of \"education\". So it is another lie and attempt to display things in different angle as they are. Your intentions are quite questioned with such false claims.\n\nAs I stated:\n> But I'm happy to leave all issues from a certain author to sort out by other leaders (note that you have done exactly 0 efforts for this), and I'll get involved when technical things are explained and discussed and proposals are ready.\n\n---\n\n> @elarlang I liked the way you reply with aggression \n\n@karantekwani, I would not call it aggression (compare with [examples](https://adtmag.com/blogs/dev-watch/2014/04/linus-torvalds-rants.aspx)). I just say what I think and without AI-polishing my text to passive-aggressive to be \"compatible with used words\". Nowadays, when people are looking for \"reasons to be offended and screaming for attention\", it provides some fuel for side effects.\n\nIn general, \"you'll get what you ask\".\n\n> That said, I'm still confused about your initial comment.\n\nI have copied a wrong requirement to my comments, I copied 3.2.1 instead of 3.2.2. Comment updated.\n\n| # | Description | Level |\n| :---: | :--- | :---: |\n| **3.2.2** | Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of content such as HTML or JavaScript. | 1 |\n\nThat said, it makes my \"problematic comment\" not fully justified, but it does not change anything in the big picture here.",
+      "createdAt": "2025-07-25T11:53:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3117506988",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM651a8U",
+      "author": {
+        "login": "karantekwani"
+      },
+      "authorAssociation": "NONE",
+      "body": "> For SPA, you use element.innerText (or equivalent from any framework in use) if you need to display it as text, or you use element.innerHTML if you need to let the content be rendered as HTML.\n\n> Requirement 3.2.2: Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNode or textContent) to prevent unintended execution of content such as HTML or JavaScript.\n\nIn your comments, you suggested using innerText or innerHTML, but the requirement mentions createTextNode or textContent. Could you please clarify which method should be used and in which scenarios?\n\nAlso, based on my knowledge, in SPA applications, rendering content safely is typically managed by the framework itself, so additional manual precautions aren’t usually necessary.\n\nSo I assume, the requirement you shared, is not applicable to SPA apps.\n",
+      "createdAt": "2025-07-25T13:18:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3117788948",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM651iNV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> In your comments, you suggested using innerText or innerHTML, but the requirement mentions createTextNode or textContent. Could you please clarify which method should be used and in which scenarios?\n\nAs I wrote [here](https://github.com/OWASP/ASVS/issues/3217#issuecomment-3113704306)\n\n> For SPA, you use element.innerText (or equivalent from any framework in use) if you need to display it as text, or you use element.innerHTML if you need to let the content be rendered as HTML.\n\nThe point is, you need to choose the output method for displaying the content. Is it innerText, textContent or anything else, it is just a detail here. The method that suits the situation.\n\n---\n\n> Also, based on my knowledge, in SPA applications, rendering content safely is typically managed by the framework itself, so additional manual precautions aren’t usually necessary.\n\nThe \"_is typically managed by the framework itself_\" is exactly the point I said in [my first comment](https://github.com/OWASP/ASVS/issues/3217#issuecomment-3109539347):\n\n\n> for SPA you don't convert the content, but use correct method based on the needs - the content is rendered or not.\n\n---\n\n> So I assume, the requirement you shared, is not applicable to SPA apps.\n\nThis is the requirement that applies to SPA apps instead of the referenced encoding ones, because of the arguments provided above (including by yourself).",
+      "createdAt": "2025-07-25T13:25:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3117818709",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM66U-eB",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I think rule 1.1.1 is messy and confusing as is and should likely be clarified.\n> \n> Here is the current version.\n> \n> _1.1.1 | Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that this is done before processing the input further, for example it is not performed after input validation or sanitization. | 2_\n> \n> I would suggest something like this to clarify the point 1.1.1 is trying to make (which is canonicalization before use of data for security purposes)\n> \n> Perhaps:\n> \n> _1.1.1 | Verify that all input is decoded/unescaped and normalized to a single canonical form exactly once at the trust boundary, before any validation, security decision, or business logic, and that it is not re‑decoded later unless it is explicitly re‑interpreted for a different interpreter context (which MUST be separately validated/encoded). | 2_\n> \n> But in general I agree that 1.1.1 could use better clarification to explain the purpose.\n\nSorry for the late reply. The updated requirement is far better than the existing. \n\nI have added the text \"**such as API entry point, component boundary, or route handler or state loaders**\" which is next to \"**trust boundary**\" text into the requirement and appended the following suggestions at the end:\n\n*  Inputs with malformed, unexpected, or unauthorized encodings must be rejected.\n* The decoding process must enforce resource limits.\n\nAlso, although \"**all input**\" is mentioned at the beginning, I would still like to ask should file-based inputs (Base64-encoded files) be explicitly considered in the requirement?\n\nHere is the updated requirement suggestion:\n\n**Verify that all input is decoded/unescaped and normalized to a single canonical form exactly once at the trust boundary such as API entry point, component boundary, or route handler or state loaders, before any validation, security decision, or business logic, and that it is not re-decoded later unless it is explicitly re-interpreted for a different interpreter context (which MUST be separately validated/encoded). Inputs with malformed, unexpected, or unauthorized encodings must be rejected and decoding process must enforce resource limits.**",
+      "createdAt": "2025-07-28T08:13:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3126060929",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM66gG4M",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this direction. Here is a suggestion to clean this up a little more:\n\n_1.1.1 Verify that all input is decoded and normalized to a single canonical form exactly once at the trust boundary (e.g., API entry point or route handler), before any validation or processing. Decoding must only occur again when explicitly reinterpreting input for a new context, with separate validation. Inputs with malformed or unauthorized encodings must be rejected._",
+      "createdAt": "2025-07-28T19:33:26Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3128978956",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM66gWbA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "And @ajayojha - take a look at the historical conversions on this requirement so you can see how we got here.\n\nhttps://github.com/OWASP/ASVS/issues/1484\nand\nhttps://github.com/OWASP/ASVS/issues/1590",
+      "createdAt": "2025-07-28T19:39:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3129042624",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM66y7eg",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I like this direction. Here is a suggestion to clean this up a little more:\n> \n> _1.1.1 Verify that all input is decoded and normalized to a single canonical form exactly once at the trust boundary (e.g., API entry point or route handler), before any validation or processing. Decoding must only occur again when explicitly reinterpreting input for a new context, with separate validation. Inputs with malformed or unauthorized encodings must be rejected._\n\nIt's good.\n\nI am sharing my thoughts on the text which are excluded during cleanup, Please take it into consideration for inclusion in the requirement, if it is aligns with your expectations:\n\n* Excluding “**component boundary**” and “**state loaders**” reduces applicability to SPAs, where inputs are often processed at component or state management layers. The API Endpoint and Router Handler can be considered at server side only.\n* “Validation or processing” is unclear compared to “validation, security decision, or business logic,”\n* \"decoding process must enforce resource limits\" - It's good add this line, without resource limits check the application server may crash or vulnerable/exploitable (referencing DoS risks). ",
+      "createdAt": "2025-07-29T20:13:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3133912992",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM66y-4C",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@jmanico any feedback on below:\n\nalthough \"all input\" is mentioned at the beginning, I would still like to ask should file-based inputs (Base64-encoded files) be explicitly considered in the requirement?",
+      "createdAt": "2025-07-29T20:17:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3133926914",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67O1T_",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> [@jmanico](https://github.com/jmanico) any feedback on below:\n> \n> although \"all input\" is mentioned at the beginning, I would still like to ask should file-based inputs (Base64-encoded files) be explicitly considered in the requirement?\n\nhere is the suggestion for file-based inputs, we can ammend the below line, I believe further improvements are still needed:\n\n**binary or file-based inputs (Base64-encoded files), define the expected canonical form and perform specific validation (file type enforcement, metadata sanitization) after decoding.**",
+      "createdAt": "2025-07-31T20:18:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3141227775",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM67O18z",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> > I like this direction. Here is a suggestion to clean this up a little more:\n> > _1.1.1 Verify that all input is decoded and normalized to a single canonical form exactly once at the trust boundary (e.g., API entry point or route handler), before any validation or processing. Decoding must only occur again when explicitly reinterpreting input for a new context, with separate validation. Inputs with malformed or unauthorized encodings must be rejected._\n> \n> It's good.\n> \n> I am sharing my thoughts on the text which are excluded during cleanup, Please take it into consideration for inclusion in the requirement, if it is aligns with your expectations:\n> \n> * Excluding “**component boundary**” and “**state loaders**” reduces applicability to SPAs, where inputs are often processed at component or state management layers. The API Endpoint and Router Handler can be considered at server side only.\n> * “Validation or processing” is unclear compared to “validation, security decision, or business logic,”\n> * \"decoding process must enforce resource limits\" - It's good add this line, without resource limits check the application server may crash or vulnerable/exploitable (referencing DoS risks).\n\nany inputs on this.",
+      "createdAt": "2025-07-31T20:20:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3141230387",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7DIiAz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This issue got a little messy. @ajayojha would you mind if we closed this and brought queries on specific requirements to dedicated issues for those requirements?",
+      "createdAt": "2025-09-10T08:01:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3273793587",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM7EFVNw",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Okay, I am closing this ticket and will create a separate issue for each requirement.",
+      "createdAt": "2025-09-14T18:03:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3217#issuecomment-3289731952",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-07-14T02:42:32Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABG_ozJA",
+      "name": "Will be closed if no response/opposite arguments",
+      "description": "",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3217,
+  "state": "CLOSED",
+  "title": "Clarification: How ASVS requirements apply to Single Page Applications (SPA) architectures",
+  "url": "https://github.com/OWASP/ASVS/issues/3217"
+}

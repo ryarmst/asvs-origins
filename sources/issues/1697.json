@@ -1,0 +1,288 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nProblem to solve: if an application uses HTTP request headers (like X-Forwarded-* headers) from load balancers, proxies etc, then it should be clear that those headers are not given by end user.\r\n\r\nFits to category: V14.5 HTTP Request Header Validation\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5l8L9c",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Something like: \r\n\r\n> Verify that http headers which the application relies upon for business logic or security decisions such as X-Forwarded-* cannot be manipulated/controlled by the end-user.\r\n\r\nWhat do you think @elarlang ?",
+      "createdAt": "2023-09-07T14:41:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1710276444",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l8QwC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can we use something like...\r\n\r\n> Verify that HTTP headers, which are set by middleware like proxy of load balancers, and application relies upon ...\r\n\r\nEnd-users can manipulate those headers anyway, the point is, that this middle-layer should clean up headers with the same name.",
+      "createdAt": "2023-09-07T14:52:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1710296066",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mRJz-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Are there any other security sensitive headers that you want to consider here or only those related to the original IP?\r\n\r\nIf there are other headers then this needs to stay as a separate requirement and we should be more specific maybe.\r\n\r\nIf the only headers we are talking about are those which provide source IP then I think we can merge with the requirement in #1389.",
+      "createdAt": "2023-09-12T13:53:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1715772670",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mS5u8",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Not just IP, there are:\r\n\r\n- `X-Forwarded-For`\r\n- `X-Forwarded-Host`\r\n- `X-Forwarded-Proto`\r\n\r\nRails has historically struggled with these in certain configurations. \r\n\r\nPerhaps something like:\r\n \r\n> Verify that HTTP headers defined by intermediary devices, such as X-Real-IP and X-Forwarded-*, that the application relies upon cannot be overridden by the end-user.",
+      "createdAt": "2023-09-12T18:35:20Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1716231100",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mTHVX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I was thinking about it more and those (#1389) need to be separate requirements.\r\n\r\n`and/or` to `and` in @jsulinski proposal and it's good for me.",
+      "createdAt": "2023-09-12T19:19:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HOORAY",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1716286807",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mVvCZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Requirement:\r\n_Verify that HTTP headers defined by intermediary devices, such as X-Real-IP and X-Forwarded-*, that the application relies upon cannot be overridden by the end-user._\r\n\r\nOther pieces/proposals:\r\n* Category V14.5 HTTP Request Header Validation\r\n* Level: 2\r\n* CWE proposal [CWE-345](https://cwe.mitre.org/data/definitions/345.html)",
+      "createdAt": "2023-09-13T05:31:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1716973721",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mWeIs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My modification:\r\n\r\n> Verify that if the application relies upon HTTP headers such as X-Real-IP and X-Forwarded-*, which are defined by intermediary devices like load balancers or proxies, that these cannot be overridden by the end-user.",
+      "createdAt": "2023-09-13T08:20:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1717166636",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mWgRx",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One more thing - \"relies upon\" ... maybe just \"uses\"?",
+      "createdAt": "2023-09-13T08:26:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1717175409",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mWiKs",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that if the application uses HTTP headers such as X-Real-IP and X-Forwarded-*, which are defined by intermediary devices like load balancers or proxies, that these cannot be overridden by the end-user.\r\n\r\nYeah ok. Any other comments @jsulinski ?",
+      "createdAt": "2023-09-13T08:31:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1717183148",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5miesE",
+      "author": {
+        "login": "jsulinski"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Sounds good to me! Here's another version if you prefer, that resolves the awkwardness of 'which/that these':\r\n\r\n> Verify that any HTTP headers used by the application and defined by intermediary devices like load balancers or proxies, such as X-Real-IP and X-Forwarded-*, cannot be overridden by the end-user.",
+      "createdAt": "2023-09-15T00:16:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1720314628",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mkGan",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I updated PR based on that (https://github.com/OWASP/ASVS/pull/1720/commits/097e6faf141d3d8554e16f18647f5aac72f6336b)",
+      "createdAt": "2023-09-15T06:21:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "ROCKET",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1720739495",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtDmH",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think about [CWE-346](https://cwe.mitre.org/data/definitions/346.html) instead of CWE-[345](https://cwe.mitre.org/data/definitions/345.html)?",
+      "createdAt": "2023-09-18T09:53:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1723087239",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mtGEf",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Both are ok, but what is the key difference?\r\n* [CWE-345](https://cwe.mitre.org/data/definitions/345.html) - Insufficient Verification of Data Authenticity\r\n  * _The product does not sufficiently verify the origin or authenticity of data, in a way that causes it to accept invalid data._\r\n* [CWE-346](https://cwe.mitre.org/data/definitions/346.html) - Origin Validation Error\r\n  * _The product does not properly verify that the source of data or communication is valid._\r\n\r\n346 and Origin in web context associates with the `Origin` header.\r\n\r\nFrom https://github.com/OWASP/ASVS/issues/1481 point of view, it does not matter too much anyway.",
+      "createdAt": "2023-09-18T10:00:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1723097375",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mt2kR",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang let's make it 346 anyway but I accept that this sort of thing is potentially going to become less important going forward",
+      "createdAt": "2023-09-18T12:20:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1723296017",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5muFOy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "(PR is updated, #1720)",
+      "createdAt": "2023-09-18T12:58:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1697#issuecomment-1723356082",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-07-19T09:10:19Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 1697,
+  "state": "CLOSED",
+  "title": "new requirement: end-user should not be able to give and/or manipulate headers which an application expects/uses from load balancers or proxies",
+  "url": "https://github.com/OWASP/ASVS/issues/1697"
+}

@@ -1,0 +1,202 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I noticed that the ASVS (Application Security Verification Standard) does not include a check for Prototype Pollution vulnerabilities. Prototype Pollution is a critical vulnerability that can allow attackers to manipulate an application's JavaScript objects and properties, leading to serious security issues such as unauthorized access to data, privilege escalation, and even remote code execution.\r\n\r\nAs JavaScript applications become more complex, Prototype Pollution attacks are becoming more common. It is therefore essential that the ASVS includes a dedicated check to help ensure that web applications are protected from this type of vulnerability.\r\n\r\nI strongly recommend that the ASVS be updated to include a Prototype Pollution check, a sample check could be this one:\r\n- Check that no user-supplied input is used to modify the prototype property of an object.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5Xnd4C",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "https://twitter.com/JoshCGrossman/status/1635987227736961025\r\n\r\nAgree we should have this, I have reached out to @hackvertor for his opinion on your wording:\r\n\r\n> Verify that no user-supplied input is used to modify the prototype property of an object.",
+      "createdAt": "2023-03-15T12:59:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1469963778",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5XntfL",
+      "author": {
+        "login": "hackvertor"
+      },
+      "authorAssociation": "NONE",
+      "body": "Here are my thoughts on protecting against this attack. I would recommend that developers use new Set() or new Map() instead of using object literals:\r\n\r\n```javascript\r\nlet allowedTags = new Set();\r\nallowedTags.add('b');\r\nif(allowedTags.has('b')){\r\n  //...\r\n}\r\n\r\nlet options = new Map();\r\noptions.set('spaces', 1);\r\nlet spaces = options.get('spaces')\r\n```\r\n\r\nIf objects have to be used then they should be created using the Object.create(null) API to ensure they don't inherit from the Object prototype:\r\n\r\n```javascript\r\nlet obj = Object.create(null);\r\n```\r\n\r\nIf object literals are required then as a last resort you could use the `__proto__` property:\r\n\r\n```javascript\r\nlet obj = {__proto__:null};\r\n```\r\n\r\nYou can also use the Object.freeze() and Object.seal() APIs to prevent built in prototypes from being modified however this can break the application if the libraries they use modify the built in prototypes.\r\n\r\nNode also offers the ability to remove the `__proto__` property completely using the --disable-proto=delete flag. Note this is a defence in depth measure. Prototype pollution is still possible using constructor.prototype properties but removing `__proto__` helps reduce attack surface and prevent certain attacks.",
+      "createdAt": "2023-03-15T13:38:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1470027723",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Xn711",
+      "author": {
+        "login": "hackvertor"
+      },
+      "authorAssociation": "NONE",
+      "body": "Sanitizing keys is a bad approach since you have to use a denylist of bad values. It's far better to use new Set() or new Map() since these APIs do not have prototype pollution vulnerabilities provided they are used correctly.",
+      "createdAt": "2023-03-15T14:14:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1470086517",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5X4xoV",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Thank you, @tghosth and @hackvertor, for your valuable input on the Prototype Pollution check. I appreciate the detailed recommendations on how developers can protect against this type of attack.\r\nBased on your feedback, I would like to propose an updated item for the ASVS that highlights these best practices for preventing Prototype Pollution vulnerabilities:\r\n\r\n[NEW] Verify that the application mitigates Prototype Pollution vulnerabilities by employing one or more of the following strategies: \r\n- Using new Set() or new Map() for storing data instead of object literals.\r\n- Creating objects using Object.create(null) to prevent inheritance from the Object prototype.\r\n- If object literals are required, using the __proto__: null property as a last resort.\r\n- Considering Object.freeze() and Object.seal() APIs to prevent modification of built-in prototypes, but being cautious of potential application breakage.\r\n- For Node.js applications, using the --disable-proto=delete flag as a defense-in-depth measure to remove the __proto__ property and reduce the attack surface.",
+      "createdAt": "2023-03-17T23:13:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1474501141",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dmZbr",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this is still a little too detailed.\r\n\r\nI would propose:\r\n\r\n> Verify that JavaScript code is written in a way that prevents prototype pollution by using Set() or Map() instead of object literals or other protection mechanisms.\r\n\r\nWhat do you think @ImanSharaf ?\r\n\r\nI am separately going to try and get the detailed guidance into a cheatsheet.",
+      "createdAt": "2023-05-31T14:27:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1570346731",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5dnHBL",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For category it waits: https://github.com/OWASP/ASVS/issues/1643",
+      "createdAt": "2023-05-31T16:17:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1570533451",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nGhEB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So this is still a little too detailed.\r\n> \r\n> I would propose:\r\n> \r\n> > Verify that JavaScript code is written in a way that prevents prototype pollution by using Set() or Map() instead of object literals or other protection mechanisms.\r\n> \r\n> What do you think @ImanSharaf ?\r\n> \r\n> I am separately going to try and get the detailed guidance into a cheatsheet.\r\n\r\nDo you agree with this @ImanSharaf?\r\n\r\nI will discuss category with elar afterwards,",
+      "createdAt": "2023-09-21T15:00:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1729761537",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5nQnWV",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To address prototype pollution, I recommend that we do not confine our solutions to exclusively using Set() or Map(). It would be nice to be more flexible in this regard.",
+      "createdAt": "2023-09-23T21:03:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1732408725",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5ncig5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so what wording do you suggest @ImanSharaf ?\r\n\r\nI think the originally proposed wording is too general...\r\n\r\n> Check that no user-supplied input is used to modify the prototype property of an object.\r\n\r\nNote that there is now a cheatsheet on this: https://cheatsheetseries.owasp.org/cheatsheets/Prototype_Pollution_Prevention_Cheat_Sheet.html",
+      "createdAt": "2023-09-26T13:22:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1735534649",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xuyD2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1843 @ImanSharaf please let know what you think",
+      "createdAt": "2024-01-24T13:07:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1908089078",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5yLaOP",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> So this is still a little too detailed.\r\n> \r\n> I would propose:\r\n> \r\n> > Verify that JavaScript code is written in a way that prevents prototype pollution by using Set() or Map() instead of object literals or other protection mechanisms.\r\n> \r\n> What do you think @ImanSharaf ?\r\n> \r\n> I am separately going to try and get the detailed guidance into a cheatsheet.\r\n\r\nThat works for me",
+      "createdAt": "2024-01-29T21:21:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1563#issuecomment-1915593615",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2023-03-01T20:17:27Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    }
+  ],
+  "number": 1563,
+  "state": "CLOSED",
+  "title": "Missing Prototype Pollution Check in ASVS",
+  "url": "https://github.com/OWASP/ASVS/issues/1563"
+}

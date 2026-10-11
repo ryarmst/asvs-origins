@@ -1,0 +1,88 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2351685075",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "So the proposal is delete current 51.2.2 and add new requirement to OIDC Client section (not made yet):\r\n> Verify that the OAuth client mitigates replay attacks by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n\r\nShould be in the requirement also OIDC client?\r\n\r\nping @randomstuff @TobiasAhnoff",
+          "recorded_at": "2024-09-15T17:17:29Z"
+        },
+        {
+          "body": "So the proposal is delete current 51.2.2 and add new requirement to OIDC Client section (not made yet):\r\n> Verify that the OAuth client mitigates replay attacks by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n\r\nShould be in the requirement also OIDC client?",
+          "recorded_at": "2024-09-15T17:16:58Z"
+        },
+        {
+          "body": "So the proposal is delete current 51.2.2 and add new requirement to OIDC Client section (not made yet):\r\n> Verify that the OAuth client mitigates replay attacks by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.",
+          "recorded_at": "2024-09-15T17:16:13Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2353671323",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "A thing to note here is that when implementing the code flow according to FAPI2 there seems to be no need to verify the ID token in the same way as when using other OIDC flows, see\r\nhttps://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.5\r\n\r\nA suggestion to align with that is to have\r\n\r\n > Verify that the OAuth client mitigates replay attacks by using code and PKCE with a confidential client or ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n\r\nBut from reading OIDC specs, at this point, I´m not 100% sure that all 3 conditions are a requirement for skipping the nonce and signature check as FAPI2 states? So perhaps just have (as suggested in previous comments)\r\n\r\n> Verify that the OAuth client mitigates replay attacks by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.",
+          "recorded_at": "2024-09-16T18:58:37Z"
+        },
+        {
+          "body": "A thing to note here is that when implementing the code flow according to FAPI2 there seems to be no need to verify the ID token in the same way as when using other OIDC flows, see\r\nhttps://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.5\r\n\r\nA suggestion to align with that is to have\r\n\r\n > Verify that the OAuth client mitigates replay attacks by using code and PKCE with a confidential client or ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n\r\nBut from reading OIDC specs, I´m not 100% sure that all 3 conditions are a requirement for skipping the nonce and signature check as FAPI2 states? So perhaps just have (as suggested in previous comments)\r\n\r\n> Verify that the OAuth client mitigates replay attacks by ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.",
+          "recorded_at": "2024-09-16T18:55:09Z"
+        },
+        {
+          "body": "A thing to note here is that when implementing the code flow according to FAPI2 there seems to be no need to verify the ID token in the same way as when using other OIDC flows, see\r\nhttps://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.5\r\n\r\nA suggestion to align with that is to have\r\n\r\n > Verify that the OAuth client mitigates replay attacks by using code and PKCE with a confidential client or ensuring that the nonce claim in the ID token matches the nonce value sent in the authentication request to the authorization server.\r\n\r\nBut from reading OIDC specs, I´m not 100% sure that all 3 conditions are a requirement for skipping the nonce and signature check as FAPI2 states?",
+          "recorded_at": "2024-09-16T18:51:39Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2353998105",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> But from reading OIDC specs, at this point, I´m not 100% sure that all 3 conditions are a requirement for skipping the nonce and signature check as FAPI2 states?\r\n\r\n@TobiasAhnoff, when receiving the ID token directly from the backend (authorization code flow), OpenID Connect allows you to skip the signature verification. This is explained in [3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation) (6) :\r\n\r\n> **If the ID Token is received via direct communication** between the Client and the Token Endpoint (which it is in this [the Authorization code] flow), the TLS server validation MAY be used to validate the issuer **in place of checking the token signature**.\r\n\r\nAs for skipping the nonce signature, this is because using PKCE is considered to already protect against replay attacks and ensure freshness.\r\n\r\nIf this is good enough for FAPI 2.0, I believe this might be good enough for ASVS (right?). (However, as the `nonce` parameter is required anyway there is not much benefit in not verifying it…)\r\n",
+          "recorded_at": "2024-09-16T20:45:57Z"
+        },
+        {
+          "body": "> But from reading OIDC specs, at this point, I´m not 100% sure that all 3 conditions are a requirement for skipping the nonce and signature check as FAPI2 states?\r\n\r\n@TobiasAhnoff, when receiving the ID token directly from the backend (authorization code flow), OpenID Connect allows you to skip the signature verification. This is explained in [3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation) (6) :\r\n\r\n> **If the ID Token is received via direct communication** between the Client and the Token Endpoint (which it is in this [the Authorization code] flow), the TLS server validation MAY be used to validate the issuer **in place of checking the token signature**.\r\n\r\nAS for skipping the nonce signature, this is because using PKCE is considered to already protect against replay attacks and ensure freshness.\r\n\r\nIf this is good enough for FAPI 2.0, I believe this might be good enough for ASVS (right?). (However, as the `nonce` parameter is required anyway there is not much benefit in not verifying it…)\r\n",
+          "recorded_at": "2024-09-16T20:45:36Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2377222673",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "I think the chapter/section heading should be \"OIDC Client\", but I´m not sure on the \"bracket sentence\"....\r\n\r\nOne argument is that is should not be needed, the reader should understand how OIDC and OAuth terminology overlaps.\r\nOn the other hand it could be good to clarify that the  \"Authentication Request to the OpenID Provider\" and  \"authorization request to the OAuth Authorization Server\" is the same request...(even if ID Tokens is not part of OAuth)\r\n\r\nI´m not sure if this is better but an alternative is to have:\r\n>  Verify that the Client (as the Relying Party) mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider (in OAuth2 refereed to as the Authorization request sent to the Authorization Server).\r\n\r\nPerhaps this will be easier to decide when we see the full OAuth/OIDC chapter?",
+          "recorded_at": "2024-09-26T15:01:04Z"
+        },
+        {
+          "body": "I think the chapter/section heading should be \"OIDC Client\", but I´m not sure on the \"bracket sentence\"....\r\n\r\nOne argument is that is should not be needed, the reader should understand how OIDC and OAuth terminology overlaps.\r\nOn the other hand it could be good to clarify that the  \"Authentication Request to the OpenID Provider\" and  \"authorization request to the OAuth Authorization Server\" is the same request...(even if ID Tokens is not part of OAuth)\r\n\r\nI´m not sure if this is better but an alternative is to have:\r\n>  Verify that the Client (as the Relying Party) mitigates ID Token replay attacks. For example, by ensuring that the nonce claim in the ID Token matches the nonce value sent in the Authentication Request to the OpenID Provider (in OAuth2 refereed to as the Authorization request sent to the Authorization Server).",
+          "recorded_at": "2024-09-26T14:59:21Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2002#issuecomment-2425032242",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "@jmanico, Actually usage of PKCE is [mostly required by the OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-countermeasures) so I think it would make sense to require it in L1:\r\n\r\n> To prevent injection of authorization codes into the client, **using code_challenge and code_verifier is REQUIRED for clients**",
+          "recorded_at": "2024-10-20T23:03:30Z"
+        },
+        {
+          "body": "@jmanico, Actually usage of PKCE is [mostly required by the OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-countermeasures) si I think it would make sense to require it in L1:\r\n\r\n> To prevent injection of authorization codes into the client, **using code_challenge and code_verifier is REQUIRED for clients**",
+          "recorded_at": "2024-10-20T15:02:29Z"
+        },
+        {
+          "body": "@jmanico, Actually usage of PKCE is [mostly required by the OAuth 2.1 draft](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-11#name-countermeasures), it think the it would make sense to require it in L1:\r\n\r\n> To prevent injection of authorization codes into the client, **using code_challenge and code_verifier is REQUIRED for clients**",
+          "recorded_at": "2024-10-20T15:02:12Z"
+        }
+      ]
+    }
+  ]
+}

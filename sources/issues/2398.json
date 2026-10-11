@@ -1,0 +1,564 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Currently the crypto appendix as table as follow:\r\n\r\n| Symmetric Key Algorithms | Reference | L1 | L2 | L3 |\r\n|--|--|--|--|--|\r\n| AES-256 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | | ✓ | ✓ |\r\n| ChaCha20 | [RFC 8439](https://www.rfc-editor.org/info/rfc8439) | | ✓ | ✓ |\r\n| AES-192 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | | ✓ | ✓ |\r\n| AES-128 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | ✓ | ✓ |\r\n\r\nThe relation between the check marks and the levels does not make much sense. Why would AES-256 be OK for L2 and L3 but nor for L1? To make sense, it would have to be the other way around:\r\n\r\n| Symmetric Key Algorithms | Reference | L1 | L2 | L3 |\r\n|--|--|--|--|--|\r\n| AES-256 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | ✓ | ✓ |\r\n| ChaCha20 | [RFC 8439](https://www.rfc-editor.org/info/rfc8439) | ✓ | ✓ | ✓ |\r\n| AES-192 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | ✓ | ✓ |\r\n| AES-128 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | | |\r\n\r\nAll these should be adjusted, I think.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6UnGgY",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In all honesty, I don't see us needing any levels here. It should apply to all no? ",
+      "createdAt": "2024-11-22T09:13:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2493278232",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Uo-Td",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It should apply to all no?\r\n\r\nYes possibly. Removing the levels here might be an option.\r\n\r\nWould it make sense to have stricter requirements in this regard for L1 applications than for L3/financial/healthcare ones? In the sense, that if you already use some somewhat sub-par cipher/MAC/signature for L1 applications, it might be OK for now but you should really use something better for L3.\r\n\r\nFor example, the appendix currently says: that EdDSA (Ed25519, Ed448) is allowed. On the other hand, FAPI 2.0 says \"EdDSA (using the Ed25519 variant)\". Should the appendix align with FAPI 2.0 in this regard? Only for L3?\r\n\r\nSo there are two options:\r\n\r\n1. remove level indications in these list;\r\n2. fix them.\r\n",
+      "createdAt": "2024-11-22T13:27:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2493768925",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6V1eap",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "A more useful classification (instead of L1/L2/L3) would be something like : approved / disallowed / legacy.\r\n\r\nFor example, HMAC-SHA-1 could be marked as legacy (i.e. maybe it's not that bad if you use if for legacy/compatibility and you have a plan to move away from it but it may not be a great idea to use it in new deployments). This is probably better (@danielcuthbert ?) than what we have currently. See #2399\r\n",
+      "createdAt": "2024-12-03T08:13:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2513823401",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6V1f0g",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note: some notable impact which may not be immediately apparent, is the use of HMAC-SHA-1 as the default mechanism for HOTP and TOTP. This is currently used in many/most recent TOTP I've been using.",
+      "createdAt": "2024-12-03T08:16:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2513829152",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cz4wy",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As discussed in the referenced discussions (especially related to the status of SHA-1), shall we move to something looking as follows. (Note: the idea is to discuss the form/idea, not the actual content.)\n\n| Symmetric Key Algorithm | Reference | Status | Restrictions |\n|--|--|--|--|\n| AES-256 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | |\n| ChaCha20 | [RFC 8439](https://www.rfc-editor.org/info/rfc8439) | ✓ | |\n| AES-192 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | |\n| AES-128 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | |\n| 2TDEA | | ❌ |\n| TDEA (3DES/3DEA) || ❌ |\n| IDEA | | ❌ |\n| RC4 | | ❌ |\n| Blowfish| | ❌ |\n| ARC4 | | ❌ |\n| DES | | ❌ |\n\n\n| Hash function | Reference | Status | Restrictions |\n| -------------- | ----------------------------- |-------------------------------------------------------------- |--|\n| SHA3-512 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) | ✓\n| SHA-512 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | ✓\n| SHA3-384 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) | ✓\n| SHA-384 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |✓\n| SHA3-256 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |✓\n| SHA-512/256 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |✓\n| SHA-256 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |✓\n| KMAC256 | [NIST SP 800-185](https://csrc.nist.gov/pubs/sp/800/185/final) |✓ | Not suitable for HMAC/KDF/RBG\n| KMAC128 | [NIST SP 800-185](https://csrc.nist.gov/pubs/sp/800/185/final) |✓ | Not suitable for HMAC/KDF/RBG\n| SHAKE256 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |✓\n| BLAKE2s |  [BLAKE2: simpler, smaller, fast as MD5](https://eprint.iacr.org/2013/322) |✓\n| BLAKE2b | [BLAKE2: simpler, smaller, fast as MD5](https://eprint.iacr.org/2013/322) |✓\n| BLAKE3 | [BLAKE3 one function, fast everywhere](https://github.com/BLAKE3-team/BLAKE3-specs/raw/master/blake3.pdf) |✓\n| SHA-1 | [RFC 3174](https://www.rfc-editor.org/info/rfc3174) & [RFC 6194](https://www.rfc-editor.org/info/rfc6194) | Legacy | Legacy use for HMA-SHA-1, …\n| SHA-224 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Legacy | Not for digital signatures\n| SHA-512/224 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Legacy | Not for digital signatures\n| SHA3-224 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |Legacy | Not for digital signatures\n| CRC (any length) | | ❌ |\n| MD4 | [RFC 1320](https://www.rfc-editor.org/info/rfc1320) | ❌ |\n| MD5 | [RFC 1321](https://www.rfc-editor.org/info/rfc1321) | ❌ |\n",
+      "createdAt": "2025-02-03T12:44:45Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2630847538",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cz5pj",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@danielcuthbert @unprovable ",
+      "createdAt": "2025-02-03T12:46:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2630851171",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6c1XZz",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"✓\", \"Legacy\" and \"❌\" are all from different style family. This red-cross is screaming to the face (too much).\n\nIf to find the pair for \"✓\", there is symbol \"✕\". But then there should be a symbol instead of \"Legacy\" as well. Or to write everything out as text.",
+      "createdAt": "2025-02-03T14:56:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "LAUGH",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2631235187",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6c1cSv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "With symbols (problem what to do with \"legacy\"?):\n\n| Symmetric Key Algorithm | Reference | Status | Restrictions |\n|--|--|--|--|\n| AES-256 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | |\n| ChaCha20 | [RFC 8439](https://www.rfc-editor.org/info/rfc8439) | ✓ | |\n| AES-192 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | |\n| AES-128 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | ✓ | |\n| 2TDEA | | ✕ |\n| TDEA (3DES/3DEA) || ✕ |\n| IDEA | | ✕ |\n| RC4 | | ✕ |\n| Blowfish| | ✕ |\n| ARC4 | | ✕ |\n| DES | | ✕ |\n\n\n| Hash function | Reference | Status | Restrictions |\n| -------------- | ----------------------------- |-------------------------------------------------------------- |--|\n| SHA3-512 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) | ✓\n| SHA-512 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | ✓\n| SHA3-384 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) | ✓\n| SHA-384 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |✓\n| SHA3-256 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |✓\n| SHA-512/256 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |✓\n| SHA-256 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |✓\n| KMAC256 | [NIST SP 800-185](https://csrc.nist.gov/pubs/sp/800/185/final) |✓ | Not suitable for HMAC/KDF/RBG\n| KMAC128 | [NIST SP 800-185](https://csrc.nist.gov/pubs/sp/800/185/final) |✓ | Not suitable for HMAC/KDF/RBG\n| SHAKE256 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |✓\n| BLAKE2s |  [BLAKE2: simpler, smaller, fast as MD5](https://eprint.iacr.org/2013/322) |✓\n| BLAKE2b | [BLAKE2: simpler, smaller, fast as MD5](https://eprint.iacr.org/2013/322) |✓\n| BLAKE3 | [BLAKE3 one function, fast everywhere](https://github.com/BLAKE3-team/BLAKE3-specs/raw/master/blake3.pdf) |✓\n| SHA-1 | [RFC 3174](https://www.rfc-editor.org/info/rfc3174) & [RFC 6194](https://www.rfc-editor.org/info/rfc6194) | Legacy | Legacy use for HMAC-SHA-1, …\n| SHA-224 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Legacy | Not for digital signatures\n| SHA-512/224 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Legacy | Not for digital signatures\n| SHA3-224 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |Legacy | Not for digital signatures\n| CRC (any length) | | ✕ |\n| MD4 | [RFC 1320](https://www.rfc-editor.org/info/rfc1320) | ✕ |\n| MD5 | [RFC 1321](https://www.rfc-editor.org/info/rfc1321) | ✕ |\n\nWith words:\n\n| Symmetric Key Algorithm | Reference | Status | Restrictions |\n|--|--|--|--|\n| AES-256 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | Approved | |\n| ChaCha20 | [RFC 8439](https://www.rfc-editor.org/info/rfc8439) | Approved| |\n| AES-192 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | Approved| |\n| AES-128 | [FIPS 197](https://csrc.nist.gov/pubs/fips/197/final) | Approved | |\n| 2TDEA | | Disallowed |\n| TDEA (3DES/3DEA) || Disallowed |\n| IDEA | | Disallowed |\n| RC4 | | Disallowed |\n| Blowfish| | Disallowed |\n| ARC4 | | Disallowed |\n| DES | | Disallowed |\n\n\n| Hash function | Reference | Status | Restrictions |\n| -------------- | ----------------------------- |-------------------------------------------------------------- |--|\n| SHA3-512 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) | Approved\n| SHA-512 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) | Approved\n| SHA3-384 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) | Approved\n| SHA-384 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Approved\n| SHA3-256 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |Approved\n| SHA-512/256 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Approved\n| SHA-256 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Approved\n| KMAC256 | [NIST SP 800-185](https://csrc.nist.gov/pubs/sp/800/185/final) |Approved | Not suitable for HMAC/KDF/RBG\n| KMAC128 | [NIST SP 800-185](https://csrc.nist.gov/pubs/sp/800/185/final) |Approved | Not suitable for HMAC/KDF/RBG\n| SHAKE256 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |Approved\n| BLAKE2s |  [BLAKE2: simpler, smaller, fast as MD5](https://eprint.iacr.org/2013/322) |Approved\n| BLAKE2b | [BLAKE2: simpler, smaller, fast as MD5](https://eprint.iacr.org/2013/322) |Approved\n| BLAKE3 | [BLAKE3 one function, fast everywhere](https://github.com/BLAKE3-team/BLAKE3-specs/raw/master/blake3.pdf) |Approved\n| SHA-1 | [RFC 3174](https://www.rfc-editor.org/info/rfc3174) & [RFC 6194](https://www.rfc-editor.org/info/rfc6194) | Legacy | Legacy use for HMAC-SHA-1, …\n| SHA-224 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Legacy | Not for digital signatures\n| SHA-512/224 | [FIPS 180-4](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) |Legacy | Not for digital signatures\n| SHA3-224 | [FIPS 202](https://csrc.nist.gov/pubs/fips/202/final) |Legacy | Not for digital signatures\n| CRC (any length) | | Disallowed |\n| MD4 | [RFC 1320](https://www.rfc-editor.org/info/rfc1320) | Disallowed |\n| MD5 | [RFC 1321](https://www.rfc-editor.org/info/rfc1321) | Disallowed |",
+      "createdAt": "2025-02-03T15:04:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2631255215",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6c1exq",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> \"✓\", \"Legacy\" and \"❌\" are all from different style family. This red-cross is screaming to the face (too much).\n\nFor ✓vs. ❌, I think this is a font problem more than anything:\n\n* ✓ is \"Check mark\"\n* ❌ is \"Cross mark\"\n* ✕ is \"Multiplication X\"",
+      "createdAt": "2025-02-03T15:06:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2631265386",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6c1oiG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "But what is the problem to solve?\n\nWhy there is need to use tables? Isn't per-status list enough?\n\n---\n\nAllowed Symmetric Key Algorithms\n* AES-256 ([FIPS 197](https://csrc.nist.gov/pubs/fips/197/final))\n* ChaCha20 ([RFC 8439](https://www.rfc-editor.org/info/rfc8439))\n* AES-192 ([FIPS 197](https://csrc.nist.gov/pubs/fips/197/final))\n* AES-128 ([FIPS 197](https://csrc.nist.gov/pubs/fips/197/final))\n\n---\n\nWhatever is not allowed, is anyway disallowed? So what is the need to list them?\n\n---\n\nBut if there is a need, it can be either \n\n\"All other algorithms should be considered as disallowed, such as 2TDEA, TDEA (3DES/3DEA), IDEA, RC4, Blowfish, ARC4, DES\"\n\n---\n\nOr another list of those:\n\nDisallowed Symmetric Key Algorithms\n* 2TDEA\n* TDEA (3DES/3DEA)\n* IDEA\n* RC4\n* Blowfish\n* ARC4\n* DES",
+      "createdAt": "2025-02-03T15:19:18Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2631305350",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6c2VZD",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> But what is the problem to solve?\n>\n> Why there is need to use tables? Isn't per-status list enough?\n\nThe goal is to discuss whether a list of \"legacy\" mechanisms should be included in addition to the existing \"allowed\" and \"disallowed\" lists and, if that is considered useful/necessary, how this should be presented.\n\nHere, they are all presented in the same table. This can be accomplished through other means such as a separate list of \"legacy\" mechanisms.\n\n> Why there is need to use tables? Isn't per-status list enough?\n\nThe table presentation is already there.\n\n> Whatever is not allowed, is anyway disallowed? So what is the need to list them?\n\nIn the current version, there *is* a list of disallowed things so this is not a change in this regard. Maybe there is no need to list disallowed things, though.\n",
+      "createdAt": "2025-02-03T16:29:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2631489091",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dH4Iv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "1) Is it ok ok recommend AES-256 without specifying the mode? I do not think FIPS approves of AES-256 for all modes. For example, certain modes like ECB are generally not recommended by FIPS.\n\n2) AES under 256 bit key length has problems with quantum resistance. When you apply grovers algorithm to symmetric crypto, you effective 1/2 the bit size. Quantum computing is coming and fast. I suggest we at least warm about this.\n\n3) This is likely the wrong place to post this, can you suggest a better place?",
+      "createdAt": "2025-02-05T08:44:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636087855",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dIDIR",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> 1. Is it ok ok recommend AES-256 without specifying the mode? I do not think FIPS approves of AES-256 for all modes. For example, certain modes like ECB are generally not recommended by FIPS.\n\nIt is restricted, though - there's a whole section that says what modes are approved, recommended, and prohibited. Perhaps it's worth familiarising yourself with the whole document.\n\n> 2. AES under 256 bit key length has problems with quantum resistance. When you apply grovers algorithm to symmetric crypto, you effective 1/2 the bit size. Quantum computing is coming and fast. I suggest we at least warm about this.\n\nAES128 and AES192 are at the bottom of the list. The blurb used to say 'ordered from most to least preferred' but that has gone, but the list order does strongly imply \"top first\". They have to be present in order to accommodate a lot of legacy tech that should be cycled out by the time quantum computing is cryptographically relevant (earliest expert estimate for that is still 5yrs away). \n\n> 3. This is likely the wrong place to post this, can you suggest a better place?\n\nRegarding the 'why tables' comment, I mean, why not? It presents the information in a useful and portable way, and is much more functional that bullet points. It keeps the formatting consistent, and allows us to add extra information (e.g. references, specifications, relevant notes, etc.).\n\nEDIT: Perhaps something like this? https://github.com/Santandersecurityresearch/ASVS-Standard/commit/20a5e06037a73837c1e4bfa139f1053b90a9903b ",
+      "createdAt": "2025-02-05T09:05:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636132881",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dIhTO",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @unprovable I think this is great work. When I said \"This is likely the wrong place to post this, can you suggest a better place?\" I was talking about my comment being in the wrong thread and was not commenting on your table! :) ",
+      "createdAt": "2025-02-05T09:56:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636256462",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dIk_v",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Sorry that's my Typo as I was referring to @elarlang's comment (though tables may just be a better fit for the crypto standards I write at work). I think yours is i the right thread @jmanico, FWIW!",
+      "createdAt": "2025-02-05T10:02:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636271599",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dIlJu",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I see the mode section at the bottom of the appendix, cool.\n\nPerhaps we can modify \"The following ciphers are approved:\" to \"The following ciphers are approved, but please note only certain modes of operation are approved, see below\" or similar. ",
+      "createdAt": "2025-02-05T10:02:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 3
+          }
+        },
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636272238",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dInNv",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> AES128 and AES192 are at the bottom of the list. The blurb used to say 'ordered from most to least preferred' but that has gone, but the list order does strongly imply \"top first\". They have to be present in order to accommodate a lot of legacy tech that should be cycled out by the time quantum computing is cryptographically relevant (earliest expert estimate for that is still 5yrs away).\n\nAdvanced in Quantum Cryptography just in the last few months are challenging the quantum horizon/2030 dates that is often cited.\n\nThere is no strong need to ever use AES-128 or AES-192 in new development and I suggest we punt them to legacy only and discourage any use in new systems.",
+      "createdAt": "2025-02-05T10:06:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636280687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dInzS",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Under \"Approved Hash Functions for Password Storage\" I suggest we drop Argon2 due to side channel problems and directly suggest Argon2id.",
+      "createdAt": "2025-02-05T10:07:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        },
+        {
+          "content": "EYES",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636283090",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dIrMW",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"Why tables?\" > \"Why not?\", well, not the best argumentation :)\n\nIf you have many parameters per item to show in separate cells, then tables suit well. At the moment I did not see that need or questioned it. As one column was duplicating the status, I asked to consider the version, when the approved/legacy/disapproved is just a title before a list of the chosen values.\n\nI just proposed an option for the open discussion.",
+      "createdAt": "2025-02-05T10:13:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636296982",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dIsMO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "And helpful note for @jmanico - https://github.com/OWASP/ASVS/issues/2398#issuecomment-2630847538\n\n> Note: the idea is to discuss the form/idea, not the actual content.",
+      "createdAt": "2025-02-05T10:14:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2636301070",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dOBeU",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I want to reiterate that there is absolutely no need to use an AES key size smaller than 256 bits. \n\nSuggesting it for new development is not just unnecessary—it’s a security risk. For several reasons, we should remove it from consideration and classify it as legacy.\n\nWith modern hardware (especially AES-NI and other hardware accelerations), the performance overhead of AES-256 compared to AES-128 is negligible. This is the typical scenario in web apps and API's.\n\nAlso, Grover’s algorithm effectively halves the security strength of symmetric ciphers in a quantum context:\n\t•\tAES-128 → 64-bit security (potentially insecure in a post-quantum world)\n\t•\tAES-256 → 128-bit security (still considered secure against quantum attacks)\n\nI strongly believe AES-256 (with a good mode) should be the default choice for all new development, regardless of what FIPS says.",
+      "createdAt": "2025-02-05T18:24:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2637698964",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dOs7u",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I want to reiterate that there is absolutely no need to use an AES key size smaller than 256 bits.\n\nSo would you set AES-128 as \"legacy\" or \"disallowed\"?\n\n/me discreetly pushing forward the idea of a \"legacy\" level.",
+      "createdAt": "2025-02-05T19:45:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2637876974",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dP5tw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "See related PR #2573 for an idea of what this could look like.",
+      "createdAt": "2025-02-05T22:34:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2638191472",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dShZ9",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with legacy for AES lower than 256 bit keys. I don’t want to punish people who used it in the past with a good mode.\r\n\r\nBy the same token, if people are prepping for quantum resistance, I’d move up to 256 bit keys a lot sooner than later. 😁 ",
+      "createdAt": "2025-02-06T05:34:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2638878333",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jNJMp",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ping on this issue. Currently, the levels in the appendix don't make sense. We need to do something about it before release.\n\nEither:\n\n* remove them completely\n* use some form of allowed/legacy/disallowed system (see #2573).",
+      "createdAt": "2025-03-19T21:14:53Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2738131753",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kK6ze",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm all for removing them and will do so.",
+      "createdAt": "2025-03-26T13:01:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2754325726",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6kyncM",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@danielcuthbert, this is done through #2573 (if we decide to take this option).",
+      "createdAt": "2025-03-30T20:29:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2764732172",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6lYqKp",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff can this be closed following the merging of #2573?",
+      "createdAt": "2025-04-03T07:15:16Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2398#issuecomment-2774704809",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-11-21T00:09:49Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xNFqn",
+      "name": "_5.0 - Not blocker",
+      "description": "This issue does not block 5.0 so if it gets addressed then great, if not then fine.",
+      "color": "f9d0c4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABy9sfPQ",
+      "name": "AppendixV",
+      "description": "Appendix with crypto details",
+      "color": "540616"
+    }
+  ],
+  "number": 2398,
+  "state": "CLOSED",
+  "title": "Appendix Crypto - Allowed mechanisms and requirement levels",
+  "url": "https://github.com/OWASP/ASVS/issues/2398"
+}

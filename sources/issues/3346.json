@@ -1,0 +1,953 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\nBEFORE YOU OPEN AN ISSUE:\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\n- Please search the issues in case your question has been discussed before.\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\n- When you reference requirements, please include them as a link, similarly to this:\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\n\nOTHER NOTES:\n- Please do not open a pull request without first opening an associated issue.\n- Please carry out all discussion in the associated issue only.\n-->\nTo make things related to the sanitization topic clearer, we need to be sure that sanitization as a defense is an acceptable option for the current data or process.\n\nI think it would be good to have a requirement in \"V1.1 Encoding and Sanitization Architecture\" (preferred) or in \"V1.3 Sanitization\" to say:\n\n> Verify that if sanitization is chosen as a defense method, it is accepted by \"business logic rules\" to make automatic modifications to the input, as changing the data removes data integrity.\n\nThe wording should be improved, hopefully it it is good enough to explain the idea.\n\nOne option is also to move to the documented security decisions with this.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM7wYZLQ",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I was thinking something very similar in response to [your comment here](https://github.com/OWASP/ASVS/issues/3335#issuecomment-4016016341), so I'm very glad to see you came up with the same idea.\n\nA couple of nuances:\n- Would prefer it to be part of [V1.3 Sanitization](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md#v13-sanitization), and even specifically 1.3.1, as a codified prerequisite to other sanitization requirements.\n- Would avoid mentioning business logic or other implications that may lead to the decision being taken by non-experts with the wrong incentives, such as project managers or product owners. Instead, I'd lean on the last resort warning.\n\nNot great wording, just an example of what I mean:\n> Verify that if sanitization is used, all defense mechanisms that would preserve data integrity have been determined to be inapplicable, and sanitization is only applied to data that wouldn't propagate further than immediate use.",
+      "createdAt": "2026-03-10T16:49:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4032926416",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wZZ-A",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I would not limit it to immediate use,.iI needed there can be additional clause to point that \"full flow need to be analyzed\" or something like that.\n\nFor example, most likely WYSIWYG content can be sanitized and also saved as sanitized. It can be done to anything else, if the \"business logic\" has decided that it is ok to do so (automatically change user-input).\n\nI'm happy to explain the entire concept, the reasons for current solution, detected and known areas that can be improved. But I would not like to have another issue with the demagogy madness here. So in case you have found your way into Slack, ping me there.",
+      "createdAt": "2026-03-10T17:28:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4033191808",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7weUUy",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I'm ok to iterate without the immediate use limitation at least for now, it's not the main point. Are you happy with the rest of my rationale? i.e. framing as all other options are exhausted instead of business is ok with it.",
+      "createdAt": "2026-03-10T21:07:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4034479410",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wg_SC",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I do not think “accepted by business logic rules” is the right framing for a general HTML sanitization requirement. The core question should be whether sanitization is an appropriate and technically justified control for that specific data flow and sink, not whether non-security stakeholders are comfortable with automatic modification of input.\n\nFor example, in the case of untrusted HTML rendered in a browser, sanitization is of course the primary security control for preventing XSS. The important issue is whether a robust HTML sanitizer is used, not whether business logic has approved modification of the input.\n\nSo I would recommend framing this around suitability of sanitization for the specific context, interpreter, and downstream use, rather than around business rules.",
+      "createdAt": "2026-03-10T23:44:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4035179650",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wnisw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I do not think “accepted by business logic rules” is the right framing for a general HTML sanitization requirement.\n\nHow \"untrusted HTML\" (input from WYSIWYG) should be sanitized is very much a \"business logical and documentation\" question, as one need to define and accept, which tags are accepted (which functionality HTML should provide).",
+      "createdAt": "2026-03-11T06:45:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4036897584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wn4kC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Are you happy with the rest of my rationale? i.e. framing as all other options are exhausted instead of business is ok with it.\n\n> all defense mechanisms that would preserve data integrity have been determined to be inapplicable\n\nI'm not sure we need this (applicable/inapplicable condition) in the requirement; it feels like something to be in the section text. It also raises a philosophical question: how to measure - is there an alternative to sanitization or not? With that, I think we enter the application logic area here, and we should not dictate the functionality for the application. I think just asking a security decision to be made for each sanitization use case should do the job.\n\nHere was the target \"functional data-field\" that comes from the user, that can (and must) be analyzed and documented. But there can also be technical needs that need to keep things safe \"deep in the flow\" or \"deep in the program code\". Those can not be targeted to be documented the same way as user-input fields are.\n\nIt is important to understand the difference between those and avoid mixing them.",
+      "createdAt": "2026-03-11T07:09:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4036987138",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wxfBa",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> How \"untrusted HTML\" (input from WYSIWYG) should be sanitized is very much a \"business logical and documentation\" question, as one need to define and accept, which tags are accepted (which functionality HTML should provide).\n\nThat has absolutely zero impact on whether this is a security control. **_Using a proper HTML sanitizer stops injection_**. Your HTML sanitization rules define allowed functionality; they do not change the fact that sanitization is the security control.",
+      "createdAt": "2026-03-11T14:12:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4039503962",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wx2gO",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> they do not change the fact that sanitization is the security control\n\nAnyone have said that sanitization is not a security control? Just stop this (inventing random statements like someone has stated the fact X and then you come and oppose it). Otherwise there is another issue full of noise, demagogy, invented \"facts\" etc.",
+      "createdAt": "2026-03-11T14:26:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4039600142",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7wyNo0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Anyone have said that sanitization is not a security control? Just stop this (inventing random statements like someone has stated the fact X and then you come and oppose it). Otherwise there is another issue full of noise, demagogy, invented \"facts\" etc.\n\nI think this is conflating _governance_ with _security control effectiveness_.\n\nHTML sanitization is itself a security control. A mature sanitizer such as DOMPurify, used correctly, can provide strong security value even without a separately published business policy defining every rule in advance. And \"used correctly\" does not mean configuration, it just needs to be used in client code where frameworks do not have sanitization built-in like Angular.\n\nA documented policy may help consistency and maintenance, but it is not required for sanitization to function as a valid security control.\n\nNow if you want to set a \"business policy\" that HTML Sanitizers like DOMPurify needs to be used on the client, I would back that.\n",
+      "createdAt": "2026-03-11T14:39:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4039694900",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7w7wt9",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> I'm not sure we need this (applicable/inapplicable condition) in the requirement; it feels like something to be in the section text.\n\nI guess I was mistaken about having the same idea then. Throughout all related arguments, my biggest concern has always been that section text clarifications are not as prominent as hard requirements, which effectively demotes any warnings.",
+      "createdAt": "2026-03-11T21:03:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4042197885",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xFDAj",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Verify that if sanitization is chosen as a defense method, it is accepted by \"business logic rules\" to make automatic modifications to the input, as changing the data removes data integrity.\n\n@elarlang  Is this requirement being written primarily with HTML sanitization in mind, or is it intended to cover other forms of sanitization as well? Based on the discussion so far, the examples and reasoning seem to be heavily focused on HTML sanitization.\n\nI will add further comments after I get a response to this point.",
+      "createdAt": "2026-03-12T07:35:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4044632099",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xFSSl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang Is this requirement being written primarily with HTML sanitization in mind, or is it intended to cover other forms of sanitization as well? \n\nIt is meant to be general.",
+      "createdAt": "2026-03-12T07:48:32Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4044694693",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xFaH-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > I'm not sure we need this (applicable/inapplicable condition) in the requirement; it feels like something to be in the section text.\n> \n> I guess I was mistaken about having the same idea then. Throughout all related arguments, my biggest concern has always been that section text clarifications are not as prominent as hard requirements, which effectively demotes any warnings.\n\nThere is also a chance that we talk about the same thing but call it differently.\n\nSo the question to solve with this requirement is - who and in which condition decides, that using a sanitization in that situation is ok or not. My point was, that we can not dictate the application logic and decide can they use sanitization instead of validation.\n\n",
+      "createdAt": "2026-03-12T07:55:47Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4044726782",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xF2v8",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "When sanitization comes into the picture, changes are by default, so what is the sense of drafting a new requirement?\n\nWhen sanitization is applied, the data is intentionally changed to remove malicious content, and this transformation is part of the security control.\n\nDo Security frameworks do require business approval for encoding or sanitization?\n\n",
+      "createdAt": "2026-03-12T08:20:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4044844028",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xGJGK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> When sanitization comes into the picture, changes are by default, so what is the sense of drafting a new requirement?\n\nIf something is making \"changes by default\" into your input that you are not aware of, it is quite problematic I guess.\n\nYes, it may provide defense against injections etc, and we are going to the ruining the integrity area here again.\n\nAs I wrote in my previous comment:\n> So the question to solve with this requirement is - who and in which condition decides, that using a sanitization in that situation is ok or not. ",
+      "createdAt": "2026-03-12T08:33:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4044919178",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xHpNP",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": ">  we are going to the ruining the integrity area here again\n\nSanitization intentionally modifies input to make it safe. This modification is part of the security control. So `ruining the integrity` is misleading,\n\n> So the question to solve with this requirement is - who and in which condition decides, that using a sanitization in that situation is ok or not.\n\nThere is already a separate “Sanitization” section, so the relevant requirements for when sanitization should be used. I do not see why an additional requirement is needed, especially one framed around “**business logic rules**” and **loss of integrity**.",
+      "createdAt": "2026-03-12T09:41:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4045312847",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xIaPm",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Sanitization intentionally modifies input to make it safe\n\nPlease provide examples, which kind of situation you keep in mind.\n\n> So ruining the integrity is misleading,\n\nObviously, I don't agree with this one.\n\n> There is already a separate “Sanitization” section, so the relevant requirements for when sanitization should be used. I do not see why an additional requirement is needed, especially one framed around “business logic rules” and loss of integrity.\n\nYou can ignore the \"business logic\" if that causes an allergy.\n\nThe difference between input validation and sanitization is rejection vs modification. My abstract point is that ASVS should not dictate which needs to be used in each case, but this is up to the application owner to decide whether modifying the data is accepted/suitable or not.\n\nThe goal is to avoid using sanitization when it was not decided as an acceptable solution (as auto-modification to the data and ruining the integrity was not accepted) AND allow sanitization even other options are available, but it is accepted process.\n\nThe current section text for sanitization (it is debated separately, it will be updated, and for everyone - please do not duplicate this discussion here):\n\n> The ideal protection against using untrusted content in an unsafe context is to use context-specific encoding or escaping, which maintains the same semantic meaning of the unsafe content but renders it safe for use in that particular context, as discussed in more detail in the previous section.\n\n> Where this is not possible, sanitization becomes necessary, removing potentially dangerous characters or content. In some cases, this may change the semantic meaning of the input, but for security reasons, there may be no alternative.\n\nSo, here is kind of requirement written into the section text - \"that if nothing else is allowed, you can use sanitization.\"\n\nI would open it up with the requirement to \"it is allowed when it is decided application functionality or flow\", even, in theory there are other options (encoding, validation) available.\n\nBut again, as it changes the data and it's integrity, then by principle it must be accepted behavior.",
+      "createdAt": "2026-03-12T10:12:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4045513702",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xKdt-",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Please provide examples, which kind of situation you keep in mind.\n\nExample I had in mind: html, logs, files, css, etc.\n\n> Obviously, I don't agree with this one.\n\nCould you please explain why?\n\n> The goal is to avoid using sanitization when it was not decided as an acceptable solution\n\nASVS is a security verification standard, not an architecture or design decision guide.\n\n> (as auto-modification to the data and ruining the integrity was not accepted)\n\nCould you provide some concrete use cases where sanitization would be considered unacceptable due to integrity concerns?\n\n> that if nothing else is allowed, you can use sanitization.\n\nCould you clarify what scenarios you have in mind here?\n\n> But again, as it changes the data and it's integrity, then by principle it must be accepted behavior.\n\nCould you please share what you mean by “**integrity**” in web security, and how you think sanitization affects it?\n\n\n\n\n",
+      "createdAt": "2026-03-12T11:37:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046052222",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xLIoy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Obviously, I don't agree with this one.\n\n> Could you please explain why?\n\nRegarding explanation on the \"integrity\", I don't really have anything to add to my previous comment. I feel everything was explained there and I'm already looping a bit here.\n\n> ASVS is a security verification standard, not an architecture or design decision guide.\n\nYou can not verify is \"using the sanitization is correct\" or not, if you don't have security decisions made on that.\n\n> Could you provide some concrete use cases where sanitization would be considered unacceptable due to integrity concerns?\n> Could you clarify what scenarios you have in mind here?\n\nBy default, it should not be used anywhere, if it is not accepted and understood behavior.\n\n> Could you please share what you mean by “integrity” in web security, and how you think sanitization affects it?\n\nAbstractly, the data is kept and handled exactly as it came from the source. The source can be an end-user, via API, from wherever the application gets the input.",
+      "createdAt": "2026-03-12T12:07:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046228018",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xNbjM",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> You can not verify is \"using the sanitization is correct\" or not, if you don't have security decisions made on that.\n\nSecurity decisions are already covered based upon the documentation section.\n\n> You can not verify is \"using the sanitization is correct\" or not, if you don't have security decisions made on that.\n> By default, it should not be used anywhere, if it is not accepted and understood behavior.\n\nThis is applicable to each functional process of the application, it's not just related to sanitization, for example:\n\n**basic numeric check validation should not be used anywhere until and unless it is accepted and understood behavior, so how is sanitization different?**\n\n\n> Abstractly, the data is kept and handled exactly as it came from the source. The source can be an end-user, via API, from wherever the application gets the input.\n\n\n[NIST](https://csrc.nist.gov/glossary/term/data_integrity) and [OWASP ](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/#integrity) define integrity as protection against unauthorized modification. Sanitization is an authorized security control and as per the official definition, it is not an integrity violation. here are the written text screenshot:\n\n### NIST\n\n<img width=\"998\" height=\"185\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/98e0dd7e-f6bc-4616-b79f-2bc5ee89d821\" />\n\n\n### OWASP Dev Guide\n\n<img width=\"1055\" height=\"227\" alt=\"Image\" src=\"https://github.com/user-attachments/assets/3097db56-7755-4418-acd8-e8f21913fcb1\" />\n\n**Note:  The end-user submitting malicious input is not a legitimate data modification.**",
+      "createdAt": "2026-03-12T13:35:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046829772",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xNvFJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > You can not verify is \"using the sanitization is correct\" or not, if you don't have security decisions made on that.\n\n> Security decisions are already covered based upon the documentation section.\n\nWhich requirement covers that?\n\n> basic numeric check validation should not be used anywhere until and unless it is accepted and understood behavior, so how is sanitization different?\n\nIt is defined by 2.1.1 + 2.2.1. When you can or can not use sanitization is not covered by security decision requirement.\n\n> Sanitization **is an authorized security** control and as per the official definition, it is not an integrity violation.\n\nBoom. And who gave the authorization to random component to modify the data?\n\nAnd that is the reason why I propose to have the requirement. You can sanitize whatever, if it is decided to do so. So, in a way, I can not understand what you are fighting against.\n\nI have answered the questions in good faith and put a lot of effort into it. I'm not convinced that the good faith is not misused here.\n\nOr let me ask it another way: do you state that sanitization is always ok to use because it is a security control with a goal to make data safe?",
+      "createdAt": "2026-03-12T13:47:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046909769",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xVX82",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I have answered the questions in good faith and put a lot of effort into it. I'm not convinced that the good faith is not misused here.\n\nI appreciate the effort you have put into this discussion, and I am engaging in good faith. Based on my experience from our discussions across multiple tickets, I strongly believe that your intention is always to make ASVS better, and I truly respect that. Please don’t assume otherwise.\n\nIf you still feel that I am not engaging in good faith, I am happy to stop the discussion here.\n\nI may be wrong in several areas, please feel free to correct me.\n\n\n> Or let me ask it another way: do you state that sanitization is always ok to use because it is a security control with a goal to make data safe?\n\nNo, sanitization is not always OK blindly in every context. The position is when sanitization is the appropriate control for a given context, applying it is not an integrity violation.\n\n\nI will answer your other questions but let first conclude the discussion \"data integrity\", shall I assume you agree that data integrity is not an issue with sanitization, so we can close that part of the discussion and focus on the remaining points?",
+      "createdAt": "2026-03-12T18:11:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4048912182",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xWScJ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> No, sanitization is not always OK blindly in every context.\n\nI agree with that sentense.\n\n> The position is when sanitization is the appropriate control for a given context , applying it is not an integrity violation.\n\nI also agree with that sentense.\n\nBut for some reason you don't want to see, that the proposed requirement is for deciding, is the situation \"appropriate control for a given context\" or not. That is it.\n\nAnd if it is approved, it changes the integrity, but it is accepted behavior. That is why the requirement is needed - to decide, is it expected or is it integrity violation.\n\n---\n\n> I will answer your other questions but let first conclude the discussion \"data integrity\", shall I assume you agree that data integrity is not an issue with sanitization, so we can close that part of the discussion and focus on the remaining points?\n\nBy definition and impact sanitization is clear integrity killer, as it modifies the data. So after sanitization integrity is gone, and my point is, this must be approved, agreed and analyzed decision.\n\nI really don't like the AI-festival I have seen in some issues, but for smooth wording, I used \"define data integrity\" in Google search and AI overview section says something I agree with:\n\n> Data integrity refers to the accuracy, consistency, and reliability of data throughout its entire lifecycle, ensuring it remains trustworthy, unaltered, and valid. It guarantees that data is not compromised by errors, hacks, or system failures during storage, **transfer, or usage**.\n\nAnd selected lines from \"Key Aspects of Data Integrity:\"\"\n\n> Consistency: Data remains uniform across different tables, applications, and systems.\n> Reliability: Data remains stable and trustworthy over time.\n\nMy assumption is that you may ignore aspects, that integrity must stay also during transfer and usage. Everywhere and always.",
+      "createdAt": "2026-03-12T18:44:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4049151753",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xWZNB",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "What we see from @elarlang is what I feel to be demagoguery and strictness that makes no sense and is not inline with normal security standards.\n\nIf every transformation were considered an integrity violation, then the following would also be “integrity killers”:\n\n- canonicalization\n- normalization\n- encoding\n- compression\n- schema validation\n- trimming whitespace\n- converting character sets\n- parsing JSON into objects\n\nAll of these modify the original byte sequence, yet none are considered integrity violations.",
+      "createdAt": "2026-03-12T18:49:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4049179457",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xXnuK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What we see from @elarlang is what I feel to be demagoguery and strictness that makes no sense and is not inline with normal security standards.\n\nIn this conversation, I would like to say that both are contributing in good faith. I try to explain my position and answer all the questions. I also think that there is no difference in supporting the concept, but I can not be sure till we are there or we are not.\n\nSo for sure, there is no demagoguery here, there is no strictness here. It is a proposal for a requirement, and to have a discussion for that, it is expected behavior.\n\nBut for sure, we can not say that you came here with good faith to contribute to it. You choose a personal attack instead. So I kindly ask you not to ruin yet another discussion.\n\nFor the rest of your comment, I recommend to carefully read and analyze the issue first.",
+      "createdAt": "2026-03-12T19:36:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_DOWN",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4049501066",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xYCXP",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Fair enough @elarlang - I'll back off this thread and let you both resolve it.",
+      "createdAt": "2026-03-12T19:54:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4049610191",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xmP4k",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> AI overview section says something I agree with:\n\n> >Data integrity refers to the accuracy, consistency, and reliability of data throughout its entire lifecycle, ensuring it remains trustworthy, unaltered, and valid. It guarantees that data is not compromised by errors, hacks, or system failures during storage, transfer, or usage.\n\n> And selected lines from \"Key Aspects of Data Integrity:\"\"\n\n> > Consistency: Data remains uniform across different tables, applications, and systems.\n> > Reliability: Data remains stable and trustworthy over time.\n\nSo what your cited definition says that integrity protects against errors, hacks, and system failures and key aspects are consistency and reliability. None of these are violated by sanitization. Sanitized data is more consistent and more reliable across systems than unsanitized malicious input. **Your cited agreement supports my data integrity concern**:\n\n* **Trustworthy** : sanitized data is more trustworthy.\n* **hacks** : sanitization prevents compromise by hacks.\n* **Reliability** : sanitized data is more reliable for its intended use.\n* **Errors & System Failures**\": No where role of sanitization in this.\n* **Consistency** : consistent for appropriate context.\n\nSo after reading your cited text I can firmly say that sanitization enforces integrity not integrity killer.\n\n \n> So after sanitization integrity is gone, and my point is, this must be approved, agreed and analyzed decision\n\nIf ASVS needs a integrity acceptance requirement for sanitization because it modifies data. Then I would suggest we should think in broader aspect and add a universal requirement which covers all modern cases related to the data integrity. Let me explain why and I would suggest to draft a requirement to cover all type of edge cases.\n\nAs I think data transformation is a fundamental and unavoidable part of how applications work. Data changes form constantly as it moves through layers from client to server, server to database, database to output. This is not integrity violation, this is normal application behavior. Here I am sharing few of the cases :\n\nTransformation | Data Change |  Integrity Requirement Needed? \n-- | --| --|\n a user enters a numeric value in a text input field, and the application stores it in the database as an INT data type instead of a string. The representation changed, the type changed, but this is not considered an integrity violation| Yes (type change) | No, It's functional decision\nFile stored as Base64 instead of bytes  | Yes | No, It's encoding decision\nDate format converted client > server >DB | Yes | No, It's format decision\n< encoded to &amp;lt; for HTML output  | Yes | No it's security control\nJSON normalized before DB storage | Yes | No it's storage decision\nImage resized/compressed on upload  | Yes | No it's functional decision\nPhone number normalized to E.164 format  | Yes | No it's validation decision\nWhitespace trimmed from user input  | Yes | No it's processing decision\nUnicode normalized for storage  | Yes | No it's encoding decision\nHTML sanitization removing <script>  | Yes | No it's security control\n\n**Every single one of these modifies user data.** if data-integrity highlights only for sanitization then we would need separate integrity-acceptance for each of them and that is clearly unworkable as demonstrated above.\n\nNone of the cited definitions, including NIST, OWASP, or the AI overview you referenced, state that client-received data is the main source of truth that must be preserved as it is.\n\n**Your governance concern is valid** but scope of the proposed wording is not aligned with the normal application behavior. I would suggest we should draft the requirement as below and it should be listed somewhere under Business Documentation section.\n\n**Verify that data transformation decisions including sanitization, encoding, and format conversion are documented as intentional architectural decisions.**\n\n\n\n\n\n\n\n\n\n\n\n",
+      "createdAt": "2026-03-13T07:34:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053335588",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xmyNE",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The list you provided needs quite some analysis one by one, as there is mixing, fully converting the entire input to another format with a reversible option, and changing the actual input.\n\nBut I would get clarification first to the main question (in my opinion), in [your comment](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4048912182) you wrote:\n\n> No, sanitization is not always OK blindly in every context. The position is that when sanitization is the appropriate control for a given context, applying it is not an integrity violation.\n\nYou agree, that sanitization needs to be authorized and approved to make changes to the input.\n\nThe question is: where, why, and who decides it, is it authorized and approved?",
+      "createdAt": "2026-03-13T08:11:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053476164",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xnO1l",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Trustworthy : sanitized data is more trustworthy.\n\nNo it isn't. It may be \"safer\" from your POV thinking primarily of injection prevention, but that is only one side to it.\n\nWhat if the data was meant to be code, and you stripped a key part of it?\nWhat if ``#1234`` was an identifier that the user tried to communicate, but an aggressive sanitizer erased it? (something that I've seen happen)\nWhat if you sanitize out a part of someone's physical address meant for shipping?\nWhat if you mangle something legally-registered as is?\n\nI don't understand the comparisons to benign operations like base64 encoding, which perfectly preserve the original data. Sanitization is inherently violating data integrity because it **destroys** part of the data, which changes its meaning.\n\nBtw, this does include image resizing - images have metadata that you are stripping. Some of them even contain digital signatures meant to satisfy a security goal. Similarly, sanitizing logs can be damaging audit trails.\n\nJust because a security concern can, with all context considered, justify an integrity violation, that doesn't make it not an integrity violation and saying that \"sanitization enforces integrity\" is absurd.",
+      "createdAt": "2026-03-13T08:38:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053593445",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xnb1v",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> The question is: where, why, and who decides it, is it authorized and approved?\n\nwhere, why, and who are already answered in my last comment of the proposed requirement:\n\n\"**Verify that data transformation decisions including sanitization, encoding, and format conversion are documented as intentional architectural decisions.**\"\n\n\"**Architectural decisions**\" covers where and who. \"**Documented**\" covers why. verifying it would confirm that the decision was made intentionally, by the right person, at the right level.\n\n> The list you provided needs quite some analysis one by one\n\nWill wait for your feedback.",
+      "createdAt": "2026-03-13T08:50:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053646703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xnrRe",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we are not in sync with the term \"integrity\" and the comment from @narfbg supports that understanding.\n\nI have said it multiple times that sanitization by concept is an integrity killer as it changes the data.\n\nFor example, encoding and compressing are used to transfer data with its full content to another format, which is necessary to present it for the interpreter in use. This does not kill the integrity of the presentation. Sure, you can come here with whataboutism and find scenarios, is it ok in this case, and is it ok in that case, and we need to watch them one by one.\n\nBut, trimming a whitespace is already against integrity. Often, whitespace is trimmed from user input, and it does not cause any other problem, but if we need to measure the data integrity and make a hash-checksum of it, it is changed.\n\n> where, why, and who are already answered in my last comment of the proposed requirement:\n\n> Verify that data transformation decisions including sanitization, encoding, and format conversion are documented as intentional architectural decisions.\n\nIf those examples are understandable for you, then you may understand that sanitization does not belong to the \"data transformation\" area and can not be seen as encoding.\n\nI still would like to ask [the question](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053476164) again.\n",
+      "createdAt": "2026-03-13T09:05:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053709918",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xntg6",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> > Trustworthy : sanitized data is more trustworthy.\n\n> No it isn't. It may be \"safer\" from your POV thinking primarily of injection prevention, but that is only one side to it.\n\nThe \"**trustworthy**\" point was made specifically in the context where sanitization is the appropriate and correctly scoped control. When a user submits malicious HTML in a field that will be rendered in a browser, sanitizing it produces data that is more trustworthy for its intended purpose, that is not an integrity violation, it is integrity enforcement in the correct context.\n\n> I don't understand the comparisons to benign operations like base64 encoding, which perfectly preserve the original data.\n\nI think there is a misunderstanding about the purpose of the table. Those 10 examples were not presented as comparisons to sanitization, they were presented to demonstrate that data transformation is a fundamental and unavoidable part of normal application behavior.\n\n\nYour examples of #1234 being stripped or an address being mangled are not cases of sanitization being the appropriate control, they are cases of sanitization being incorrectly scoped or misapplied\n\n> Sanitization is inherently violating data integrity because it destroys part of the data, which changes its meaning.\n\nWait for sometime for the conclusion on violating data integrity part.\n",
+      "createdAt": "2026-03-13T09:07:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053719098",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xn17n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> When a user submits malicious HTML in a field that will be rendered in a browser, sanitizing it produces data that is more trustworthy for its intended purpose, that is not an integrity violation, it is integrity enforcement in the correct context.\n\nOh, no, @ajayojha - in the context of data integrity, the \"trustworthy\" means that not a single bit of the data is changed. You apply \"I can use it safely in the HTML output\" to \"trustworthy\". Those are completely different things.\n\nI think all important pieces are discussed in the issue. I recommend taking a bit of a timeout here, investigating the data integrity concept, and not only from the pieces that could support your current agenda, but from the \"blank page point of view\".\n\n> ... examples of https://github.com/OWASP/ASVS/pull/1234 being stripped or an address being mangled are not cases of sanitization being the appropriate control, they are cases of sanitization being incorrectly scoped or misapplied\n\nSo you basically say yourself, that there is a need to have a decision somewhere that decides, what is appropriate and what is not.",
+      "createdAt": "2026-03-13T09:14:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053753575",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xomte",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I recommend taking a timeout and investigating data integrity from a blank page point of view.\n\nI recognize this as a dismissal move, but I will set it aside and continue with the technical discussion.\n\n> In the context of data integrity, trustworthy means not a single bit of the data is changed.\n\nThe \"**not a single bit changed**\" definition has a fundamental problem, it would make routine database operations integrity violations. When JSON is stored in a relational database, the structure changes, whitespace is removed, data types are mapped, and the binary representation changes completely. When a datetime is received from a client in IST and stored in the database as UTC Unix timestamp, the bits change at every layer.\nNobody considers these integrity violations or trustworthy failure, because integrity in any practical context has never meant bit-for-bit preservation across every layer of an application. It has always meant protection against unintended, unauthorized, or wrong changes. \n\nSanitization is none of those things. It is intended, authorized, and intentional. The same is true of JSON normalization, datetime conversion, and every other transformation in the table.\nThe \"**not a single bit changed**\" definition does not hold up against normal application behavior, which is precisely the point the table was demonstrating.\n\n> So you basically say yourself, that there is a need to have a decision somewhere that decides, what is appropriate and what is not.\n\n\"**yourself, that there is a need to have a decision** \" - I never been in dispute and my disagreement has always been about the framing integrity violation. I already proposed the recommendation and your side comment is pending on that.",
+      "createdAt": "2026-03-13T09:55:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053953374",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xo261",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> I have said it multiple times that sanitization by concept is an integrity killer as it changes the data.\n\n... and i have highlighted that not only sanitization there are other cases which also changes the data structure. one thing i like in our discussion that you have shifted from integrity violation to integrity killer.\n\n> But, trimming a whitespace is already against integrity. Often, whitespace is trimmed from user input, and it does not cause any other problem, but if we need to measure the data integrity and make a hash-checksum of it, it is changed.\n\nIs new requirement is required for trimming?, as this is also against the integrity.\n\n> sanitization does not belong to the \"data transformation\" area and can not be seen as encoding.\n\nYour focus is on sanitization only and I am helping you see a bigger picture rather focusing on the sanitization only. Here the objective is \"Integrity Violation\" it's not sanitization is belongs to the \"data transformation\" or not. At the end, both change data by your own definition, both would be integrity killers. So the question remains is a new requirement needed for every operation that changes a single bit?\n\n",
+      "createdAt": "2026-03-13T10:07:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4054019765",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xo-sK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I have reached to the point, where I feel that I'm just going to repeat myself with attempt to explain \"sanitization by concept is killing the integrity as it is modifies the data\". You got the [same message with explanations from](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053593445) from @narfbg .\n\nAdding sanitization to the same list with encoding and call it \"transformation\" is fundamental mistake that I recommend you to analyze and reconsider the concept. Sanitization modifies the data, and modification is not a transformation.\n\nAs those understandings has not been changed, those are fundamentals to develop anything further. I have tried my best, and I don't want to put more time into it as I don't see any progress here at the moment. Yes, I know how you will interpret it.\n\nMaybe @narfbg wants to share his vision.",
+      "createdAt": "2026-03-13T10:13:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4054051594",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xqDmL",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks @elarlang for the so far discussion with the good faith, except one dismissal move.\n\n> Adding sanitization to the same list with encoding and call it \"transformation\" is fundamental mistake that I recommend you to analyze and reconsider the concept. Sanitization modifies the data, and modification is not a transformation.\n \n\"**modification is not a transformation**\" has no basis in any technical standard. Encoding modifies data it changes its binary representation completely. Compression modifies data it reduces its size. By your own definition both would be modifications, not transformations. The distinction you are drawing does not exist every transformation involves modification, and the two terms are not mutually exclusive. \n\nFYI, In real-world pipelines (Spark, dbt, Airflow, Glue, etc.), sanitization is clearly part of data transformation and I would consider that modification **IS** a form of transformation.\n\n**Encoding** — modifies data from one format to another = modification + transformation\n**Compression** — modifies data by reducing size = modification + transformation\n**Sanitization** — modifies data by removing harmful content = modification + transformation\n**Whitespace trimming** — modifies data by removing characters = modification + transformation\n\n**By the way the important part is not modification is part of transformation or not, the important part \"**single bit change**\" shall we consider integrity violation or trustworthy failure or not in application behavior at every layer?**, I will improve my knowledge on terms you are suggesting, if required. **but I believe the main question is still unanswered.**\n\n> fundamental mistake that I recommend you to analyze and reconsider the concept.\n\nI would request reading the comments in their broader context rather than focusing on individual terminology.\n\n\n# So Far summary for others\n\nFor the record, the JSON normalization, datetime conversion, and whitespace trimming examples were not addressed, and the proposed requirement is still pending feedback:\n\"**Verify that data transformation decisions including sanitization, encoding, and format conversion are documented as intentional architectural decisions.**\"\nThe governance concern is valid. The disagreement has only ever been about framing it as an integrity violation rather than a context and applicability decision. That distinction matters for a standard that others will implement. Happy to continue if @narfbg or anyone else wants to discuss on the technical ground.\n\n",
+      "createdAt": "2026-03-13T11:08:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4054333835",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xyUOu",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@ajayojha You seem to be oblivious to this, so I will not assume malintent, but you would do well to be not be dismissive yourself and follow your own advice:\n\n> I would request reading the comments in their broader context rather than focusing on individual terminology.\n\nSo far, you have been nitpicking terminology and quotes with extreme strictness, yet whenever the (quite obvious) difference between format transformations and sanitization is pointed out, you apply a reductionist logic that strips all nuance and claim that it's all the same because representation changes.\n\nNobody is concerned about semantically lossless conversion, that's only muddying the waters. We are concerned about *how* people determine whether sanitization is the right control, because that choice can be dangerous and therefore requires extra care. Which brings me to your proposed wording and claims about it:\n\n> **\"Verify that data transformation decisions including sanitization, encoding, and format conversion are documented as intentional architectural decisions.\"**\n>\n> **\"Architectural decisions\"** covers where and who. **\"Documented\"** covers why. verifying it would confirm that the decision was made intentionally, by the right person, at the right level.\n\nPerhaps you are lucky to work in a team that can infer the correct conclusions, but I can assure you that is not the norm and your wording doesn't even cover intentionality.\nMost will simply document what they've already coded, not the other way around. \"Of course it was intentional\", they'll say, why else would have they coded it ... That's if they bother complying at all, because documenting every single transformation is just silly.\n\n@elarlang My vision is quite different from yours actually, as I don't believe effective advice can stay out of application logic, nor that the authority to decide should so explicitly default on business stakeholders.\n\nBusiness should be consulted, informed, and ultimately always has veto power whether we mention it or not. However, in my experience business stakeholders tend to avoid involving security experts whenever they can, and any suggestion that they alone can decide will be used as an excuse for exactly that.",
+      "createdAt": "2026-03-13T16:46:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4056499118",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7xylMC",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> [@elarlang](https://github.com/elarlang) My vision is quite different from yours actually, as I don't believe effective advice can stay out of application logic, nor that the authority to decide should so explicitly default on business stakeholders.\n> \n> Business should be consulted, informed, and ultimately always has veto power whether we mention it or not. However, in my experience business stakeholders tend to avoid involving security experts whenever they can, and any suggestion that they alone can decide will be used as an excuse for exactly that.\n\nI'm not sure that it is so different, as I have not said that it should stay out of the application logic or it must be decided by business stakeholders. I used \"business logic rules\"` as an example in the initial idea explanation, and it seems to distract a lot from the problem to solve. Also note that \"business logic rules\" does not mean \"business unit\" in the organization. [I have proposed](https://github.com/OWASP/ASVS/issues/2797#issuecomment-2758755855) to call the \"business logic\" topic/chapter to just \"Logic\" (but it was not supported, so it stayed like it is), as the word \"business\" is misleading people to think something other than only focusing on the application logic.\n\nI also rephrased the problem to solve in https://github.com/OWASP/ASVS/issues/3346#issuecomment-4044726782\n\n> So the question to solve with this requirement is - who and in which condition decides that using a sanitization in that situation is ok or not. My point was that we can not dictate the application logic and decide whether they can use sanitization instead of validation.",
+      "createdAt": "2026-03-13T16:57:35Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4056568578",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7x0VDY",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I know you didn't directly mean business stakeholders, and I've actually refrained from many comments because \"business logic\" can reasonably be interpreted to mean very technical things that only developers will ever be involved in. The problem is that, like you said, the mere mention of \"business\" triggers wildly different associations for many people, so I want to play it safe by assuming the worst outcome will materialize.\n\nFair enough, I've missed the part where you opened the door to something rather condition-based. I'll need to think on that.",
+      "createdAt": "2026-03-13T18:06:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4057026776",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7yKQ5K",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@narfbg \n\n> because documenting every single transformation is just silly.\n\nThe below I am writing based on my own practical experience of working as a developer and architect; from small projects to chief architect on 100+ team projects. In both cases, architecture decisions are taken care of by technical experts -Tech Leads, Security Architects, Enterprise Architects, Application Architects, etc. When I say **documenting architectural decisions**, they may document it in Architecture Decision Records, design documents, Jira epics/stories at the architecture level, or in security design reviews. This all happens before starting development, before writing a single line of code.\n\nBased on my TOGAF experience, every serious enterprise uses Jira, Confluence, ADRs, TOGAF, or any architecture documentation framework to document intentional decisions before implementation. Architecture decisions are not written by developers after coding. Rather than calling this silly, we should recognize it as an important pillar of continuous application development without compromising security. If documenting decisions before implementation is considered silly, then tools like Jira, Confluence, and every architecture framework would have no purpose. The proposed text is asking for a pre-implementation security design decision, not a post-coding justification.\n\n> Nobody is concerned about semantically lossless conversion\n\nI think the earlier comments from @elarlang should be considered here. He defined integrity as \"**not a single bit changed**\" and also described whitespace trimming as an integrity violation. If integrity truly means not a single bit changes, then even reversible transformations would violate it; including transformations that are semantically lossless. \n\n> We are concerned about how people determine whether sanitization is the right control\n\nFor right control - Please refer to my proposed text ([comment](https://github.com/OWASP/ASVS/issues/3335#issuecomment-4055206450))\ndetermine - technical experts will determine and document this correctly for developers and other team members before implementation begins.\n\nI believe the technical disagreement discussion is actually quite narrow in this ticket (especially on my technical concerns) and there is no need for it to become uncivil (this is in general, not pointing you) . Many concerns raised have not been directly answered. \n\nI would appreciate if you could address those and answer of the below questions.\n\nDo you agree architectural decisions are made before development, not after coding?\nDo you disagree with the NIST/OWASP definitions of integrity as protection against unauthorized modification?\n\n\n\n\n",
+      "createdAt": "2026-03-15T11:05:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4062776906",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7yLAUR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I feel that here is some \"selective reading\" in progress.\n\nI wrote in https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053709918\n\n> For example, encoding and compressing are used to transfer data with its full content to another format, which is necessary to present it for the interpreter in use. This does not kill the integrity of the presentation. Sure, you can come here with whataboutism and find scenarios, is it ok in this case, and is it ok in that case, and we need to watch them one by one.\n\n> But, trimming a whitespace is already against integrity. Often, whitespace is trimmed from user input, and it does not cause any other problem, but if we need to measure the data integrity and make a hash-checksum of it, it is changed.\n\nSo there is not really a valid reason to claim that those are not addressed.\n\nWhitespace trimming is a good example, where auto-modification for user data must be acknowledged behavior. For most of the user-controlled input, it makes sense to remove whitespace leading/trailing characters if the user-input data field itself does not have any special meaning for those symbols. At the same time, it can not be applied blindly to everything and everywhere - for example, for passwords, for code (where space characters have special meaning) etc.\n\nIf we still need to discuss, is \"trimming whitespace\" killing the integrity by principle, it leads me back to my other comment: https://github.com/OWASP/ASVS/issues/3346#issuecomment-4054051594",
+      "createdAt": "2026-03-15T13:17:04Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4062971153",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7yq5nq",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@ajayojha I find your comment to be misrepresentative of what I said in too many ways to be worth addressing.\n\nI propose the following:\n\n> Verify that lossless defense techniques are prioritized, and where sanitization is used, partial data loss is an agreed-upon, justified trade-off for functional requirements and is clearly documented.\n\nI believe it covers everything and we don't have to bicker about data integrity definitions.",
+      "createdAt": "2026-03-16T23:39:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4071332330",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7y3sRC",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks @narfbg , I welcome the new proposal, and I would note that it represents a meaningful shift from the original **integrity** framing to a “**partial data loss**” framing. That shift is actually the core point I have been making throughout: sanitization, when applied in the correct context, is a justified and documented decision, not an integrity violation by definition. If this discussion led to that refinement, then it was constructive engagement, not bickering.\n\nHow about the text below, with some minor modifications to your proposed wording?\n\n**Verify that lossless defense techniques (such as encoding, escaping, or parameterization) are prioritized. Where non-reversible data modification (e.g. sanitization, truncation, masking) is used, ensure it is technically justified, approved, and documented clearly.**\n\n",
+      "createdAt": "2026-03-17T12:43:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4074685506",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7y4NKc",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "Other Proposed wording, as I see prioritized is not the better word to use as it  implies try lossless first.\n\n**Verify that lossless defense techniques (such as encoding, escaping, or parameterization) are used where sufficient. Where non-reversible data modification (e.g. sanitization, truncation, masking) is used, ensure it is technically justified, approved, and documented clearly.**",
+      "createdAt": "2026-03-17T13:06:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4074820252",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7y5USl",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@ajayojha Please apply some restraint and stop trying to angle everything as you being right all along. Everybody has been exceedingly patient with you, but that's not going to continue infinitely.\n\nA few things:\n- Prioritizing lossless techniques is the entire point. My intent is for sanitization to be clearly a last resort, and there's little point in mentioning other techniques if not to underline that.\n- Remember the context is a requirement about sanitization itself; i.e. to be included under [V1.3 Sanitization](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x10-V1-Encoding-and-Sanitization.md#v13-sanitization). Things like truncation and masking have no relevance.\n- Your version is emphasizing technical justification, which is vague and arguably goes against what I tried to achieve - harmonizing both technical and business justifications.\n\nAside from your preference that lossless techniques aren't prioritized, which you only added as a second revision, what was the point of any modifications at all? You didn't point out any problems or explain what you attempted to achieve.",
+      "createdAt": "2026-03-17T13:50:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4075111589",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7y8OQ-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, I feel we are back in the beginning.\n\nI explained my view on prioritizing (then called applicable/inapplicable) there:  https://github.com/OWASP/ASVS/issues/3346#issuecomment-4036987138\n\nIt is quite complicated to require or measure.\n\nFor @ajayojha I recommend 2 phrases to Google:\n* `is partial data loss an integrity violation`\n* `is integrity violation a partial data loss`\n\nI'm convinced, that the requirement is needed, and the very first line in the issue is:\n> To make things related to the sanitization topic clearer, we need to be sure that sanitization as a defense is an acceptable option for the current data or process.\n\nSo most likely I'll focus on this issue again when discussing things with Josh.",
+      "createdAt": "2026-03-17T15:30:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4075873342",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7y-xXK",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang genuinely curious, what were you hoping I would find by searching those two phrases?\r\n\r\n@narfbg Sorry, I missed to share the explanation, I had written it in my draft but forgot to paste it in the comment. I will address your concerns in the next couple of hours. As i am replying from my phone.\r\n\r\n\r\n\r\nGet Outlook for Android<https://aka.ms/AAb9ysg>\r\n________________________________\r\nFrom: Elar Lang ***@***.***>\r\nSent: Tuesday, March 17, 2026 9:00:50 PM\r\nTo: OWASP/ASVS ***@***.***>\r\nCc: Ajay Ojha ***@***.***>; Mention ***@***.***>\r\nSubject: Re: [OWASP/ASVS] proposal: add requirement to verify that using a sanitization is an accepted solution for that data or flow (Issue #3346)\r\n\r\n[https://avatars.githubusercontent.com/u/47597707?s=20&v=4]elarlang left a comment (OWASP/ASVS#3346)<https://github.com/OWASP/ASVS/issues/3346#issuecomment-4075873342>\r\n\r\nWell, I feel we are back in the beginning.\r\n\r\nI explained my view on prioritizing (then called applicable/inapplicable) there: #3346 (comment)<https://github.com/OWASP/ASVS/issues/3346#issuecomment-4036987138>\r\n\r\nIt is quite complicated to require or measure.\r\n\r\nFor @ajayojha<https://github.com/ajayojha> I recommend 2 phrases to Google:\r\n\r\n  *   is partial data loss an integrity violation\r\n  *   is integrity violation a partial data loss\r\n\r\nI'm convinced, that the requirement is needed, and the very first line in the issue is:\r\n\r\nTo make things related to the sanitization topic clearer, we need to be sure that sanitization as a defense is an acceptable option for the current data or process.\r\n\r\nSo most likely I'll focus on this issue again when discussing things with Josh.\r\n\r\n—\r\nReply to this email directly, view it on GitHub<https://github.com/OWASP/ASVS/issues/3346#issuecomment-4075873342>, or unsubscribe<https://github.com/notifications/unsubscribe-auth/AE3SS3RLUWM4U2CB35XHVPL4RFVSVAVCNFSM6AAAAACWLSFF26VHI2DSMVQWIX3LMV43OSLTON2WKQ3PNVWWK3TUHM2DANZVHA3TGMZUGI>.\r\nYou are receiving this because you were mentioned.Message ID: ***@***.***>\r\n",
+      "createdAt": "2026-03-17T17:01:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4076541386",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zONOj",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> stop trying to angle everything as you being right all along\n\nYour proposed text is much better than what I suggested, and I openly welcomed it and asked for feedback with a few modifications. I have tried to keep the focus on your goal. That does not mean I am saying, “**I was right all along.**” So please don’t misunderstand my intention..\n\n**Why your proposed text is better than my proposed text?**\n\nYour proposal is much better than mine because it clearly distinguishes between lossless techniques and sanitization (which I replaced with “**non-reversible data modification**”). I think this distinction is important and easier for anyone to understand.\n\n**The next question is why I replaced some of the original text:**\n\n1. \"**partial data loss**\" - The partial data loss should not be right term to use with sanitization as sanitization is intentionally altering the data for security, it's not unintended data corruption or loss. Most tech experts would consider well-sanitized data not lost, it's just safe.\n\n2. \"**functional requirements**\" - it seems confusing for me to include sanitization with functional requirements, so I replaced it with \"**technically justified**\". As you pointed out, there is a concern with that phrase, which is valid. So, a few lines below, I have proposed alternative text.\n\nNow the next question comes why I have mentioned \"**non-reversible data modification**\" instead of sanitization:\n\nWhen designing application architecture and documenting all important aspects including sanitization, focusing only on sanitization may not be the most appropriate approach. Since sanitization falls under non-reversible data modification, I prefer that term because it better covers other cases that are equally important from a security perspective. If valid use cases are needed, I would be happy to share them.\n\n> Prioritizing lossless techniques is the entire point. My intent is for sanitization to be clearly a last resort, and there's little point in mentioning other techniques if not to underline that.\n\nThe choice between lossless and lossy (sanitization at last resort) techniques is not a matter of priority **it is a matter of context and applicability**. \"**lossless is prioritized**\" implies sanitization is a lesser or reluctant choice, when in reality it is the correct and primary control for that specific context. The framing imposes a false hierarchy. If you have some valid use-cases which tells that sanitization must be last resort then please share for better understanding.\n\n> Remember the context is a requirement about sanitization itself; i.e. to be included under V1.3 Sanitization. Things like truncation and masking have no relevance.\n\n* I do remember, truncation and masking are in examples under non-reversible data modification, I hope i have categorized correctly in examples.\n* \"**to be included under v1.3 sanitization**\" currently this is under proposal state so nothing is finalized yet so saying to be included under v1.3 is  may not fully correct. \n\n\n> Your version is emphasizing technical justification, which is vague and arguably goes against what I tried to achieve - harmonizing both technical and business justifications.\n\nGood to highlight, how about \"**application architecture decisions**\" or \"**architecture decisions**\" - as application architecture decisions connects to technical choices to business outcomes.\n\n\n> Everybody has been exceedingly patient with you\n\nGood to know that discussing on technical ground with the right mindset is considered exceedingly patient. I have maintained patience throughout even when comments have been dismissive, lecturing, condescending and attacks reasoning style not the argument **without sharing a single authoritative technical reference**. I remain patient because I want this discussion to conclude on technical ground in good faith, with whatever text is finalized being good enough for end users to understand. So I would request everyone who is exceedingly patient to please focus on technical ground rather than becoming uncivil.\n\n> but that's not going to continue infinitely.\n\nOk, Good to know, thanks. The continuation of this discussion matters less to me than its quality. I would rather have fewer exchanges based on solid technical points than many that drift into personal matters.\n",
+      "createdAt": "2026-03-18T08:20:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4080587683",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zPMas",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> 1. \"partial data loss\" - The partial data loss should not be right term to use with sanitization as sanitization is intentionally altering the data for security, it's not unintended data corruption or loss.\n\nSanitization is partial data loss, as it is modifying the data. It does not matter, do we use the word \"integrity\" or \"partial data loss\", the concept stays the same.\n\nIs it intentional or unintential, is the main thing to solve with the proposed requirement/issue. It does not change the fact, that sanitization causes the data loss.\n\n> Most tech experts would consider well-sanitized data not lost, it's just safe.\n\nBased on what you state that?\n\n> 2. \"functional requirements\" - it seems confusing for me to include sanitization with functional requirements ...\n\nIf user-input is automatically modified, it is a functionality that must be approved. It is not just \"use sanitization and make things safe\", it is - modifying the data - which also means - it is causing a data loss and kills the integrity. Whatever is the way you want to call it, it does not change the concept or the meaning.\n\n> I have maintained patience throughout even when comments have been dismissive, lecturing, condescending and attacks reasoning style not the argument without sharing a single authoritative technical reference. \n\nWe are 50 comments into the issue. 2 persons have explained multiple times the concept and what it means. If it did not give results so far, most likely the next 50 comments will not do it either.\n\n---\n\nAgreement: as an option, the proposed requirement can be generalized to every automatic data modification to user-input, including trimming, truncation etc. Then this requirement most likely will not be in V1, but will be in V2. But at this stage, it is too early to go there, if the understanding of fundamentals are not aligned.\n",
+      "createdAt": "2026-03-18T09:01:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4080846508",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zRzKe",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Focus or point of view by @narfbg\n\n* https://github.com/OWASP/ASVS/issues/3346#issuecomment-4032926416\n* https://github.com/OWASP/ASVS/issues/3346#issuecomment-4071332330\n* https://github.com/OWASP/ASVS/issues/3346#issuecomment-4075111589\n\nI would like to provide a clear summary on this.\n\nI agree that sanitization should not be \"just used to make things safe\" without understanding what it causes as a side-effect - do we call it partial data loss or integrity loss.\n\nFrom your proposals I see some problems with the \"prioritizing\" part:\n\n  * we can not really measure it - was defense method X available, or was defense method Y prioritized\n  * we can not dictate it - there may be some functional scenarios, where keeping only certain symbols / removing agreed symbols is decided and approved functionality. So I would leave this to the application owner to decide (I don't want to have a debate over the \"application owner\" as a potentially specific term - in this context, it means someone who is responsible for deciding business and security requirements).\n\nThose points I also tried to address in my previous comment on the topic:\n\n  * https://github.com/OWASP/ASVS/issues/3346#issuecomment-4036987138\n\nSo first, it may feel like a completely different goal, but I think the proposed requirement solves the focus point you try to address - sanitization (or when to generalize in the wide picture, any not-approved modification) must not happen if it is not analyzed and approved. It should also take away blacklist-driven naive \"I think it is more secure now\" solutions.",
+      "createdAt": "2026-03-18T10:52:41Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4081529502",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zSxtc",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "@elarlang  I like your phrase \"**AI-festival**\" and since you shared some Google search suggestions, I thought why not search myself? Since you don't prefer AI-related content, I went directly to Google and then to the OWASP site specifically, since OWASP is the standard the world follows.\n\nI first searched \"**World's top security project name**\"; it returned OWASP. So I searched the terms you and @narfbg have been using throughout this discussion directly on the OWASP site. Here are my findings:\n\n| Search Text | Reviewed Pages | Conclusion\n| ------------| ----------- |--------|\n|[partial data loss](https://www.google.com/search?q=site%3Aowasp.org+%22partial%20data%20loss%22) | 0 | ASVS invented this term for sanitization if proposal includes this term.\n|[integrity loss](https://www.google.com/search?q=site%3Aowasp.org+%22integrity+loss%22) | 5 | none confirm sanitization = integrity loss.\n|[data loss](https://www.google.com/search?q=site%3Aowasp.org+%22data+loss%22) | 60 | none link sanitization to data loss.\n|[integrity violation](https://www.google.com/search?q=site%3Aowasp.org+%22integrity%20violation%22) | 2 | none prove sanitization = integrity violation.\n|[data integrity](https://www.google.com/search?q=site%3Aowasp.org+%22data%20integrity%22) | 128 | none confirm sanitization = data integrity issue.\n\nAfter reviewing these results I can firmly say that none of the framing used in this discussion is supported anywhere on OWASP in relation to sanitization.\n\nI would request you to share an authoritative reference link that supports what you have written here, since what you are pointing to is not available on OWASP, and the world follows OWASP. If you have reference links that correct my understanding please share them. I would also request that you please do not suggest Google search terms, as I need references that directly support the points being made, not general searches.",
+      "createdAt": "2026-03-18T11:34:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4081785692",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zVRZH",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Based on what you state that?\n\nLet me first share some search links to find authoritative references confirming that tech experts use the term 'well-sanitized':\n\n* Search text on [OWASP Site](https://www.google.com/search?q=site%3Aowasp.org+%22well-sanitized%22).\n* Search text on [NIST](https://www.google.com/search?q=site%3Anist.gov+%22well-sanitized%22)\n* [Global Search](https://www.google.com/search?q=%22well-sanitized%22+in+web+security)\n\nYou will find good information confirming that most tech experts use the term 'well-sanitized'. I hope I have answered your question in a way which you like.\n\n\n> We are 50 comments into the issue. 2 persons have explained multiple times the concept and what it means. If it did not give results so far, most likely the next 50 comments will not do it either.\n\nBe positive :). This usually happens in technical discussion and don't worry before we reach 100 comments, it will be concluded with proper alignment.\n\n\n",
+      "createdAt": "2026-03-18T13:10:17Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4082439751",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zWMXi",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Addressed to @ajayojha \n\nSo you accept definitions from NIST and OWASP, as you referenced in https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046829772.\n\n\n[NIST](https://csrc.nist.gov/glossary/term/data_integrity)\n\n> The property that data has not been altered in an unauthorized manner. Data integrity covers data in storage, during processing, and while in transit.\n\n> A property whereby data has not been altered in an unauthorized manner since it was created, transmitted, or stored.\n\nIt says, that data has not been altered (we have used the word \"modified\" here).\n\nSanitization modifies (alters) the data - so, sanitization kills the integrity.\n\nWhat exactly is not understandable here?\n\n---\n\n[OWASP Dev Guide](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/#integrity)\n\nNote that the same way I could put the definition into the ASVS document and reference it as \"OWASP definition\".\n\n> Integrity is about protecting data against unauthorized modification, or assuring data trustworthiness. The concept contains the notion of data integrity (**data has not been changed accidentally or deliberately**) and the notion of source integrity (data came from or was changed by a legitimate source).\n\nIt also says, that data has not been changed accidentally or deliberately which means any modification is killing the integrity.\n\nWhat exactly is not understandable here?\n\n---\n\nI already wrote that in the very next comment after your quotes here: https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046909769\n\nBut you just ignored that. And then claim, that your concerns are not answered.\n\n---\n\nYou [claim](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053335588), that \"sanitized data is more trustworthy\" thinking blindly only in injection/execution context. You got a clear feedback on that also from @narfbg in https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053593445.\n\nBut you just ignored that. And then claim, that your concerns are not answered.\n\n\n---\n\n> Be positive :). This usually happens in technical discussion and don't worry before we reach 100 comments, it will be concluded with proper alignment.\n\nDo you think it is funny?\n\nTo have a discussion on the issues in this project is meant to provide followable information. This is not a followable discussion that someone wants to read through.\n\nThis issue is an example, why I start questioning, is development in the issues is in the correct place. Here, I would say, volunteer-resources are misused. Volunteer-resources are the only resources the project has.\n\nYou have claimed that I walk away from the issues - I do, when I can not see any perspective other than a dead-end, and in this situation, there is no sense in wasting more volunteer-resource time on that.\n",
+      "createdAt": "2026-03-18T13:44:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4082681314",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zi0ds",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang \n\n> From your proposals I see some problems with the \"prioritizing\" part:\n> \n> * we can not really measure it - was defense method X available, or was defense method Y prioritized\n> * we can not dictate it - there may be some functional scenarios, where keeping only certain symbols / removing agreed symbols is decided and approved functionality. So I would leave this to the application owner to decide (I don't want to have a debate over the \"application owner\" as a potentially specific term - in this context, it means someone who is responsible for deciding business and security requirements).\n\nI understand your concern on how to measure, but I don't understand the position that we can't dictate it. I'm having a hard time imagining a scenario that requires stripping symbols as a matter of business logic, but be that as it may ... prioritization addresses that:\n\n1. Can we satisfy functional requirements with lossless technique X? Yes, great! No? Next.\n2. Can we satisfy functional requirements with lossless technique Y? Yes, great! No? Next.\n3. Repeat until all lossless options are exhausted.\n4. No lossless technique satisfies functional requirements? I guess sanitization is the best we can do then.\n\nShort of enumerating every single scenario where sanitization is appropriate, this is the closest we can come to measuring, and if there's a conflict with any functional requirements - techniques that don't satisfy them simply wouldn't be used, that's what prioritization implies.\n\n> Those points I also tried to address in my previous comment on the topic:\n> \n> * [proposal: add requirement to verify that using a sanitization is an accepted solution for that data or flow #3346 (comment)](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4036987138)\n> \n> \n> So first, it may feel like a completely different goal, but I think the proposed requirement solves the focus point you try to address - sanitization (or when to generalize in the wide picture, any not-approved modification) must not happen if it is not analyzed and approved.\n\nI appreciate that you're focusing on where we share agreement, but that's understating what I'm trying to address and simply offloading the decision to another party without clear guidance IMO makes the requirement moot.",
+      "createdAt": "2026-03-18T22:33:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4085991276",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM7zwQIc",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "\n\n\n\n> Addressed to [@ajayojha](https://github.com/ajayojha)\n> \n> So you accept definitions from NIST and OWASP, as you referenced in [#3346 (comment)](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046829772).\n> \n> [NIST](https://csrc.nist.gov/glossary/term/data_integrity)\n> \n> > The property that data has not been altered in an unauthorized manner. Data integrity covers data in storage, during processing, and while in transit.\n> \n> > A property whereby data has not been altered in an unauthorized manner since it was created, transmitted, or stored.\n> \n> It says, that data has not been altered (we have used the word \"modified\" here).\n> \n> Sanitization modifies (alters) the data - so, sanitization kills the integrity.\n> \n> What exactly is not understandable here?\n> \n> [OWASP Dev Guide](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/#integrity)\n> \n> Note that the same way I could put the definition into the ASVS document and reference it as \"OWASP definition\".\n> \n> > Integrity is about protecting data against unauthorized modification, or assuring data trustworthiness. The concept contains the notion of data integrity (**data has not been changed accidentally or deliberately**) and the notion of source integrity (data came from or was changed by a legitimate source).\n> \n> It also says, that data has not been changed accidentally or deliberately which means any modification is killing the integrity.\n> \n> What exactly is not understandable here?\n> \n> I already wrote that in the very next comment after your quotes here: [#3346 (comment)](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046909769)\n> \n> But you just ignored that. And then claim, that your concerns are not answered.\n> \n> You [claim](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053335588), that \"sanitized data is more trustworthy\" thinking blindly only in injection/execution context. You got a clear feedback on that also from [@narfbg](https://github.com/narfbg) in [#3346 (comment)](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053593445).\n> \n> But you just ignored that. And then claim, that your concerns are not answered.\n> \n> > Be positive :). This usually happens in technical discussion and don't worry before we reach 100 comments, it will be concluded with proper alignment.\n> \n> Do you think it is funny?\n> \n> To have a discussion on the issues in this project is meant to provide followable information. This is not a followable discussion that someone wants to read through.\n> \n> This issue is an example, why I start questioning, is development in the issues is in the correct place. Here, I would say, volunteer-resources are misused. Volunteer-resources are the only resources the project has.\n> \n> You have claimed that I walk away from the issues - I do, when I can not see any perspective other than a dead-end, and in this situation, there is no sense in wasting more volunteer-resource time on that.\n\nThanks @elarlang for the detailed response. I will answer all of your raised questions and concerns tomorrow as I am busy with other priorities. Until then it would be helpful if you could answer the below questions, which will help me better understand your point of view before responding:\n\n1. What is the meaning for you of the term \"**an unauthorized manner**\"?\n2. What is the meaning for you of the term \"**unauthorized modification**\"?\n\nIf you could also share any authoritative references that explain these terms in the context you are using them, This helps a lot to me to understand better your context..",
+      "createdAt": "2026-03-19T11:34:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4089512476",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM70ryL4",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> It says, that data has not been altered (we have used the word \"modified\" here).\n\n> Sanitization modifies (alters) the data - so, sanitization kills the integrity.\n\n> What exactly is not understandable here?\n\nI think you missed reading the full statement and have not answered my previously asked questions. The statement does not claim that any modification violates integrity, it says \"**data has not been altered in an unauthorized manner**\". So saying sanitization kills integrity is completely incorrect. Any unauthorized modification kills integrity, not sanitization specifically. Saying sanitization changes the meaning of data and therefore kills integrity is incorrect.\n\nI would again request you to share an authoritative reference link that supports what you have written in this thread, since what you are pointing to is not aligned with the world tech community.\n\nIf sanitization kills integrity, then please answer one question, Please refer to the [Mozilla Developer Docs](https://developer.mozilla.org/en-US/docs/Web/Security#maintain_data_integrity) which includes both a 'Maintain Data Integrity' section and a dedicated 'Sanitize Form Input' section. The 'Sanitize Form Input' section clearly states: '**don't trust anything that users enter into forms**'. **Should we create a PR proposing that Mozilla add a warning that sanitization kills data integrity and violates it with reference to the comments? What do you think?**\n\n> It also says, that data has not been changed accidentally or deliberately which means any modification is killing the integrity.\n\n> What exactly is not understandable here?\n\nAgain you have missed the first line of the same definition:\n\n\"**Integrity is about protecting data against unauthorized modification, or assuring data trustworthiness**.\"\n\nIntegrity loss is not caused by any modification, it is only considered in the case of unauthorized modification. Please refer this blog https://www.invicti.com/blog/web-security/software-and-data-integrity-failures-an-owasp-top-10-risk\n\nI have re-read your comments. Here is one I would like to quote:\n\n> > I will answer your other questions but let first conclude the discussion \"data integrity\", shall I assume you agree that data integrity is not an issue with sanitization, so we can close that part of the discussion and focus on the remaining points?\n\n> By definition and impact sanitization is clear integrity killer, as it modifies the data. So after sanitization integrity is gone, and my point is, this must be approved, agreed and analyzed decision.\n\n\"**By definition and impact sanitization is clear integrity killer, as it modifies the data. So after sanitization integrity is gone,** \" -  Sanitization is an authorized, intentional transformation. Sanitization does not kill integrity, it is a designed security control. Integrity is only violated when data is modified without authorization. Sanitization is explicitly authorized by design.\n\n\"**my point is, this must be approved, agreed and analyzed decision**\" - I have already answered this.\n\n**If a developer incorrectly scopes sanitization and it causes unintended data modification - do you consider that an integrity violation or a mistake in the application?**\n\n> You https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053335588, that \"sanitized data is more trustworthy\" thinking blindly only in injection/execution context. You got a clear feedback on that also from @narfbg in https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053593445.\n\nLet me elaborate - sanitized data is more **trustworthy** specifically when sanitization is correctly scoped and applied. This has been my consistent position throughout.\n\n**What's the difference between \"safer\" and \"trustworthy\" in the context of sanitization?**\n\n> But you just ignored that. And then claim, that your concerns are not answered.\n\nMy concerns are not yet answered on \"data integrity\" with authoritative references and some of them are ignored to discuss further, please **share an authoritative reference link that supports what you have written here, since what you are pointing to is not available**, I think you should use the term called \"data fidelity\" instead \"data integrity\". \n\n\n> Do you think it is funny?\n\nI used \"**be positive**\" in a lighthearted way. Please do not read more into it than was intended. Let us stay focused on the technical discussion.\n\n> this project is meant to provide followable information\n\nVery good point you have highlighted, Is the below is the great sense of followable discussion:\n1. After 35+ comments you responded to the data integrity definition link I shared - is that the kind of followable discussion expected from someone raising concerns about followable discussions?\n2. Questions have been answered selectively without authoritative references..\n3. Direct personal attacks and dismissive tone are against OSS standards and the OWASP Code of Conduct. This is frequently violated.\n\n> This issue is an example, why I start questioning, is development in the issues is in the correct place. Here, I would say, volunteer-resources are misused. Volunteer-resources are the only resources the project has.\n\nThis ticket is actually an example of how an established term - \"data integrity\" - has been incorrectly applied and used in the wrong context. Without any authoritative references. Later, I will address the 'misused' claim separately.",
+      "createdAt": "2026-03-22T02:03:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4105118456",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM70xp0P",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Statements like...\n\n> So saying sanitization kills integrity is completely incorrect. Any unauthorized modification kills integrity, not sanitization specifically. Saying sanitization changes the meaning of data and therefore kills integrity is incorrect.\n\n> Sanitization is an authorized, intentional transformation. Sanitization does not kill integrity, it is a designed security control. Integrity is only violated when data is modified without authorization. Sanitization is explicitly authorized by design.\n\nJust wow. Or if to quote another person here - absurd.\n\nIn short, it proves my previous lines that there is no point to continue, as there is no development or will to analyze given feedback.",
+      "createdAt": "2026-03-22T17:35:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4106657039",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM70yK6P",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "I am happy to correct your understanding of the 'absurd' claim with authoritative references, as explanation alone does not seem to matter here. At the same time I would like to note that the request for an authoritative reference supporting 'sanitization kills integrity' remains unanswered throughout this entire discussion, along with the Mozilla PR proposal and other important questions.\"",
+      "createdAt": "2026-03-22T19:01:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4106792591",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM700F3b",
+      "author": {
+        "login": "narfbg"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@ajayojha I will attempt, once, to give you exactly what you asked for:\n\n[OWASP definition of integrity](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/#integrity), which **you personally [cited](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046829772)**\n> Integrity is about protecting data against unauthorized modification, or assuring data trustworthiness. The concept contains the notion of **data integrity (data has not been changed accidentally or deliberately)** and the notion of source integrity (data came from or was changed by a legitimate source).\n\n[NIST definition of integrity](https://csrc.nist.gov/glossary/term/integrity), also part of [FIPS-200](https://nvlpubs.nist.gov/nistpubs/fips/nist.fips.200.pdf) and [SP800-53](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf) (Appendix A in both documents)\n> Guarding against improper information modification or destruction, and includes ensuring information non-repudiation and authenticity.\n\nIf you're going to again reply with something to the effect of _\"but if sanitization is correctly scoped and intended, it's proper\"_, sorry but no it isn't - **we have no clear guidance on how to decide whether it's the correct control**, which means your position has no foundation to stand on. \"Technical experts\" aren't the answer - anyone can claim to be that, and even the most senior ones very often make the wrong decisions.\n\nThis has been repeatedly explained already, but even when sanitization is the correct choice, that's a matter of one security concern (e.g. injection prevention) **overriding** another (integrity violation), but it doesn't make it disappear. I'll extend you an olive branch in recognizing that sanitization can be used to defend *overall* system integrity and therefore the integrity and trustworthiness of all other data in the system, which is why it is at all justifiable, but that still happens at the price of an integrity violation to a specific piece of data.\n\nTo make a more blunt analogy, if amptutating a limb is necessary to save your life, that's clearly the correct decision, yet you still lose a limb. It can be the correct decision, and it can even be reasonably argued that it preserves other limbs, but you cannot then spin that as _\"amputation doesn't result in limb loss because it was the correct thing to do\"_.\n\nI also want to note that your [citation](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4046829772) of [NIST on data integrity](https://csrc.nist.gov/glossary/term/data_integrity) is based on standards in the area of cryptography and industrial control systems - fields in which sanitization simply does not exist - and the page has a clear disclaimer on its right side, which reads:\n> See the identified Source document to understand each term-definition pair in its proper context.\n\nDifferent standards and organizations will frame the issue differently, but all of them fundamentally mean integrity as the opposite of \"damaged\". This is one of the most basic concepts in security and your refusal to acknowledge it is inflammatory.\n\nYou claim to be having a technical discussion in good faith, yet you're completely unable to write a comment that doesn't include loaded questions, snarky jabs, or miss an opportunity to disagree on something, anything. Seriously, in your [very first reply to me](https://github.com/OWASP/ASVS/issues/3346#issuecomment-4053719098), you directly _told_ me to wait, as if I'm a small child interrupting a grown-ups conversation, and you complain about civility and OSS standards of conduct?\n\nPlease, take this as a fulfillment of your requests for references, a best effort attempt at explaining why your comments are getting increasingly more ignored, and let that be the end of it. There's no need for every second comment in the thread to be your disagreements on repeat.",
+      "createdAt": "2026-03-23T00:19:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4107296219",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM707WoO",
+      "author": {
+        "login": "ajayojha"
+      },
+      "authorAssociation": "NONE",
+      "body": "> 'wait'\n\n@narfbg  The \"wait\" comment was not intended as dismissive and I am sorry if it came across that way.\n\n> To make a more blunt analogy, if amptutating a limb is necessary to save your life, that's clearly the correct decision, yet you still lose a limb. It can be the correct decision, and it can even be reasonably argued that it preserves other limbs, but you cannot then spin that as \"amputation doesn't result in limb loss because it was the correct thing to do\".\n\nAmputation analogy is fair as an analogy, though I would argue sanitization is closer to removing a tumor than amputating a healthy limb, the removed content was malicious and never legitimate input to begin with. In practice changing representation is not damaging data in the correct context.\n\n> we have no clear guidance on how to decide whether it's the correct control\n\nThere is clear guidance that already exists for taking appropriate decisions, I would like to understand your point of view - what specific type of guidance is missing that does not currently exist? Please elaborate.\n\n> which means your position has no foundation to stand on. \"Technical experts\" aren't the answer - anyone can claim to be that, and even the most senior ones very often make the wrong decisions.\n\nThis seems overstated. Technical expert decisions should be based on standards, patterns, peer review, and documented rationale - not personal opinion.\n\n> Please, take this as a fulfillment of your requests for references, a best effort attempt at explaining why your comments are getting increasingly more ignored, and let that be the end of it. There's no need for every second comment in the thread to be your disagreements on repeat.\n\nThank you for the references. However these are definitions of integrity, not references stating that **sanitization kills integrity**. I am still waiting.\n\nPlease take note that as I have mentioned earlier, I don't have any disagreement with the goal but I do have a problem with the wording which has not been addressed yet. Once you share the authoritative references which state that '**sanitization kills integrity**' I would be happy to stop repeating the comment.\n\nPlease suggest how many problems in the below proposed text and how this is not aligned with your goal:\n\n**Verify that lossless defense techniques (such as encoding, escaping, or parameterization) are prioritized. Where non-reversible data modification (e.g. sanitization, truncation, masking) is used, ensure it is application architecture decisions, approved, and documented clearly.**\n\n\n\n\n\n\n",
+      "createdAt": "2026-03-23T09:31:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3346#issuecomment-4109199886",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2026-03-09T08:27:50Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM8AAAABPxIA-g",
+      "name": "V1 (prev V5)",
+      "description": "",
+      "color": "75639F"
+    }
+  ],
+  "number": 3346,
+  "state": "OPEN",
+  "title": "proposal: add requirement to verify that using a sanitization is an accepted solution for that data or flow",
+  "url": "https://github.com/OWASP/ASVS/issues/3346"
+}

@@ -1,0 +1,374 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjUzMTQ2NQ==",
+    "is_bot": false,
+    "login": "jmanico",
+    "name": "Jim Manico"
+  },
+  "body": "In relation to:\r\n\r\nhttps://github.com/OWASP/ASVS/issues/877 and https://github.com/OWASP/ASVS/issues/1031\r\n\r\nI think all of v1 needs to stick with threat modeling and general architecture requirements and drop the technical duplicates and move them into a different section.\r\n\r\nV1.1 looks ok, but I would like to split v1.1 into SDLC and Threat modeling as separate sections\r\n\r\nI think all of v1.2 Architecture should move into v2\r\nI think all of v1.4 Should move into the correct access control vx\r\nand that goes for the rest\r\n\r\nThis is a big change, need leads to comment here. cc @elarlang @vanderaj @tghosth @danielcuthbert ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM43mCyj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I copy-paste [my opinion](https://app.slack.com/client/T04T40NHX/C06MNF14M/thread/C06MNF14M-1620288971.020800) (2021-05-06) from ASVS slack channel\r\n\r\nPicking some phrases from https://github.com/OWASP/ASVS/blob/master/4.0/en/0x10-V1-Architecture.md\r\n> \"Architecture is not an implementation, but a way of thinking about a problem\"\r\n\r\nFrom this point of view, I interpret:\r\n* it is NOT something what you can check from actual implementation - with HTTP request, with watching program code or configuration\r\n* it IS all about principles, working/implementation processes and documentation\r\nNow there are some things which can be both, like:\r\n* 1.4.3\tVerify enforcement of the principle of least privilege in functions, data files, URLs, controllers, services, and other resources. This implies protection against spoofing and elevation of privilege.\r\n* 4.1.3 Verify that the principle of least privilege exists - users should only be able to access functions, data files, URLs, controllers, services, and other resources, for which they possess specific authorization. This implies protection against spoofing and elevation of privilege.\r\n\r\nWhat could be the argumentation to have 2 too similar requirements? What is the use-case for 1.4.3?\r\n\r\nPreviously we made move from 1.5.3 \"architecture\" to 5.1.6 \"implementation\":\r\n> Verify that input validation is enforced on a trusted service layer.\r\n\r\nArguments: even it's in big picture architecture question, you can and need to check it from implementation. Another problem is that V1 category is \"Level 2\" category, but many requirements should be Level 1.\r\n\r\nThe question here is - do we need to have duplicates for \"architecture\" and \"implementation\" requirements?\r\n\r\nLike requirement 1.5.4:\r\n> Verify that output encoding occurs close to or by the interpreter for which it is intended.\r\n\r\nI can understand, it's principle and architecture question, but you can and need to check it from implementation.\r\n\r\nFor my taste there are quite many requirements in V1 category, which should not be there.\r\n\r\nI propose that there should stay requirements like: Verify that\r\n* some development, implementation etc processes and/or requirements are described\r\n* something is identified and documented (like what is sensitive data for the application)\r\n* some principles are described - but here it must be clear and different from \"check the implementation\" requirement",
+      "createdAt": "2021-10-02T09:11:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-932719779",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43_SUZ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "V1 category should contain \"inventory\" requirements, which must give \"pre-condition\" data for testing \"implementation requirements\".\r\n\r\nExamples:\r\n* \"sensitive data\" - sensitive data must be defined, otherwise you can not test any requirement related with sensitive data\r\n* \"logs inventory\" - you must have list of logs you expect, otherwise you can not test, do they exist and also, that there are no others logs\r\n* \"list of required connections to outside\" - if an application needs whatever communication to external party, then it must be documented. only documented connections should be allowed\r\n* etc...",
+      "createdAt": "2021-10-09T18:00:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-939336985",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM48_jxb",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Suggestion about 1.1.6.\r\n\r\n> Verify implementation of centralized, simple (economy of design), vetted, secure, and reusable security controls to avoid duplicate, missing, ineffective, or insecure controls. (C10)\r\n\r\nIt is included in architecture V1.1 but says \"verify implementation.\" In addition, I can't find the origin in C10 and don't have an idea about what is the good way to meet or what is the anti-pattern of this requirement.\r\n\r\nIf there is no clear guidance on the architecture, how about removing this?",
+      "createdAt": "2022-01-27T14:55:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1023294555",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5A_heb",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico \r\n\r\nI think the opposite. V1 currently contains SSDLC processes like threat modelling which I think should not be there. They belong in SAMM. To me V1 should have the basic principles underlying each individual section and if we cannot find enough content we should rethink it entirely.",
+      "createdAt": "2022-04-06T15:18:41Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1090394011",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5A_sq0",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "1) I am more than happy to drop all threat modeling, I am with you. It's a \"soft\" requirement that I will be glad to see go.\r\n\r\n2) I want to see access control requirements ONLY in the access control section. The idea of putting an access control requirement in both section 1 and the access control section is, IMO, a very bad idea. \r\n\r\nWe are not completely in oposition Josh, we're getting close to agreement.",
+      "createdAt": "2022-04-06T16:01:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1090439860",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BqD80",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ok so I think we need to think carefully about what if anything should be in V1 or whether we need to abolish it completely. I think maybe we need community input on this decision",
+      "createdAt": "2022-04-18T16:29:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1101545268",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5CiU2M",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I vote to totally drop v1. It's not concise enough for us. They got SAMM to evaluate process.",
+      "createdAt": "2022-05-03T16:26:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1116294540",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Cib24",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We still need some documentation requirements, without those you can not develop or security test another requirements.",
+      "createdAt": "2022-05-03T16:48:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1116323256",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5C1Wck",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So our proposal is to keep V1 as some sort of basis but strip out all the process level requirements? @elarlang ",
+      "createdAt": "2022-05-09T15:56:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1121281828",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P8Ct5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang do you remember if we wrote something somewhere about our philosophy for what should be in V1 or was it just the following?\r\n\r\n> So our proposal is to keep V1 as some sort of basis but strip out all the process level requirements? @elarlang",
+      "createdAt": "2022-12-07T15:31:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1341139833",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5P8Ey4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Basically the philosophy at the moment are in comments: https://github.com/OWASP/ASVS/issues/1063#issuecomment-932719779 and https://github.com/OWASP/ASVS/issues/1063#issuecomment-939336985",
+      "createdAt": "2022-12-07T15:37:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1341148344",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RHw1k",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For v1, yeah remove threat modeling\r\nfor v2, removing it will be the hill I'm happy to die on, I think it really adds a lot of value and the tooling around threat modeling has changed so much since the awful days of stride/dread and clunky tools. ",
+      "createdAt": "2022-12-21T08:16:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1360989540",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l1oeq",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree with the concept that V1 should contain documentation requirements. \r\n\r\nAs regards architectural requirements, I still think that having these in V1 makes sense from a building perspective because you need the architectural foundations to implement the actual requirements. I guess from the validation perspective it makes more sense to have them in the specific sections where they belong.\r\n\r\nDo we have anything to say about V1 other than documentation requirements? I am not sure we should have process here at all...\r\n\r\n@elarlang ?",
+      "createdAt": "2023-09-06T15:05:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1708558250",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5l2Sog",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I prefer to keep implementation requirements away from documentation/security decisions requirements.\r\n\r\nIf to to give them more hilight, we can use *.1 subcategory for architecture requirements. But can you give an example, what is the problem or situation to solve here?",
+      "createdAt": "2023-09-06T16:38:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1708730912",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5mRT9D",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My concept for V1 architecture requirements is things that are foundational to the application and will either have to be developed before the more specific controls are implemented or will require significant effort to retrofit. For example, having a consistent input validation architecture will be necessary before individual input validation controls can be implemented.\r\n\r\n",
+      "createdAt": "2023-09-12T14:16:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1715814211",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5tLNmQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just documenting one idea / option to discuss: after V1 cleanup from implementation requirements, we probably have too few requirements for each sections and some sections are empty which may cause confusion.\r\n\r\nSo one option is: for each category, there are:\r\n* VX.1 documentation requirements\r\n* VX.2 architecture, principle and general requirements for the category",
+      "createdAt": "2023-11-29T10:48:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1831655824",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vhYFz",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Are you advocating to eliminate V1 entirely?",
+      "createdAt": "2023-12-28T10:10:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1871020403",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5vhbkR",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me, the trend is toward the idea written in the last comment. But let's see how many requirements we have in the V1 if we have cleaned it up.",
+      "createdAt": "2023-12-28T10:28:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-1871034641",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LSGx2",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So this is our current direction for V1:\r\nhttps://github.com/OWASP/ASVS/discussions/1831",
+      "createdAt": "2024-09-08T18:25:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-2336779382",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LU16g",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I really really like for docs (and more) to be moved to the relevant chapter so consumers of ASVS don't have to hop around to different sections.",
+      "createdAt": "2024-09-09T08:41:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-2337496736",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LdauG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I take your point, I think V1 will be one of the final chapters to be update so let's see how we are doing then",
+      "createdAt": "2024-09-10T06:10:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-2339744646",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Smeex",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this is no longer relevant, we have pretty much eliminated V1",
+      "createdAt": "2024-11-06T11:58:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1063#issuecomment-2459559857",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-10-02T00:53:56Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABSffwUA",
+      "name": "4b Major-rework",
+      "description": "These issues need to be part of a full chapter rework",
+      "color": "006b75"
+    }
+  ],
+  "number": 1063,
+  "state": "CLOSED",
+  "title": "Align v1 Architecture with Threat Modeling Process and General Architecture and Drop All Duplicates",
+  "url": "https://github.com/OWASP/ASVS/issues/1063"
+}

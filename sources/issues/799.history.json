@@ -1,0 +1,52 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/799#issuecomment-641884123",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Proposals for discussion:\r\n\r\n- Plain\r\n> Verify that the application checks compressed files against maximum allowed uncompressed size and against maximum files inside container.\r\n\r\n- Extensions\r\n> Verify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum files inside container.\r\n\r\n- Explanations\r\n> Verify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum files inside container to avoid \"ZIP bomb\" attacks against the application and users.",
+          "recorded_at": "2020-06-10T09:40:09Z"
+        },
+        {
+          "body": "Proposals for discussion:\r\n\r\n- Plain\r\n> Verify that the application checks compressed files against maximum allowed uncompressed size and against maximum files inside container.\r\n\r\n- Extensions\r\nVerify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum files inside container.\r\n\r\n- Explanations\r\n> Verify that the application checks compressed files (e.g. zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum files inside container to avoid \"ZIP bomb\" attacks against the application and users.",
+          "recorded_at": "2020-06-10T09:39:58Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/799#issuecomment-641985319",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "With running unzip you already got the attack (even if it does not fill your disk quota, it's using resources for unpacking).\r\n\r\nWhat about:\r\n```\r\n$ zipinfo test.zip \r\nArchive:  test.zip\r\nZip file size: 101940 bytes, number of entries: 1\r\n-rw-r--r--  3.0 unx 104857600 tx defX 20-Mar-20 08:59 test.pdf\r\n1 file, 104857600 bytes uncompressed, 101774 bytes compressed:  99.9%\r\n```\r\n\r\nand\r\n```\r\n$ exiftool test.zip \r\nExifTool Version Number         : 10.80\r\nFile Name                       : test.zip\r\nDirectory                       : .\r\nFile Size                       : 100 kB\r\nFile Modification Date/Time     : 2020:03:20 08:59:58+02:00\r\nFile Access Date/Time           : 2020:06:10 15:48:45+03:00\r\nFile Inode Change Date/Time     : 2020:03:23 10:41:51+02:00\r\nFile Permissions                : rw-r--r--\r\nFile Type                       : ZIP\r\nFile Type Extension             : zip\r\nMIME Type                       : application/zip\r\nZip Required Version            : 20\r\nZip Bit Flag                    : 0x0002\r\nZip Compression                 : Deflated\r\nZip Modify Date                 : 2020:03:20 08:59:29\r\nZip CRC                         : 0xba4c670c\r\nZip Compressed Size             : 101774\r\nZip Uncompressed Size           : 104857600\r\nZip File Name                   : test.pdf\r\n```",
+          "recorded_at": "2020-06-10T12:54:59Z"
+        },
+        {
+          "body": "With running unzip you already got the attack.\r\n\r\nWhat about:\r\n```\r\n$ zipinfo test.zip \r\nArchive:  test.zip\r\nZip file size: 101940 bytes, number of entries: 1\r\n-rw-r--r--  3.0 unx 104857600 tx defX 20-Mar-20 08:59 test.pdf\r\n1 file, 104857600 bytes uncompressed, 101774 bytes compressed:  99.9%\r\n```\r\n\r\nand\r\n```\r\n$ exiftool test.zip \r\nExifTool Version Number         : 10.80\r\nFile Name                       : test.zip\r\nDirectory                       : .\r\nFile Size                       : 100 kB\r\nFile Modification Date/Time     : 2020:03:20 08:59:58+02:00\r\nFile Access Date/Time           : 2020:06:10 15:48:45+03:00\r\nFile Inode Change Date/Time     : 2020:03:23 10:41:51+02:00\r\nFile Permissions                : rw-r--r--\r\nFile Type                       : ZIP\r\nFile Type Extension             : zip\r\nMIME Type                       : application/zip\r\nZip Required Version            : 20\r\nZip Bit Flag                    : 0x0002\r\nZip Compression                 : Deflated\r\nZip Modify Date                 : 2020:03:20 08:59:29\r\nZip CRC                         : 0xba4c670c\r\nZip Compressed Size             : 101774\r\nZip Uncompressed Size           : 104857600\r\nZip File Name                   : test.pdf\r\n```",
+          "recorded_at": "2020-06-10T12:51:05Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/799#issuecomment-642158076",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "In practice, adding a lot (empty) files increases output zip file size quite fast:\r\n\r\n- `100 000 files =  8.4MB, generated in  6sec`\r\n- `500 000 files = 43.7MB, generated in 30sec`\r\n\r\nIt's possible to decrease file sizes a bit but it gives some idea.\r\n\r\nExample (random) solution for detecting \"amount of files\", yes, it goes through listing, but it shows that time is not something for what you need to take calendar:\r\n```\r\ntime zipinfo -1 alotoffiles_500000.zip | wc -l\r\n500000\r\n\r\nreal\t0m1,724s\r\nuser\t0m1,171s\r\nsys\t0m1,951s\r\n```\r\n\r\nPractical advice could be: allow smaller \"max upload file size\" for archives from untrusted sources.\r\n\r\nSo I would say that within relatively small \"max upload file size\" you will not have \"huge catastrophic-problematic amount of files in container\" from detection perspective. If you keep unpacking them constantly to the same folder then you will have one.\r\n\r\nThis is my knowledge at the moment with quick research.\r\n",
+          "recorded_at": "2020-06-10T17:50:55Z"
+        },
+        {
+          "body": "In practice, adding a lot (empty) files increases file size quite fast:\r\n\r\n- `100 000 files =  8.4MB, generated in  6sec`\r\n- `500 000 files = 43.7MB, generated in 30sec`\r\n\r\nIt's possible to decrease file sizes a bit but it gives some idea.\r\n\r\nExample (random) solution for detecting \"amount of files\", yes, it goes through listing, but it shows that time is not something for what you need to take calendar:\r\n```\r\ntime zipinfo -1 alotoffiles_500000.zip | wc -l\r\n500000\r\n\r\nreal\t0m1,724s\r\nuser\t0m1,171s\r\nsys\t0m1,951s\r\n```\r\n\r\nPractical advice could be: allow smaller \"max upload file size\" for archives from untrusted sources.\r\n\r\nSo I would say that within relatively small \"max upload file size\" you will not have \"huge catastrophic-problematic amount of files in container\" from detection perspective. If you keep unpacking them constantly to the same folder then you will have one.\r\n\r\nThis is my knowledge at the moment with quick research.\r\n",
+          "recorded_at": "2020-06-10T17:41:50Z"
+        },
+        {
+          "body": "In practice, adding a lot (empty) files increases file size quite fast:\r\n\r\n- `100 000 files =  8.4MB, generated in  6sec`\r\n- `500 000 files = 43.7MB, generated in 30sec`\r\n\r\nIt's possible to decrease file sizes a bit but it gives some idea.\r\n\r\nExample (random) solution for detecting \"amount of files\", yes, it goes through listing, but it shows that time is not something for what you need to take calendar:\r\n```\r\ntime zipinfo -1 alotoffiles_500000.zip | wc -l\r\n500000\r\n\r\nreal\t0m1,724s\r\nuser\t0m1,171s\r\nsys\t0m1,951s\r\n```\r\n\r\nPractical advice could be: allow smaller \"max upload file size\" for archives from untrusted sources.\r\n\r\nSo I would say that within relatively small \"max upload file size\" you will not have \"huge catastrophic-problematic amount of files in container\".\r\n\r\nThis is my knowledge at the moment with quick research.\r\n",
+          "recorded_at": "2020-06-10T17:40:15Z"
+        }
+      ]
+    }
+  ]
+}

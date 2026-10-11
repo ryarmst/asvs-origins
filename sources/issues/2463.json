@@ -1,0 +1,178 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Current 2.9.1 (talking about smart cards, FIDO devices):\r\n\r\n> **2.9.1** [MODIFIED, LEVEL L2 > L3] Verify that the **authentication server** stores the cryptographic keys used in verification are securely and protected against** disclosure**, such as using a Trusted Platform Module (TPM) or Hardware Security Module (HSM), or an OS service that can use this secure storage. \r\n\r\nOn the authentication server, these credentials are actually *public keys*. It is therefore not that important to protect them against disclosure. You would not need to store a public key in a TPM or HSM for this usage.\r\n\r\nFor smart card, these are actually X.509 certificates and protecting them agaisnt disclosure often does not make sense at all.\r\n\r\nIf I understand this requirement correctly, I think it is not needed.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Xmv42",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Looks like the original NIST requirement was misinterpreted:\r\nhttps://pages.nist.gov/800-63-3/sp800-63b.html#5172-single-factor-cryptographic-device-verifiers\r\n\r\nI would suggest:\r\n\r\n\"_[MODIFIED, LEVEL L2 > L3] Verify that the authentication server stores the cryptographic keys used in verification such that they are protected against **modification (and for symmetric keys, against disclosure)**. This could involve using a Trusted Platform Module (TPM), a Hardware Security Module (HSM), or an OS service that can **provide** this secure storage._\"",
+      "createdAt": "2024-12-15T07:27:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2543517238",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZSE7N",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff what do you think about my proposal?",
+      "createdAt": "2025-01-05T14:54:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2571652813",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZSRLJ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, maybe.\r\n\r\nI am wondering how protection about modification should work because it must be possible in some way to modify these credentials.\r\n\r\nAnd we don't have the same requirement (protection against modification) for password hash, do we? Isn't it weird to require protection against modification for these credentials but not some other?",
+      "createdAt": "2025-01-05T17:52:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2571702985",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZW349",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My guess is that if you can alter this one key then it might lead to widespread compromise whereas if you just modify someone's password that just affects their account.\r\n\r\nAgain, this is in response to a specific NIST requirement so I think it is ok as it is.",
+      "createdAt": "2025-01-06T11:23:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2572910141",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZW4q6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Any other comments or do you think we can merge this PR?\r\nhttps://github.com/OWASP/ASVS/pull/2507\r\n\r\n",
+      "createdAt": "2025-01-06T11:25:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2572913338",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZhB1c",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> My guess is that if you can alter this one key then it might lead to widespread compromise whereas if you just modify someone's password that just affects their account.\r\n\r\nAFAIU, we are talking a per user (actually, per user authentication device) <del>secret</del> public key, are we not?",
+      "createdAt": "2025-01-07T15:26:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2575572316",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZhXOy",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > My guess is that if you can alter this one key then it might lead to widespread compromise whereas if you just modify someone's password that just affects their account.\r\n> \r\n> AFAIU, we are talking a per user (actually, per user authentication device) ~secret~ public key, are we not?\r\n\r\nGood point, I think you might be correct.\r\n\r\nThe requirement is here, do you see any other similar requirement there?\r\nhttps://pages.nist.gov/800-63-3/sp800-63b.html#5172-single-factor-cryptographic-device-verifiers",
+      "createdAt": "2025-01-07T16:02:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2575659954",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Z27Ls",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Here is the [wording for *verifiers*](https://pages.nist.gov/800-63-4/sp800-63b.html#sfcv) in the NIST sp800-63b draft:\r\n\r\n> The verifier has either a symmetric or an asymmetric public cryptographic key that corresponds to each authenticator. While <mark>both types of keys SHALL be protected against modification, symmetric keys SHALL additionally be protected against unauthorized disclosure by access controls</mark> that limit access to the key to only those software components that require access\r\n\r\nHere is the [wording for *authenticators*](https://pages.nist.gov/800-63-4/sp800-63b.html#sfca):\r\n\r\n> The key SHOULD be stored in appropriate storage available to the authenticator (e.g., <mark>keychain storage</mark>), or <mark>if the key is to be non-exportable, it SHALL be stored in an isolated execution environment protected by hardware</mark> or in a separate processor with a controlled interface to the central processing unit of the user endpoint.\r\n\r\nFor *authenticators*, they recommend (but do *not* require) using HSM or similar.\r\n\r\nHowever, they don't have this requirement for *verifiers*, they only say that there must be some protection against unauthorized disclosure and modification. I understand, that access control is considered to be OK.",
+      "createdAt": "2025-01-09T21:51:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2581312236",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Z29yA",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "OK with your proposition. Shall we replace \"authentication server\" by \"authentication verifier\"?",
+      "createdAt": "2025-01-09T21:59:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2463#issuecomment-2581322880",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-12-14T21:01:51Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABS8f4hA",
+      "name": "V6 (prev V2)",
+      "description": "",
+      "color": "31ADE3"
+    }
+  ],
+  "number": 2463,
+  "state": "CLOSED",
+  "title": "V2.9.1 Cryptographic authentication mechanism, protection against disclosure is not relevant",
+  "url": "https://github.com/OWASP/ASVS/issues/2463"
+}

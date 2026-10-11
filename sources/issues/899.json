@@ -1,0 +1,201 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjI1MzgyMjk2",
+    "is_bot": false,
+    "login": "ossie-git",
+    "name": "oelnaggar"
+  },
+  "body": "I ran into the following attack yesterday and thought it was pretty interesting. I noticed it isn't covered by the ASVS as well and doubt many companies actually consider it despite it leading to RCE. I think we can add it as a requirement under V14: Configuration Verification Requirements (probably under 14.1 - or 14.2) - probably as an L2 / L3 requirement.\r\n\r\nThe actual researcher goes into a lot more detail here which I recommend you read - [Dependency Confusion: How I Hacked Into Apple, Microsoft and Dozens of Other Companies](https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610)\r\n\r\nTo summarize: if a malicious attacker can discern the name of a private package that you use, they can create a package with the same name in the corresponding public repo (npm registry, PyPi, etc.) and unless you configure your builds properly, the malicious package will be downloaded and used instead of your private registry.\r\n\r\nThoughts?\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3NzIyNTU1OA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One of those?\r\n* V1.14.5 Verify that the build pipeline contains a build step to automatically build and verify the secure deployment of the application, particularly if the application infrastructure is software defined, such as cloud environment build scripts.\r\n* V14.2.4 Verify that third party components come from pre-defined, trusted and continually maintained repositories.\r\n\r\n",
+      "createdAt": "2021-02-11T06:15:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-777225558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3NzI0MDg0NA==",
+      "author": {
+        "login": "ossie-git"
+      },
+      "authorAssociation": "NONE",
+      "body": "Dependency confusion attacks are different in my opinion. You can meet v14.2.4 and v1.14.5 and still be impacted by dependency confusion attacks. For example, I can:\r\n\r\n- use PyPI for most of my packages\r\n- use an internal Package Index / Repo for my internal packages\r\n\r\nand be complaint with v14.2.4 but due to the misconfiguration / lookup order of packages by pip I end up downloading a package from PyPI instead of my internal repo. The above 2 are more related to:\r\n\r\n- don't download packages from untrusted repos / locations\r\n- build pipelines (and the build pipeline will likely not be able to verify that a given package was modified unless you have 100% test coverage)",
+      "createdAt": "2021-02-11T07:01:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-777240844",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3NzI1OTkyMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From attacker perspective it does not matter (as it is weakness anyway), but from ASVS perspective I think we should define here the scope.\r\n\r\nWhat is the recommendation (or verification requirement proposal) for your described/linked issue?",
+      "createdAt": "2021-02-11T07:55:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-777259920",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc4MjU0ODUyNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Add to that typo-squatting where malicious code is delivered on common \nmisspellings to third party library naming conventions.\n\n- Jim\n\nOn 2/10/21 3:18 PM, oelnaggar wrote:\n>\n> I ran into the following attack yesterday and thought it was pretty \n> interesting. I noticed it isn't covered by the ASVS as well and doubt \n> many companies actually consider it despite it leading to RCE. I think \n> we can add it as a requirement under V14: Configuration Verification \n> Requirements (probably under 14.1 - or 14.2) - probably as an L2 / L3 \n> requirement.\n>\n> The actual researcher goes into a lot more detail here which I \n> recommend you read - Dependency Confusion: How I Hacked Into Apple, \n> Microsoft and Dozens of Other Companies \n> <https://medium.com/@alex.birsan/dependency-confusion-4a5d60fec610>\n>\n> To summarize: if a malicious attacker can discern the name of a \n> private package that you use, they can create a package with the same \n> name in the corresponding public repo (npm registry, PyPi, etc.) and \n> unless you configure your builds properly, the malicious package will \n> be downloaded and used instead of your private registry.\n>\n> Thoughts?\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/899>, or unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCP4Z3T7VH2R5BFOL4DS6MV7HANCNFSM4XN7N2SQ>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2021-02-20T03:18:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-782548527",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc4NjM0OTIzNg==",
+      "author": {
+        "login": "joubin"
+      },
+      "authorAssociation": "NONE",
+      "body": "I agree with @jmanico that this is close to typo squatting. I posted the merge request above. Would love the feedback. But generally speaking, this is easy to fix in Maven/Java\r\n\r\n- Java requires both groupID and artifactID \r\n- Adding to Maven central is already hard if you are a legitimate user and requires [domain ownership](https://central.sonatype.org/pages/producers.html#individual-projects-open-source-software-repository-hosting-ossrh)\r\n - There needs to be something that guides organizations not to allow their domain registration used for artifacts laps  \r\n- Maven allows you to set the order of repositories to try. First repo would win. In this case, we need to ensure that the organizations internal repositories are first.   \r\n\r\nI think the merge request above addresses most of these in a language and domain agnostic way. If accepted, I can add more specific description under 14.2 to expand and explain the domain more without making it language dependent. ",
+      "createdAt": "2021-02-26T01:38:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-786349236",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc4OTM3Nzc5NQ==",
+      "author": {
+        "login": "ossie-git"
+      },
+      "authorAssociation": "NONE",
+      "body": "I agree partially with @jmanico's take on it being closely related to typo-squatting. I think he's right in that the end result is the same (RCE) but what the developer actually has to do to prevent both cases is different which is why I would prefer them to be separate issues. For typo-squatting, the developer has to verify that they actually typed the name of the package correctly. For dependency confusion, the developer has to understand how their package manager lookups packages from various repos and add the necessary configuration to always pull up local repos first pulls. Since the ASVS is a checklist for developers, I prefer having each item requiring different action by the developer as different items",
+      "createdAt": "2021-03-03T02:27:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-789377795",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzczMzk4OQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The PR for this issues has been merged into main and I'm closing this issue, please re-open if you feel I closed this rashly.",
+      "createdAt": "2021-03-12T20:23:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-797733989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5odlpN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Re-opening this issue. 14.2.7 was added [in this PR](https://github.com/OWASP/ASVS/pull/908/files).\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **14.2.7** | [ADDED] Verify that third party components are sourced separately from internally owned and developed applications. | ✓ | ✓ | ✓ | 441 |\r\n\r\nIt is followed by the following note:\r\n\r\n> Note: Certain languages and package managers, have ecosystems that require the identification of packages using multiple factors (e.g groupId and artifactId). This would allow the build process to more specifically identify a resource. In other cases, package managers operate by the order of repositories or mirrors included. Consult your package managers to specifically indicate search order.\r\n\r\nDo we think this requirement is clear enough or could it be made clearer?\r\n\r\nAny thoughts @joubin. @ImanSharaf, @elarlang, @jmanico ?",
+      "createdAt": "2023-10-09T08:52:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-1752586829",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5odmC3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang [said](https://github.com/OWASP/ASVS/issues/1746#issuecomment-1751680085):\r\n\r\n> I'm not sure the chosen CWE suits here - [CWE-441](https://cwe.mitre.org/data/definitions/441.html) Unintended Proxy or Intermediary ('Confused Deputy')",
+      "createdAt": "2023-10-09T08:53:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-1752588471",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xt2Cl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "[CWE-427](https://cwe.mitre.org/data/definitions/427.html#oc_427_Alternate_Terms) is considered to cover dependency confusion",
+      "createdAt": "2024-01-24T10:27:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-1907843237",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5xt3C6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I added that the requirement relates to dependency confusion attacks and left it at that plus I changed the CWE, see #1837",
+      "createdAt": "2024-01-24T10:30:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/899#issuecomment-1907847354",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-02-11T01:18:30Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7xMjd_",
+      "name": "Community wanted",
+      "description": "We would like feedback from the community to guide our decision otherwise we will progress",
+      "color": "BFD4F2"
+    }
+  ],
+  "number": 899,
+  "state": "CLOSED",
+  "title": "Dependency Confusion Attacks",
+  "url": "https://github.com/OWASP/ASVS/issues/899"
+}

@@ -1,0 +1,293 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3MTc2NjQ=",
+    "is_bot": false,
+    "login": "Hipapheralkus",
+    "name": "Andrej Šimko"
+  },
+  "body": "At the moment, the check 14.4.1 says: \r\n`Verify that every HTTP response contains a Content-Type header. text/*, */*+xml and application/xml content types should also specify a safe character set (e.g., UTF-8, ISO-8859-1).`\r\n\r\nI have a question here. What if the request is for css file, and the response header would contain `Content-Type: text/css`?\r\n\r\nBased on the text this would pose a \"fail\", but honestly as users usually can't upload their own CSS, I don't believe it poses a vulnerability. Could the description catch such corner cases?\r\n\r\nSame question for when there is a static web application, and static HTML files where there is no value reflected by the user (be it stored, or really reflected). As attacker can't inject stuff like XSS, does the charset specification still have some specific significance? \r\n\r\nPerhaps the improvement I would suggest would should reflect the ability to inject content:\r\n`Verify that every HTTP non-static response contains a Content-Type header. text/*, */*+xml and application/xml content types should also specify a safe character set (e.g., UTF-8, ISO-8859-1). Non-static in this context means there is no possibility for the attacker to inject data into the response, for example static HTML pages, css files, and other non-alterable content`. I guess you catch my meaning and can write it with more grace:)\r\nThanks",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3Nzc4Njc5Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Take it as integrity requirement for static (HTML) files - if you don't have charset specified, browser and/or web server use some default values then. If default values will not match with your content actual charset, content will not be displayed correctly.",
+      "createdAt": "2021-02-11T21:01:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-777786793",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3Nzg3MjU1MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "+1 excellent refinement. I’ll assign this to myself and finish it up when I’m back.\n\n--\nJim Manico\n@Manicode\n\n> On Feb 11, 2021, at 11:02 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> Take it as integrity requirement for static (HTML) files - if you don't have charset specified, browser and/or web server use some default values then. If default values will not match with your content actual charset, content will not be displayed correctly.\n> \n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-02-11T23:51:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-777872550",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3ODAzODI0Ng==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "What if a HTML page specifies the encoding in a tag instead of a header:\r\n\r\n```html\r\n<meta charset=\"utf-8\"/>\r\n```\r\n\r\nWhat is the risk of a text/plain file without specified encoding being misinterpreted, even when it's dynamic content?",
+      "createdAt": "2021-02-12T07:52:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-778038246",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3ODA3OTU0MQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Related RFC: \"Update to MIME regarding \"charset\" Parameter Handling in Textual Media Types\"\r\nhttps://tools.ietf.org/html/rfc6657",
+      "createdAt": "2021-02-12T09:23:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-778079541",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3ODM0NjQxMQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "## charset in Content-Type header vs HTML document\r\n\r\nContent-Type header overrides charset from HTML document\r\n\r\n* <https://elarlang.eu/asvs/issue900/?content_type=iso-8859-1&html=utf-8>\r\n* <https://elarlang.eu/asvs/issue900/?content_type=utf-8&html=iso-8859-1>\r\n\r\n\r\n## if CSS is with incorrect Content-Type\r\n\r\nand for example ```::before``` prefix is used\r\n\r\n* <https://elarlang.eu/asvs/issue900/?css=iso-8859-1>\r\n\r\n\r\n## Conclusion\r\n\r\nYou always need to specify correct charset, even for static files. It's for integrity. There can be some edge-cases when wrong charset is causing some other vulnerabilities as well.\r\n\r\nI think this requirement can (from opened issue perspective) stay like it is and this issue can be closed.",
+      "createdAt": "2021-02-12T17:54:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-778346411",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3ODM0NzMxMw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "it's worse than that, if the charset is not properly set - and I can set \nit myself as an attacker - I drop the page to utf-7 or similar where \nvery few characters are needed for XSS.[1]\n\nX-Content-Type-Options: nosniff + setting the proper character type is \nthe answer.\n\n- Jim\n\n[1] \nhttp://michaelthelin.se/security/2014/06/08/web-security-cross-site-scripting-attacks-using-utf-7.html\n\n\nOn 2/11/21 11:02 AM, Elar Lang wrote:\n>\n> Take it as integrity requirement for static (HTML) files - if you \n> don't have charset specified, browser and/or web server use some \n> default values then. If default values will not match with your \n> content actual charset, content will not be displayed correctly.\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/900#issuecomment-777786793>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCNDGMH6CS4Z5AOIXNDS6RAUVANCNFSM4XPQ2ODQ>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2021-02-12T17:55:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-778347313",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3ODM0ODgwNg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@jmanico - that's all true, but the context for current issue was \"do we need charset for static files\", it contains proposal to make exception for static files where userinput is not reflected to the output, including user/attacker does not control the charset value.",
+      "createdAt": "2021-02-12T17:58:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-778348806",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc3ODM1MTAxMw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Point taken, Elar, I was moving too fast before class\n\n--\nJim Manico\n@Manicode\n\n\n> On Feb 12, 2021, at 7:59 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> @jmanico - that's all true, but the context for current issue was \"do we need charset for static files\", it contains proposal to make exception for static files where userinput is not reflected to the output, including user/attacker does not control the charset value.\n> \n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-02-12T18:03:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-778351013",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzM4NTE2MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@andrejsimko1 and @Sjord - do you still think that requirement 14.4.1 needs improvement? If so, then why.",
+      "createdAt": "2021-03-12T10:11:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-797385160",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzM5ODgwMg==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that every HTTP response contains a Content-Type header. text/*, */*+xml and application/xml content types should also specify a safe character set (e.g., UTF-8, ISO-8859-1).\r\n\r\nThis implies that the charset should be set in the `Content-Type` header, but I think it's also acceptable to set it in the content itself, using `<meta charset=\"utf-8\"/>` or `<?xml version=\"1.0\" encoding=\"UTF-8\"?>`.\r\n\r\nFor some content types such as text/plain, there is no security risk when the charset is not defined. It could display certain characters incorrectly, but that is not a security issue.\r\n\r\n> specify a safe character set\r\n\r\nWhich character sets are \"safe\"? Aren't they all safe?\r\n\r\n> Verify that every HTTP non-static response contains a Content-Type header.\r\n\r\nI am less sure about this distinction between static and dynamic responses. What's dynamic can change over time, and even static files are uploaded by someone. I think it's often hard to distinguish between static and dynamic in practice.",
+      "createdAt": "2021-03-12T10:33:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-797398802",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzQwMjk5Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I demonstrated already what happens if you have different charset in content-type header and in document. Server most-likely sends default charset header anyway, when you don't set it. Please take time to investigate given examples.\r\n\r\n> For some content types such as text/plain, there is no security risk when the charset is not defined. It could display certain characters incorrectly, but that is not a security issue.\r\n\r\nLacking integrity (not showing content correctly) is clearly a security issue.\r\n\r\n> Which character sets are \"safe\"? Aren't they all safe?\r\n\r\nNo, utf-7 for an example. It's obsoleted, but also not safe.",
+      "createdAt": "2021-03-12T10:41:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-797402993",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzY2Njk0MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I do agree that we should support request headers, meta tags and similar \r\nfor specifying the charset, not just a response header. And Elar is very \r\ncorrect in that UTF-7 makes XSS much (much) easier and is to be avoided.\r\n\r\n- Jim\r\n\r\n",
+      "createdAt": "2021-03-12T18:13:21Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-797666941",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzcyMzY5NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you going to put meta tags to requirement, it requires to rethink the category as well. Current category is limited to HTTP response headers.",
+      "createdAt": "2021-03-12T20:04:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-797723695",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzcyNDI5Nw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Since headers is one of the options, I think its ok to leave it there for now.\r\n\r\n- Jim\r\n\r\n\r\n",
+      "createdAt": "2021-03-12T20:05:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-797724297",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzNTc1MTMyMg==",
+      "author": {
+        "login": "timhemel"
+      },
+      "authorAssociation": "NONE",
+      "body": "This ASVS requirement has bothered me since version 3 (requirement 11.2). \"What exactly is a safe character set?\" is indeed the big question here. I tried to find out where this requirement came from, and discovered that [this bug in Apache](http://httpd.apache.org/info/css-security/apache_specific.html) has something to do with it: certain modules did not encode their output properly (according to the character set) and did not set an explicit character set. Many browsers back then autodetected UTF-7, and that made XSS possible.\r\n\r\nIMO, the problem is not the character set, it is the mismatch between the character set assumed by one system (output encoding in the web application) and another (the browser). A character set being safe or unsafe depends entirely on how other systems handle it. In theory, if you specify your character set explicitly in a response, there should not be any problem, right? Only if other systems such as a browser ignore the character set, choose an alternative character set, or handle it insecurely, may there be a problem. I am not aware of any character sets being widely mishandled in browsers at the moment (except UTF-7 in (very) old browsers), but if there are, those would be the character sets to avoid.\r\n\r\nRegarding header and `<meta http-equiv>`: response headers seem to have priority, but i could not find an authoritative reference for that. The HTML Living standard [says](https://html.spec.whatwg.org/multipage/semantics.html#character-encoding-declaration):\r\n\r\n```\r\nIf an HTML document does not start with a BOM, and its encoding is not explicitly\r\ngiven by Content-Type metadata, and the document is not an iframe srcdoc document,\r\nthen the encoding must be specified using a meta element with a charset attribute or a\r\nmeta element with an http-equiv attribute in the Encoding declaration state.\r\n```\r\n\r\nI am missing the 'only if' part, but my guess would be that browser would ignore the in-document character set specification if `Content-Type` specifies the character set.\r\n\r\n14.4.1 could use some clarification. I suggest: \r\n\r\n```\r\nVerify that every HTTP response contains a Content-Type header. text/*, */*+xml\r\nand application/xml content types should also specify a \"safe\" character set, i.e.\r\none that browsers and other processors of the response implement and will\r\nrecognize correctly. UTF-8 and ISO-8859-1 are good choices.\r\n```\r\n\r\nThis respects the fact that (other) character sets are not inherently insecure, and explains the cause of the problem, so that the reader can make a better decision. At the same time, it gives some suggestions that will likely be safe.\r\n\r\nHeaders are more secure than meta tags, as meta tags could be injected by an attacker. Meta tags were intended for situations where people could not control response headers. How likely would that be for a webapp developer? I think we can ignore meta tags in this requirement.\r\n\r\n\r\nTim\r\n",
+      "createdAt": "2021-05-09T08:54:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-835751322",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgzNTc1NjgyMA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@timhemel - I try to fix this problem in issue https://github.com/OWASP/ASVS/issues/788 . Please take a look there.\r\n\r\nheader vs meta-tag - \"Content-Type header must match with served content\" (proposal in issue #788) will/could cover that \"meta tag vs header\", they must match.",
+      "createdAt": "2021-05-09T09:09:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-835756820",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40qMO0",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This was resolved with issue 788 https://github.com/OWASP/ASVS/commit/9c6d8a22b28b00222e5cd1414b816823e68e4330",
+      "createdAt": "2021-07-20T15:14:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/900#issuecomment-883475380",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-02-11T20:54:27Z",
+  "labels": [],
+  "number": 900,
+  "state": "CLOSED",
+  "title": "14.4.1: charset specification - improvement",
+  "url": "https://github.com/OWASP/ASVS/issues/900"
+}

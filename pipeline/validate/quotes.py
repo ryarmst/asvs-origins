@@ -52,56 +52,62 @@ def _history_edited_ids(number: int) -> set[str]:
     return edited
 
 
+def validate_record(data: dict, rel: str, snapshot_cache: dict | None = None) -> list[str]:
+    errors: list[str] = []
+    cache: dict[int, tuple[str | None, dict | None]] = snapshot_cache if snapshot_cache is not None else {}
+    seen_comment_quotes: set[tuple[int, str]] = set()
+    for node in _walk(data):
+        if not isinstance(node, dict):
+            continue
+        quote = node.get("quote")
+        if not quote or node.get("type") not in {
+            "issue_body",
+            "issue_comment",
+            "pr_body",
+            "pr_review_comment",
+        }:
+            continue
+        words = quote.split()
+        if len(words) > MAX_QUOTE_WORDS:
+            errors.append(
+                f"{rel}: quote exceeds {MAX_QUOTE_WORDS} words ({len(words)}): {quote!r}"
+            )
+        issue_number = node.get("issue")
+        if issue_number is None and node.get("url"):
+            match = re.search(r"/issues/(\d+)", node["url"])
+            if match:
+                issue_number = int(match.group(1))
+        if not isinstance(issue_number, int):
+            errors.append(f"{rel}: quoted citation is missing issue number")
+            continue
+        if issue_number not in cache:
+            cache[issue_number] = _snapshot_text(issue_number)
+        text, _ = cache[issue_number]
+        if text is None:
+            errors.append(f"{rel}: no source snapshot for quoted issue {issue_number}")
+            continue
+        if _normalize(quote) not in text:
+            errors.append(
+                f"{rel}: quote not found verbatim in sources/issues/{issue_number}.json: {quote!r}"
+            )
+        comment_id = str(node.get("comment_id") or "")
+        if comment_id:
+            key = (issue_number, comment_id)
+            if key in seen_comment_quotes:
+                errors.append(
+                    f"{rel}: more than one quote cites issue {issue_number} comment {comment_id}"
+                )
+            seen_comment_quotes.add(key)
+    return errors
+
+
 def validate_all() -> list[str]:
     errors: list[str] = []
     snapshot_cache: dict[int, tuple[str | None, dict | None]] = {}
-
     for kind, path in iter_data_files():
         rel = str(path.relative_to(ROOT))
         data = load_json(path)
-        seen_comment_quotes: set[tuple[int, str]] = set()
-        for node in _walk(data):
-            if not isinstance(node, dict):
-                continue
-            quote = node.get("quote")
-            if not quote or node.get("type") not in {
-                "issue_body",
-                "issue_comment",
-                "pr_body",
-                "pr_review_comment",
-            }:
-                continue
-            words = quote.split()
-            if len(words) > MAX_QUOTE_WORDS:
-                errors.append(
-                    f"{rel}: quote exceeds {MAX_QUOTE_WORDS} words ({len(words)}): {quote!r}"
-                )
-            issue_number = node.get("issue")
-            if issue_number is None and node.get("url"):
-                match = re.search(r"/issues/(\d+)", node["url"])
-                if match:
-                    issue_number = int(match.group(1))
-            if not isinstance(issue_number, int):
-                errors.append(f"{rel}: quoted citation is missing issue number")
-                continue
-            if issue_number not in snapshot_cache:
-                snapshot_cache[issue_number] = _snapshot_text(issue_number)
-            text, _ = snapshot_cache[issue_number]
-            if text is None:
-                errors.append(f"{rel}: no source snapshot for quoted issue {issue_number}")
-                continue
-            if _normalize(quote) not in text:
-                errors.append(
-                    f"{rel}: quote not found verbatim in sources/issues/{issue_number}.json: {quote!r}"
-                )
-            comment_id = str(node.get("comment_id") or "")
-            if comment_id:
-                key = (issue_number, comment_id)
-                if key in seen_comment_quotes:
-                    errors.append(
-                        f"{rel}: more than one quote cites issue {issue_number} comment {comment_id}"
-                    )
-                seen_comment_quotes.add(key)
+        errors.extend(validate_record(data, rel, snapshot_cache))
     return errors
 
 

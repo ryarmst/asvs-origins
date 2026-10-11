@@ -1,0 +1,263 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n[V4.3.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V4-Access-Control.md#v43-other-access-control-considerations)\r\n\r\nCurrent:\r\n> V4.3.2 Verify that directory browsing is disabled unless deliberately desired. Additionally, applications should not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders. \r\n\r\nProblems:\r\n- it contains 2 separate problems which requires separate defense methods\r\n- if you disable directory browsing, mentioned files and folders are still readable\r\n- if you disable reading mentioned files, it does not affect directory browsing\r\n\r\nProposal, split to 2 different requirements.\r\n\r\nSecond part of the requirement maybe should be merged with current V12.5.1?\r\n> V12.5.1 Verify that the web tier is configured to serve only files with specific file extensions to prevent unintentional information and source code leakage. For example, backup files (e.g. .bak), temporary working files (e.g. .swp), compressed files (.zip, .tar.gz, etc) and other extensions commonly used by editors should be blocked unless required.\r\n\r\nMilestone ASVS v4.1 (as it changes requirements numbers)",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDYzNzc3NzA5OA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree with the split and would be open to wording.\r\n\r\nRegarding 12.5.1, I would rather keep the reuqirement separate as I think 12.5.1 might be difficult to implement practically.",
+      "createdAt": "2020-06-02T20:05:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-637777098",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MTkyMjM4OQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I try to move on with that.\r\n\r\nProposal - split current V4.3.2 to separate requirements (needs language correction):\r\n* V4.3.2 Verify that directory browsing is disabled unless deliberately desired. \r\n* V4.3.NEW Verifify that applications do not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders.",
+      "createdAt": "2020-12-09T17:26:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-741922389",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MTkyNDc5MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is really I would dare say picky stuff can we please keep it in one requirement and handle both cases?  I would say get rid of directory browsing and just make sure that sensitive data can’t be exposed. Directory browsing itself is rarely a risk it’s the exposure of files on the web server that shouldn’t be exposed that’s the problem.\n\nOr even better I would just remove this requirement altogether. This is already covered by the access control POLP rules that we talked about earlier....\n\n--\nJim Manico\n@Manicode\n\n> On Dec 9, 2020, at 7:26 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> I try to move on with that.\n> \n> Proposal - split current V4.3.2 to separate requirements (needs language correction):\n> \n> V4.3.2 Verify that directory browsing is disabled unless deliberately desired.\n> V4.3.NEW Verifify that applications do not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders.\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-12-09T17:30:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-741924790",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MTk1ODQ1MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "## Directory browsing\r\n\r\nDirectory browsing is problem. Really small one separately, but in for crappy PHP world where _everything_ is in public folder and `.htaccess` or other protection is disabled by web server, it helps attackers to browse around. For me it still makes sense to keep it. If I compare it with \"don't show application/server version number\" (V14.3.3), then I would say, more important is to disable directory browsing.\r\n\r\n## Thumbs.db, .DS_Store\r\nThere can be some kind of leakage.. I don't care too much about those (or probably I have not done enough research on this topic)\r\n\r\n## .git, .svn, CVS\r\nThis is must-have, and actually it deserves separate requirement. See https://github.com/arthaud/git-dumper for example.\r\n\r\n",
+      "createdAt": "2020-12-09T18:18:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-741958450",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MTk5Njg5OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "My understanding is that figuring out what technology you’re using and what version you’re using of everything is easy via fingerprinting tools so I don’t think it’s a real risk to know what framework version you’re using; I can figure that out very easily. So again I assert that while directory browsing is not great I don’t think it’s a big enough of a problem to put into ASVS.\n\nMy conjecture is at the real problem is exposing files that should not be exposed and that simply an access control problem covered under POLP.\n\nThis is just my take on it love to get other people to chime in.\n\n--\nJim Manico\n@Manicode\n\n> On Dec 9, 2020, at 8:19 AM, Elar Lang <notifications@github.com> wrote:\n> \n> ﻿\n> Directory browsing\n> \n> Directory browsing is problem. Really small one separately, but in for crappy PHP world where everything is in public folder and .htaccess or other protection is disabled by web server, it helps attackers to browse around. For me it still makes sense to keep it. If I compare it with \"don't show application/server version number\" (V14.3.3), then I would say, more important is to disable directory browsing.\n> \n> Thumbs.db, .DS_Store\n> \n> There can be some kind of leakage.. I don't care too much about those (or probably I have not done enough research on this topic)\n> \n> .git, .svn, CVS\n> \n> This is must-have, and actually it deserves separate requirement. See https://github.com/arthaud/git-dumper for example.\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2020-12-09T19:28:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-741996898",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc0MjAwMTY0OQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is the reason, why I took parallel with \"showing server version\". If you hide it, you don't fix \"problems with using old version of software\", but you also don't advertise it.\r\n\r\nThe same with directory browsing - if you disable it, you don't fix \"accessing file directly\" problem, but you don't share list of files in folder and you don't make it easier for attackers or for search engines to index potentially sensitive content (yes, it's again another topic). Disable directory listing is way more needed in practice than a lot of other requirements in ASVS.\r\n\r\nProbably you can not say that there is no difference for attackers is directory browsing enabled or not. Till there is difference for attackers, it make sense to keep this requirement in ASVS. Even it's 2nd, 3rd or n-th level \"defense\".",
+      "createdAt": "2020-12-09T19:36:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-742001649",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc2NjkxNQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I'm with you now. PR for this sounds good.",
+      "createdAt": "2021-03-12T21:31:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-797766915",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODkyMjIyNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If I reanalyze them - I think both requirements (after spliting current 4.3.2) fits better to 14.3 subcategory (V14.3 Unintended Security Disclosure Requirements) as those are not access control problems from application point of view.\r\n",
+      "createdAt": "2021-03-14T14:59:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-798922227",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTAyNjUxMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Agreed @elarlang ",
+      "createdAt": "2021-03-15T01:16:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-799026510",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTc3MzYzOA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "When we will have requirement like: \"Verifify that applications do not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders.\" in category V14.3 Configuration > \"Unintended Security Disclosure\"\r\n\r\nand currently we have requirement \"V12.5.1 Verify that the web tier is configured to serve only files with specific file extensions to prevent unintentional information and source code leakage. For example, backup files (e.g. .bak), temporary working files (e.g. .swp), compressed files (.zip, .tar.gz, etc) and other extensions commonly used by editors should be blocked unless required.\r\n\" in category V12.5 File and Resources > File Download\r\n\r\nbut for me it feels those should belong to same subcategory, and I could propose 14.3 here. 12.5.1 is not related application's file download functionality, but in case some \"wrong files\" are placed to public folder web application should disallow to access them.",
+      "createdAt": "2021-03-15T21:45:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-799773638",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5OTc5NjUyNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree these should be in different categories. One is essentially a configuration issue and another is a developer code issue.",
+      "createdAt": "2021-03-15T22:26:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-799796527",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDAyNzYxNg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Jim, could you specify with what you agreed, there is space for interpret it in different ways.",
+      "createdAt": "2021-03-16T07:34:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-800027616",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDQwMzk0MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree with your post above. Both of these requirements should be in 14.3",
+      "createdAt": "2021-03-16T16:18:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-800403941",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMTQ1MjUxOQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\r\n* V4.3.2 Verify that directory browsing is disabled unless deliberately desired. Additionally, applications should not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders.\r\n\r\nSplit and move to category \"V14.3 Configuration > Unintended Security Disclosure\"\r\n\r\nProposal 1: `[ADDED, SPLIT FROM 4.3.2]`\r\n* V14.3.4 Verify that directory browsing is disabled unless deliberately desired.\r\n* [CWE-548](https://cwe.mitre.org/data/definitions/548.html)\r\n\r\nProposal 2: `[ADDED, SPLIT FROM 4.3.2]`\r\n* V14.3.5 Verify that applications do not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders.\r\n* CWE ? <- need help here. From different CWE's for .git (source code leakage) and Thumbs.db (some thumbnail leakage) we may want to split it again.\r\n\r\nI'll make separate issue for mentioned V12.5.1 if this issue is finished.",
+      "createdAt": "2021-03-17T21:23:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-801452519",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMTUxMDQ3MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I like this split, there is no good CWE for proposal 2 and suggest we keep it blank. \n\n> On Mar 17, 2021, at 5:23 PM, Elar Lang ***@***.***> wrote:\n> \n> ﻿\n> Current requirement:\n> \n> V4.3.2 Verify that directory browsing is disabled unless deliberately desired. Additionally, applications should not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders.\n> Split and move to category \"V14.3 Configuration > Unintended Security Disclosure\"\n> \n> Proposal 1: [ADDED, SPLIT FROM 4.3.2]\n> \n> V14.3.4 Verify that directory browsing is disabled unless deliberately desired.\n> CWE-548\n> Proposal 2: [ADDED, SPLIT FROM 4.3.2]\n> \n> V14.3.5 Verifify that applications do not allow discovery or disclosure of file or directory metadata, such as Thumbs.db, .DS_Store, .git or .svn folders.\n> CWE ? <- need help here. From different CWE's for .git (source code leakage) and Thumbs.db (some thumbnail leakage) we may want to split it again.\n> I'll make separate issue for mentioned V12.5.1 if this issue is finished.\n> \n> —\n> You are receiving this because you were assigned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-17T23:37:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/800#issuecomment-801510471",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-05-30T10:59:08Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    }
+  ],
+  "number": 800,
+  "state": "CLOSED",
+  "title": "V4.3.2 - split to 2 different requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/800"
+}

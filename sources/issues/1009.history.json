@@ -1,0 +1,168 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-849808452",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "If `Content-Type` is `text/html` but content itself is JSON, then it's fixable with just proper `Content-Type: application/json`.\r\n\r\nIf you can make request directly to URL where API is serving XML content with `Content-Type: text/xml` it will execute as XML. And from XML you can execute JavaScript as well, if you have full control over served content.\r\n\r\nAn example:\r\n```xml\r\n<?xml version=\"1.0\"?>\r\n<html:html xmlns:html='http://www.w3.org/1999/xhtml'>\r\n<html:script>\r\nalert(1);\r\n</html:script>\r\n</html:html>\r\n```\r\n\r\nAnd if API is serving some other content, which is not XML or JSON? Then what?",
+          "recorded_at": "2021-05-27T18:28:55Z"
+        },
+        {
+          "body": "If `Content-Type` is `text/html` but content itself is JSON, then it's fixable with just proper `Content-Type: application/json`.\r\n\r\nIf you can make request directly to URL where API is serving XML content with `Content-Type: text/xml` it will execute as XML. And from XML you can execute JavaScript as well, if you have full control over served content.\r\n\r\nAnd if API is serving some other content, which is not XML or JSON? Then what?",
+          "recorded_at": "2021-05-27T17:25:34Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850209724",
+      "author": "Bankde",
+      "previous_versions": [
+        {
+          "body": "```\r\nIt is not input validation, it is output encoding problem.\r\n```\r\nWe might both have the same idea but just from different perspectives. I personally think it is both. We have to ensure that user input do not cross into the domain of script/HTML structure. If we concatenate the user input directly into the Javascript content (don't do this) then output encoding may not be enough.\r\n\r\nMy current breakdown idea is like this:\r\n- User can control the whole XML content for the API, then application may be doing something wrong.\r\n- User control the whole XML content as upload/downloadable file, application should serve back as an attachment. No issue here.\r\n- User can control some fields' values, encoding sounds like a solution. Preventing not only XSS but also poisoning and malformed XML structure. No issue here.\r\n- User can control both fields and values such that field=\"html:script xmlns:html...\" and value=\"alert(1);\", this is the only issue I could address. Either validation or content-type+attachment may be the solution?\r\n- Anything else I'm missing?\r\n\r\n```\r\nThe problem here is, in this example, XML response from an API is not meant to be executed in browser as a response for direct request to URL of an API\r\n```\r\nI get your point. And unlike json, this XML complex thing makes my head spin.\r\n`Content-Type + as attachment` looks good as a solution (not yet tested though); however, I'm not sure it is the standard mitigation to this issue. Does `Content-Type: text/plain` also accomplish the same thing? It basically says to the browser \"Do not execute this\" and let JS handles the rest.",
+          "recorded_at": "2021-05-28T07:26:05Z"
+        },
+        {
+          "body": "```\r\nIt is not input validation, it is output encoding problem.\r\n```\r\nWe might both have the same idea but just from different perspectives. I personally think it is both. We have to ensure that user input do not cross into the domain of script/HTML structure. If we concatenate the user input directly into the Javascript content (don't do this) then output encoding may not be enough.\r\n\r\nMy current breakdown idea is like this:\r\n- User can control the whole XML content for the API, then application may be doing something wrong.\r\n- User control the whole XML content as upload/downloadable file, application should serve back as an attachment. No issue here.\r\n- User can control some fields' values, encoding sounds like a solution. Preventing not only XSS but also poisoning and malformed XML structure. No issue here.\r\n- User can control both fields and values such that field=\"html:script xmlns:html...\" and value=\"alert(1);\", this is the only issue I could address, either validation or +attachment may be the solution.\r\n- Anything else I'm missing?\r\n\r\n```\r\nThe problem here is, in this example, XML response from an API is not meant to be executed in browser as a response for direct request to URL of an API\r\n```\r\nI get your point. And unlike json, this XML complex thing makes my head spin.\r\n`Content-Type + as attachment` looks good as a solution (not yet tested though); however, I'm not sure it is the standard mitigation to this issue. Does `Content-Type: text/plain` also accomplish the same thing? It basically says to the browser \"Do not execute this\" and let JS handles the rest.",
+          "recorded_at": "2021-05-28T07:25:27Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850218853",
+      "author": "Bankde",
+      "previous_versions": [
+        {
+          "body": "By the way, I completely agree with @elarlang concern. While I don't have an exact idea of recommendation, I propose to add some general idea like this into the requirements:\r\n```\r\nVerify and choose proper Content-Type for API responses that the browsers do not execute them as an active content (XSS) when directly access through the API URLs.\r\n```\r\nThis will cover not only json but also XML and others as well and let the complex details to the developers to decide according to their applications.",
+          "recorded_at": "2021-05-28T07:45:54Z"
+        },
+        {
+          "body": "By the way, I completely agree with @elarlang concern. While I don't have an exact idea of recommendation, I propose to add some general idea like this into the requirements:\r\n```\r\nVerify and choose proper Content-Type for API responses that the browsers do not execute them as an active content (XSS) when directly access the API URLs.\r\n```\r\nThis will cover not only json but also XML and others as well and let the complex details to the developers to decide according to their applications.",
+          "recorded_at": "2021-05-28T07:40:49Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850368674",
+      "author": "Bankde",
+      "previous_versions": [
+        {
+          "body": "Apologize. My head is so spinning over so many issues tangling together @_@\r\n\r\n> Disagree. Serving content as attachment when you don't have any business logic need to watch it directly it's correct solution. You can not see any piece of content \"out of context\" (not only XSS problem)\r\n\r\nAh I get your perspective now. It does make sense.\r\n\r\n> Can you please clarify - what exactly is deprecated?\r\n> Disagree. Arguments? How does it affect JSON API? Just this \"developers want to see\" situation or something else?\r\n\r\nAt first, I wouldn't want a change that affect too much, against the norm, and with little improvement. But that argument **was from my own mistake and confusion** that this will be a new requirement; this requirement is actually been here for quite some time so there should not be any issue to developers if we bring it back.\r\n\r\n**Another mistake** is that I thought it exists solely to mitigate RFD and mime type confusion ([which original commit stated](https://github.com/OWASP/ASVS/blame/45a586e09711d1c2585a572f1839cb72b7950b4d/4.0/en/0x22-V14-Config.md#L78)) so I called a remove too early as I saw that most of RFD and mime type confusion is deprecated and handled by other requirements. However, from this discussion, it does also prevent browser execution on non-business-logic-related content too.\r\n\r\nFor the level, I originally preferred it to be L3. I'm still inclined that proper encoding/validation can prevent XML XSS and this is just a defense in depth. However, I find the idea to be similar to CSP so I'm ok if it's L1, L2, L3 (same level as CSP).\r\n\r\nThank you for tackling with my head. I'm still opened to the discussion but I need to rest for today.\r\n",
+          "recorded_at": "2021-05-28T12:10:59Z"
+        },
+        {
+          "body": "Apologize. My head is so spinning over so many issues tangling together @_@\r\n\r\n> Disagree. Serving content as attachment when you don't have any business logic need to watch it directly it's correct solution. You can not see any piece of content \"out of context\" (not only XSS problem)\r\n\r\nAh I get your perspective now. It does make sense.\r\n\r\n> Can you please clarify - what exactly is deprecated?\r\n> Disagree. Arguments? How does it affect JSON API? Just this \"developers want to see\" situation or something else?\r\n\r\nAt first, I wouldn't want a change that affect too much, against the norm, and with little improvement. But that argument **was from my own mistake and confusion** that this will be a new requirement; this requirement is actually here for quite some time so there should not be any issue to developers if we bring it back.\r\n\r\n**Another mistake** is that I thought it exists solely to mitigate RFD and mime type confusion ([which original commit stated](https://github.com/OWASP/ASVS/blame/45a586e09711d1c2585a572f1839cb72b7950b4d/4.0/en/0x22-V14-Config.md#L78)) so I called a remove too early. However, from this discussion, it does also prevent browser execution on non-business-logic-related content too.\r\n\r\nFor the level, I originally preferred it to be L3. I'm still inclined that proper encoding/validation can prevent XML XSS and this is just a defense in depth. However, I find the idea to be similar to CSP so I'm ok if it's L1, L2, L3 (same level as CSP).\r\n\r\nThank you for tackling with my head. I'm still opened to the discussion but I need to rest for today.\r\n",
+          "recorded_at": "2021-05-28T12:00:35Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850799638",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Some more options to achieve \"do not render content out of context in browser\":\r\n\r\n  * for API - for old-style XHR request you can check, is there `XMLHttpRequest` header, and if there is not, then you should not give response.\r\n    * Problem, fetch API do not send this header, but you can set your own custom header to solve it (like serving content with direct access is not issue, when API needs Authorized header)\r\n  * use `Sec-Fetch-Mode` and check on the server side, was it navigation request or not.\r\n    * not ready as only solution yet, as Firefox, IE ans Safari do not support it, global support 68% (https://caniuse.com/mdn-http_headers_sec-fetch-mode)\r\n\r\nThe point is - there are many ways to achieve goal do not serve or render response content on direct access to resource, which is not intended for that.\r\n\r\nThe reason, why #721 stayed opened, was that purpose for 14.4.2 was not clear and that is why it got (too fast) deleted as well. So just bringing back this requirement with the same text is not the best solution and instead of \"technical requirement\" maybe we should ask \"what vector must be taken away\".\r\n\r\nDirection for that requirement should contain goals:\r\n\r\n  * if there is direct request to resource which is not meant to be navigation (including responses from API)\r\n    * is not rendered and/or executed in browser as HTML, XML or JavaScript\r\n      * using serving as `Content-Disposition: attachment`\r\n      * using sandboxing with `Content-Security-Policy: sandbox`\r\n    * OR serving response is not provided\r\n      * as request is not initialized by application (not authorized request)\r\n\r\nAt the moment it seems, that technically the most bullet-proof solution could be to bring back previous 14.4.2, removing API part from it and adding description, what goal this requirement have.\r\n\r\nSo, opened for discussion and arguments if there is some better alternatives.",
+          "recorded_at": "2021-07-18T20:24:18Z"
+        },
+        {
+          "body": "Some more options to achieve \"do not render content out of context in browser\":\r\n\r\n  * for API - for old-style XHR request you can check, is there `XMLHttpRequest` header, and if there is not, then you should not give response.\r\n    * Problem, fetch API do not send this header, but you can set your own custom header to solve it (like serving content with direct access is not issue, when API needs Authorized header)\r\n  * use `Sec-Fetch-Mode` and check on the server side, was it navigation request or not.\r\n    * not ready as only solution yet, as Firefox, IE ans Safari do not support it, global support 68% (https://caniuse.com/mdn-http_headers_sec-fetch-mode)\r\n\r\nThe point is - there are many was to achieve goal do not serve or render response content on direct access to resource, which is not intended for that.\r\n\r\nThe reason, why #721 stayed opened, was that purpose for 14.4.2 was not clear and that is why it got (too fast) deleted as well. So just bringing back this requirement with the same text is not the best solution and instead of \"technical requirement\" maybe we should ask \"what vector must be taken away\".\r\n\r\nDirection for that requirement should contain goals:\r\n\r\n  * if there is direct request to resource which is not meant to be navigation (including responses from API)\r\n    * is not rendered and/or executed in browser as HTML, XML or JavaScript\r\n      * using serving as `Content-Disposition: attachment`\r\n      * using sandboxing with `Content-Security-Policy: sandbox`\r\n    * OR serving response is not provided\r\n      * as request is not initialized by application (not authorized request)\r\n\r\nAt the moment it seems, that technically the most bullet-proof solution could be to bring back previous 14.4.2, removing API part from it and adding description, what goal this requirement have.\r\n\r\nSo, opened for discussion and arguments if there is some better alternatives.",
+          "recorded_at": "2021-05-29T09:01:10Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-850807938",
+      "author": "ThunderSon",
+      "previous_versions": [
+        {
+          "body": "I am tilted more towards the CSP solution:\r\n1. Pushes for the adoption of CSP\r\n2. If something is to look bad, it feels better contained in the browser\r\n3. I am not a fan of websites that download content when being traversed (no one is)\r\n\r\nThe benefit of using `Content-Disposition` is against the HTML rendering. That is still going to happen when the user opens the file. What we just did is mainly add an additional step.\r\n\r\nThe last defense option looks like using the `Origin` header. If it's coming from the API domain itself, then don't provide a response. Not a big fan, but can be an extra layer since the browsers are firm on this header.",
+          "recorded_at": "2021-05-29T10:06:36Z"
+        },
+        {
+          "body": "I am tilted more towards the CSP solution:\r\n1. Pushes for the adoption of CSP\r\n2. If something is to look bad, it feels better contained in the browser\r\n3. I am not a fan of websites that download content when being traversed (no one is)\r\n\r\nThe benefit of using `Content-Disposition` is the HTML rendering. That is still going to happen when the user opens the file. What we just did is mainly add an additional step.\r\n\r\nThe last defense option looks like using the `Origin` header. If it's coming from the API domain itself, then don't provide a response. Not a big fan, but can be an extra layer since the browsers are firm on this header.",
+          "recorded_at": "2021-05-29T10:06:15Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-851983151",
+      "author": "Bankde",
+      "previous_versions": [
+        {
+          "body": "Hi, I don't want this to go stale. \r\nThis `Content-Disposition` is currently still in the current released version of ASVS. We should decide it soon whether to bring it back (and/or rephrase) or confirm of removal so the change can be minimal.\r\n\r\nI'm ok with either way.\r\nor how about rephrase into something more general?\r\n```\r\nVerify that security controls are in place that browsers do not render or execute the API responses (and other resources not meant for navigation) from the direct URL access.\r\n```\r\n\r\nI'm not a fan of adding specific implementations into the general guidelines; they are usually fragile. Developers are free to add them in their project as pleased though.",
+          "recorded_at": "2021-06-01T09:42:18Z"
+        },
+        {
+          "body": "Hi, I don't want this to go stale. \r\nThis `Content-Disposition` is currently still in the current released version of ASVS. We should decide it soon whether to bring it back (and/or rephrase) or confirm of removal so the change can be minimal.\r\n\r\nI'm ok with either way.\r\nor how about rephrase into something more general?\r\n```\r\nVerify that security controls are in place that browsers do not render or execute the API responses (and other resources not meant for navigation) from the direct URL access.\r\n```",
+          "recorded_at": "2021-06-01T09:37:37Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-852014313",
+      "author": "Bankde",
+      "previous_versions": [
+        {
+          "body": "> can use victim's browser to make some other attack\r\n\r\nThank you for bringing that up. I realize we may not want something with possible negative effect in the guidelines so... \r\nhow about this?\r\n```\r\nVerify that API responses contains `Content-Security-Policy: sandbox` or other security controls so that the browsers do not render when directly accessed from the URL..\r\n```\r\nThis way, we are enforcing the CSP (not yet perfect but no downside) while still open to other solutions (that devs have to take care by themselves)",
+          "recorded_at": "2021-06-01T10:48:55Z"
+        },
+        {
+          "body": "> can use victim's browser to make some other attack\r\n\r\nThank you for bringing that up. I thought it's covered by #726 and others. This is a defense in depth configuration so if the file is so dangerous to user (even in .json or .xml XD), then something went very wrong before this configuration (missing validation+wrong content-type+let attacker controls a filename, etc.).\r\nAnyway, I realize we may not want something with possible negative effect in the guidelines so... \r\nhow about this?\r\n```\r\nVerify that API responses contains `Content-Security-Policy: sandbox` or other security controls so that the browsers do not render when directly accessed from the URL..\r\n```\r\nThis way, we are enforcing the CSP (not yet perfect but no downside) while still open to other solutions (that devs have to take care by themselves)",
+          "recorded_at": "2021-06-01T10:28:15Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1358946438",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "Question, we have [12.5.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V12-Files-Resources.md#v125-file-download) which I think was intended to address [reflected file download](https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/).\r\n\r\nIs this attack in scope for the discussion here?\r\n\r\nAt this point, I am not sure how focussed on this attack 12.5.3. is.",
+          "recorded_at": "2022-12-20T07:33:47Z"
+        },
+        {
+          "body": "Question, we have [12.5.3](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x20-V12-Files-Resources.md#v125-file-download) which I think was intended to address [reflected file download](https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/).\r\n\r\nIs this attack in scope for the discussion here?",
+          "recorded_at": "2022-12-20T07:33:26Z"
+        },
+        {
+          "body": "Question, we have 12.5.3 which I think was intended to address [reflected file download](https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/).\r\n\r\nIs this attack in scope for the discussion here?",
+          "recorded_at": "2022-12-20T07:31:28Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1734972756",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> If resources are only meant to be used with JavaScript requests, a possible solution would be for the client to set a specific header (`X-Requested-With: XMLHttpRequest`) and then only serving the response if that header is present. This would prevent users from browsing to that resource directly.\r\n\r\nIt is one possible way of detecting it, but nowadays I would take direction to `Sec-Fetch-*` headers. The requirement must be abstract enough to not limit to any solution but must just describe the goal.\r\n \r\n> Another solution is to set a content-type to `text/plain` or `application/octet-stream`. That way, the HTML won't be interpreted as HTML. However, I don't really like this since then the content type is incorrect, and this can make it harder to work with these resources in legitimate use cases.\r\n\r\nThis is technically incorrect and against `X-Content-Type-Options: nosniff` requirement, if the header is set (like requirement V14.4.4 asks), then with incorrect `Content-Type` for `<script>` sources are not loaded by browsers.",
+          "recorded_at": "2023-09-26T07:22:59Z"
+        },
+        {
+          "body": "> If resources are only meant to be used with JavaScript requests, a possible solution would be for the client to set a specific header (`X-Requested-With: XMLHttpRequest`) and then only serving the response if that header is present. This would prevent users from browsing to that resource directly.\r\n\r\nIt is one possible way of detecting it, but nowadays I would take direction to `Sec-Fetch-*` headers. The requirement must be abstract enough to not limit to any solution but must just describe the goal.\r\n \r\n> Another solution is to set a content-type to `text/plain` or `application/octet-stream`. That way, the HTML won't be interpreted as HTML. However, I don't really like this since then the content type is incorrect, and this can make it harder to work with these resources in legitimate use cases.\r\n\r\nThis is technically incorrect and against `X-Content-Type-Options: nosniff` requirement, if the header is set (like requirement V14.4.4 asks), then with incorrect `Content-Type` for `<script>` resources are not loaded by browsers.",
+          "recorded_at": "2023-09-26T07:22:48Z"
+        },
+        {
+          "body": "> If resources are only meant to be used with JavaScript requests, a possible solution would be for the client to set a specific header (`X-Requested-With: XMLHttpRequest`) and then only serving the response if that header is present. This would prevent users from browsing to that resource directly.\r\n\r\nIt is one possible way of detecting it, but nowadays I would take direction to `Sec-Fetch-*` headers. The requirement must be abstract enough to not limit to any solution but must just describe the goal.\r\n \r\n> Another solution is to set a content-type to `text/plain` or `application/octet-stream`. That way, the HTML won't be interpreted as HTML. However, I don't really like this since then the content type is incorrect, and this can make it harder to work with these resources in legitimate use cases.\r\n\r\nThis is technically incorrect and against `X-Content-Type-Options: nosniff` requirement, if the header is set (like requirement V14.4.4 asks), then with incorrect `Content-Type` `<script>` sources are not loaded by browsers.",
+          "recorded_at": "2023-09-26T07:22:09Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1009#issuecomment-1739181998",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "So, based on https://github.com/OWASP/ASVS/issues/1009#issuecomment-1266835959\r\n\r\nI tried to put my ideas here (wording needs some work):\r\n_Verify that if a client navigates to a resource (template, API response) which are not meant to be accessed directly, the application have defense (not serving the response, serving as an attachment or sandboxed content) to avoid rendering the response in browser or showing content and functionality out of context._",
+          "recorded_at": "2023-10-09T17:26:55Z"
+        },
+        {
+          "body": "So, based on https://github.com/OWASP/ASVS/issues/1009#issuecomment-1266835959\r\n\r\nI tried to put my ideas here (wording needs some work):\r\nVerify that if a client navigates to a resource (template, API response) which are not meant to be accessed directly, the application have defense (not serving the response, serving as an attachment or sandboxed content) to avoid rendering the response in browser or showing content and functionality out of context.",
+          "recorded_at": "2023-09-28T13:29:00Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE2NTAwMzQ=",
+    "is_bot": false,
+    "login": "TheDauntless",
+    "name": "Jeroen Beckers"
+  },
+  "body": "Concerning 2.2.1: https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v22-general-authenticator-requirements\r\n\r\n> Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. **Verify that no more than 100 failed attempts per hour is possible on a single account.**\r\n\r\n100 authentication requests before lockout already seems very generous, and would allow you to perform password spraying on a large list of popular passwords. In addition, the ASVS requirement says that it should be 'per hour', which insinuates that you can just try again after an hour, continuing your attack.\r\n\r\nThe 100 seems very arbitrary, but appears to come from the NIST guide: \r\nhttps://pages.nist.gov/800-63-3/sp800-63b.html#throttle\r\n\r\nHowever, the NIST guide does not say '100 per hour' (but rather 100 at most). \r\n\r\n> When required by the authenticator type descriptions in Section 5.1, the verifier SHALL implement controls to protect against online guessing attacks. Unless otherwise specified in the description of a given authenticator, the verifier SHALL limit consecutive failed authentication attempts on a single account to no more than 100.\r\n\r\nThe 2.2.1 control is the only one that mentions account lockout, so there are no other controls that would put more stringent requirements on account locks. For a financial application, 100 is definitely too much, especially per hour. I think either this control should be modified to the text below, or an additional control should be added that focusses on account lockout, and this control should be rewritten to focus on actual throttling against password spraying and not brute-forcing/account lockouts.\r\n\r\nSo my suggestion, though I'm not sure if you use this risk profile approach in other controls:\r\n\r\n> Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. **Verify that only a limited number of consecutive unsuccessful authentication attempts are allowed, according to the risk profile of the application**\r\n\r\nThe actual number would then of course depend on the application, though some (much lower) defaults could be nice.\r\n\r\nIt also somewhat surprised me that there is no real control on account lockout and unlocking (I searched for 'lock' in the pdf). Locking accounts can result in a DoS, but since almost every application has an email address to which an unlock/login URL could be sent, that seems like a preventable problem. This is related to this discussion, but let me know if you would like a separate issue to discuss this?\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc4MjE2MzIyNw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"**no more** than 100 attempts per hour\" does not mean, that application need to provide \"**at least** 100 attempts per hour\".\r\n\r\n100 is at least some clear limit. Your proposal actually works in opposite way as it allows now more than 100, because it does not describe the limit - everyone can interpret their own.\r\n\r\nI don't see problem with that (part of the) requirement.",
+      "createdAt": "2021-02-19T15:53:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-782163227",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc4MjczOTQ0MQ==",
+      "author": {
+        "login": "TheDauntless"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "We can surely keep a maximum upper limit, but even the NIST '100 before successful attempt' is much stricter than what's currently in the guide.\r\n\r\nPCI DSS 8.1.6 has 'no more than 6' which is much more reasonable and secure: https://www.pcisecuritystandards.org/documents/Prioritized-Approach-for-PCI_DSS-v3_2.pdf?agreement=true&time=1469037392985\r\n\r\nCIS has 'after 5 failed attempts': https://www.cisecurity.org/blog/cis-password-policy-guide-passphrases-monitoring-and-more/\r\n\r\nSo alternatives are: Remove the 'per hour' to make it more strict, or go down even further to PCI DSS and CIS recommendations, since 100 is unacceptable for high-security applications, especially since the control doesn't even enforce an account lockout after those 100 attempts, but rather suggest different potential actions:\r\n\r\n> Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. Verify that no more than 5 failed attempts are possible on a single account before triggering a reaction.\r\n",
+      "createdAt": "2021-02-20T19:47:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-782739441",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc4Mjc0OTc0Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If you remove \"per hour\", then you can interpret, like \"5 attempts per lifetime\" which is not correct.\r\n\r\nI still say, if the maximum is 100, does not mean your application can not have limit at 5. But it must have \"timeunit\" specified.\r\n\r\nnote: I'm not the author of the requirement or responsible what goes / what does not go to the project, just brainstorming ideas here :)\r\n",
+      "createdAt": "2021-02-20T21:08:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-782749743",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzczMDcwMw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "i like the last suggest of adding \"Verify that no more than 5 failed attempts are possible on a single account before triggering a reaction.\"\r\n\r\nCan you submit a PR on this and let's get this one done? Thank you!",
+      "createdAt": "2021-03-12T20:16:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-797730703",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODI4NzI1Mg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I still stand for \"timeunit must be specified\". 5 attempts during what time? If it is not specified, it means \"5 units total\" or since account is created. Not PR-ready.",
+      "createdAt": "2021-03-13T12:27:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-798287252",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODM4MTE3MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "5 per hour or 100 total errors should trigger the control - I think that is what we want to do.",
+      "createdAt": "2021-03-13T13:29:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-798381170",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM49o1_n",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang can you submit a PR?",
+      "createdAt": "2022-02-09T19:28:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-1034117095",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-iL2T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Not really, as\r\n\r\n> I don't see problem with that (part of the) requirement.\r\n\r\nhttps://github.com/OWASP/ASVS/issues/906#issuecomment-782163227",
+      "createdAt": "2022-02-23T19:44:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-1049148819",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5BqNOZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Any further comments @TheDauntless ? Do you think you can open a PR based on the comments above. Need to decide by mid-May whether to action or close.",
+      "createdAt": "2022-04-18T17:21:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-1101583257",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5CMnbs",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current [updated proposal](https://github.com/OWASP/ASVS/pull/1269/commits/7f12c62985a2eb342d54bf7a5d123b6023a7a80f):\r\n\r\n> Verify that anti-automation controls are effective at mitigating breached credential testing, brute force, and account lockout attacks. Such controls include blocking the most common breached passwords, soft lockouts, rate limiting, CAPTCHA, ever increasing delays between attempts, IP address restrictions, or risk-based restrictions such as location, first login on a device, recent attempts to unlock the account, or similar. More than 5 failed authentication attempts per hour should trigger some sort of reaction or alert.\r\n\r\n\"More than 5 failed authentication attempts per hour\"\r\n* per user?\r\n* per application?\r\n* per IP?\r\n\r\n\"some sort of reaction\" \r\n* some may interpret, that you should lock account after 5 failed logging attempts for one user? or from one IP? and we are back to lockout scenario",
+      "createdAt": "2022-04-27T06:41:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-1110603500",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5CMr2Q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > \"More than 5 failed authentication attempts per hour\"\r\n> \r\n> - per user?\r\n> - per application?\r\n> - per IP?\r\n\r\n\r\nI agree I think it would be worth @TheDauntless confirming about this.\r\n\r\n> > \"some sort of reaction\"\r\n>\r\n> some may interpret, that you should lock account after 5 failed logging attempts for one user? or from one IP? and we are back to lockout scenario\r\n\r\nI think we need to leave the reaction vague in this case as it will be very case specific",
+      "createdAt": "2022-04-27T07:04:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-1110621584",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5CMujK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can have different \"some sort of reactions\" here, different limits and different \"blocks\".\r\n* per user account, for example 5 per hour\r\n* per IP, for example 100 per hour\r\n\r\nIf you have only \"per user\" limit, attacker can rotate usernames and use the same IP address for online guessing. If you have only \"per IP\" limit, attacker can use different IP addresses.\r\n\r\nNumbers are \"random\" and subject to change, just for explaining the idea.",
+      "createdAt": "2022-04-27T07:15:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-1110632650",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5C1Vqu",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang \r\nI have approved the change for now. If we want to specify something else then I am open to suggestions but I would be worried about being too specific...",
+      "createdAt": "2022-05-09T15:52:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/906#issuecomment-1121278638",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-02-19T15:33:35Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkwMzg5",
+      "name": "3) awaiting proposal",
+      "description": "There is some discussion in issue and reach to some results but it's not concluded with clear propos",
+      "color": "60048C"
+    }
+  ],
+  "number": 906,
+  "state": "CLOSED",
+  "title": "Control 2.2.1 > Too specific and tolerant",
+  "url": "https://github.com/OWASP/ASVS/issues/906"
+}

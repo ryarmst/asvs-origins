@@ -1,0 +1,140 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEzNjIzODI4",
+    "is_bot": false,
+    "login": "tghosth",
+    "name": "Josh Grossman"
+  },
+  "body": "@randomstuff [wrote](https://github.com/OWASP/ASVS/issues/2590#issuecomment-2817942850):\n\n> I was checking 6.7.2 (now 11.6.1) in the context of [#2985](https://github.com/OWASP/ASVS/issues/2985) and I have some questions:\n> \n> * Maybe we should clarify the wording to say that \"key generation\" is about \"private key generation\".\n> * We currently don't have a list of approved \"cryptographic algorithms […] for key generation and seeding\". Is that a problem? Should we instead split this requirement into:\n>   \n>   * Verify that only approved cryptographic algorithms are used for digital signature generation and verification.\n>   * Verify that only industry-proven algorithms are used for (private) key generation and (private key) seeding. (or is it OK to say approved here?)\n> * As for \"modes of operations\", are they really used in the context of \"key generation and seeding, and digital signature generation and verification\"?\n> \n> Any feedback, [@unprovable](https://github.com/unprovable) and [@danielcuthbert](https://github.com/danielcuthbert)?\n\nI would like to pull this discussion into this issue and close #2590.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6pMDN3",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is what section 11.6  currently looks like:\n\n---\n\n## V11.6 Public Key Cryptography\n\nPublic Key Cryptography will be used where it is not possible or not desirable to share a secret key between multiple parties.\n\nAs part of this, there exists a need for approved key exchange mechanisms, such as Diffie-Hellman and Elliptic Curve Diffie-Hellman (ECDH) to ensure that the cryptosystem remains secure against modern threats. The \"Secure Communication\" chapter provides requirements for TLS so the requirements in this section are intended for situations where Public Key Cryptography is being used in use cases other than TLS.\n\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **11.6.1** | Verify that only approved cryptographic algorithms and modes of operation are used for key generation and seeding, and digital signature generation and verification. Key generation algorithms must not generate insecure keys such as RSA keys which are vulnerable to Fermat factorization. | 2 | v5.0.be-6.7.2 |\n| **11.6.2** | Verify that approved cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. This will prevent attacks on the key establishment process which could lead to adversary-in-the-middle attacks or cryptographic breaks. | 3 | v5.0.be-6.7.1 |\n\n\n---\n\nI don't think we should split 11.6.1 but we do need to handle the approved question plus some other questions\n\nI just want to summarise the points for @danielcuthbert and @unprovable as I understand them:\n\n* Note that we are going to specify private keys.\n* Do you have approved algorithms for asymmetric key generation and seeding to add to the appendix?\n* Do \"modes\" apply for all of \"key generation and seeding, and digital signature generation and verification\" or only certain use cases?",
+      "createdAt": "2025-04-29T11:46:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3061#issuecomment-2838508407",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sCYUJ",
+      "author": {
+        "login": "unprovable"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Looks like the right shape of what we need :) To answer your points:\n\n> Note that we are going to specify private keys.\nSymmetric keys don't differentiate between public/private, only for ECC/RSA/PQC KEX operations. \"Secret key material and private keys\" may be a better phrase. \n\n> Do you have approved algorithms for asymmetric key generation and seeding to add to the appendix?\n\nI think the RBG/RNG requirements we put in there are sufficient to cover this. \n\n> Do \"modes\" apply for all of \"key generation and seeding, and digital signature generation and verification\" or only certain use cases?\n\nIt _can_, so I'd leave it in there just in case (thinking of a scheme that might use a symmetric keystream cipher like ChaCha20 to generate key material). \n\nI'm also confused as to why Fermat factoring is mentioned? If yo'ure generating RSA primes close enough for that to matter, you're using a very old cryptosystem implementation.",
+      "createdAt": "2025-05-16T10:19:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3061#issuecomment-2886305033",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6scvzJ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I'm also confused as to why Fermat factoring is mentioned? If you're generating RSA primes close enough for that to matter, you're using a very old cryptosystem implementation.\n\nI guess that's the point? I would say that this reference is easy to find and may be fine as an *illustration* of what can be wrong. But if you have any better example (or if you think we don't need any example here) feel free to say so. For reference, it was added from https://github.com/OWASP/ASVS/issues/2985 (ping @ingo-rauner)",
+      "createdAt": "2025-05-20T07:10:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3061#issuecomment-2893216969",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sp6kB",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@randomstuff will this get sorted on tomorrow's call? We need to release next week so we need a final resolution on this as it is a blocker",
+      "createdAt": "2025-05-21T05:41:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3061#issuecomment-2896668929",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6sycjL",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, the goal of tomorrow's call is to settle out these remaining (for the crypto-related issues) issues so I hope this will be sorted out 😄",
+      "createdAt": "2025-05-21T18:45:38Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3061#issuecomment-2898905291",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6s6dnr",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Both issues have been resolved and will be added to a forthcoming PR",
+      "createdAt": "2025-05-22T12:12:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "HEART",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/3061#issuecomment-2901006827",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-04-29T11:41:22Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwvZdg",
+      "name": "V11 (prev V6)",
+      "description": "",
+      "color": "F8D13F"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 3061,
+  "state": "CLOSED",
+  "title": "Clarifications on section 11.6",
+  "url": "https://github.com/OWASP/ASVS/issues/3061"
+}

@@ -1,0 +1,143 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "The ASVS level columns generally contain a ✓. There are some exceptions to this, listed below. I propose to make these columns contain ✓ or nothing, and not free-form text. This makes it easier to retrieve a list of requirements for a certain level, and makes it clear which levels every requirement applies to.\r\n\r\n| **2.8.7** | Verify that biometric authenticators are limited to use only as secondary factors in conjunction with either something you have and something you know. | | o | ✓ | 308 | 5.2.3 |\r\n| **2.8.8** | [ADDED] Ensure that generation of the time-based multi-factor OTP token is based on the server's system time and not the client's machine. | | o | ✓ | 367 | 5.1.4.2 / 5.1.5.2 |\r\n| **3.3.2** | If authenticators permit users to remain logged in, verify that re-authentication occurs periodically both when actively used or after an idle period. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | 30 days | 12 hours or 30 minutes of inactivity, 2FA optional | 12 hours or 15 minutes of inactivity, with 2FA | 613 | 7.2 |\r\n| **2.10.1** | Verify that intra-service secrets do not rely on unchanging credentials such as passwords, API keys or shared accounts with privileged access. | | OS assisted | HSM | 287 | 5.1.1.1 |\r\n None\r\n| **2.10.2** | Verify that if passwords are required for service authentication, the service account used is not a default credential. (e.g. root/root or admin/admin are default in some services during installation). | | OS assisted | HSM | 255 | 5.1.1.1 |\r\n| **2.10.3** | Verify that passwords are stored with sufficient protection to prevent offline recovery attacks, including local system access. | | OS assisted | HSM | 522 | 5.1.1.1 |\r\n| **2.10.4** | Verify passwords, integrations with databases and third-party systems, seeds and internal secrets, and API keys are managed securely and not included in the source code or stored within source code repositories. Such storage SHOULD resist offline attacks. The use of a secure software key store (L1), hardware TPM, or an HSM (L3) is recommended for password storage. | | OS assisted | HSM | 798 | |\r\n\r\nIn 2.8.7 and 2.8.8, the level is \"o\". This means \"Recommended, but not required\", according to [this legend](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#legend). This is only used in two requirements, and the legend is specific to the authentication chapter. Furthermore, I think all requirements are recommended, so this doesn't add much information. I propose to remove the \"o\", and the legend chapter.\r\n\r\n3.3.2 has requirements in the levels. I think this is an abuse of the level indicators. I propose to replace these all with ✓. At the start of the section there is already an explanation about the session timeouts.\r\n\r\n2.10.2 - 2.10.4 have OS assisted / HSM in the levels, without an explanation anywhere. I propose to replace these with ✓. A description at the start of this section would be fitting.\r\n\r\nAlternatively to L1, L2, L3 with ✓, we could make one \"level\" column with 1, 2, or 3. However, that would also need support from export scripts and other consumers that parse the current format.\r\n\r\n\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg2MTY3ODk3Mw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I agree 100% this is a good idea. We just need to capture the nuance in the requirement.",
+      "createdAt": "2021-06-15T17:12:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1022#issuecomment-861678973",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg2MjE1NDkzMg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I support proposal to get rid of \"o\" (Optional) - if requirement exists and it is not required for that level, it anyway means \"Optional\" for me.\r\n\r\nCurrent level combinations:\r\n```\r\n    139 ✓|✓|✓\r\n    130 -|✓|✓\r\n     21 -|-|✓\r\n      4 -|OS assisted|HSM\r\n      2 -|o|✓\r\n      1 30 days|12 hours or 30 minutes of inactivity, 2FA optional|12 hours or 15 minutes of inactivity, with 2FA\r\n```\r\n\r\nit means - there are no requirements, where higher level is not required and lower level is. Therefore I support also idea to use just one numeric field for level.\r\n\r\n",
+      "createdAt": "2021-06-16T08:16:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1022#issuecomment-862154932",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg2NjA3MTgwOQ==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": " > | **3.3.2** | If authenticators permit users to remain logged in, verify that re-authentication occurs periodically both when actively used or after an idle period. ([C6](https://owasp.org/www-project-proactive-controls/#div-numbering)) | 30 days | 12 hours or 30 minutes of inactivity, 2FA optional | 12 hours or 15 minutes of inactivity, with 2FA | 613 | 7.2 |\r\n\r\nSo, for L1 the session can be valid for 30 days. I would say this is not pentestable. Testing this would take 30 days, and in my experience pentests last shorter than that. So this would become a L2 and L3 requirement. Agree?\r\n\r\nIn that case, we can put a maximum of 12 hours session duration in the requirement. We could also choose either 15 or 30 minutes of inactivity:\r\n\r\n> Verify that sessions require reauthentication after at most 12 hours since the start of the session, or after at most 30 minutes of inactivity.\r\n\r\nWe could also make a requirement for each level:\r\n\r\n> Verify that sessions require reauthentication after at most 12 hours since the start of the session, or after at most 30 minutes of inactivity. = L2\r\n> Verify that sessions require reauthentication after at most 12 hours since the start of the session, or after at most 15 minutes of inactivity. = L3\r\n\r\nPersonally, I don't like that. I would say we allow at most 30 minutes in ASVS, and if people want to be NIST AAL3 compliant, they have to read the NIST spec.\r\n\r\nDo we still need a requirement for L1?",
+      "createdAt": "2021-06-22T15:13:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1022#issuecomment-866071809",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDg2OTY0MzQxOQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "One completely different way to solve it:\r\n* one requirement to V1.3 - verify that you have documented policy for session maximum lifetime and maximum inactivity time.\r\n* second requirement for V3.3.2 - verify that the application follows policy for session maximum lifetime and maximum inactivity time.\r\n\r\nProblematic part here is still, how to solve the levels issue - if think direction for different levels should be described in V1.3 requirement.\r\n\r\nFor level1 at the moment I can not see good solution - it must be covered, but I can not see at the moment, how it cam be automatically pentestable.",
+      "createdAt": "2021-06-28T12:29:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1022#issuecomment-869643419",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41wXpP",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I propose to change 3.3.2 to L2, L3, with the following requirement:\r\n\r\n> Verify that sessions require reauthentication after at most 12 hours since the start of the session, or after at most 30 minutes of inactivity.\r\n\r\nshould we add \"whichever comes first\", to make clear that both apply?\r\n\r\nI think the level 1 == pentestable is becoming more and more of a problem. Do we want to keep this? Did we already have an issue about this? \r\n\r\n> verify that you have documented policy\r\n> verify that the application follows policy\r\n\r\nI think ASVS has to say something about what reasonable values are for session timeout, and not totally leave it up to the developers.",
+      "createdAt": "2021-08-19T12:26:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1022#issuecomment-901872207",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM4-hZ23",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think that the level columns are too messy anyway and I would prefer changing things so that is just a single column containing 1 2 or 3. That would be one of the last things we do though.\r\n\r\n@elarlang what is the next action here?",
+      "createdAt": "2022-02-23T16:06:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/1022#issuecomment-1048944055",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5A_f23",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to close this for now as it will be dealt with when the level column is simplified.",
+      "createdAt": "2022-04-06T15:12:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1022#issuecomment-1090387383",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2021-06-15T14:36:01Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    }
+  ],
+  "number": 1022,
+  "state": "CLOSED",
+  "title": "Use of non-✓ for level",
+  "url": "https://github.com/OWASP/ASVS/issues/1022"
+}

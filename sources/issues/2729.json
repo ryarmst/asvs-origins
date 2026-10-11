@@ -1,0 +1,318 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjk0NjcyNw==",
+    "is_bot": false,
+    "login": "randomstuff",
+    "name": "Gabriel Corona"
+  },
+  "body": "Currently we have:\n\n> 51.4.14 [MODIFIED, MOVED FROM 3.5.1] Verify that refresh tokens and reference access tokens can be revoked by an authorized user. It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation. (L2).\n\nI think we should require revocation by the AS.\n\nThis has been discussed in part of #211:\n\n> The current requirement addresses the problem \"do not share your data longer than it is necessary\" and for that reason, there should be a possibility to revoke data. It does not take into account the situation, if the client itself is malicious.\n\nI think that the two aspects are mostly about different aspects and security issues:\n\n1. revocation by the client is about \"do not share your data longer than it is necessary\"\n2. revocation by through the AS UI is more about \"revoke access if the application is found to be malicious and/or you can't find a way to revoke the access from the client application\n\n@elarlang's argument is interesting:\n\n> if the (OAuth/OIDC) client is malicious and the end-user can not revoke permissions, then the requirement is just not satisfied\n\nI quite agree with that analysis. However,\n\n1. The reader may not interpret the requirement that way and might read it as \"I can just support revocation through the client\" without more consideration for the topic.\n2. If we take this interpretation of the current wording doesn't it mean that you *have* to support revocation through the AS UI? If so, shouldn't this be stated explicitly.\n\nSee #2705 for context.\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6in3Pl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "From other issue:\n> (Note: I still think that \"or by a client\" should be removed from this requirement).\n\nThe reason is/was, that OAuth client may be able to call this action via API-s from AS, e.g. we should not dictate the functionality or technical solution to achieve that.",
+      "createdAt": "2025-03-17T06:39:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2728358885",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ixl07",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> call this action via API-s from AS\n\nThis is fine for letting the client revoke existing token/authorizations. I don't think that it's the most important consideration about token revocation.\n\nToken revocation from the client is not useful if the client is found to be malicious or compromised:\n\n* In the former case, the client could just refuse to revoke the token.\n* In the latter case, the secret could just have been exfiltrated from the client and then erased making revocation from the client impossible.\n* Another scenario would be a token stored in the stolen/compromised user-agent.\n* If for some reason, the user does not trust the client anymore he would better stop interacting with the client altogether.\n\nIn all three scenarios, the end user would need to use the *AS* (not the client) in order to revoke the stolen authorization.\n",
+      "createdAt": "2025-03-17T20:57:11Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2730908987",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1Hi0",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My main concern here is - is it realistic and/or everyday practice that all applications need to send their users to an external environment/application (authorization server) for handling revocation? Is this one and only acceptable solution?\n\nThe important part for the requirement is:\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user.\n\nI don't feel confident to write this one-and-only solution to achieve that into the requirement.\n\nAt the moment we have:\n> It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation.\n\nI don't want to punish every application, because there may be scenario for \"malicious client\".\n\nProbably your concerns can be addressed with a line like:\n> It **may be** achieved by a client that is using authorization server APIs for revocation, and revocation functionality **must be** available using the authorization server user interface (to revoke access to malicious clients)",
+      "createdAt": "2025-03-18T06:35:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2731833524",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1uVs",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don't want to punish every application, because there may be scenario for \"malicious client\".\n\nYes, I agree that the \"malicious client\" scenario may not be super important in deployments where the clients are tightly integrated and have a high trust relationship (i.e. they are managed by the same entity). It is arguably more important for deployments where the AS may provide authorization to (a wide range of) third-party applications.\n\n> It may be achieved by a client that is using authorization server APIs for revocation, and revocation functionality must be available using the authorization server user interface (to revoke access to malicious clients)\n\nThis looks OK to me (if we agree we need to make this change).",
+      "createdAt": "2025-03-18T07:51:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2731992428",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i1yv-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I agree that the \"malicious client scenario\" must be addressed, but it feels like L3 area for me.\n\nSo an additional option is to use the phrase we have:\n> It can be achieved by using the authorization server user interface, or by a client that is using authorization server APIs for revocation.\n\nAnd say:\n> From L3 authorization server must provide the functionality /explain the reasons why/",
+      "createdAt": "2025-03-18T07:57:50Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2732010494",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i56mW",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I agree that the \"malicious client scenario\" must be addressed, but it feels like L3 area for me.\n\nI would find it important to include this in L2 if there any third-party (or maybe low-trust) client connection in the mix. If a malicious clients gets access to a refresh token, it might maintain access for a long time if there is no provision for revoking the access through the AS.\n\nThis is not unlike for example: if I can create API keys through the server, I should be able to revoke it through the server.\n\nBut I understand your position.",
+      "createdAt": "2025-03-18T12:44:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2733091222",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6i7uMH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I think we can justify it to L2 the same way as \"overview of active sessions\".\n\nIt means we need to finetune the second part of the requirement to cover the idea proposed in https://github.com/OWASP/ASVS/issues/2729#issuecomment-2731833524 (requires proper smooth language):\n> It may be achieved by a client that is using authorization server APIs for revocation, and revocation functionality must be available using the authorization server user interface (to revoke access to malicious clients)\n\n",
+      "createdAt": "2025-03-18T14:57:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2733564679",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jMqiF",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "You proposition (I think):\n\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user.  It may be achieved by a client that is using authorization server APIs for revocation, and revocation functionality must be available using the authorization server user interface (to revoke access to malicious clients)\n\nYes, that was the meaning I was suggesting to include in the requirement.\n\nMy proposition would have been something like:\n\n> Verify that an authorized user can revoke his active refresh tokens and reference access tokens using the authorization server user interface (L2).\n\nI think this wording and your wording are semantically equivalent. (and I am absolutely *not* suggesting that mine is better 😄).",
+      "createdAt": "2025-03-19T20:18:29Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2738006149",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jVarN",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that an authorized user can revoke his active refresh tokens and reference access tokens using the authorization server user interface.\n\nOk, for L2 situation this \"may be done via client\" do not add anything to the _requirement_. The final question is, is it always L2 or are there some mitigations (like 1st party usage only) when it can be L3?",
+      "createdAt": "2025-03-20T12:30:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2740300493",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jdx6Z",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "What about this this? (just removing the second part, not limiting to your active tokens)\n\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user using the authorization server user interface.\n\nYou could be authorized to revoke other users tokens, e g a Support/SOC-person that needs to instantly deny access for a malicious user  or abused session....\n\nThis also allows you to build client UI, but we do not say anything about it, even if it is a good practice I think this is hard to write it as a verification \"It is also recommended for the client to provide UI...\", maybe hard to require this for all clients?",
+      "createdAt": "2025-03-21T06:48:06Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2742492825",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jmRMA",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hey @TobiasAhnoff this is exactly the kind of requirement I was looking for. 2 thumbs up. But let's wait for @elarlang to approve. :)",
+      "createdAt": "2025-03-22T00:24:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2744718080",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jn0nK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh tokens and reference access tokens can be revoked by an authorized user using the authorization server user interface.\n\nWe can go in with that, but the requirement do not describe why it exists or what problem it solves - so it may rise quite many questions in the future.\n\nI would add messages:\n* authorization user interface must provide overview of \"active\" tokens\n* it is neccessary to address the risk of malicious client or stolen token is involved",
+      "createdAt": "2025-03-22T07:45:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2745125322",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jn11Q",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, I completely agree to that (but that might go against the \"not go to deep into the topic\").",
+      "createdAt": "2025-03-22T08:00:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2745130320",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jn328",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, it requires explanation - for example, \"if you have full access to the application - can you test it\" - you can not.\n\nBut in this case, part of the permission/consent management logic is delegated to another component and we need to watch this as a logical unity.",
+      "createdAt": "2025-03-22T08:22:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2745138620",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jr9Fr",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang good points, is this better?\n\n> Verify that, to mitigate the risk of malicious clients or stolen tokens, refresh tokens and reference access tokens can be revoked by an authorized user using the authorization server user interface.\n\nor \n\n> Verify that, to mitigate the risk of malicious clients or stolen tokens, refresh tokens and reference access tokens can be revoked by an authorized user using the authorization server user interface. This should include e.g. a interface where an end-user can revoke all active tokens authorized to the user. ",
+      "createdAt": "2025-03-23T13:17:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2746208619",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jsCXe",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think we can go with the 1st proposal, I hope that @tghosth does the language check before the PR.",
+      "createdAt": "2025-03-23T13:54:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2746230238",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6jsR1q",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can we do:\n\n\"_Verify that refresh tokens and reference access tokens can be revoked by an authorized user using the authorization server user interface, to mitigate the risk of malicious clients or stolen tokens._\"\n\nSwapped the first and second parts. ",
+      "createdAt": "2025-03-23T16:15:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2729#issuecomment-2746293610",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-03-16T22:17:12Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2729,
+  "state": "CLOSED",
+  "title": "51.4.14 require revocation by the AS?",
+  "url": "https://github.com/OWASP/ASVS/issues/2729"
+}

@@ -1,0 +1,90 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjYwNjA4MDc2",
+    "is_bot": false,
+    "login": "anuragnedunuri",
+    "name": "Anurag Nedunuri"
+  },
+  "body": "### Problem statement\n\nASVS 5.0 requires that defined sensitive data is not sent to untrusted parties (14.2.3), and covers sensitive data at rest on the client (V14.3: DOM cleanup, caching, browser storage). However, there is no requirement addressing the mechanism by which this data most commonly leaks in practice: client-side monitoring, analytics, error-tracking, and session-recording scripts capturing **input events before form submission**.\n\nThese scripts are typically first-party authorized (loaded intentionally, allowlisted in CSP, integrity-checked where applicable), so existing V3 controls do not constrain them:\n\n- 3.4.3 (CSP) controls which scripts load, not what authorized scripts capture once loaded.\n- 3.6.1 (SRI) verifies integrity of externally hosted static assets; it says nothing about the data-capture behavior of a legitimate, unmodified script.\n- 14.2.3 states the outcome (sensitive data must not reach untrusted parties) but is difficult to verify at the browser layer: egress inspection at submission time misses keystroke-level capture that occurs while the user is typing, and 14.2.3 gives the tester no mechanism-level requirement to test against.\n- 14.3.1–14.3.3 cover data at rest (DOM after session end, caches, browser storage), not live input events.\n\nThe result is a well-documented failure class: session-replay and analytics tooling capturing credentials, payment data, and health information from form fields, including from forms the user never submits. Large-scale measurement research has shown session-replay scripts collecting form input before submission from production sites, with vendor redaction mechanisms found to be imperfect in practice, and follow-up research documented inadvertent plaintext password collection by analytics and replay tooling. Notably, the discussion in #1274 (which produced 14.2.3) cited exactly this scenario : telemetry capturing authentication form submissions as plaintext credentials as motivation.\n\n### Attack/failure scenario\n\n1. An application loads a session-recording or analytics script intentionally, from an allowlisted origin, with SRI where applicable. All existing V3 requirements pass.\n2. The script attaches listeners to input events (keystrokes, paste, autofill mutation) across the page.\n3. A user types a password, card number, or health information into a form. The field contents are serialized and transmitted to the vendor's collection endpoint as the user types before submission, and even if the user abandons the form.\n4. Field-masking configuration in the recording tool is absent, incomplete (e.g., masks `type=\"password\"` but not a custom credential field), or silently degraded.\n\nNo malicious script is involved. The application \"leaks by configuration.\"\n\n### Proposed requirement\n\nSection: V3.7 (Other Browser Security Considerations), or a new section if preferred.\n\n> **3.7.x** -  Verify that input fields which are expected to contain defined sensitive data are excluded from capture by any client-side monitoring, analytics, error-tracking, or session-recording mechanisms in use, including capture of input events (such as keystrokes or paste events) which occur before form submission.\n\nAlternative, shorter wording:\n\n> **3.7.x** - Verify that client-side monitoring or session-recording mechanisms in use do not capture the values of input fields which are expected to contain defined sensitive data, including values entered but not yet submitted.\n\nThe phrase \"defined sensitive data\" is used deliberately to tie into the data classification required by 14.1.1, consistent with how 14.2.3 is scoped.\n\n### Proposed level: 2\n\nSession-recording and analytics tooling is ubiquitous in ordinary applications, not only high-assurance ones, and the data at risk (credentials, payment, health data) is the same data 14.2.3 protects at L2 (verified on master as of 2026-08-12). L1 seems too aggressive since verification requires knowledge of which monitoring tools are in use.\n\n### How a tester verifies this\n\n- **Configuration review**: inspect the masking/exclusion configuration of each recording/analytics mechanism in use against the application's documented sensitive fields (per 14.1.1 classification).\n- **Dynamic testing**: enter marker values into designated sensitive fields without submitting; inspect network egress and vendor-side session captures for the marker values.\n- **Instrumented testing**: monitor input-event listener attachment on sensitive fields to confirm exclusion behavior.\n\nThis is verifiable with standard browser tooling and does not depend on any specific vendor product.\n\n### Relationship to existing requirements (why this is not a duplicate)\n\n| Existing | Covers | Does not cover |\n| --- | --- | --- |\n| 14.2.3 | Outcome: sensitive data not sent to untrusted parties | The pre-submission input-event capture mechanism; browser-layer verifiability |\n| 14.3.1–14.3.3 | Sensitive data at rest in DOM/caches/storage | Live input events during data entry |\n| 3.4.3 (CSP) | Which scripts may load/execute | What authorized scripts capture |\n| 3.6.1 (SRI) | Integrity of externally hosted static assets | Data-capture behavior of legitimate scripts |\n\nThis proposal is the V3 (mechanism-level, browser-layer) counterpart that makes the 14.2.3 outcome testable for the most common leakage path.\n\n### References\n\n- Englehardt, Acar, Narayanan — \"No boundaries: Exfiltration of personal data by session-replay scripts\" (Princeton CITP, Nov 2017): https://blog.citp.princeton.edu/2017/11/15/no-boundaries-exfiltration-of-personal-data-by-session-replay-scripts\n- Englehardt, Acar, Narayanan — \"No boundaries for credentials: password leaks to Mixpanel and session replay companies\" (Feb 2018): https://freedom-to-tinker.com/2018/02/26/no-boundaries-for-credentials-password-leaks-to-mixpanel-and-session-replay-companies/\n- CWE-359: Exposure of Private Personal Information to an Unauthorized Actor\n- CWE-201: Insertion of Sensitive Information Into Sent Data",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM8AAAABPAI2Vw",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What is sensitive and what is not, and how sensitive data must be protected, must be covered by documented security decisions\n\n- v5.0.0-14.1.1 Verify that all sensitive data created and processed by the application has been identified and classified into protection levels. This includes data that is only encoded and therefore easily decoded, such as Base64 strings or the plaintext payload inside a JWT. Protection levels need to take into account any data protection and privacy regulations and standards which the application is required to comply with.\n- v5.0.0-14.1.2 Verify that all sensitive data protection levels have a documented set of protection requirements. This must include (but not be limited to) requirements related to general encryption, integrity verification, retention, how the data is to be logged, access controls around sensitive data in logs, database-level encryption, privacy and privacy-enhancing technologies to be used, and other confidentiality requirements.\n\nFrom an implementation standpoint, I think v5.0.0-14.2.3 covers the untrusted parties well (and it does not matter when exactly it is sent - keypress vs form-submit):\n\n- v5.0.0-14.2.3 Verify that defined sensitive data is not sent to untrusted parties (e.g., user trackers) to prevent unwanted collection of data outside of the application's control.\n\nThe proposal:\n\n> Verify that client-side monitoring or session-recording mechanisms in use do not capture the values of input fields which are expected to contain defined sensitive data, including values entered but not yet submitted.\n\nI can not see the problem if the client-side script captures the value and it stays on the client side - the problem is that, when it is sent somewhere where or in a way it must not be sent (3rd party, as URL parameter) and this is covered by v5.0.0-14.2.3 (and v5.0.0-14.2.1).\n\nIf the application owner does not control what data is sent to the 3rd party by the component in use, the component must not be used.\n\nFrom the client-side storage point of view, we have requirements in the V14.3 section to cover that.\n\nV3 is a technical web frontend security and does (and should) not handle business logic things such as handling sensitive data.\n\nSo in short, for me it seems that it is covered.",
+      "createdAt": "2026-08-15T10:07:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3395#issuecomment-5301745239",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABPxr6EQ",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@anuragnedunuri - please review my comment and give feedback - do you think we have something not covered or the v5.0.0-14.2.3 actually covers your concerns?\n",
+      "createdAt": "2026-08-20T08:58:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3395#issuecomment-5353699857",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABQHSv6g",
+      "author": {
+        "login": "anuragnedunuri"
+      },
+      "authorAssociation": "NONE",
+      "body": "Thanks for the ping, and apologies for the delay.\n\nDirect answer: I think 14.2.3 covers most of my concern, but one case falls outside its wording, and it happens to be the most common real-world failure mode.\n\nI agree with the structural split. V3 governs frontend technical mechanics, and sensitive data handling belongs in V14, so I'll drop the V3 placement. I also agree that capture which stays on the client is not the harm. Transmission is.\n\nThe remaining gap turns on the word \"untrusted\" in v5.0.0-14.2.3.\n\nIn the most common real-world failure, the receiving party is trusted and intentionally integrated: a session-recording or analytics vendor, or a first-party telemetry endpoint, that the application owner deliberately deployed. The failure is that this authorized party receives categories of data it is not authorized to receive, such as credentials or health data, because exclusion configuration is absent or incomplete. The documented password leaks to Mixpanel and session-replay vendors are the canonical example: trusted vendor, unauthorized data (https://freedom-to-tinker.com/2018/02/26/no-boundaries-for-credentials-password-leaks-to-mixpanel-and-session-replay-companies/).\n\nUnder a strict reading, 14.2.3 does not apply because the party is not untrusted. Under a broad reading (\"untrusted with respect to this data\"), the outcome is covered, but a verifier has nothing concrete to test for authorized integrations. In practice, testers verify 14.2.3 by intercepting form submissions with an HTTP proxy. Asynchronous telemetry that fires on input events or DOM mutation, including values typed but never submitted, routinely slips past that check because nothing in 14.2.3 prompts anyone to look for it.\n\nYou wrote: \"If the application owner does not control what data is sent to the 3rd party by the component in use, the component must not be used.\" Fully agreed, and that control is exactly what I'm proposing to make verifiable. Reformulated for V14.2:\n\nVerify that client-side monitoring, analytics, or session-recording mechanisms in use (first-party or third-party) are configured to exclude defined sensitive data from collection, including values entered into input fields but not yet submitted.\n\nAlternatively, if you consider even the authorized-party case to be within the intent of 14.2.3, a clarification of its wording (for example, \"untrusted parties, or parties not authorized to receive that category of data\") or added testing guidance covering pre-submission asynchronous collection by authorized tools would close the same gap. I'm happy with either direction.",
+      "createdAt": "2026-08-21T23:14:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3395#issuecomment-5376356330",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM8AAAABQWbR4g",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Based on the intent for described requirements - I would say that your concern should be covered by existing requirements - 14.1.1, 14.1.2 + 14.2.3, so I think we don't need a new requirement.\n\nOne option is to point out more clearly in 14.2.3, that for each type of data that it must not leak to un**authorized** party for that specific data based on the documented security decisions.\n\nCurrent:\n> v5.0.0-14.2.3 Verify that defined sensitive data is not sent to untrusted parties (e.g., user trackers) to prevent unwanted collection of data outside of the application's control.\n\nProposal (for verifying the idea, the wording needs improvements):\n> v5.0.0-14.2.3 Verify that defined sensitive data is not sent to untrusted  **or unauthorized** parties (e.g., user trackers) **for that data type** to prevent unwanted collection of data **and sensitive information leakage** outside of the application's control.",
+      "createdAt": "2026-08-24T07:49:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/3395#issuecomment-5392224738",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2026-08-14T02:27:41Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABjwwVCA",
+      "name": "V14 (prev V8)",
+      "description": "",
+      "color": "962A16"
+    }
+  ],
+  "number": 3395,
+  "state": "OPEN",
+  "title": "New requirement proposal (V3): sensitive input fields must be excluded from client-side monitoring and session-recording capture",
+  "url": "https://github.com/OWASP/ASVS/issues/3395"
+}

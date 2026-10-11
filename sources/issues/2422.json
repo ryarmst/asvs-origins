@@ -1,0 +1,251 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Current requirement, moved from V3.4.4 to V50.2.4 via #2410:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **50.2.4** | [MOVED FROM 3.4.4] Verify that cookie-based session tokens use the \"\\_\\_Host-\" prefix so cookies are only sent to the host that initially set the cookie. | ✓ | ✓ | ✓ | 16 |\r\n\r\nAs the requirement is now a general cookie security requirement, the wording must be non-session-cookie specific.\r\n\r\nProposal:\r\n> Verify that if the cookie is meant to be used only by the same host from where it is written, the cookie has the \"\\__Host-\" prefix for the cookie name.\r\n\r\nupdated proposal from https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507457902\r\n> Verify that the cookie has the '__Host-' prefix for the cookie name unless it is explicitly designed to be shared with other hosts.\r\n\r\nlevel: from easy to implement point of view, level 1. can be level 2\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6Vcy1O",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Alternative \"stronger\" wording:\r\n\r\n> Verify that the cookie has the \"__Host-\" prefix for the cookie name unless it is (explicitly) designed to be shared with other hosts.\r\n\r\nOptional sentence at the end of the requirement:\r\n\r\n> In this case, it must have the \"__Secure-\" prefix instead.\r\n\r\nIf we don't include this extra sentence, we should probably have a requirement which says \"user either __Host- or __-Secure-\".",
+      "createdAt": "2024-11-29T08:55:37Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507353422",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VdHFK",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't agree with that. Those prefixes are different things and address different problems\r\n* `__Host-` avoid competitive cookies (over)written from same-site scope\r\n* `__Secure-` basically enforce the usage of `Secure` attribute",
+      "createdAt": "2024-11-29T09:42:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507436362",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VdMIv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, I agree they serve different purpose. If you want to be strict about the goal of each requirement you should have the following requirements:\r\n\r\n1. protect from `https://other-host-name` → \"use __Host- unless you are sure you need to you cookie to be used cross-host\"\r\n2. protect from `http://same-host-name` → \"use either __Secure- unless you use __Host-\"\r\n\r\nIn both cases, this is about protecting from other origins (roughly) overwriting/setting the cookie in our stead.\r\n\r\nThen maybe \"__Secure-\" is not that useful if HSTS is used …",
+      "createdAt": "2024-11-29T09:53:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507457071",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VdMVu",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I don't agree with that.\r\n\r\nWhat about the first (main) part? (Verify that the cookie has the \"__Host-\" prefix for the cookie name unless it is (explicitly) designed to be shared with other hosts.)",
+      "createdAt": "2024-11-29T09:54:28Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507457902",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VdNEO",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> __Secure- basically enforce the usage of Secure attribute\r\n\r\nIt prevents an adversary from setting the cookie from `http:`. This is not a problem when using HSTS unless the cookie is set before the browsers sees the HSTS.",
+      "createdAt": "2024-11-29T09:56:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507460878",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VdUDk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > __Secure- basically enforce the usage of Secure attribute\r\n> \r\n> It prevents an adversary from setting the cookie from `http:`. This is not a problem when using HSTS unless the cookie is set before the browsers sees the HSTS.\r\n\r\nit can be still a problem when HSTS is not set to the main domain. Then any site from the eTLD+1 scope can write a cookie with the same name to the main domain which makes the cookie valid for everything in the same-site scope. Including when someone serves `http:` service from own-controlled network.\r\n\r\nBut it is not the topic for `__Host-`, it is for `Secure`. `__Secure-` can be part of 50.2.1 (#2419).",
+      "createdAt": "2024-11-29T10:11:44Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507489508",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Vdevk",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For me both \"__Host-\" and \"__Secure-\" prefixes are about making sure that adversaries do not define/overwrite the cookie for us and should be together in 50.2.4.\r\n\r\nOn the other hand, 50.2.1 would be about making sure that the data stored in the cookie is not exfiltrated. The \"__Secure-\" prefix does not help with that (the Secure attribute alone does).\r\n\r\nBut I can live with \"__Secure-\" being discussed in 50.1.2 :smile: ",
+      "createdAt": "2024-11-29T10:35:30Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507533284",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Vdh3v",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For me both \"__Host-\" and \"__Secure-\" prefixes are about making sure that adversaries do not define/overwrite the cookie for us and should be together in 50.2.4.\r\n\r\n`__Secure-` prefix does not provide that.\r\n\r\n> On the other hand, 50.2.1 would be about making sure that the data stored in the cookie is not exfiltrated. The \"__Secure-\" prefix does not help with that (the Secure attribute alone does).\r\n\r\nThey are not the same. `__Secure-` vs `Secure` :\r\n* `Secure` - this cookie is can not be written and later sent over `http:` connection, ~~but you can (over)write existing cookie (key: name+domain/host+path) without setting the `Secure` flag from `http:` connection~~ (see https://github.com/OWASP/ASVS/issues/2422#issuecomment-2519956325)\r\n* `__Secure-` - is it requires `Secure` to be set, it has the same as `Secure` PLUS - you can not write the cookie with `__Secure-` from `http:` connection.\r\n\r\nIf there is further need to explain those, I'll invite you to my training ;)",
+      "createdAt": "2024-11-29T10:43:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507546095",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VdiQ0",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Note that \"__Host-\" prevents binding the cookie to a subpath.\r\n\r\nSome people might want to support cookies bound to paths:\r\n\r\n1. in order to have different cookies for different paths (eg. Keycloak uses `Path=/realms/myrealm/` to scope each session cookie to its own realm);\r\n2. in order to have different applications under the same host (and somehow hope they you will be able to isolate them this way → this does not work).\r\n\r\nI don't think there are good reasons for not using `__Host-` because:\r\n\r\n* For (1), use could include some info about the realm in the cookie name instead.\r\n* For (2), your should probably not do that in the first place.\r\n* The added value of `__Host` is important enough and can only be achieved this way.\r\n\r\nTo be clear, I still think this should be required but I am raising this point here for reference (and to let the opportunity to express a different opinion).",
+      "createdAt": "2024-11-29T10:44:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507547700",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VdmWa",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, `__Host-` provides that you can not write so-called competitive cookie (a cookie with the same name valid to the same scope) choosing different path or domain values. This is something that `__Secure-` does not provide.\r\n\r\nFor that reason, those Keycloak cookies are manipulatable from any site from the same-site scope. And for that reason I proposed:\r\n> V50.1.1 Verify that separate applications are hosted on different hostnames to leverage the restrictions provided by same-origin policy, including how documents or scripts loaded by one origin can interact with resources from another origin and hostname-based restrictions on cookies.",
+      "createdAt": "2024-11-29T10:54:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2507564442",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WMYiZ",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> but you can (over)write existing cookie\r\n\r\nIt is [no longer possible](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-alone-01) to overwrite an existing secure cookie.\r\n\r\n> In this case, it must have the \"__Secure-\" prefix instead.\r\n\r\nI agree. I think it makes sense to put both prefixes in one requirement. __Host has the behavior of __Secure and more, and it is not possible to include both prefixes. So all cookies should have either the __Secure or __Host prefix.\r\n",
+      "createdAt": "2024-12-05T10:04:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2519828633",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WM3tl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > but you can (over)write existing cookie\r\n> \r\n> It is [no longer possible](https://datatracker.ietf.org/doc/html/draft-ietf-httpbis-cookie-alone-01) to overwrite an existing secure cookie.\r\n\r\nRe-checked, that's correct. But you can still write a cookie with the same name to valid for the same request. That is the reason to use `__Host-`.\r\n\r\n> > In this case, it must have the \"__Secure-\" prefix instead.\r\n> \r\n> I agree. I think it makes sense to put both prefixes in one requirement. __Host has the behavior of __Secure and more, and it is not possible to include both prefixes. So all cookies should have either the __Secure or __Host prefix.\r\n\r\nThe only duplicating behavior is that you can not write a cookie with the same name from `http:` connection.",
+      "createdAt": "2024-12-05T10:49:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2519956325",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WNTnv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the cookie has the '__Host-' prefix for the cookie name unless it is explicitly designed to be shared with other hosts.\r\n\r\nI think this makes sense to me\r\n\r\nGrammar:\r\n_Verify that cookies have the '\\_\\_Host-' prefix for the cookie name unless they are explicitly designed to be shared with other hosts._",
+      "createdAt": "2024-12-05T11:36:33Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2422#issuecomment-2520070639",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-11-29T07:55:19Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABVOeqHA",
+      "name": "V3 (prev V50)",
+      "description": "Group issues related to Web Frontend",
+      "color": "9834AF"
+    }
+  ],
+  "number": 2422,
+  "state": "CLOSED",
+  "title": "V50.2.4 (v4.0.3-3.4.4) - cookie __Host- name prefix",
+  "url": "https://github.com/OWASP/ASVS/issues/2422"
+}

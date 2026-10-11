@@ -1,0 +1,539 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjEyMzcyOTY3",
+    "is_bot": false,
+    "login": "maizuka",
+    "name": "IZUKA Masahiro"
+  },
+  "body": "Hi,\r\n\r\nI believe that the minimal length of passwords defined at [2.1.1](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v21-password-security-requirements) should be 8 characters rather than 12. Why not recover it?\r\n\r\nHere are the reasons:\r\n\r\n- Although the hashes from 8 chars can be reversed in a day, you need to have them locally. Brute-force attacks via network cannot be performed so rapidly.\r\n- For local attacks against compromised hashes, the risks can be reduced using stretching as described in [SP 800-63B](https://csrc.nist.gov/publications/detail/sp/800-63b/final).\r\n- Limiting user passwords does not necessarily make them more secure, as indicated in the forbidding of composition, history and rotation requirements.\r\n- As mentioned in #683, there are few web apps which meet the 12-chars requirement in real world. This might impact UX negatively and seems not to be employed in most of the apps, even 2 years after v4.0.1 released. I'm afraid that it may lower the reliability of ASVS as a standard.\r\n- Although we can fork ASVS as a new checklist for each needs, it is too hard to extend password length because ASVS is considered as one of the significant baselines.\r\n\r\nReferences:\r\n\r\n- The pull request #437 shows the evidence by hashcat and suggests of the change of this requirement from 8 to 12.\r\n- The question #730 has the answer that we should fork ASVS to new standards if necessary.\r\n- This answer is referenced against the push-back suggestion in the issue #683.\r\n\r\nRegards,\r\n\r\nMasahiro\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Njc2NTAxNA==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree. NIST says minimum of 8. Microsoft [says](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/Microsoft_Password_Guidance-1.pdf) minimum of 8, and longer is not necessarily better. OWASP [says](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html) minimum of 8, in some places. The ASVS follows the NIST guidelines in almost everything, but not in this.\r\n\r\nThe [PR](https://github.com/OWASP/ASVS/pull/437) that changed this from 8 to 12 did so, because 12 is 50% more than 8. That doesn't seem like a good motivation. It's not based on any research or anything. When a client asks why they should have passwords of 12 characters, I would like to have some better answer than 12 is 50% more than 8.\r\n\r\nAnother possibility to solve this issue is to don't give an exact value for the minimum length, and change the requirement to something like \"Verify that user set passwords have a reasonable minimum length.\"\r\n\r\nI also feel like ASVS wants to combine a verification standard with best practice recommendations. When designing an application, I would choose a certain minimum password length that is best practice and the most secure. When I am testing an application, a value that is not best-practice may still give acceptable security. I think ASVS should give limits for acceptable security, not for best security.",
+      "createdAt": "2021-03-11T14:12:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796765014",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Njc2ODQwNw==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "NIST suggestions are way more nuanced. We are discussing SP800-63 here.\n\nFor AAL 1 applications, NIST is suggesting 8 character passwords because \nit's only public data at AAL 1\n\nFor AAL 2 applications (serious sensitive data) NIST suggests at least 8 \ncharacter passwords (that are not common or know plus a whole lot more \npw controls) and multi factor that cannot only be SMS. IF you choose SMS \nfor MFA you need to also provide another MFA method.\n\nFor AAL 3 applications (critical infrastructure) you need 8 character \npasswords with a host of special controls plus a hard token for MFA.\n\nSo \"8 character passwords\" per NIST is only relevant in the above context.\n\n- Jim\n\nOn 3/11/21 9:12 AM, Sjoerd Langkemper wrote:\n>\n> I agree. NIST says minimum of 8. Microsoft says \n> <https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/Microsoft_Password_Guidance-1.pdf> \n> minimum of 8, and longer is not necessarily better. OWASP says \n> <https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html> \n> minimum of 8, in some places. The ASVS follows the NIST guidelines in \n> almost everything, but not in this.\n>\n> The PR <https://github.com/OWASP/ASVS/pull/437> that changed this from \n> 8 to 12 did so, because 12 is 50% more than 8. That doesn't seem like \n> a good motivation. It's not based on any research or anything. When a \n> client asks why they should have passwords of 12 characters, I would \n> like to have some better answer than 12 is 50% more than 8.\n>\n> Another possibility to solve this issue is to don't give an exact \n> value for the minimum length, and change the requirement to something \n> like \"Verify that user set passwords have a reasonable minimum length.\"\n>\n> I also feel like ASVS wants to combine a verification standard with \n> best practice recommendations. When designing an application, I would \n> choose a certain minimum password length that is best practice and the \n> most secure. When I am testing an application, a value that is not \n> best-practice may still give acceptable security. I think ASVS should \n> give limits for acceptable security, not for best security.\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/913#issuecomment-796765014>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCMYU5EKE4K7P2Q5GMLTDDFVHANCNFSM4ZAHCIIQ>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2021-03-11T14:17:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796768407",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Njc5ODA5NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Few comments:\r\n1) I think we should not take one password requirement out of context like this is the only requirement what matters and we should look entire set of rules for passwords, that is why I opened issue #683 ages ago.\r\n2) Requirements like \"Verify that user set passwords have a reasonable minimum length.\" does not have any point in my opinion. Those are still \"Verify that your application is secure\" and does not give any information and/or value.",
+      "createdAt": "2021-03-11T14:58:59Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796798095",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjgwMTE3NA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar,\n\nhttps://github.com/OWASP/ASVS/issues/683 Is a bit overwhelming but we will address is before the next major release. \n\nI agree with your point on #2 below.\n\nAloha,\n--\nJim Manico\n@Manicode\n\n\n> On Mar 11, 2021, at 9:59 AM, Elar Lang ***@***.***> wrote:\n> \n> ﻿\n> Few comments:\n> \n> I think we should not take one password requirement out of context like this is the only requirement what matters and we should look entire set of rules for passwords, that is why I opened issue #683 ages ago.\n> Requirements like \"Verify that user set passwords have a reasonable minimum length.\" does not have any point in my opinion. Those are still \"Verify that your application is secure\" and does not give any information and/or value.\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-11T15:03:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796801174",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjgwNDQyNQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Elar,\n\nJosh Grossman (out current process lead) was asking that you break issue 683 into smaller chunks, and rejected his request so we are likely to ignore 683 until you do as he politely asked.\n\nWe need everyone to both be respectful and acknowledge the wishes of the ASVS leadership team in order to have a harmonious project.\n\n--\nJim Manico\n@Manicode\n\n> On Mar 11, 2021, at 10:03 AM, Jim Manico ***@***.***> wrote:\n> \n> ﻿Elar,\n> \n> https://github.com/OWASP/ASVS/issues/683 Is a bit overwhelming but we will address is before the next major release. \n> \n> I agree with your point on #2 below.\n> \n> Aloha,\n> --\n> Jim Manico\n> @Manicode\n> \n> \n>>> On Mar 11, 2021, at 9:59 AM, Elar Lang ***@***.***> wrote:\n>>> \n>> ﻿\n>> Few comments:\n>> \n>> I think we should not take one password requirement out of context like this is the only requirement what matters and we should look entire set of rules for passwords, that is why I opened issue #683 ages ago.\n>> Requirements like \"Verify that user set passwords have a reasonable minimum length.\" does not have any point in my opinion. Those are still \"Verify that your application is secure\" and does not give any information and/or value.\n>> —\n>> You are receiving this because you commented.\n>> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-11T15:07:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796804425",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjgxODAxNg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "What are you talking about? You describe this as problem or known rule which I broke. No, I said why it makes sense to have entire set of rules - to have clear overview. If there is time to PR's, I'll make them. But it requires some analytical feedback from others... ",
+      "createdAt": "2021-03-11T15:26:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796818016",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjgyMTg4OQ==",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Thank you for your comments.\r\n\r\nIt is true that NIST requires multi factor in AAL 2 and 3. However, it doesn't mean that the limit 8 is less secure or meaningless. It just indicates that single factor authentication is sufficient only for AAL 1.\r\n\r\nTo discuss about enriching beyond AAL 1, I suggest we should think about requiring MFA ([2.2.4](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v22-general-authenticator-requirements) at L3) in another issue, rather than about hardening password limits.\r\n\r\nI've made this new issue because I felt that the #683 discusses more complicated points as overview and this 2.1.1 requirement has independent history and independent impact to user passwords.\r\n\r\nI just want to improve ASVS standard and please excuse me if my words make some harm.\r\n\r\nRegards",
+      "createdAt": "2021-03-11T15:32:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796821889",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjgyMzc0Mg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "It’s not a problem it’s just a request so we can work on the password issues in separate discussions since it’s a complex issue. 🤙🏼 This request came from Josh and it’s a reasonable one.\n\n--\nJim Manico\n@Manicode\n\n\n> On Mar 11, 2021, at 10:26 AM, Elar Lang ***@***.***> wrote:\n> \n> ﻿\n> What are you talking about? You describe this as problem or known rule which I broke. No, I said why it makes sense to have entire set of rules - to have clear overview. If there is time to PR's, I'll make them. But it requires some analytical feedback from others...\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-11T15:34:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796823742",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjgyNDc4MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The point I’m making is - 8 character passwords alone is not enough for authentication when it comes for AAL 2 and above.\n\nI also agree with you there at 12 character password recommendation is very non-standard.\n\n--\nJim Manico\n@Manicode\n\n> On Mar 11, 2021, at 10:32 AM, IZUKA Masahiro ***@***.***> wrote:\n> \n> ﻿\n> Thank you for your comments.\n> \n> It is true that NIST requires multi factor in AAL 2 and 3. However, it doesn't mean that the limit 8 is less secure or meaningless. It just indicates that single factor authentication is sufficient only for AAL 1.\n> \n> To discuss about enriching beyond AAL 1, I suggest we should think about requiring MFA (2.2.4 at L3) in another issue, rather than about hardening password limits.\n> \n> I've made this new issue because I felt that the #683 discusses more complicated points as overview and this 2.1.1 requirement has independent history and independent impact to user passwords.\n> \n> I just want to improve ASVS standard and please excuse me if my words make some harm.\n> \n> Regards\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-11T15:36:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796824780",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NjgyNjI1MQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "No hard at all, I agree with your PR and we will address it before the next major release even if we do not have a full discussion right away.\n\nWe often hold onto these comments and do not reply right away and when we’re getting close to a major release we address them in big batches when all the leaders are participating. :)\n\nThank you!\n--\nJim Manico\n@Manicode\n\n> On Mar 11, 2021, at 10:32 AM, IZUKA Masahiro ***@***.***> wrote:\n> \n> ﻿\n> Thank you for your comments.\n> \n> It is true that NIST requires multi factor in AAL 2 and 3. However, it doesn't mean that the limit 8 is less secure or meaningless. It just indicates that single factor authentication is sufficient only for AAL 1.\n> \n> To discuss about enriching beyond AAL 1, I suggest we should think about requiring MFA (2.2.4 at L3) in another issue, rather than about hardening password limits.\n> \n> I've made this new issue because I felt that the #683 discusses more complicated points as overview and this 2.1.1 requirement has independent history and independent impact to user passwords.\n> \n> I just want to improve ASVS standard and please excuse me if my words make some harm.\n> \n> Regards\n> \n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-03-11T15:38:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-796826251",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzA2Mzg1NQ==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Personally, the chart in the following tweet (from a couple of years ago) is what I think makes 12 char passwords so much better than 8 char passwords. Obviously an attack over the network will take longer but offline cracking is still a very valid scenario.\r\n\r\nhttps://twitter.com/TerahashCorp/status/1155112559206383616/photo/1\r\n![image](https://user-images.githubusercontent.com/13623828/110857804-f4a9cd80-82c1-11eb-9ea0-514cf97eab09.png)\r\n",
+      "createdAt": "2021-03-11T21:32:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-797063855",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzA5ODc1MQ==",
+      "author": {
+        "login": "raoul361"
+      },
+      "authorAssociation": "NONE",
+      "body": "Could this not be linked through to an architecture question? I.e. whether a determination was made on what is appropriate for the particular use case (not forgetting whether this is appropriate also) and that the implementation follows? Obviously still requires a minimum baseline...\r\n\r\nI'm also conscious that some user groups, particularly for large corporate/government sites, may have difficulty with long passwords. Thinking elderly/impaired users as possible issues here.",
+      "createdAt": "2021-03-11T22:42:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-797098751",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzEwNDYzNQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "None of the algorithms on this list are good password storage. bcrypt or \nArgon2id is the norm today for good password storage.\n\nhttps://tools.ietf.org/html/draft-ietf-kitten-password-storage-03\n\nThis is even more unnecessary in the face of multi factor AuthN which \nNIST 800-63 suggests for any application with sensitive data.\n\nI suggest 8 or if we want to push the limit, 10. But 12 does not seem \nreasonable, I state with respect.\n\n- Jim\n\nOn 3/11/21 4:33 PM, Josh Grossman wrote:\n>\n> Personally, the chart in the following tweet (from a couple of years \n> ago) is what I think makes 12 char passwords so much better than 8 \n> char passwords. Obviously an attack over the network will take longer \n> but offline cracking is still a very valid scenario.\n>\n> https://twitter.com/TerahashCorp/status/1155112559206383616/photo/1 \n> <https://twitter.com/TerahashCorp/status/1155112559206383616/photo/1>\n> image \n> <https://user-images.githubusercontent.com/13623828/110857804-f4a9cd80-82c1-11eb-9ea0-514cf97eab09.png>\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/913#issuecomment-797063855>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCK2B4EECONFAEM4HTTTDEZJBANCNFSM4ZAHCIIQ>.\n>\n",
+      "createdAt": "2021-03-11T22:55:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-797104635",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzMxOTE1MQ==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> the chart in the following tweet\r\n\r\nThis chart is accurate for random passwords, but does not account for user behaviour. The [Microsoft document](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/06/Microsoft_Password_Guidance-1.pdf) claims that users choose relatively easier passwords when a longer length is required:\r\n\r\n> Excessive length requirements (greater than about 10 characters) can result in user behavior that is\r\npredictable and undesirable. For example, users who are required to have a 16-character password may\r\nchoose repeating patterns like fourfourfourfour or passwordpassword that meet the character length\r\nrequirement but are clearly not hard to guess. These passwords were chosen by participants in a pilot\r\nstudy in which one treatment group was asked to create a password under the constraint that the\r\npassword must be 16 characters long.",
+      "createdAt": "2021-03-12T08:19:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-797319151",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5NzMzNjM0NQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Why this requirement exists - it's for making offline guessing more resource-demanding for attacker. It's against brute-force attacks and there simple mathematics says that the longer a password is, it's more complicated and time-consuming to guess it.\r\n\r\nIf user chose \"fourfourfourfour\" with 16-character password requirement, I guess he/she chose \"fourfour\" for 8-character password. Simple passwords should be avoided with other requirements, like check against leakages and HIBP.\r\n\r\nThose are just my thoughts on arguments provided here. Is the minimum length requirement 8 or 12, does not even matter too much. If authentication is done with only asking username and password, it's weak authentication anyway and should be considered as weakness already. If the main criteria to make application secure is length of password, then probably there are a lot of other things which need to be improved.\r\n\r\n8-character passwords should be allowed ONLY when check from leakages, dictionaries etc are implemented.",
+      "createdAt": "2021-03-12T08:49:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-797336345",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgwMDc3MzEwMw==",
+      "author": {
+        "login": "maizuka"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The PR to 8-chars limit has been approved and I close this issue. Thank you all for your comments and discussions.\r\n\r\nI recognize there are remained discussions. I agree that password authentication is not secure until it meets ALL the related requirements of the corresponding level L1/L2/L3. It may needs additional requirements, e.g. about hashing process to mitigate offline attacks. And user set passwords have inevitable risks to the phishing or breached list attacks, which seem to be recently increasing, so MFA may be necessary even for L2 or L1 apps.\r\n\r\nRegards",
+      "createdAt": "2021-03-17T03:50:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-800773103",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxNDM3NjQ1Mw==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am going to re-open this issue because I would like to gather more feedback on this change. including from @vanderaj @m8urnett @demarinaGit.\r\n\r\nThe referenced Microsoft paper seems to be primarilly designed for Active Directory/Azure AD Administrators so I am not sure it is directly comparable and I am also not sure I understand exactly how the supporting research backed up a conclusion of a length of 8.\r\n\r\nI think the main threat this particular requirement is coming to address is offline cracking and whilst I accept that password cracking is not random, if the full 8 character alphanumeric keyspace can be cracked in a space of months, even with a strong storage algorithm, I am not sure how much difference it makes.\r\n\r\n",
+      "createdAt": "2021-04-06T19:17:42Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-814376453",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxNDM3OTU0MA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I totally support opening this back up. My argument for the merge is:\r\n\r\n- 8 character passwords (alone) for authentication is only for public data per SP800-63.\r\n- Anytime sensitive data is involved, multi-factor is REQUIRED. I suggest this as a level 1 requirement is so basic now.\r\n- Anytime personal safety is involved (and more) than hard tokens are REQUIRED.\r\n\r\nPassword strength is not going to save you from phishing and other risks.\r\n\r\nI also suggest ASVS updated password storage recommendations per https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html which was recently updated.",
+      "createdAt": "2021-04-06T19:22:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-814379540",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxNTQzODk5Nw==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Relevant thread:\r\nhttps://twitter.com/CormacHerley/status/1379892615852613633?s=19",
+      "createdAt": "2021-04-08T04:35:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-815438997",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxNTgyNDE3Mg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "1) I agree that marmite (and Vegemite) is horrible\n2) I appreciate the other opinions around password length, I do think the change to 8 is acceptable but I’m still open to other opinions here",
+      "createdAt": "2021-04-08T13:27:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-815824172",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxNjgyMzYwMQ==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "VEGEMITE IS THE BEST NECTAR OF THE YEAST GODS.\n\n\nAlso, I would like us to keep in line with NIST 800-63 if at all possible.\nAs someone who used to do GRC for his clients at KPMG, having multiple\nstandards with multiple different requirements is a nightmare, and usually\nresulted in the worst common denominator being selected. Let's not let\ndaylight come between us and NIST 800-63 if we can help it. It would be\nprudent to ask Jim Fenton, the primary author of NIST 800-63 if he's\nchanged his mind at all on password length / complexity requirements before\nwe change away from NIST.\n\nthanks\nAndrew\n\nOn Thu, Apr 8, 2021 at 7:28 AM Jim Manico ***@***.***> wrote:\n\n> 1) I agree that marmite (and Vegemite) is horrible\n> 2) I appreciate the other opinions around password length, I do think the\n> change to 8 is acceptable but I’m still open to other opinions here\n>\n> —\n> You are receiving this because you were mentioned.\n> Reply to this email directly, view it on GitHub\n> <https://github.com/OWASP/ASVS/issues/913#issuecomment-815824172>, or\n> unsubscribe\n> <https://github.com/notifications/unsubscribe-auth/ABGMA2JPAGVDIWOGVWNATQDTHWVO3ANCNFSM4ZAHCIIQ>\n> .\n>\n",
+      "createdAt": "2021-04-09T17:04:34Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-816823601",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxNjg2NDgxMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "8 is the NIST standard, Andrew. We were the ones who deviated from it! \nBut keep in mind that standard also mandates MFA anytime you have \nsensitive data in play.\n\nRespectful, Jim\n\n",
+      "createdAt": "2021-04-09T18:09:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-816864810",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40qpW_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Keep minimal length 8 as it is now or back to 12 like it was before?",
+      "createdAt": "2021-07-20T18:12:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-883594687",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41A3Kj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang do we mandate MFA as a level 1 control?",
+      "createdAt": "2021-07-29T19:58:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-889418403",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM41A8QM",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I say 2\n\n--\nJim Manico\n@Manicode\nSecure Coding Education\n+1 (808) 652-3805\n\n> On Jul 29, 2021, at 12:58 PM, Josh Grossman ***@***.***> wrote:\n> \n> ﻿\n> @elarlang do we mandate MFA as a level 1 control?\n> \n> —\n> You are receiving this because you were assigned.\n> Reply to this email directly, view it on GitHub, or unsubscribe.\n",
+      "createdAt": "2021-07-29T20:35:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-889439244",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41BT9F",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "NTLM splits the password into two 7 character limits so the eighth character is easy to brute force as it is now a single character \r\npassword due to know padding.\r\n\r\nI support a character length of 8 [characters] as per NIST 800-63 and this will not conflict with the UX.\r\n\r\nI worked in emergency services and rejected hard tokens due to the high possibility that this would lead to loss of life if personal did not have their hard token at the time.\r\n\r\nAlso, this same high standard is not followed by vendors of hard tokens such as https://www.wired.com/story/the-full-story-of-the-stunning-rsa-hack-can-finally-be-told/ et al.\r\n\r\n",
+      "createdAt": "2021-07-30T00:06:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-889536325",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM41B0C4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this \"level issue\" must be clarified first - is it mostly \"must be pentestable\" or is it more \"this application is not that critical\".\r\n\r\nMFA is pentestable, but I'm not that sure it must be required for \"not that critical applications\". Personally I don't mind, but I doubt it is realistic to require it. Yet.",
+      "createdAt": "2021-07-30T06:41:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-889667768",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Nm-V",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The original posters request on this thread is complete and live. I you have remaining topics you wish to discuss please open a new issue. :)",
+      "createdAt": "2021-09-24T03:25:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-926314389",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43N2Ce",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Any chance of tagging the closed issue, as \"Additional Issues\", so it doesn't slip through the cracks? ",
+      "createdAt": "2021-09-24T06:19:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-926376094",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM43Onpk",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good call Christian. Done. If you see other closed ones that have lingering issues, let me know...",
+      "createdAt": "2021-09-24T12:16:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-926579300",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM44yH1a",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As this is \"the most important requirement\", then I just document it here - we don't apply this change to patch release (v4.0.3) as we consider it as breaking change.\r\n* without having compensating requirements like required MFA, it weakens the requirement too much\r\n* additional MFA requirement, like current 2.2.9 from bleeding edge is new requirement - which means breaking change for \"patch release\" and can not be included.\r\n\r\nv4.0.2-2.1.1\r\n> Verify that user set passwords are at least 12 characters in length (after multiple spaces are combined).\r\n\r\nbleeding edge 2.1.1 (2021-10-27)\r\n> Verify that user set passwords are at least 8 characters in length.\r\n\r\nbleeding edge 2.2.9 (2021-10-27)\r\n> Verify that a hardware-based authenticator and an authenticator that provides verifier impersonation resistance against phishing attacks are used, such as a multi-factor cryptographic hardware, or a combination of a single-factor cryptographic hardware and an OTP device.",
+      "createdAt": "2021-10-27T08:26:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-952663386",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM440cTh",
+      "author": {
+        "login": "cmlh"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Should we have include roadmap explaining the adherence to NIST?",
+      "createdAt": "2021-10-27T20:10:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/913#issuecomment-953271521",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2021-03-11T12:51:30Z",
+  "labels": [],
+  "number": 913,
+  "state": "CLOSED",
+  "title": "2.1.1 Reconsider minimal length of passwords",
+  "url": "https://github.com/OWASP/ASVS/issues/913"
+}

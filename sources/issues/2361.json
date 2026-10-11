@@ -1,0 +1,297 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "Add access token requirement for preventing \"key confusion\".\r\n\r\nThis is part of \"cleaning up 3.5\" see https://github.com/OWASP/ASVS/issues/1917#issuecomment-2466143871\r\n\r\n> Verify that the cryptographic keys for tokens belong to the token issuer. If both symmetric (MAC) and asymmetric (digital signatures) algorithms needs to be supported, additional controls must prevent key confusion. For JWTs the 'iss' claim must be validated to be a preconfigured expected value.\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6S_4BS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think it is JWT or token specific requirement - those who have worked with V6 maybe can hint is this covered there already.\r\n\r\nAlso it is on the limit with the scope. You need to have access to issuer setup that is a bit out of scope from application point of view. And if you have access, then I think it is more a question of handling keys in general? (ping @randomstuff @danielcuthbert )\r\n\r\nFor tokens we additionally have or will have requirement for validating the 'iss' claim.",
+      "createdAt": "2024-11-09T13:35:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2466218066",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TJpZe",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\"key confusion\" is mentioned at the moment in current version of 3.5.5:\r\n> Verify that only algorithms on an allowlist can be used to create and verify cryptographically secured tokens, for a given context. The allowlist should include the permitted algorithms, ideally only either symmetric or asymmetric algorithms, and should not include the 'None' algorithm. **If both symmetric and asymmetric are needed, additional controls should prevent key confusion**.\r\n\r\nThe requirement itself is discussed in the issue #2204 .  Is this a recommendation to split the current 3.5.5, is it a duplicate of current 3.5.5 and should be closed or it provides some new aspect that is not covered yet?",
+      "createdAt": "2024-11-11T18:19:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2468779614",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6TYE7x",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The suggestion was to split split the current 3.5.5 and have \"key confusion\" together with \"Verify that the cryptographic keys for tokens belong to the token issuer\" and to provide an example for JWTs with \"For JWTs the 'iss' claim must be validated to be a preconfigured expected value\".\r\n\r\nI think is is good to split, since \"using strong alg\" and \"key confusion\" are different things, you could use strong algs and still confuse keys.",
+      "createdAt": "2024-11-13T06:28:55Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2472562417",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T2TfL",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Given that we decide to split, is this good as a requirement for the \"key confusion\" part?\r\n\r\n> Verify that the cryptographic keys for tokens belong to the token issuer. If both symmetric (MAC) and asymmetric (digital signatures) algorithms needs to be supported, additional controls must prevent key confusion. For JWTs the 'iss' claim must be validated to be a preconfigured expected value.",
+      "createdAt": "2024-11-16T09:03:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2480486347",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T2_r1",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Would it be \"needs to be supported\" or \"are supported\"?\r\n\r\nMaybe we need to say that this is for token *verification* (not generation)?\r\n\r\n> Verify that the cryptographic keys used for for token validation belong to the token issuer.\r\n\r\nNitpick, there is a missing comma:\r\n\r\n> Verify that the cryptographic keys for tokens belong to the token issuer. If both symmetric (MAC) and asymmetric (digital signatures) algorithms needs to be supported, additional controls must prevent key confusion. For JWTs, the 'iss' claim must be validated to be a preconfigured expected value.",
+      "createdAt": "2024-11-16T17:04:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2480667381",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T4dMj",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Perhaps this?\r\n\r\n> Verify that the cryptographic keys used for token validation belong to the token issuer. If both symmetric (MAC) and asymmetric (digital signatures) algorithms are supported, additional controls must prevent key confusion. For JWTs, the 'iss' claim must be validated to be a preconfigured expected value.",
+      "createdAt": "2024-11-17T08:55:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2481050403",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T4f2Q",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Some more clarifications to document:\r\n1) how do you test/verify it?\r\n2) how it is different from 3.5.7?\r\n  * _V3.5.7 Verify that key material that is used to validate cryptographically secured tokens is from trusted pre-configured sources for the token issuer, preventing attackers from specifying untrusted sources and keys. For JWTs and other JWS structures, headers such as 'jku', 'x5u', and 'jwk' must be validated against an allowlist of trusted sources._",
+      "createdAt": "2024-11-17T09:07:55Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2481061264",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6T5NBv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> how it is different from 3.5.7?\r\n\r\n3.5.7 is about using the correct cryptographic material for validating the token.\r\n\r\nThe one we are discussing here is supposed to be about key confusion but actually covers:\r\n\r\n1. key confusion\r\n2. correct cryptographic material\r\n\r\nWe should probably better focus on (1) and remove (2) from this requirement.\r\n\r\nAlternatively or in addition, this might be part of a more general cryptography requirement about verifying that each key is used with its intended cryptographic usage:\r\n\r\n* honoring key type and key usage\r\n* for JWK, this would mean enforcing \"kty\", \"use\", \"key_ops\", \"alg\"\r\n* for X.509, this would mean honoring key type, key usage, extended key usage",
+      "createdAt": "2024-11-17T12:25:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2481246319",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UCknc",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> how it is different from 3.5.7?\r\n\r\nMaybe 3.5.7 could include issuer claim, like this?\r\n\r\n> V3.5.7 Verify that key material that is used to validate cryptographically secured tokens is from trusted pre-configured sources for the token issuer, preventing attackers from specifying untrusted sources and keys. For JWTs and other JWS structures, the 'iss' claim and headers such as 'jku', 'x5u', and 'jwk' must be validated against an allowlist of trusted sources.\r\n\r\nI think this would address the \"key confusion\" scenario as well.\r\n\r\nIt is also probably good to open a new issue for a \"more general cryptography requirement about verifying that each key is used with its intended cryptographic usage\" in V6",
+      "createdAt": "2024-11-18T17:37:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2483702236",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UDigm",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Just focusing on key confusion, if we look at the key confusion example from the [WSTG](https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/06-Session_Management_Testing/10-Testing_JSON_Web_Tokens), there are potentially two issues:\r\n\r\n1. The JWT library permits verification without explicitly specifying an algorithm. \r\n2. The application does not validate against an allow list of algorithms. \r\n\r\nIn theory, key confusion could still occur with (2) in place if an application needed to accept both symmetric and asymmetric algorithms. The issue can also occur even if the application uses a trusted key from a trusted source, so I think it should be separate from 3.5.7. @randomstuff I like the idea of abstracting this to ensure that keys are only used for intended purposes, but I think abstracting it will make it more challenging to implement and test as a requirement, so here is a first attempt just focusing on key confusion with JWTs as an example: \r\n\r\n> Verify that key material is only used with algorithms intended for it to prevent key confusion attacks. For JWTs, ensure that token verification operations explicitly specify which algorithm is to be used. \r\n\r\nConcerning 3.5.5:\r\n\r\n> ...If both symmetric and asymmetric are needed, additional controls should prevent key confusion.\r\n\r\nI think it is worthwhile to have a more precise requirement instead of \"additional controls should\". As is, the core of 3.5.5 addresses (2) from my points above and then appends that last phrase to address (1).",
+      "createdAt": "2024-11-18T19:45:23Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2483955750",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UD9zi",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> For JWTs, ensure that token verification operations explicitly specify which algorithm is to be used.\r\n\r\nIs this necessary? Would it be OK if I'm using `algorithms=[\"ES384\", \"ES512\"]`? It might be enough to avoid mixing MACs and digital signature in the list of allowed  algorithms.\r\n\r\nShould we say \"For example, for JWTs, …\"?",
+      "createdAt": "2024-11-18T20:30:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2484067554",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UEU7z",
+      "author": {
+        "login": "ryarmst"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Good point, how about something more specific to key confusion: \r\n\r\n> Verify that key material is only used with algorithms intended for it to prevent key confusion attacks. For example, JWT verification operations must not permit a public key to be used as an HMAC secret. \r\n\r\n",
+      "createdAt": "2024-11-18T21:25:00Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2484162291",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6UnKj6",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Please see my comment here: https://github.com/OWASP/ASVS/issues/2360#issuecomment-2493294316\r\n\r\n@ryarmst @TobiasAhnoff @randomstuff ",
+      "createdAt": "2024-11-22T09:20:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2493294842",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WSCJ-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is it solved now via #2360 > #2431?",
+      "createdAt": "2024-12-05T20:17:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2521309822",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WYFbv",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I believe it is, open to follow up but I am going to close for now",
+      "createdAt": "2024-12-06T11:07:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2361#issuecomment-2522896111",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2024-11-09T09:36:44Z",
+  "labels": [
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB05s23w",
+      "name": "V9 (prev V52)",
+      "description": "",
+      "color": "e99695"
+    }
+  ],
+  "number": 2361,
+  "state": "CLOSED",
+  "title": "Add access token requirement for preventing \"key confusion\"",
+  "url": "https://github.com/OWASP/ASVS/issues/2361"
+}

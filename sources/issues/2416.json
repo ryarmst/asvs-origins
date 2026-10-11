@@ -1,0 +1,827 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjExMzAzMA==",
+    "is_bot": false,
+    "login": "Sjord",
+    "name": "Sjoerd Langkemper"
+  },
+  "body": "[Your API Shouldn't Redirect HTTP to HTTPS](https://jviide.iki.fi/http-redirects)\r\n\r\nThe argument is that when a client uses 'http://api.example.org', it should fail instead of silently be insecure.\r\n\r\nI propose to add a requirement that specifies what behavior a site should have when the HTTP version is accessed, whether it should redirect or return an error.",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6VP1JT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Situation at the moment:\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **9.1.1** | [MODIFIED] Verify that TLS is used for all connectivity between a client and external facing, HTTP-based services, and does not fall back to insecure or unencrypted communications. | ✓ | ✓ | ✓ | 319 |\r\n| **9.2.2** | [MODIFIED] Verify that an encrypted protocol such as TLS is used for all inbound and outbound connections to and from the application, including monitoring systems, management tools, remote access and SSH, middleware, databases, mainframes, partner systems, or external APIs. The server must not fall back to insecure or unencrypted protocols. | | ✓ | ✓ | 319 |\r\n| **9.3.1** | [ADDED] Verify that TLS or another appropriate transport encryption mechanism used for all connectivity between internal, HTTP-based services within the application, and does not fall back to insecure or unencrypted communications. | | ✓ | ✓ | 319 |\r\n\r\nSection titles to better understand the context of the requirements above:\r\n* V9.1 HTTPS Communication with External Facing Services\r\n* V9.2 General Service to Service Communication Security\r\n* V9.3 HTTPS Communication between Internal Services\r\n\r\n---\r\n\r\nI find it quite complicated to write a requirement \"If you use `http:` for an API, then don't auto-redirect to `https:`\" as we disallow use `http:` in any situation.\r\n\r\nIf we find it worth to be mentioned, I think it should be done in 9.2.2.",
+      "createdAt": "2024-11-27T14:00:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2503955027",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VSr5S",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I find it quite complicated to write a requirement \"If you use http: for an API, then don't auto-redirect to https:\" as we disallow use http: in any situation.\r\n\r\nI don't think that 9.1.1, 9.2.2 or 9.3.1 intends to disallow listening on `http:` for redirecting browsers to HTTPS.\r\n\r\nEven if you are certain that all your software is properly communicating using `https:`, third party applications communicating with your application might use `http:` by mistake. This makes sure that this problematic configuration does not go unnoticed.",
+      "createdAt": "2024-11-27T20:14:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2504703570",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VVHCj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This makes sure that this problematic configuration does not go unnoticed.\r\n\r\nI agree it decreases the likelihood, but at the same time it must be clear, that it does not fix the issue.\r\n\r\nIf a third party app communicates over `http:` and there is already man-in-the-middle (MiTM) in place, MiTM participant can do the redirect itself - it works \"correctly\" for the third party client and it works \"correctly\" for the service provider.",
+      "createdAt": "2024-11-28T06:15:58Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2505339043",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VXSrI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The points to achieve:\r\n* redirect to https only navigation requests\r\n* do not redirect if the request contains sensitive data\r\n  * give an error as a response\r\n  * do not listen on `http:` (port 80) at all (for API)",
+      "createdAt": "2024-11-28T11:36:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2505910984",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Vq37U",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, I think we need to focus this on API calls specifically here.\r\n\r\nIt seems unlikely but not impossible that you would use Cookies with an API so I don't think we can limit to just tokens in headers.\r\n\r\nSince this would apply for non-browser clients which would not necessarily comply with Secure flag and HSTS.\r\n\r\nOverall, I would propose:\r\n\r\n> **13.1.8** - Verify that API endpoints will not respond to a non-HTTPS request, even with with a redirect to the HTTPS endpoint. This is to avoid API clients accidentally sending data over plaintext HTTP but this not being discovered due to an automatic redirect.\r\n\r\n(Level 3)\r\n\r\nThoughts @Sjord @elarlang @randomstuff ",
+      "createdAt": "2024-12-02T09:46:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2511044308",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Vq7rv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It is a wider topic than API. For example, redirects using OAuth or some SSO and containing secrets or sensitive information.",
+      "createdAt": "2024-12-02T09:52:54Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2511059695",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VrZyU",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It seems unlikely but not impossible that you would use Cookies with an API\r\n\r\nFor what it's worth, I have seen that :)",
+      "createdAt": "2024-12-02T10:44:31Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2511182996",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6VsfMG",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> It is a wider topic than API. For example, redirects using OAuth or some SSO and containing secrets or sensitive information.\r\n\r\nHow would you expand the proposal then?",
+      "createdAt": "2024-12-02T12:54:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2511467270",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WGBGD",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > It is a wider topic than API. For example, redirects using OAuth or some SSO and containing secrets or sensitive information.\r\n> \r\n> How would you expand the proposal then?\r\n\r\nGot stuck with providing alternative proposal. We can say, that the service getting the request from SSO or whatever other request is an API and the proposed request is valid.\r\n\r\nThe requirement is also negative requirement, but when I tried to make it positive, it's hard to keep the main problem in the focus, say probably we can leave it like that.",
+      "createdAt": "2024-12-04T17:59:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2518159747",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WK_4O",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Any better?\r\n\r\n_13.1.8 - Verify that API endpoints, including those used in SSO processes, will only respond to HTTPS requests and that an HTTP endpoint is not available, even for redirection. This is to avoid API clients accidentally sending data over plaintext HTTP but this not being discovered due to an automatic redirect._",
+      "createdAt": "2024-12-05T07:35:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2519465486",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WLHiw",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Is is clear enough that we are talking about HTTP-based APIs (in contrast to some other RPC mechanism)?\r\n\r\nWould we need something like:\r\n\r\n> 13.1.8 - Verify that *HTTPS* API endpoints, including those used in SSO processes, will only respond to HTTPS requests and that an HTTP endpoint is not available, even for redirection. This is to avoid API clients accidentally sending data over plaintext HTTP but this not being discovered due to an automatic redirect.\r\n\r\nor\r\n\r\n> 13.1.8 - Verify that HTTP-based API endpoints, including those used in SSO processes, will only respond to HTTPS requests and that an HTTP endpoint is not available *when used over the network*, even for redirection. This is to avoid API clients accidentally sending data over plaintext HTTP but this not being discovered due to an automatic redirect.\r\n\r\nIs it clear that the \"always use HTTPS\" requirements do not apply to HTTP-over-IPC (such as HTTP over Unix Domain Socket)?\r\n\r\nIs it clear that \"HTTP endpoint\" is about the actual virtual + port + path (+ HTTP method)? i.e. if my API is `https://www.example.com/`, it is OK if:\r\n\r\n* the server is listening on `http://www.example.com/`;\r\n* the server is redirecting for example `http://www.example.com/` to `https://www.example.com/`;\r\n* the server must not redirect `http://www.example.com/api/` to `https://www.example.com/`;\r\n* but could instead answer with some 404.",
+      "createdAt": "2024-12-05T07:52:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2519496880",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WMEDi",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so how about:\r\n\r\n_13.1.8 - Verify that HTTPS-based API endpoints, including those used in SSO processes, will only successfully respond to HTTPS requests. The endpoint should respond to plaintext HTTP requests with either an error or no response, and never with a redirect to the HTTPS endpoint. This is to avoid clients accidentally sending data over plaintext HTTP, but this not being discovered due to an automatic redirect._\r\n\r\nor even\r\n\r\n_13.1.8 - Verify that HTTPS-based endpoints will only successfully respond to HTTPS requests. The endpoint should respond to plaintext HTTP requests with either an error or no response, and never with a redirect to the HTTPS endpoint. This is to avoid clients accidentally sending data over plaintext HTTP, but this not being discovered due to an automatic redirect._\r\n \r\n",
+      "createdAt": "2024-12-05T09:30:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2519744738",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WNXR_",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2432 based on discussion with Elar",
+      "createdAt": "2024-12-05T11:43:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2520085631",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WcKW3",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I know this is merged but this text is a little awkward.\r\n\r\n> non-encrypted HTTP\r\n\r\nThis is redundant.\r\n\r\n> requests with an error\r\n\r\nThis alone can be problematic. The better call it to not respond at all:\r\n\r\n> So I suggest we just keep this simple, with text like.\r\n\r\n**_Verify that HTTPS-based endpoints do not respond to HTTP requests._**\r\n\r\nThis drops the negative requirement of not redirecting, drops the \"error message\" part, and simplifies the language.",
+      "createdAt": "2024-12-06T19:00:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2523964855",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WcQbv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think this requirements needs the self-explanation part - why it exists.\r\n\r\nAt the moment it is:\r\n> Responding with an automatic redirect to the HTTPS endpoint may lead to clients accidentally sending data over non-encrypted HTTP, but this is not being discovered.",
+      "createdAt": "2024-12-06T19:15:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2523989743",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Wce9m",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "... but this not being discovered due to an automatic redirect ...\r\n\r\nI guess the language here is what I'm struggling with. I suggest:\r\n\r\n_Verify that HTTPS-based endpoints do not redirect or respond to HTTP requests so that sensitive data is not accidentally sent over HTTP._\r\n\r\nAnd Elar, I know you want to get this done. I am happy to let it go. I am sorry to reopen this after a merge.",
+      "createdAt": "2024-12-06T19:55:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2524049254",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WgOrI",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that HTTPS-based endpoints do not redirect or respond to HTTP requests so that sensitive data is not accidentally sent over HTTP.\r\n\r\nThe point for the requirement is, that no-one **keeps** \"accidentally\" sending data over HTTPS. If the request was made over HTTP, the sensitive data was already sent over HTTP and not redirecting or responding does not give away this.",
+      "createdAt": "2024-12-07T08:38:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2525031112",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Wh1Bd",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is the current wording\r\n\r\n| # | Description | L1 | L2 | L3 | CWE |\r\n| :---: | :--- | :---: | :---: | :---: | :---: |\r\n| **13.1.8** | [ADDED] Verify that HTTPS-based endpoints will only respond to non-encrypted HTTP requests with an error or will not respond at all. Responding with an automatic redirect to the HTTPS endpoint may lead to clients accidentally sending data over non-encrypted HTTP, but this is not being discovered. | | ✓ | ✓ | |\r\n\r\nRegarding your points @jmanico \r\n\r\n> I know this is merged but this text is a little awkward.\r\n\r\nI agree that the text is a little awkward but there is a tricky balance here between clarity and elegance and also the will for this to be a positive requirement, not a negative requirement.\r\n\r\n> > non-encrypted HTTP\r\n> \r\n> This is redundant.\r\n\r\nSlightly but I think it is necessary because we always talk about requests which use the HTTP protocol even though practically speaking the HTTP requests should always be sent via HTTPS. This leads to slightly weird situations like this quote from the HTTP/2 FAQ:\r\n\r\n> > > _**Does HTTP/2 require encryption?**_\r\n> > > \r\n> > > _No. After extensive discussion, the Working Group did not have consensus to require the use of encryption (e.g., TLS) for the new protocol._\r\n> > > \r\n> > > _However, some implementations have stated that they will only support HTTP/2 when it is used over an encrypted connection, and currently no browser supports HTTP/2 unencrypted._\r\n\r\nAs such, I think it is better to be clear at the risk of sounding a bit weird\r\n\r\n> > requests with an error\r\n> \r\n> This alone can be problematic. The better call it to not respond at all:\r\n\r\nDo you have a specific reason why would this be a problem? Obviously in that case the secrets have been transferred in plaintext once but hopefully no more than that.\r\n\r\n> > So I suggest we just keep this simple, with text like.\r\n> \r\n> **_Verify that HTTPS-based endpoints do not respond to HTTP requests._**\r\n> \r\n> This drops the negative requirement of not redirecting, drops the \"error message\" part, and simplifies the language.\r\n\r\nI agree with Elar that we do need the explanation here.\r\n",
+      "createdAt": "2024-12-08T06:46:08Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2525450333",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlRjL",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If we want to keep the details and same basic words in, then I would suggest:\r\n\r\n_Verify that HTTPS-based endpoints either return an error or do not respond to unencrypted HTTP requests. Automatic redirects to HTTPS endpoints can risk exposing data if clients accidentally send information over unencrypted HTTP, potentially resulting in data leakage that may go undiscovered._",
+      "createdAt": "2024-12-08T19:54:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2526353611",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlTPu",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The initial idea was it was not great for *APIs* to redirect from HTTP to HTTPS while it might be a good idea for frontend / HTML pages. This has been dropped at some point but I think this was good to have because redirecting from HTTP to HTTPs for HTML pages provides some value (it makes it possible to provide the HSTS info to the browser).\r\n\r\n>  If the request was made over HTTP, the sensitive data was already sent over HTTP and not redirecting or responding does not give away this.\r\n\r\nIf the browser/client starts talking over HTTP, the fact that the server does not listen on this port does not help so much. It helps against passives attackers but any active attacker could just answer to HTTP in the target server's place.",
+      "createdAt": "2024-12-08T20:12:04Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2526360558",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlT1Q",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "If port 80 is closed then the handshake can never start (in a typical client) and sensitive data does not leave the browser. This risk is only if port 80 is open.",
+      "createdAt": "2024-12-08T20:20:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2526362960",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlUIj",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Current requirement:\r\n> V13.1.8 Verify that HTTPS-based endpoints will only respond to non-encrypted HTTP requests with an error or will not respond at all. Responding with an automatic redirect to the HTTPS endpoint may lead to clients accidentally sending data over non-encrypted HTTP, but this is not being discovered.\r\n\r\n@jmanico - Can you clarify, what is the problem to solve or improve from the current requirement? You seem to propose new versions, but without taking into account, why the requirement was created and which messages it must send.\r\n\r\nIf there no clear mistake in the current one or clear proposal for improvement, I prefer to leave it as it is.\r\n\r\n---\r\n\r\nIf we want to move forward with this one, I would like to get highlighted add-on:\r\n> Verify that HTTPS-based endpoints either return an error or do not respond to unencrypted HTTP requests. Automatic redirects **from HTTP** to HTTPS endpoints can risk exposing data if clients accidentally send information over unencrypted HTTP, potentially resulting in data leakage that may go undiscovered.",
+      "createdAt": "2024-12-08T20:24:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2526364195",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlVG_",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I only want to fix this sentence which has an awkward ending. \"Responding with an automatic redirect to the HTTPS endpoint may lead to clients accidentally sending data over non-encrypted HTTP, but this is not being discovered.\"\r\n\r\nEspecially, \"but this is not being discovered\", is a bit strange language. But after hearing you and Josh's comments I do not want to change the details, just wordsmith it so it flows better.\r\n\r\n",
+      "createdAt": "2024-12-08T20:31:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2526368191",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlVMn",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The initial idea was it was not great for _APIs_ to redirect from HTTP to HTTPS while it might be a good idea for frontend / HTML pages. This has been dropped at some point but I think this was good to have because redirecting from HTTP to HTTPs for HTML pages provides some value (it makes it possible to provide the HSTS info to the browser).\r\n\r\nI proposed to widen it to be more general than API, but now it is too wide. So the question is, should we have one requirement to say, in which conditions is allowed to make redirect from `http:` to `https:` or we should have the requirement (the current direction) to say, that don't do redirect if the request contains authenticated or sensitive data.\r\n\r\n> > If the request was made over HTTP, the sensitive data was already sent over HTTP and not redirecting or responding does not give away this.\r\n> \r\n> If the browser/client starts talking over HTTP, the fact that the server does not listen on this port does not help so much. It helps against passives attackers but any active attacker could just answer to HTTP in the target server's place.\r\n\r\nThis is taken out of context. It was written to point out the word \"keep\".",
+      "createdAt": "2024-12-08T20:32:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2526368551",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WlWvv",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> This is taken out of context. It was written to point out the word \"keep\".\r\n\r\nOh yes OK, I understand. :bow\r\n",
+      "createdAt": "2024-12-08T20:49:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2526374895",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WoqxY",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "How about:\r\n\r\n> Verify that HTTPS-based endpoints either return an error or do not respond to unencrypted HTTP requests which contain sensitive data in the headers or body. If a client is erroneously sending unencrypted HTTP requests but the requests are being automatically redirected to HTTPS, this leakage of sensitive data may go undiscovered.\r\n\r\nCookies should be irrelevant because they should be marked secure only.",
+      "createdAt": "2024-12-09T08:24:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527243352",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WqEGY",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> requests which contain sensitive data in the headers or body\r\n\r\nI am not sure this is a criteria. Not only the confidentiality, but also the integrity of the connection should be protected. If a trading bot requests http://publicstockmarket.example/NASDAQ.json the request does not contain any sensitive information, but if the response is manipulated by a MitM attacker that is still a problem.",
+      "createdAt": "2024-12-09T11:05:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527609240",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Wq3Pl",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "We can not fix the MiTM issue with this requirement, see https://github.com/OWASP/ASVS/issues/2416#issuecomment-2505339043\r\n\r\nWe can only set the condition when redirect from `http:` to `https:` should and can happen.",
+      "createdAt": "2024-12-09T12:40:08Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527818725",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WriaR",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang @jmanico are you good with this fix: https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527243352 ?",
+      "createdAt": "2024-12-09T13:44:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527995537",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WrkJY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @elarlang @jmanico are you good with this fix: [#2416 (comment)](https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527243352) ?\r\n\r\nI'm ok with that.",
+      "createdAt": "2024-12-09T13:47:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2528002648",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WsfUx",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "What I am saying is that in my example, publicstockmarket.example should not transparently redirect to HTTPS, because this allows clients to configure HTTP URLs without noticing, which risks the integrity of the response. How the proposed requirement is currently worded, they could have a HTTPS redirect, since they don't have \"sensitive data in the headers or body\".",
+      "createdAt": "2024-12-09T14:57:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2528245041",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WtvT5",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> What I am saying is that in my example, publicstockmarket.example should not transparently redirect to HTTPS, because this allows clients to configure HTTP URLs without noticing, which risks the integrity of the response. How the proposed requirement is currently worded, they could have a HTTPS redirect, since they don't have \"sensitive data in the headers or body\".\r\n\r\nSo to my mind this is less risky because the attacker would have to have perpetual AiTM to continually feed incorrect data via HTTP ",
+      "createdAt": "2024-12-09T16:27:49Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2528572665",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6WvDSh",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> @elarlang @jmanico are you good with this fix: [#2416 (comment)](https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527243352) ?\r\n\r\nI'm ok with that.",
+      "createdAt": "2024-12-09T17:55:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2528916641",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Wv2ld",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #2444",
+      "createdAt": "2024-12-09T19:05:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2529126749",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W2LqA",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I feel like we insufficiently explored whether \"sensitive data in the headers or body\" is required, and whether integrity protection is needed. I made two comments but the proposed requirement was merged without much discussion. I feel left out, like my contributions were ignored.",
+      "createdAt": "2024-12-10T08:26:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2530785920",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W2a9I",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> I feel left out, like my contributions were ignored.\r\n\r\n@Sjord - I think your comments were answered.\r\n\r\nPlease revisit this comment and give feedback, does it make sense for you? If not, then please explain.\r\n* https://github.com/OWASP/ASVS/issues/2416#issuecomment-2505339043\r\n* https://github.com/OWASP/ASVS/issues/2416#issuecomment-2527818725\r\n\r\n\r\n>  I made two comments but the proposed requirement was merged without much discussion.\r\n\r\nIt was agreed by 3 persons. In that case, if there is no clear problem statement to discuss, it is expected to merge it.\r\n\r\n> I feel like we insufficiently explored whether \"sensitive data in the headers or body\" is required, and whether integrity protection is needed. \r\n\r\nAs I understood the problem statement: the scope for this issue is only to \"give feedback for misconfigured client to stop using application over `http:` connection\". If there is man-in-the-middle scenario in place, we can not fix it with this requirement.\r\n\r\nIf there is some mistake or error in any requirement, we can always re-open related issue and fix it.",
+      "createdAt": "2024-12-10T08:52:18Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2530848584",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W2kVM",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> If there is man-in-the-middle scenario in place, we can not fix it with this requirement.\r\n\r\nYou mentioned this multiple times, but I don't understand why exactly. You seem to assume some misunderstanding on my part, is that right? Do I have an invalid assumption or something like that?\r\n\r\nTo make sure API clients configure the correct (secure) URLs, HTTP URLs should not work. So services should not transparently redirect to HTTPS, unless they expect the URL to by typed by humans into a browser. HTTPS encryption is not only needed for confidentiality but also for integrity, so HTTP URLs should give an error whether the data contains sensitive information or not.\r\n\r\n> So to my mind this is less risky because the attacker would have to have perpetual AiTM to continually feed incorrect data via HTTP\r\n\r\nAn AiTM that by chance sees some responses by chance and modifies them could already have a large impact, but this depends on the working of the application. In my example, a single modified NASDAQ.json could make the tradebot make incorrect trade decisions. If the tradebot requests this file every minute, it is pretty likely that a AiTM can modify one response.",
+      "createdAt": "2024-12-10T09:07:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2530886988",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W3Pis",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@Sjord do you have an alternative wording suggestion?",
+      "createdAt": "2024-12-10T09:58:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2531063980",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W3eDH",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Verify that services do not transparently redirect HTTP requests to HTTPS unless the URL is specifically designed to be accessed manually by end-users via a web browser.",
+      "createdAt": "2024-12-10T10:20:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2531123399",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6W4FcN",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Could you reword it to be worded as a positive requirement and also include the text that explains why?",
+      "createdAt": "2024-12-10T11:19:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2531284749",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZA6Eg",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Something along these lines?\r\n\r\n_Verify that only user-facing endpoints (intended for manual web-browser access) automatically redirect from HTTP to HTTPS, while other services or endpoints do not implement transparent redirects._",
+      "createdAt": "2025-01-01T21:28:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2567151904",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZBxhI",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang what do you think about this proposal?\r\n",
+      "createdAt": "2025-01-02T07:38:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2567379016",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZCNAv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "The proposed part is ok, but I think the requirement needs an explanatory part to be clear about why it exists or what problem it addresses.",
+      "createdAt": "2025-01-02T09:34:20Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2567491631",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ZDqTJ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "So how about this:\r\n\r\n\"_Verify that only user-facing endpoints (intended for manual web-browser access) automatically redirect from HTTP to HTTPS, while other services or endpoints do not implement transparent redirects. **If a client is erroneously sending unencrypted HTTP requests but the requests are being automatically redirected to HTTPS, this leakage of sensitive data may go undiscovered.**_\"",
+      "createdAt": "2025-01-02T14:38:35Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2567873737",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6aK7F3",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Can we change the second part to something like:\r\n> This is to avoid the potential leakage of sensitive data may go undiscovered in case a client is erroneously sending unencrypted HTTP requests but the requests are being automatically redirected to HTTPS.\r\n\r\nIf the additional sentence starts with an \"if\" it feels like a separate condition in the requirement, not a start of the explanation part.",
+      "createdAt": "2025-01-13T09:08:57Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2586554743",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6arLrj",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that only user-facing endpoints (intended for manual web-browser access) automatically redirect from HTTP to HTTPS, while other services or endpoints do not implement transparent redirects. This is to avoid a situation where a client is erroneously sending unencrypted HTTP requests but, since the requests are being automatically redirected to HTTPS, the leakage of sensitive data goes undiscovered.\r\n\r\n@elarlang what do you think?",
+      "createdAt": "2025-01-16T09:34:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2595011299",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ariQ4",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I'm ok with this.\r\n\r\nPing @Sjord ",
+      "createdAt": "2025-01-16T10:10:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2595103800",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6auUjl",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Drafted #2529 to resolve.\n\n@set-reminder @tghosth to mark as ready for review in 1 week if we don't get further input",
+      "createdAt": "2025-01-16T14:12:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2595834085",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6avHGc",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I think it makes sense to merge it in. If there are something to improve, we can do another commit/PR, but I don't like those hanging PR's to collect conflicts to solve.",
+      "createdAt": "2025-01-16T15:32:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2416#issuecomment-2596041116",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-11-27T13:45:05Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABhTtkBQ",
+      "name": "V4 (prev V13)",
+      "description": "",
+      "color": "b60205"
+    }
+  ],
+  "number": 2416,
+  "state": "CLOSED",
+  "title": "Don't redirect to HTTPS for API",
+  "url": "https://github.com/OWASP/ASVS/issues/2416"
+}

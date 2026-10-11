@@ -1,0 +1,311 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjIzOTQwMDc=",
+    "is_bot": false,
+    "login": "TobiasAhnoff",
+    "name": "Tobias Ahnoff"
+  },
+  "body": "A suggestion is to add the following verifications to address refresh tokens: \r\n\r\n## V51.2 Authorization Server\r\n\r\nVerify that refresh tokens for public clients are sender-constrained (confidential clients must use client authentication in refresh token requests). Note that refresh token rotation to prevent e g token replay attacks is no longer recommended, but allowed. (L1, L2, L3)\r\n\r\nVerify that refresh and reference tokens can be revoked. (L1, L2, L3)\r\n\r\nVerify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, re-authentication should be forced at some point in time. Note that how often depends on the application in scope, from hours to months. (L1, L2, L3)",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6KenV_",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh tokens for public clients are sender-constrained (confidential clients must use client authentication in refresh token requests). Note that refresh token rotation to prevent e g token replay attacks is no longer recommended, but allowed. (L1, L2, L3)\r\n\r\nIt is / replaces current 51.1.4\r\n\r\nIt is not clear now, are we saying, that refresh token rotation is not ok or it is ok, but is is recommended to use sender-contstrained tokens?\r\n\r\n> Verify that refresh and reference tokens can be revoked. (L1, L2, L3)\r\n\r\nI'm not sure we need this as separate requirement, we should instead cover it in general token handling section. Till it is not clearly covered elsewhere, we can keep this requirement in.\r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, re-authentication should be forced at some point in time. Note that how often depends on the application in scope, from hours to months. (L1, L2, L3)\r\n\r\nDepends on the refresh token rotation requirement - if we kind of support refresh token rotation, it should be clearly said, that when rotating the token, the lifetime for the token must stay the same (and not be extended)\r\n\r\nrelated or partly duplicate to https://github.com/OWASP/ASVS/issues/1968",
+      "createdAt": "2024-09-01T10:44:34Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2323281279",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6Kg_H8",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Yes, the intention is to modify/replace 51.1.4 to align with (as far as I now) the latest best current practices, see FAPI at https://openid.bitbucket.io/fapi/fapi-2_0-security-profile.html#section-5.3.2.1 which in Note 2 states:\r\n\r\n>The use of refresh token rotation does not provide security benefits when used with confidential clients and sender-constrained access tokens. This specification prohibits the use of refresh token rotation for security reasons as it causes user experience degradation and operational issues whenever the client fails to store or receive the new refresh token and has no option to retry.\r\n>\r\n>However, as refresh token rotation may be required from time to time for infrastructure migration or similar extraordinary circumstances, this specification allows it, provided that authorization servers offer clients the time-limited option to retry with the old refresh token in case of failure. Implementers need to consider a secure mechanism for clients to recover from a loss of a new refresh token on issue. The details of this mechanism are outside the scope of this specification.\r\n\r\nCompared the old from 2022-2023 :), where refresh-token rotation was defined as an alternative to sender-contrained tokens, see https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-10#section-4.3 \r\n\r\n>The authorization server MUST verify the binding between the refresh token and client identity whenever the client identity can be authenticated. When client authentication is not possible, the authorization server SHOULD issue sender-constrained refresh tokens or use refresh token rotation as described in [Section 4.3.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-10#refresh-token-endpoint-extension).  \r\n\r\nMaybe the note-part should be removed and just have:  \r\n\r\n>Verify that refresh tokens for public clients are sender-constrained (confidential clients must use client authentication in refresh token requests). (L1, L2, L3)\r\n\r\nor, since other suggested verifications in #2038 cover client authentication and sender-constrained token requirements, simply have:\r\n \r\n>Verify that refresh tokens for public clients are sender-constrained. (L1, L2, L3)\r\n   \r\nThis is (in my opinion)  a good example of how hard it is to keep ASVS updated with OAuth/OIDC BCPs and security profiles, and the importance a well-defined scope etc (#2036) ",
+      "createdAt": "2024-09-02T06:20:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2323902972",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K3zI9",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh and reference tokens can be revoked. (L1, L2, L3)\r\n\r\nIt should be handled together and to solve also 3.5.1 from https://github.com/OWASP/ASVS/issues/1917",
+      "createdAt": "2024-09-04T20:10:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2329883197",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6K5kXC",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The use of refresh token rotation does not provide security benefits when used with confidential clients and sender-constrained access tokens. This specification prohibits the use of refresh token rotation for security reasons as it causes user experience degradation and operational issues whenever the client fails to store or receive the new refresh token and has no option to retry.\r\n> However, as refresh token rotation may be required from time to time for infrastructure migration or similar extraordinary circumstances, this specification allows it, provided that authorization servers offer clients the time-limited option to retry with the old refresh token in case of failure. Implementers need to consider a secure mechanism for clients to recover from a loss of a new refresh token on issue. The details of this mechanism are outside the scope of this specification.\r\n> \r\n\r\n@TobiasAhnoff, it seems to be a fair point, but since the details of that mechanism (Implementers need to consider a secure mechanism for clients to recover from a loss of a new refresh token on issue) is out of scope of the specification, it will read and sound like we are not sure what to recommend either. I guess this is where I see a problem with it. I would be more cautious with it as it sounds like there is no proposed solution either and it is up to the implementer to figure it out which might lead to more design/implementation flaws. \r\n\r\nJust my opinion on this, if we cannot have a bit of a solid solution for any user of ASVS that would be harder to justify using it. I am inclined to keep the current 51.1.4 unless there's a clearer path what to do with this dilemma. What do you guys think @elarlang, @TobiasAhnoff, @deleterepo? \r\n",
+      "createdAt": "2024-09-05T00:02:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2330346946",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LCGiY",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Note that refresh token rotation to prevent e g token replay attacks is no longer recommended, but allowed.\r\n\r\nWhen I read this, the first thing I did was check what the OAuth 2.1 draft had to say about that (they mention the option of using refresh token rotation would discouraging its use). If this is to be kept, maybe something like:\r\n\r\n> Note that refresh token rotation to prevent e g token replay attacks is prohibited by FAPI 2.0.",
+      "createdAt": "2024-09-05T20:34:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2332584088",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LCJhQ",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh and reference tokens can be revoked. \r\n\r\nNote: I did not know what a reference token was :) but it [*is* mentioned](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-10#name-access-token-validation) in the current OAuth 2.1 draft:\r\n\r\n> Access tokens generally fall into two categories: reference tokens or self-encoded tokens. Reference tokens can be validated by querying the authorization server or looking up the token in a token database, whereas self-encoded tokens contain the authorization information in an encrypted and/or signed string which can be extracted by the resource server.\r\n\r\nHowever, it is *not* mentioned in current OAuth specifications AFAIU so maybe it might be worthwhile to add a short note explaining the term.\r\n\r\nAlso we are talking about reference tokens which are *access* tokens, right? Or does this apply to other kind of tokens as well? Can we say \"reference access token\" (or would it make it more difficult to find what we are talking about?). Maybe \"access tokens which are reference tokens\"?",
+      "createdAt": "2024-09-05T20:42:47Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2332596304",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LCKwa",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh and reference tokens can be revoked.\r\n\r\nDo we need to clarify what kind of revocation we are talking about? Revocation by the user using the AS user interface ? Revocation [by the client using the token revocation API](https://datatracker.ietf.org/doc/html/rfc7009)? Both?",
+      "createdAt": "2024-09-05T20:46:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2332601370",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LCOTg",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh tokens for public clients are sender-constrained (confidential clients must use client authentication in refresh token requests).\r\n\r\nMaybe add something like \"This can be achieved using DPoP or Certificate-Bound Access Tokens.\" in order to make it clearer for the layman what we are talking about?",
+      "createdAt": "2024-09-05T20:56:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2332615904",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LT_WA",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Do we need to clarify what kind of revocation we are talking about? Revocation by the user using the AS user interface ? Revocation [by the client using the token revocation API](https://datatracker.ietf.org/doc/html/rfc7009)? Both?\r\n\r\nA clarification including both cases will be good to add.",
+      "createdAt": "2024-09-09T06:53:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2337273216",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LUAbQ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> Also we are talking about reference tokens which are access tokens, right? Or does this apply to other kind of tokens as well? Can we say \"reference access token\" (or would it make it more difficult to find what we are talking about?). Maybe \"access tokens which are reference tokens\"?\r\n\r\nYes we are talking about access tokens, good to make that clearer with in example \"reference access tokens\"",
+      "createdAt": "2024-09-09T06:56:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2337277648",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LUB9l",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": ">Note that refresh token rotation to prevent e g token replay attacks is prohibited by FAPI 2.0.\r\n\r\nAlso good to make this clearer, I will modify suggested verifications to try and make things clearer, probably later today....",
+      "createdAt": "2024-09-09T06:59:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2337283941",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LaUpp",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Refresh tokens is a challenging topic! I will try to address comments above from @randomstuff and @csfreak92  by suggesting 4 verifications (where the second is a modification of 51.1.4): \r\n\r\n> Verify that confidential clients must use client authentication in refresh token requests.  (L1, L2, L3)\r\n\r\n> Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks.  (L1, L2, L3)\r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication should be forced at some point in time. Note that how often depends on the application in scope, from e g hours to months. (L1, L2, L3) \r\n\r\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user, using the AS user interface, or by a client using AS APIs for revocation.  (L1, L2, L3)\r\n\r\n@elarlang this might be \"related or partly duplicate\" to #1968 and #1917 but perhaps it is easiest to first finish refresh token verifications for the OAuth/OIDC chapter here and then address if it is covered by #1968 and #1917 ? \r\n",
+      "createdAt": "2024-09-09T19:39:15Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2338933353",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6La5if",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that refresh tokens and reference access tokens can be revoked by an authorized user, using the AS user interface, *or* by a client using AS APIs for revocation. (L1, L2, L3)\r\n\r\nI am wondering whether this should be a \"and\" instead of a \"or\"?\r\n\r\n* As a user, I want to be able to revoke my grants (which would revoke the associated tokens) using the AS user interface. In particular, if the token has been exfiltrated by a rogue/compromised client application (which means I cannot use the client application to revoke the token).\r\n* The client application should be able to revoke the tokens it does not use anymore.\r\n\r\nSo I would suggest replacing the \"or\" by a \"and\" or (better?) split it into:\r\n\r\n* Verify that the user can revoke their grants by using the AS user interface and that this revokes any refresh tokens and reference access tokens associated with that grant (L1, L2, L3). \r\n* Verify that refresh tokens and reference access tokens can be revoked by a client using AS APIs (revocation endpoint) for revocation. (L1, L2, L3).\r\n\r\nQuestions: Is this science-fiction? Are major authorization servers providing these features? Are there cases where there is no AS user interface?\r\n\r\nI checked how Keycloak works:\r\n\r\n* The logged-in user can kill his existing sessions (which I guess would kill all tokens associated with the session).\r\n* When changing his password, there is an option to kill all existing sessions.\r\n* I am not sure what would happen for tokens with \"offline_access\" scope.\r\n* The revocation endpoint can be used to revoke both access and refresh tokens.",
+      "createdAt": "2024-09-09T21:02:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2339084447",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6LtUui",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Not an easy task...\r\n\r\nBut let's stop finetuning the technical testing guide or cheat sheet content here and state - what problem do we address with those requirements? What risk it mitigates? Maybe we can reach to not that technically detailed abstraction.\r\n\r\nAlso, I'm afraid, that all the refresh_token topic things are changing so fast, that we are outdated already next day after we release it.",
+      "createdAt": "2024-09-11T14:55:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2343914402",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6L9B4U",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> But let's stop finetuning the technical testing guide or cheat sheet content here and state - what problem do we address with those requirements? What risk it mitigates? Maybe we can reach to not that technically detailed abstraction.\r\n\r\n@elarlang, @randomstuff, I would say @TobiasAhnoff's modifications below here are quite good and addresses the risks that we are trying to mitigate. Don't you think? \r\n\r\n> \r\n> Verify that confidential clients must use client authentication in refresh token requests.  (L1, L2, L3)\r\n> \r\n> Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks.  (L1, L2, L3)\r\n> \r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication should be forced at some point in time. Note that how often depends on the application in scope, from e g hours to months. (L1, L2, L3)\r\n> \r\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user, using the AS user interface, or by a client using AS APIs for revocation.  (L1, L2, L3)\r\n\r\n",
+      "createdAt": "2024-09-13T05:00:26Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2348031508",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NGmpv",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As each requirement needs further finetuning and discussion, I split this issue into separate issues per requirement.\r\n\r\n---\r\n\r\n> Verify that confidential clients must use client authentication in refresh token requests. (L1, L2, L3)\r\n\r\n#2109\r\n\r\n---\r\n\r\n> Verify that refresh tokens for public clients are either sender-constrained, using DPoP or Certificate-Bound Access Tokens (mTLS), or use refresh token rotation to mitigate refresh token replay attacks. (L1, L2, L3)\r\n\r\n#2110\r\n\r\n---\r\n\r\n> Verify that refresh tokens have an absolute expiration. Even if sliding refresh token expiration is applied, user re-authentication should be forced at some point in time. Note that how often depends on the application in scope, from e g hours to months. (L1, L2, L3)\r\n\r\n#1968\r\n\r\n---\r\n\r\n> Verify that refresh tokens and reference access tokens can be revoked by an authorized user, using the AS user interface, or by a client using AS APIs for revocation. (L1, L2, L3)\r\n\r\n#2111",
+      "createdAt": "2024-09-23T06:21:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2040#issuecomment-2367318639",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-08-31T14:42:15Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2040,
+  "state": "CLOSED",
+  "title": "V51 OAuth: Add refresh token verfications",
+  "url": "https://github.com/OWASP/ASVS/issues/2040"
+}

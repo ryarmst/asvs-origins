@@ -1,0 +1,77 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjE3MjkzNTgz",
+    "is_bot": false,
+    "login": "ordinaehs",
+    "name": ""
+  },
+  "body": "Both V5.13 and V16.4 mention File Inclusion. The way I read it, V5.13 is only when the data sent is a path to an already existing resource (either local or remote), and V16.4 is when the data sent is code or a file. Assuming I got this correct, can this difference please be made more clear in the descriptions?\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDIzMTY0MzM2Nw==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Let's have a discussion of how best to address this:\n- V5 is about input validation and output encoding as a first line of defence to prevent the issue in the first place, even if configuration (V16) is weak\n- V16 is about improving or altering configuration to protect the platform, even if the application's first line of defence (V5) is weak\n\nWe try to de-dupe as much as possible, which in ASVS 3.0, meant a lot of retired duplicate requirements. \n\nIf both requirements in 3.0.1 are asking for the same resolution for file inclusion, then we need to eliminate one of them. \n\nIf they are two controls for different activities, then how best do we change the text to make it clear?\n\nDo we need to make LFI and RFI seperate in V16? I believe that V5.13 could be changed to encompass both the metadata of the file (path, filename, etc) as well as the contents without duplication\n\nThoughts?\n",
+      "createdAt": "2016-07-11T05:09:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/112#issuecomment-231643367",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDIzMTY0MzU2OQ==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Additionally, the ASVS doesn't cope with this \"new\" reflective file download attack:\n\nhttps://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/\n\nDo we need to cope with this? I must admit to not seeing this in play before, but Trustwave's paper is fairly clear on how to exploit it. \n",
+      "createdAt": "2016-07-11T05:12:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/112#issuecomment-231643569",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDIzMzYyNjg5MQ==",
+      "author": {
+        "login": "ordinaehs"
+      },
+      "authorAssociation": "NONE",
+      "body": "Might I suggest changing the wording of V16.4 to:\nVerify that untrusted data is not used within inclusion, class loader, or reflection capabilities to prevent remote/local code execution vulnerabilities.\n\nThis means that local/remote file inclusion is only part of V5.13, while V16.4 is more about getting the application to execute untrusted code, or trusted code in an unwanted way.\n\nThat reflective file download should probably be considered a case of V5.12?\n",
+      "createdAt": "2016-07-19T13:09:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/112#issuecomment-233626891",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDI3MTUwNzc1NA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Done. I've updated the text as you described for 16.4. I've also included 16.2 to include reflective file download, as that's specifically about not trusting file metadata supplied by the user. I'm trying to keep section 16 about files and resources, and stop polluting V5 with everything under the sun. \r\n\r\n16.2\tVerify that untrusted file data submitted to the application is not used directly with file I/O commands, particularly to protect against path traversal, local file include, file mime type, reflective file download, and OS command injection vulnerabilities.\r\n\r\n16.4\tVerify that untrusted data is not used within inclusion, class loader, or reflection capabilities to prevent remote/local code execution vulnerabilities. ",
+      "createdAt": "2017-01-10T07:46:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/112#issuecomment-271507754",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2016-07-05T08:28:01Z",
+  "labels": [],
+  "number": 112,
+  "state": "CLOSED",
+  "title": "File inclusion classification unclear",
+  "url": "https://github.com/OWASP/ASVS/issues/112"
+}

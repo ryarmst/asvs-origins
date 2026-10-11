@@ -1,0 +1,113 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQwMDI3NjU=",
+    "is_bot": false,
+    "login": "csfreak92",
+    "name": "Ralph Andalis"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/4.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\n\r\nI have observed that there are some verification requirements in `ASVS L1` that are not pentestable. In our practice, we mark them as `security design review related` verification requirements and then verify these through documentation, source code, etc with a whitebox approach. In my understanding, `ASVS L1` requirements are supposed to be fully pentestable in a blackbox perspective. \r\n\r\nI propose for us to add a flag/mark of ASVS requirements whether they are `pentestable/testable`, and `design review` for non-testable items if we cannot move those requirements to `ASVS L2`. \r\n\r\nFor illustration, ASVS 2.1.10 - `Verify that there are no periodic credential rotation or password history requirements.`\r\nThis requirement has two parts, check if there are periodic credential rotation (forcing users to change passwords every 30, 60, 90 days, etc) and the other one checking for password history requirements (not allowing users to re-use the last 5-10 passwords, etc). The first part is almost untestable in a blackbox perspective, while the second part is totally testable without any help from the organization to tweak things in the backend, etc. \r\n\r\nAnother examples are ASVS 7.1.1 - `Verify that the application does not log credentials or payment details. Session tokens should only be stored in logs in an irreversible, hashed form.` and ASVS 7.1.2 - `Verify that the application does not log other sensitive data as defined under local privacy laws or relevant security policy.` which are both L1 requirements but it needs a whitebox/graybox approach to see those application logs. ",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxMDQ4MDU2MQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I try to make this issue alive.\r\n\r\nSo - proposal is to mark/flag all blackbox pentestable requirements. But is it always that clear? With blackbox you may not reach to that part of application (like some admin interfaces) and you can not perform any test there. Maybe it's more test-scope question.\r\n\r\nBut I agree with example like 7.1.1 it's confusing - with marked L1 ASVS says you need to test it even with blackbox, but you can not (without having vulnerabilities which gives you access to logs). If to \"fix\" this issue with moving 7.1.1 to level 2, then ASVS could send message: \"storing plain-text credentials to logs with level 1 application is ok\" which is clearly incorrect as well.\r\n\r\nTo make everyone's life easier I leave link to levels description here:\r\nhttps://github.com/OWASP/ASVS/blob/master/4.0/en/0x03-Using-ASVS.md",
+      "createdAt": "2021-03-30T18:26:09Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/840#issuecomment-810480561",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxMDYzNTY3NQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "I think the issue of wether a issue is testable and by what method is too confusion and is a bit out of scope of ASVS's intention. **I prefer to see our levels to be more like NIST SP800-63 levels based on risk and not on \"testability\".** So I'm not a fan of marking items as testable or not, respectfully.",
+      "createdAt": "2021-03-30T23:06:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/840#issuecomment-810635675",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxODkxNjc0Ng==",
+      "author": {
+        "login": "ThunderSon"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "The part about marking things as testable is done by ASVS. It's even mentioned in the link provided by Elar on levels:\r\n> ASVS Level 1 is for low assurance levels, and is completely penetration testable\r\n\r\nSo the question comes, if someone doesn't have a low level of security but isn't penetration testable, is that actually considered L2, or L1 but not testable?\r\n\r\nI love the part that ASVS tried to make all L1 testable, but it gives back issues for people doing a design review to actually have a minimum level of assurance.\r\nSo then the question would be: If ASVS should be based on risk and testability, why is [section 2.4](https://github.com/OWASP/ASVS/blob/master/4.0/en/0x11-V2-Authentication.md#v24-credential-storage) given a paragraph saying that this of huge importance but not testable, thus is L2?\r\n\r\nThe above question isn't made to trigger aggressiveness, there's just a misunderstanding in the terms being used and the focus.",
+      "createdAt": "2021-04-13T17:32:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/840#issuecomment-818916746",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDgxODkzMDc2NQ==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "The point I’m making - for future consideration - is that just because it’s easily testable doesn’t say everything about the overall risk, it’s just the likelihood factor at best.\r\n\r\nI’d rather •totally change• ASVS to have level 1-2-3 be risk based as opposed to testability as the sole factor. I’m planting seeds for consideration. Who cares if something is testable by a scanner? The industry is horrible at security testing as a whole and I do not want to map to dumb scanners for a critical standard.\r\n\r\nRisk based security is how other standards like SP800-63 (which is MUCH more mature than ASVS) handle their various categories.\r\n\r\nIf we did move in this direction it would be a •massive change• and would require that the paragraphs you mentioned be fully changed. It would not be easy. I plan to fight for this change to risk based security in ASVS 5. It's not an appropriate change for future 4x releases.\r\n\r\nRespectfully,\r\nJim",
+      "createdAt": "2021-04-13T17:55:25Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/840#issuecomment-818930765",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM40qQHs",
+      "author": {
+        "login": "danielcuthbert"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is a great issue. We know the levels are going to change with the push towards 5.0, and this is something we are taking into account. I'm closing the issue for now and we will revisit this with 5.0 dev work. ",
+      "createdAt": "2021-07-20T15:35:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/840#issuecomment-883491308",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2020-09-16T02:14:45Z",
+  "labels": [],
+  "number": 840,
+  "state": "CLOSED",
+  "title": "[For Improvement] Add flag/mark if an ASVS requirement is Pentestable or not",
+  "url": "https://github.com/OWASP/ASVS/issues/840"
+}

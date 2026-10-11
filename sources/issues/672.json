@@ -1,0 +1,278 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjI3OTU4MTc=",
+    "is_bot": false,
+    "login": "VincentDS",
+    "name": "Vincent"
+  },
+  "body": "With the upcoming adoption of Same-Site cookies ([caniuse - Same-Site cookies](https://caniuse.com/#feat=same-site-cookie-attribute)) and Chrome defaulting cookies to “SameSite=Lax” ([Chrome - SameSite=Lax](https://www.chromestatus.com/feature/5088147346030592)), it might be useful to add an additional check in the ASVS concerning the use of safe and unsafe HTTP methods.\r\n\r\nThe [RFC on Same-Site](https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1) states the following: \r\n\r\n> Lax enforcement provides reasonable defense in depth against CSRF attacks that rely on unsafe HTTP methods (like \"POST”).\r\n\r\n> Developers may set the \"SameSite\" attribute in a \"Lax\" enforcement mode that carves out an exception which sends same-site cookies along with cross-site requests if and only if they are top-level navigations which use a \"safe\" (in the [RFC7231] sense) HTTP method.\r\n\r\nHence, the proper use of safe and unsafe methods will have a reasonable impact on CSRF mitigations if browsers will set the SameSite flag automatically to Lax (If not specified otherwise). \r\nTherefore I would propose to add an additional check in section V13.2 (RESTful Web Service Verification Requirements) to ensure GET is only used to perform “safe” actions. \r\nAs for now, the only relevant control is currently 13.2.1. However this does not cover this, since it is about not allowing unsafe operations on known URIs.\r\n\r\n\r\nI would propose something along the lines of: \r\n\r\n**Verify that HTTP GET requests do not modify any backend data structure or perform any actions. GET is a [safe method](https://tools.ietf.org/html/rfc2616#page-51) and should therefore not have any side effects.**\r\n\r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUzMTE2NzI0NQ==",
+      "author": {
+        "login": "Someniak"
+      },
+      "authorAssociation": "NONE",
+      "body": "Indeed, I agree upon the above. Good idea! :)  I would suggest rephrasing your proposal to...\r\nVerify that HTTP GET requests do not modify any backend data structure or perform **any state-changing actions**. GET is a safe method and should therefore not have any side effects.",
+      "createdAt": "2019-09-13T09:23:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-531167245",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUzMTE4OTg2Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Do not use blacklist/disallow-list for GET method! What about HEAD, OPTIONS and TRACE?\r\n\r\nDuring pen-test cases I have used this requirement to report \"incorrect usage of safe method\" problems (like pointed out in original post):\r\n> V13.2.1 Verify that enabled RESTful HTTP methods are a valid choice for the user or action, such as preventing normal users using DELETE or PUT on protected API or resources.\r\n\r\nIs there need for new requirement or should it be merged to V13.2.1?",
+      "createdAt": "2019-09-13T10:42:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-531189863",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUzMTY2Mjc0NA==",
+      "author": {
+        "login": "VincentDS"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "I agree HEAD, OPTIONS and TRACE should be in there as well for the sake of completeness.\r\n\r\nFor me, V13.2.1 is more about restricting unsafe methods on protected API endpoints, while the new proposal is about the proper usage of safe methods.",
+      "createdAt": "2019-09-16T07:03:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-531662744",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUzMzI2MzM4Nw==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I like the idea of a new requirement about restricting methods. Someone want to open a PR?\r\n",
+      "createdAt": "2019-09-19T18:55:38Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-533263387",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDUzNTQyNTUzMQ==",
+      "author": {
+        "login": "VincentDS"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Created PR #678",
+      "createdAt": "2019-09-26T09:40:43Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-535425531",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY0ODIyNTU5NA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "This is a breaking change to that section, so it will remain a 4.1 issue. 4.0.2 could have used this commit if it had not re-used the same numbering as 4.0.1. \r\n\r\ne.g. there's a new 13.2.2, and then 4.0.1's 13.2.2 becomes 13.2.3. Could we revert this PR and try again with 4.0.2 taking the better wording and 4.1 the new item(s)?",
+      "createdAt": "2020-06-23T15:08:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-648225594",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDY1ODQwNzY3MA==",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@vanderaj I don't think there is any changed wording here, just a new requirement so I see no further action for 4.0.2, correct?",
+      "createdAt": "2020-07-14T20:53:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-658407670",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcwNDgwMzA1MA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Found this new requirement now as 13.2.2\r\n\r\n<https://github.com/OWASP/ASVS/blob/master/4.0/en/0x21-V13-API.md#v132-restful-web-service-verification-requirements>\r\n\r\n> 13.2.2 Verify that HTTP requests using the HEAD, OPTIONS, TRACE or GET verb do not modify any backend data structure or perform any state-changing actions. These requests are safe methods and should therefore not have any side effects.\r\n\r\nAs this requirement is not web services specific maybe it should belong to subcategory V14.5?\r\n\r\n> V14.5 Validate HTTP Request Header Requirements\r\n\r\n\r\nAnd in general, it's kind of duplicate to current V14.5.1 with just a bit different point of view.\r\n\r\n<https://github.com/OWASP/ASVS/blob/master/4.0/en/0x22-V14-Config.md>\r\n\r\n> V14.5.1 Verify that the application server only accepts the HTTP methods in use by the application/API, including pre-flight OPTIONS, and logs/alerts on any requests that are not valid for the application context.",
+      "createdAt": "2020-10-07T09:11:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-704803050",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcwNTE1MzE2Ng==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Good catch Elar, I agree this should be cleaned up.\n\nI agreed 13.3.2 should be moved to 14.5.1\n\nBut these are indeed two distinct requirements.\n\n13.3.2 is talking about the idempotence and nullimpotence of GET and \nother non state changing verbs per the HTTP RFC. It's about API design \nin relation to security. For example if GET's really do only read data \nand do not change state, then I do not need CSRF protection for those \nendpoints.\n\n14.5.1 is about access control to ensure the server only accepts verbs \nthe application needs and should alert and reject, for example, if POST \nendpoint accepts a GET.\n\n- Jim\n\nOn 10/6/20 11:11 PM, Elar Lang wrote:\n>\n> Found this new requirement now as 13.2.2\n>\n> https://github.com/OWASP/ASVS/blob/master/4.0/en/0x21-V13-API.md#v132-restful-web-service-verification-requirements \n> <https://github.com/OWASP/ASVS/blob/master/4.0/en/0x21-V13-API.md#v132-restful-web-service-verification-requirements>\n>\n>     13.2.2 Verify that HTTP requests using the HEAD, OPTIONS, TRACE or\n>     GET verb do not modify any backend data structure or perform any\n>     state-changing actions. These requests are safe methods and should\n>     therefore not have any side effects.\n>\n> As this requirement is not web services specific maybe it should \n> belong to subcategory V14.5?\n>\n>     V14.5 Validate HTTP Request Header Requirements\n>\n> And in general, it's kind of duplicate to current V14.5.1 with just a \n> bit different point of view.\n>\n> https://github.com/OWASP/ASVS/blob/master/4.0/en/0x22-V14-Config.md \n> <https://github.com/OWASP/ASVS/blob/master/4.0/en/0x22-V14-Config.md>\n>\n>     V14.5.1 Verify that the application server only accepts the HTTP\n>     methods in use by the application/API, including pre-flight\n>     OPTIONS, and logs/alerts on any requests that are not valid for\n>     the application context.\n>\n> —\n> You are receiving this because you are subscribed to this thread.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/672#issuecomment-704803050>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCNF6KLVRSVDQJOYGFDSJQWEBANCNFSM4IWNZ6RA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-10-07T19:41:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-705153166",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcxMzU4MjcyMg==",
+      "author": {
+        "login": "Sjord"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> 13.2.2 Verify that HTTP requests using the HEAD, OPTIONS, TRACE or GET verb do not modify any backend data structure or perform any state-changing actions. These requests are safe methods and should therefore not have any side effects.\r\n\r\nShould this go to chapter 5 instead (Validation, Sanitization and Encoding Verification Requirements)? Chapter 14 is about Configuration Verification Requirements, that seems not a good fit for this requirement.",
+      "createdAt": "2020-10-21T13:38:27Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-713582722",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcxMzYzMzUwOQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In most cases I don't consider HTTP method as user-input which you need to validate by program code.\r\n\r\nArchitecture must be written the way that with \"wrong\" HTTP method an application will not execute functionality for input validation which was meant to be executed (only) with other HTTP method. Think about REST - it just defines, which action you want to call. But as this requirement is not REST specific in general, I recommend to move it from V13 to V14.\r\n\r\nIt's more architecture/configuration problem, can be considered to move also to V1.14 subcategory.",
+      "createdAt": "2020-10-21T14:50:36Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-713633509",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcxNDY1MTExMA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "+1 Agree with Elar on this\n\nOn 10/21/20 4:50 AM, Elar Lang wrote:\n>\n> In most cases I don't consider HTTP method as user-input which you \n> need to validate by program code.\n>\n> Architecture must be written the way that with \"wrong\" HTTP method an \n> application will not execute functionality for input validation which \n> was meant to be executed (only) with other HTTP method.\n>\n> It's more architecture/configuration problem, can be considered to \n> move also to V1.14 subcategory.\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/672#issuecomment-713633509>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCNGPX7IG4AXKEU6BSTSL3YM5ANCNFSM4IWNZ6RA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-10-22T17:39:37Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-714651110",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDcxNDY1MjAxOA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": " > In most cases I don't consider HTTP method as user-input which you \nneed to validate by program code.\n\nThe only case I can think of is when an attacker changes a REST verb \nfrom say GET to DELETE (or similar) and abuses access control via verb \ntampering....\n\n- Jim\n\nOn 10/21/20 4:50 AM, Elar Lang wrote:\n>\n> In most cases I don't consider HTTP method as user-input which you \n> need to validate by program code.\n>\n> Architecture must be written the way that with \"wrong\" HTTP method an \n> application will not execute functionality for input validation which \n> was meant to be executed (only) with other HTTP method.\n>\n> It's more architecture/configuration problem, can be considered to \n> move also to V1.14 subcategory.\n>\n> —\n> You are receiving this because you commented.\n> Reply to this email directly, view it on GitHub \n> <https://github.com/OWASP/ASVS/issues/672#issuecomment-713633509>, or \n> unsubscribe \n> <https://github.com/notifications/unsubscribe-auth/AAEBYCNGPX7IG4AXKEU6BSTSL3YM5ANCNFSM4IWNZ6RA>.\n>\n-- \nJim Manico\nManicode Security\nhttps://www.manicode.com\n\n",
+      "createdAt": "2020-10-22T17:41:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-714652018",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5Nzc4NTk4OA==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Am I ok to close this issue out?",
+      "createdAt": "2021-03-12T22:11:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-797785988",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODI2MjE5Mg==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "In current document added requirement is 13.2.7:\r\nhttps://github.com/OWASP/ASVS/blob/master/4.0/en/0x21-V13-API.md\r\n\r\nShould be moved to 14.5.5 (need to keep all current numbers as they are) or as 1.14.8",
+      "createdAt": "2021-03-13T12:11:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-798262192",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDc5ODM5MTU5Ng==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "move completed per 7b18aef and closing issue",
+      "createdAt": "2021-03-13T13:37:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/672#issuecomment-798391596",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-09-13T09:19:08Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwxMjQ4NDMwMzYx",
+      "name": "2) Awaiting response",
+      "description": "Awaiting a response from the original poster",
+      "color": "0052cc"
+    }
+  ],
+  "number": 672,
+  "state": "CLOSED",
+  "title": "V13.2: Add check on the correct usage of safe HTTP methods",
+  "url": "https://github.com/OWASP/ASVS/issues/672"
+}

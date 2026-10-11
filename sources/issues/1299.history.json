@@ -1,0 +1,70 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1162806467",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> Applications running on different TCP ports would have different origins\r\n\r\ntechnically possible, never seen in practice for public websites. It is used for internal API's, probably we need to exclude this somehow in the requirement?\r\n\r\n> we need to have one application per eTLD (effective Top Level Domain)\r\n\r\nthis was given as an alternative. If there is just one application per domain, we don't have a lot of other problems and therefore the need to solve them. But I agree, it's easier to leave this option completely out\r\n\r\n> every application must run on its own (sub)domain\r\n\r\nI think host**name** is correct to use here instead of domain or subdomain",
+          "recorded_at": "2022-06-22T08:28:08Z"
+        },
+        {
+          "body": "> Applications running on different TCP ports would have different origins\r\n\r\ntechnically possible, never seen in practice for public websites. It is used for internal API's, probably we need to exclude this somehow in the requirement?\r\n\r\n> we need to have one application per eTLD (effective Top Level Domain)\r\n\r\nthis was given as an alternative. If there is just one application per domain, we don't have a lot of other problems and therefore the need to solve them. But I agree, it's easier to leave this option completely out\r\n\r\n> every application must run on its own (sub)domain\r\n\r\nI think host**name** is correct to user here instead of domain or subdomain",
+          "recorded_at": "2022-06-22T08:27:56Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1167183581",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Why do we need this requirement?\r\n\r\nIf a site uses cookies - one application (e. g. `one.example.com`) can write cookies to the main domain (eTLD+1) (`.example.com`) and this is the way how it can manipulate other hosts on the same domain (e. g. `other.example.com`). To limit this scenario, we can use `__Host-` (current requirement 3.4.4) for the cookie name and it limits it to \"one cookie with this name for this hostname\". Pre-condition for this is - **there is one application per hostname** (hostname - IP address or full host name (without port)).\r\n\r\nIf a site does not use cookies - uses JWT - if there is a so-called XSS vulnerability in one site, it should not affect any other site. The scope for JavaScript execution is Same-Origin. Pre-condition for this is - **there is one application per origin** (origin - schema + hostname + port).\r\n\r\nIf there are CORS requests in use, there should be only one application in `Access-Control-Allow-Origin` scope (related requirements 14.4.8, 14.5.3). Pre-condition for this is - **there is one application per origin**.",
+          "recorded_at": "2023-12-01T11:58:47Z"
+        },
+        {
+          "body": "Why do we need this requirement?\r\n\r\nIf a site uses cookies - one application (e. g. `one.example.com`) can write cookies to the main domain (eTLD+1) (`.example.com`) and this is the way how it can manipulate other hosts on the same domain (e. g. `other.example.com`). To limit this scenario, we can use `__Host-` (current requirement 3.4.4) for the cookie name and it limits it to \"one cookie with this name for this hostname\". Pre-condition for this is - **there is one application per hostname** (hostname - IP address or full host name (without port)).\r\n\r\nIf a site does not use cookies - uses JWT - if there is a so-called XSS vulnerability in one site, it should not affect any other site. The scope for JavaScript execution is Same-Origin. Pre-condition for this is - **there is one application per origin** (origin - schema + hostname + port).\r\n\r\nIf there are CORS requests in use, there should be only one site in `Access-Control-Allow-Origin` scope (related requirements 14.4.8, 14.5.3). Pre-condition for this is - **there is one application per origin**.",
+          "recorded_at": "2022-10-28T06:28:25Z"
+        },
+        {
+          "body": "Why do we need this requirement?\r\n\r\nIf a site uses cookies - one application (`one.example.com`) can write cookies to the main domain (`.example.com`) and this is the way how it can manipulate other sites on the same domain (`other.example.com`). To limit this scenario, we can use `__Host-` (current requirement 3.4.4) for the cookie name and it limits it to \"one cookie with this name for this hostname\". Pre-condition for this is - **there is one application per hostname** (hostname - IP address or full host name (without port)).\r\n\r\nIf a site does not use cookies - uses JWT - if there is a so-called XSS vulnerability in one site, it should not affect any other site. The scope for JavaScript execution is Same-Origin. Pre-condition for this is - **there is one application per origin** (origin - schema + hostname + port).\r\n\r\nIf there are CORS requests in use, there should be only one site in `Access-Control-Allow-Origin` scope (related requirements 14.4.8, 14.5.3). Pre-condition for this is - **there is one application per origin**.",
+          "recorded_at": "2022-06-27T10:35:12Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1631495535",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "I’m not sure I fully understand this one but the change does seem reasonable, I'm just not 100% certain of the technical details here.",
+          "recorded_at": "2023-07-12T19:23:32Z"
+        },
+        {
+          "body": "I’m not sure I fully understand this one, so I’ll remain neutral.",
+          "recorded_at": "2023-07-12T19:22:57Z"
+        },
+        {
+          "body": "I’m not sure I fully understand this one, so I’ll remain neutral.On Jul 10, 2023, at 10:29 PM, Josh Grossman ***@***.***> wrote:﻿\r\nhi @jmanico\r\nDo you think the following requirement change is appropriate and sensible? It is quite sweeping but seems to add a lot of value against attacks which can cross application boundaries.\r\nOld requirement:\r\nV3.4 Cookie-based Session Management\r\n\r\n\r\n\r\n#\r\nDescription\r\nL1\r\nL2\r\nL3\r\nCWE\r\nNIST §\r\n\r\n\r\n\r\n\r\n3.4.5\r\n[GRAMMAR] Verify that if the application is published under a domain name with other applications that set or use session cookies that might disclose the session cookies, it sets the path attribute in cookie-based session tokens using the most precise path possible. (C6)\r\n✓\r\n✓\r\n✓\r\n16\r\n7.1.1\r\n\r\n\r\n\r\nNew requirement (might change it to be in a different section)\r\n\r\n\r\n\r\n#\r\nDescription\r\nL1\r\nL2\r\nL3\r\nCWE\r\nNIST §\r\n\r\n\r\n\r\n\r\n3.4.5\r\n[MODIFIED] Verify that separate applications are hosted on different hostnames so as to benefit from the protections provided by the \"same origin policy\" and the hostname restrictions on cookies.\r\n✓\r\n✓\r\n✓\r\n16\r\n7.1.1\r\n\r\n\r\n\r\n\r\n—Reply to this email directly, view it on GitHub, or unsubscribe.You are receiving this because you were mentioned.Message ID: ***@***.***>",
+          "recorded_at": "2023-07-11T20:54:14Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1299#issuecomment-1660494291",
+      "author": "tghosth",
+      "previous_versions": [
+        {
+          "body": "So @elarlang this feels like an architecture level requirement, there is an implementation but the requirement is at the very heart of the application is built (and it would be hard to retro fit this back onto an existing application.) That is why I moved it to V1. Do you disagree?",
+          "recorded_at": "2023-08-01T14:55:28Z"
+        },
+        {
+          "body": "So this feels like an architecture level requirement, there is an implementation but the requirement is at the very heart of the application is built (and it would be hard to retro fit this back onto an existing application.) That is why I moved it to V1. Do you disagree?",
+          "recorded_at": "2023-08-01T14:55:20Z"
+        }
+      ]
+    }
+  ]
+}

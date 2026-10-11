@@ -1,0 +1,168 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "<!---\r\nBEFORE YOU OPEN AN ISSUE:\r\n- If you have a question about content, make sure you are looking at the raw .md files which contain the master version of the text and not in the CSV, JSON, XLSX, PDF, DOCX files which are derived from this.\r\n- Please search the issues in case your question has been discussed before.\r\n- Make sure you are looking at the latest edits at: https://github.com/OWASP/ASVS/tree/master/5.0\r\n- When you reference requirements, please include them as a link, similarly to this:\r\n[6.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x14-V6-Cryptography.md#v61-data-classification)\r\n\r\nOTHER NOTES:\r\n- Please do not open a pull request without first opening an associated issue.\r\n- Please carry out all discussion in the associated issue only.\r\n-->\r\nSpin-off from https://github.com/OWASP/ASVS/issues/2040#issuecomment-2338933353\r\n\r\n> Verify that confidential clients must use client authentication in refresh token requests. (L1, L2, L3)\r\n\r\nIsn't it the point for confidential client to use client authentication?\r\n\r\nIf we require it from Level 1 from confidential client but allow public clients without any restrictions, I would say there is a conflict.\r\n\r\nIs it required only for refresh token request or to any request to token endpoint?\r\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6NGrt2",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I believe the idea here is that that some authorization server implementations could assume that presenting the refresh token is enough for refreshing the token (as presenting the access token is enough for using the service). This is requirement is indeed valid for all requests to the token endpoint.\r\n\r\nA more precise wording of this requirement could be something like: ”Verify that, for using refresh tokens emitted to a confidential client, the authorization server requires authentication *of this client*.“",
+      "createdAt": "2024-09-23T06:38:01Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2109#issuecomment-2367339382",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NGu7n",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Isn't it the point for confidential client to use client authentication?\r\n\r\nMy point is - can you use confidential client without authentication for the token endpoint?\r\n\r\n> ... for using refresh tokens emitted\r\n\r\nbut asking the refresh token with token request?",
+      "createdAt": "2024-09-23T06:47:31Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2109#issuecomment-2367352551",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NXi16",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> My point is - can you use confidential client without authentication for the token endpoint?\r\n\r\nIt should not be possible, but not all AS implementations follows the RFC which states that confidential clients must be authenticated, both when using refresh-tokens, authorization codes or client-credentials.\r\nSee in example https://www.rfc-editor.org/rfc/rfc6749.html#section-4.1.3\r\n\r\nThis is important for a secure OAuth implementation, but perhaps not a widespread issue, except if using a custom built AS or flow (not \"well-known industry standard\"). Still, I think it is a good level 1 requirement for ASVS.\r\n\r\nIt could also me written to not just focus on refresh-tokens, like this\r\n\r\n> Verify that all confidential clients are authenticated for all token requests. (L1, L2, L3) \r\n\r\nThere is no conflict with public clients, since the requirement only applies to confidential clients.\r\n\r\n\r\n",
+      "createdAt": "2024-09-24T16:22:39Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2109#issuecomment-2371759482",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NYRoA",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok, the definition says \"capable of\", not doing so https://datatracker.ietf.org/doc/html/rfc6749#section-2.1\r\n>    confidential - Clients capable of maintaining the confidentiality of their credentials (e.g., client implemented on a secure server with restricted access to the client credentials), or capable of secure client authentication using other means.\r\n\r\nSo from that perspective it makes sense.\r\n\r\nShould we add \"authorization server\" in the requirement?\r\n> Verify that all confidential clients are authenticated for all token requests **to the authorization server**.",
+      "createdAt": "2024-09-24T17:59:02Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2109#issuecomment-2371951104",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NhkO7",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "At the moment it goes to the document as:\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.7** | [ADDED] Verify that all confidential clients are authenticated for all token requests to the authorization server. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-09-25T15:15:21Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2109#issuecomment-2374386619",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NtJUl",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Coming from #2042, should we extend this to include other backend requests (such as PAR, token revocation, token introspection). Something in the line:\r\n\r\n> Verify that all confidential clients are authenticated for client-to-authorized server backchannel request such as token requests, PAR requests, token revocation requests and token introspection requests.",
+      "createdAt": "2024-09-26T16:26:02Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2109#issuecomment-2377422117",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6NxIgG",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Update - from \"all confidential clients\" to \"confidential client\"\r\n\r\n| # | Description | L1 | L2 | L3 |\r\n| :---: | :--- | :---: | :---: | :---: |\r\n| **51.2.7** | [ADDED] Verify that confidential client is authenticated for client-to-authorized server backchannel requests such as token requests, PAR requests, token revocation requests, and token introspection requests. | ✓ | ✓ | ✓ |",
+      "createdAt": "2024-09-27T06:04:57Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2109#issuecomment-2378467334",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2024-09-23T06:00:09Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2109,
+  "state": "CLOSED",
+  "title": "V51 - OAuth - confidential client",
+  "url": "https://github.com/OWASP/ASVS/issues/2109"
+}

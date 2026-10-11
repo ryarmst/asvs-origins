@@ -1,0 +1,193 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "\nCurrent requirements:\n| # | Description | Level | #v5.0.be |\n| :---: | :--- | :---: | :---: |\n| **13.1.2** | Verify that where the application connects to separate services, the application's documentation indicates the maximum possible parallel connections (connection pool) to each service and how the application responds when this maximum is reached, to avoid a denial of service condition. | 3 | v5.0.be-1.14.8 |\n| **13.1.3** | Verify that where the application connects to separate system resources or services (such as database connections, open files, and threads), each has a documented resource release and connection failure strategy, which includes how fast the connection times out and whether there is a retry strategy. This is to prevent resource exhaustion. External connections in synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections. | 3 | v5.0.be-1.14.9 |\n\nRequirements from #1778, #2762\n\nProposal for 13.1.2:\n> Verify that for each separate service the application uses, the documentation indicates the maximum possible parallel connections (connection pool) and how the application responds when this maximum is reached, to avoid a denial of service condition.\n\nProposal for 13.1.3:\n> Verify that for each separate system resource or service (such as database connections, open files, and threads) the application connects to, has a documented resource release and connection failure strategy, which includes how fast the connection times out and whether there is a retry strategy. This is to prevent resource exhaustion. External connections in synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections.\n\n",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6m1CrH",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "> Proposal for 13.1.2:\n> \n> > Verify that for each separate service the application uses, the documentation indicates the maximum possible parallel connections (connection pool) and how the application responds when this maximum is reached, to avoid a denial of service condition.\n\nThis is a bit old-school.  Modern, cloud-native applications typically employ auto-scaling and _dynamic_ connection pools, making fixed values unrealistic and rigid. Cloud-native patterns generally handle these issues automatically through elastic scalability, automatic retries, rate limiting, or circuit breakers.\n\nDocumenting a precise maximum pool size becomes impractical, and often obsolete shortly after it's recorded. Modern cloud deployments dynamically scale (e.g., Kubernetes autoscaling or managed database services like AWS Aurora).\n\nSo I would suggest (with a bit more cleanup):\n\n_13.1.2: Verify that the application documentation includes information on how connection pooling or parallel connection limits are managed, including scaling policies, dynamic behaviors, and strategies to handle exhaustion scenarios, to prevent denial of service conditions._\n\n> Proposal for 13.1.3:\n> \n> > Verify that for each separate system resource or service (such as database connections, open files, and threads) the application connects to, has a documented resource release and connection failure strategy, which includes how fast the connection times out and whether there is a retry strategy. This is to prevent resource exhaustion. External connections in synchronous HTTP request-response scenarios should fail fast without any retry, to avoid reaching the maximum possible connections.\n\nA few issues with this:\n\n* Modern cloud-native applications typically implement these behaviors via frameworks, infrastructure libraries, service meshes, or even service-level configurations (e.g., Istio, Envoy, Netflix Hystrix, Resilience4J, Polly, etc.). Explicit manual documentation might be redundant if these behaviors are standardized through conventions or policies.\n* The recommendation that synchronous HTTP request-response scenarios should \"fail fast without any retry\" is a strong prescription. While \"fail fast\" is typically a good practice in synchronous scenarios to avoid cascading latency and resource exhaustion, forbidding retries entirely may be overly rigid. \n* In reality, it's common (and sometimes advisable) to implement limited, bounded retries with strict timeouts or exponential backoff strategies, even in synchronous HTTP scenarios. _The emphasis should instead be on avoiding unbounded retries or long blocking periods._\n\nSo I would suggest:\n\n_13.1.3 Verify that the application documentation clearly defines resource management strategies (including resource release, timeout configurations, and connection failure handling) for each service (such as databases, open file handles, threads, and HTTP connections) as well as any retry strategies, specifying retry limits, intervals, and backoff strategies. For synchronous HTTP request-response scenarios, ensure connections use short timeouts and either avoid retries or limit them strictly to prevent cascading delays and resource exhaustion._\n",
+      "createdAt": "2025-04-12T17:41:48Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2798922439",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6m_qfy",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let's start from 13.1.2\n\nFirst:\n* Not everything is on cloud\n* Also for cloud you need to have limits and strategy\n  * I have seen an application being blocked from cloud service because it exceeded the defined limits after such test, easy dos vector\n\nI proposed:\n> Verify that for each separate service the application uses, the documentation indicates the maximum possible parallel connections (connection pool) and how the application responds when this maximum is reached, to avoid a denial of service condition.\n\nJim proposed:\n> Verify that the application documentation includes information on how connection pooling or parallel connection limits are managed, including scaling policies, dynamic behaviors, and strategies to handle exhaustion scenarios, to prevent denial of service conditions.\n\nIt lost or changed to important aspects:\n* documented decision for **each** connection\n* \"and strategies to handle exhaustion scenarios\" is not as precise as \"how the application responds when this maximum is reached\" and without reading the previous line for comparison I could not interpret it that way\n\nWhat do you mean by \"dynamic behaviors\"?\n",
+      "createdAt": "2025-04-14T13:24:56Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2801706994",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nVRJn",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Let me take another stab at it. Taking your comments into consideration:\n\n_13.1.2 Verify that for each service the application depends on, the documentation defines the maximum number of concurrent connections (e.g., connection pool limits) and how the application behaves when that limit is reached, including any fallback or recovery mechanisms, to prevent denial of service conditions._\n\nThis is much closer to your proposal.",
+      "createdAt": "2025-04-15T20:09:14Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2807370343",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6npv95",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang any further comments on Jim's 13.1.2 and 13.1.3 proposals?",
+      "createdAt": "2025-04-17T12:39:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2812739449",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6np0I1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that for each service the application depends on\n\nI think the \"depends on\" may rise questions, in my opinion it requires to every connection application uses and we should not have limiting \"depends on\" or \"does not depend that much\".\n\n13.1.3 requires further discussion, I would get one sorted first.",
+      "createdAt": "2025-04-17T12:46:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2812756533",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nqrrm",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> > Verify that for each service the application depends on\n> \n> I think the \"depends on\" may rise questions, in my opinion it requires to every connection application uses and we should not have limiting \"depends on\" or \"does not depend that much\".\n> \n> 13.1.3 requires further discussion, I would get one sorted first.\n\nSo maybe we refine @jmanico's proposal to:\n\n\"_Verify that for each service the application **uses**, the documentation defines the maximum number of concurrent connections (e.g., connection pool limits) and how the application behaves when that limit is reached, including any fallback or recovery mechanisms, to prevent denial of service conditions._\"\n\nWhat do you think @elarlang ?",
+      "createdAt": "2025-04-17T13:44:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2812984038",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nqunu",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, otherwise I'm ok with that proposal.",
+      "createdAt": "2025-04-17T13:48:22Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2812996078",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6nqxXZ",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so how about 13.1.3?",
+      "createdAt": "2025-04-17T13:52:30Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2813007321",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM6ntZwW",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Let me make one more suggestion that is less messy and considers @elarlang original suggestion a bit more:\n\n_13.1.3 Verify that the application documentation defines resource‑management strategies for every external system or service it uses (e.g., databases, file handles, threads, HTTP connections). This should include resource‑release procedures, timeout settings, failure handling, and where retry logic is implemented, specifying retry limits, delays, and back‑off algorithms. For synchronous HTTP request–response operations it should mandate short timeouts and either disable retries or strictly limit retries to prevent cascading delays and resource exhaustion.._\n\nAnd frankly this is extremely wordy. I wish there was a way to reduce this a lot. I am very open to other changes, especially ones that make this mess more clear.\n\n\n",
+      "createdAt": "2025-04-17T18:09:06Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2813697046",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6n6b1b",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I opened #3006 for this so we can get this in. I am not sure how easilly it can be made shorter but on the other hand at least it is L3",
+      "createdAt": "2025-04-20T10:54:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2950#issuecomment-2817113435",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2025-04-12T11:16:55Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwyMDA5NTIwNzI4",
+      "name": "6) PR awaiting review",
+      "description": "",
+      "color": "d5fcae"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABTmGdIQ",
+      "name": "V13 (prev V14)",
+      "description": "",
+      "color": "2F7741"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAAB5DAAeA",
+      "name": "_5.0 - rc1",
+      "description": "",
+      "color": "99F2D1"
+    }
+  ],
+  "number": 2950,
+  "state": "CLOSED",
+  "title": "V13.1 requirements",
+  "url": "https://github.com/OWASP/ASVS/issues/2950"
+}

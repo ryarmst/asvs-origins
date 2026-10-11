@@ -1,0 +1,376 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "Should we have a requirement, that a malicious user can not downgrade acr=high to acr=low?\n\nissue was raised by @silviavali",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM6bHqFY",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ping @randomstuff @TobiasAhnoff ",
+      "createdAt": "2025-01-20T13:48:48Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2602475864",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bH_Pk",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Yes, indeed, if the RP requests a given set of ACR (`acr_values=…`), it should make sure that a suitable acr was indeed used to authenticate the user (`acr` claim). This might be redundant with similar requirements. A similar concern is enforcing `max_age` (using `auth_time` claim).\n\nSee [RFC9470](https://datatracker.ietf.org/doc/rfc9470/), Step Up Authentication.\n\nWould this fit into some existing requirement? (I'll check that later on).",
+      "createdAt": "2025-01-20T14:25:50Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2602562532",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bPURV",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "My initial reason to open the issue was id token validation\nhttps://openid.net/specs/openid-connect-core-1_0.html#acrSemantics\n\nSo, it must be checked from id-token and from access token. I don't think it is something to hide into a general requirement.",
+      "createdAt": "2025-01-21T11:37:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2604483669",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bUSF3",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang, shall we include something about `max_age`/`auth_time` as well? In the same requirement? In a separate requirement?",
+      "createdAt": "2025-01-21T21:34:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2605785463",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bZ6IX",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> shall we include something about max_age/auth_time as well? In the same requirement? In a separate requirement?\n\nI think we need to cover them both, and in case we don't want to use different levels from those, they can be in one requirement.\n\nFrom: https://datatracker.ietf.org/doc/html/rfc9470#section-2-3.2\n\n>   2.  The resource server determines that the circumstances in which\n       the presented access token was obtained offer insufficient\n       authentication strength and/or recentness; hence, it denies the\n       request and returns a challenge describing (using a combination\n       of acr_values and max_age) what authentication requirements must\n       be met for the resource server to authorize a request.\n\nAttempt to convert it into a requirement:\n> Verify that the resource server validates that the presented access token was obtained with the required authentication strength and recentness by checking acr_values and max_age.",
+      "createdAt": "2025-01-22T13:32:00Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2607260183",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bhDsn",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "For \"recentness\", I think \"freshness\" is the word usually used?\n\n`max_age` is part of the authorization request and 403 response. The resource server must not check `mage_age` but choose a `max_age` (if required) and then check `auth_time`. I would say something:\n\n> Verify that, if the resource server requires specific authentication strength and/and recentness using the `acr_values` and `max_age` parameters, it verifies that the presented access token satisfies these constraints (for example using the `acr` and `auth_time` claims respectively).\n\nAlso, this wording does not support OIDC (ID tokens). Shall we include a related requirement for OIDC?\n",
+      "createdAt": "2025-01-23T08:20:45Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2609134375",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bwK3b",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "To me, 51.3.3 should cover this for the resource server, perhaps add acr and max_age to the list of claims?\n\n> Verify that the resource server enforces authorization decisions based on claims from the access token that define delegated authorization. If claims such as 'sub', 'scope', 'authorization_details' **or 'acr'** are present, they should be part of the decision.\n\nAnd add a requirement for the OIDC RP?\n\n> Verify that, if specific authentication strength or recentness are required using the acr_values and max_age parameters, the OIDC RP verifies that the presented ID Token satisfies these constraints (for example using the acr and auth_time claims respectively).",
+      "createdAt": "2025-01-24T17:58:23Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2613095899",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bzWY1",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I can see the logic behind using V51.3.3, but I also think it makes sense to keep \"delegated authorization\" and \"confidence on the authentication\" separately. Levels are not decided for those yet, but it may also be situation, that current V51.3.3 is L1 and acr/max_age is L2 requirement.",
+      "createdAt": "2025-01-25T11:06:14Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2613929525",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6bzgGQ",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "@elarlang good point, then maybe have something like this for the resource server?\n\n> Verify that, if specific user authentication strength or recentness are required , the resource server enforces authorization decisions based on claims from the access token that originates from the user authentication event. For example, if present, using OIDC claims such as 'acr' or 'auth_time'.",
+      "createdAt": "2025-01-25T13:39:05Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2613969296",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b1Zxp",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think the requirement should talk or mention \"authorization decisions\" anyhow. It's validating the confidence in authentication. I think we should develop a proposal from @randomstuff (https://github.com/OWASP/ASVS/issues/2543#issuecomment-2609134375).\n\nThe question here is, should we ask in the requirement, that the application send the user to re-authenticate the user to have the expected authentication level or just disallowing id-tokens and access tokens with an expected authentication level is enough?",
+      "createdAt": "2025-01-26T15:23:12Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2614467689",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6b1kTO",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The question here is, should we ask in the requirement, that the application send the user to re-authenticate the user to have the expected authentication level or just disallowing id-tokens and access tokens with an expected authentication level is enough?\n\nI think the idea that we want to convey *if that if the application requires a certain ACR* (in general or for some specific operations), it must not just include it in the authorization request but must also check it in the access token / ID token / etc.\n\nThe application SHOULD try to reauthenticate the user (OIDC) or include a 403 with the requested ACR when the ACR is not enough but I don't think we must have this as a requirement. From a security point of view, rejecting the token is enough.",
+      "createdAt": "2025-01-26T17:10:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2614510798",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cPnlT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> The question here is, should we ask in the requirement, that the application send the user to re-authenticate the user to have the expected authentication level or just disallowing id-tokens and access tokens with an expected authentication level is enough?\n\nI clarify this to:\n> The question here is, **after the RS detected that the expected authentication level is not enough** - should we ask in the requirement, that the application send the user to re-authenticate the user to have the expected authentication level or just disallowing id-tokens and access tokens with an expected authentication level is enough?\n\n---\n\nFrom https://github.com/OWASP/ASVS/issues/2543#issuecomment-2609134375\n\n> Verify that, if the resource server requires specific authentication strength and/and recentness using the acr_values and max_age parameters, it verifies that the presented access token satisfies these constraints (for example using the acr and auth_time claims respectively).\n\nUpdated proposal:\n> Verify that, if the resource server requires specific authentication strength (using the 'acr_values' parameter) or recentness (using the 'max_age' parameter), it verifies that the presented access token satisfies these constraints (for example using the 'acr' and 'auth_time' claims respectively).\n",
+      "createdAt": "2025-01-29T11:08:29Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2621339987",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cw93N",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Looks good, but maybe clarify that the claims are OIDC claims and if not using OIDC (just OAuth) then other claims might be used by the resource server to verify this, often OIDC ID-token claims are also \"copied\" to the OAuth access token, but not always...perhaps like this?\n\n> Verify that, if the resource server requires specific authentication strength or recentness, it verifies that the presented access token satisfies these constraints. For example, if present, using the OIDC 'acr' and 'auth_time' claims respectively.\n\n\nAnd add this for the OIDC RP\n\n> Verify that, if specific authentication strength (using the 'acr_values' parameter) or recentness (using the 'max_age' parameter) is required, the RP verifies that the presented ID-token satisfies these constraints (for example using the 'acr' and 'auth_time' claims respectively).\n\nShould we also mention using the 'amr' claim?",
+      "createdAt": "2025-02-03T06:30:12Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2630081997",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cxUqN",
+      "author": {
+        "login": "randomstuff"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Should we also mention using the 'amr' claim?\n\nPossibly, I'm not sure whether `amr` should be used or this vs. `acr`.",
+      "createdAt": "2025-02-03T07:34:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2630175373",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6cx0Uk",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Let talk about level as well - feels like too much for level 2 and too basic for level 3...",
+      "createdAt": "2025-02-03T08:45:03Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2630305060",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dBck-",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "> > Should we also mention using the 'amr' claim?\n> \n> Possibly, I'm not sure whether `amr` should be used or this vs. `acr`.\n\nA use case is to use amr instead of acr, where amr is \"free text\" to indicate a particular authentication method. The naming must not be standardized and could e g be \"BankID\" etc, but should be according to the spec\n\n> OPTIONAL. Authentication Methods References. JSON array of strings that are identifiers for authentication methods used in the authentication. For instance, values might indicate that both password and OTP authentication methods were used. The amr value is an array of case-sensitive strings. Values used in the amr Claim SHOULD be from those registered in the IANA Authentication Method Reference Values registry [[IANA.AMR]](https://openid.net/specs/openid-connect-core-1_0.html#IANA.AMR) established by [[RFC8176]](https://openid.net/specs/openid-connect-core-1_0.html#RFC8176); parties using this claim will need to agree upon the meanings of any unregistered values used, which may be context specific.\n\nLevels are hard, since the requirement has \"if\" I think it could be L2? ",
+      "createdAt": "2025-02-04T15:59:43Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2634402110",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dHq9r",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "To cover the need for the \"amr\" should the requirement additionally ask \"authentication methods\"?\n\n> Verify that, if the resource server requires specific authentication strength, **methods** or recentness ...",
+      "createdAt": "2025-02-05T08:16:53Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2636033899",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dMULR",
+      "author": {
+        "login": "TobiasAhnoff"
+      },
+      "authorAssociation": "CONTRIBUTOR",
+      "body": "Then we have\n\n> Verify that, if the resource server requires specific authentication strength, methods or recentness, it verifies that the presented access token satisfies these constraints. For example, if present, using the OIDC 'acr', 'amr' and 'auth_time' claims respectively.\n\nand (note that there is no \"acr parameter\")\n\n> Verify that, if specific authentication strength (using the 'acr_values' parameter), authentication methods or recentness (using the 'max_age' parameter) is required, the RP verifies that the presented ID-token satisfies these constraints (using the 'acr', 'amr' and 'auth_time' claims respectively).\n\nor, perhaps remove the parameter part? (they are optional to use and you could check the constraints even of you didn´t use them)\n\n> Verify that, if specific authentication strength, authentication methods or recentness is required, the RP verifies that the presented ID-token satisfies these constraints (using the 'acr', 'amr' and 'auth_time' claims respectively).\n",
+      "createdAt": "2025-02-05T15:30:33Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 1
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2637251281",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM6dNnjS",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Find agreement with @randomstuff and PR it :)\n\nI think we can skip one \"authentication\"\n> authentication strength, ~~authentication~~ methods or recentness",
+      "createdAt": "2025-02-05T17:36:32Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [
+        {
+          "content": "THUMBS_UP",
+          "users": {
+            "totalCount": 2
+          }
+        }
+      ],
+      "url": "https://github.com/OWASP/ASVS/issues/2543#issuecomment-2637592786",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2025-01-20T13:48:38Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkzMDYz",
+      "name": "5) awaiting PR",
+      "description": "A proposal hs been accepted and reviewed and we are now waiting for a PR",
+      "color": "331CB4"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABePI44g",
+      "name": "V10 (prev V51)",
+      "description": "Group issues related to OAuth",
+      "color": "c5def5"
+    }
+  ],
+  "number": 2543,
+  "state": "CLOSED",
+  "title": "OIDC acr downgrade",
+  "url": "https://github.com/OWASP/ASVS/issues/2543"
+}

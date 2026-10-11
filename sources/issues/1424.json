@@ -1,0 +1,327 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjc4MjI3ODk1",
+    "is_bot": false,
+    "login": "ImanSharaf",
+    "name": "Iman"
+  },
+  "body": "I was checking [this](https://hackerone.com/reports/1439593) HackerOne report with a $29000 bounty and I found it very interesting. This is different than Zip Slip. In case of Zip Slip we can inject .. in the file path so we can extract our file in a wrong place. In this report, the attacker crafts a malicious symlink to /etc/passwd when the backend extracts it untar_zxf function only changes the permissions and extract the symlink as is, so the attacker was able to read the passwd file!\r\nI believe we need an ASVS item to check for removal of symlinks in the zip files. ",
+  "comments": [
+    {
+      "id": "IC_kwDOAYyWqM5OH2cT",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "This is interesting.\r\n\r\nIs there any harm it can do to end user as well? I mean should application prevent uploading zip-files containing symlinks, or it is only necessary when application actually extracts files (from user) and processes their content.",
+      "createdAt": "2022-11-10T18:00:05Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1310680851",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5OIUF3",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "If the user directly uploads a symlink that links to /etc/passwd the user's  passwd file would be uploaded to the server. But if the app has a function to untar or unzip (for example, a Ruby app), and then the user is able to see the content of the uploaded zip or tar file, then the user will be able to see the server's passwd file. I believe on of the mitigations is to remove any symlinks when the app starts to extract a compressed file.",
+      "createdAt": "2022-11-10T19:35:07Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1310802295",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5OaqUP",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Interesting attack vector. Seems like a valid requirement to have. Does this mean it is sort of an RCE-level kind of threat the way this vulnerability works? ",
+      "createdAt": "2022-11-15T17:03:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1315611919",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5OivbF",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@csfreak92 It could lead to an RCE if the attacker would be able to fetch some sensitive secrets in the environment variables  files or the source code.",
+      "createdAt": "2022-11-16T22:03:03Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1317729989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5O1Cw-",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Well, played with that  a bit. Now there is nice question - what is the actual defense?\r\n\r\nOriginal proposal:\r\n> I believe we need an ASVS item to check for removal of symlinks in the zip files.\r\n\r\nOptions:\r\n* removing only symlinks - like proposed, but It's not my favourite\r\n* requirement do not allow to upload archives with symlinks at all\r\n  * good: threat taken down in early stage and does not depend on configuration\r\n  * bad: it requires inspecting the archive content on every file upload and may increase the risk for zip bombs\r\n* require unpacking zip files without following symlinks or in sandboxed environment",
+      "createdAt": "2022-11-21T19:13:40Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1322527806",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5QHca8",
+      "author": {
+        "login": "guillaume-d"
+      },
+      "authorAssociation": "NONE",
+      "body": "> Well, played with that a bit. Now there is nice question - what is the actual defense?\r\n[...]\r\n> Options:\r\n> \r\n>     * removing only symlinks - like proposed, but It's not my favourite\r\n\r\nWhy? (It is not mine either, see below, just asking for clarification.)\r\n\r\n> \r\n>     * requirement do not allow to upload archives with symlinks at all\r\n>       \r\n>       * good: threat taken down in early stage and does not depend on configuration\r\n\r\nIndeed.\r\n\r\n>       * bad: it requires inspecting the archive content on every file upload and may increase the risk for zip bombs\r\n\r\nThe risk for _*.zip_ bombs will not increase on inspection if one just scans the archive structure, because files in *.zip archives are always compressed individually (_not_-[solid compression](https://en.wikipedia.org/wiki/Solid_compression)).\r\nThe scan can be done in linear time proportional to the compressed archive size, which of course should have an separate limit.\r\n\r\nFor example one can use:\r\n- `zipinfo -l`\r\n- else most programming languages offer low-level abstraction for the ZIP entries and the ZIP central directory\r\n\r\nFor other formats like compressed tarballs, *.7z, etc. using solid compression, this may indeed a problem.\r\nOnly allowing the ubiquitous ZIP format may be a viable option. Often it is not used for its unique compression or metadata features (if any) but just to collect files together, so offering much less popular choices may not matter.\r\n\r\nUncompressed tarballs are OK too: similarly `tar tf` can help detect symlinks there, else low-level abstractions for the TAR format should be readily available as well.\r\n\r\n> \r\n>     * require unpacking zip files without following symlinks or in sandboxed environment\r\n\r\nWith a sandbox symlinks do not do harm at once, but when deleting the sandbox one still has to make sure not to follow symlinks...\r\n\r\n\r\nAnother much better \"meta-option\" is of course to find a library or framework with safe defaults and good structured logging (for detection) that can do most of the hard work above...",
+      "createdAt": "2022-12-09T10:29:25Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1344128700",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RIqFt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Why I don't like removing symlinks - it is automodification (changing integrity) for user-provided data.\r\n\r\nIs there any valid and needed use-case why an application should allow symlinks?\r\n\r\nMy direction is something like (wordsmithing and correction needed):\r\n_Verify that the application do not allow uploading compressed files containing symlinks if not especially intended by the application._\r\n\r\nCategory V12.1, Level 2 (as zip bomb 12.1.2 is also level 2)",
+      "createdAt": "2022-12-21T11:57:24Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1361224045",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RpF53",
+      "author": {
+        "login": "csfreak92"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I am also inclined to agree with @elarlang on this one. Automodification of any uploaded files that may contain symlinks breaks the principle of integrity of the user's data. \r\n\r\n@ImanSharaf, I am on the same boat as with that question of what is the valid and needed use-case for an application to allow symlinks? Maybe you could enlighten us more about it? ",
+      "createdAt": "2023-01-03T12:44:44Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1369726583",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5RpM6T",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> @ImanSharaf, I am on the same boat as with that question of what is the valid and needed use-case for an application to allow symlinks? Maybe you could enlighten us more about it?\r\n\r\nI think the question was addressed to @guillaume-d ",
+      "createdAt": "2023-01-03T13:15:28Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1369755283",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5SUQGU",
+      "author": {
+        "login": "ImanSharaf"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "@elarlang @csfreak92 @guillaume-d where are we at right now for this one? Can I commit the new item with the proposed solution? ",
+      "createdAt": "2023-01-12T21:59:46Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1381040532",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5Saq41",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't think it's ready yet. FYI: we do some \"commit sessions\" with Josh and it will be addressed one day :)",
+      "createdAt": "2023-01-14T12:02:58Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1382723125",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5UAk1j",
+      "author": {
+        "login": "guillaume-d"
+      },
+      "authorAssociation": "NONE",
+      "body": "> > @ImanSharaf, I am on the same boat as with that question of what is the valid and needed use-case for an application to allow symlinks? Maybe you could enlighten us more about it?\r\n> \r\n> I think the question was addressed to @guillaume-d\r\n\r\nSorry I missed the correction! I do not have a usecase for symlinks in archives either.\r\nI was merely pointing out that @erlang's only \"self-inflicted\" drawback to his option of forbidding symlinks in uploaded archives does not hold for *.zip archives.\r\nI cannot think of another drawback either.\r\nSo I am also in favour of forbidding symlinks unless absolutely necessary, for what it's worth.\r\nMaybe avoiding other (solid) archive formats would also be good advice (so that the symlink scanning itself does not trigger zip bombs, see https://github.com/OWASP/ASVS/issues/1424#issuecomment-1344128700).",
+      "createdAt": "2023-01-30T22:18:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1409437027",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5doeTt",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "As proposal we can finetune input from https://github.com/OWASP/ASVS/issues/1424#issuecomment-1361224045\r\n\r\n> Verify that the application do not allow uploading compressed files containing symlinks if not especially intended by the application.\r\n\r\nCategory V12.1, Level 2 (as zip bomb 12.1.2 is also level 2)",
+      "createdAt": "2023-05-31T20:19:16Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1570890989",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5emZIC",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "> Verify that the application do not allow uploading compressed files containing symlinks if not especially intended by the application.\r\n\r\nWhat happens if we *do* need to accept symlinks? Is there a way to protect ourselves in that case @elarlang?",
+      "createdAt": "2023-06-12T11:17:22Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1587122690",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5emij6",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "I don't know what could be the reason to accept symlinks? But if you really need to, you need to validate it against allow-list or use sandboxed environment etc. Anyway, I don't think we need to cover that in more detailed than \"if not especially intended by the application\".",
+      "createdAt": "2023-06-12T11:41:10Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1587161338",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e7rxi",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Ok so how about:\r\n\r\n> Verify that the application does not allow uploading compressed files containing symlinks unless this is specifically required (in which case it will be necessary to enforce an allow list of the files that can be symlinked to).\r\n",
+      "createdAt": "2023-06-15T09:33:51Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1592704098",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e89yH",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "ok for me",
+      "createdAt": "2023-06-15T13:17:36Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1593040007",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e9lX-",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1670",
+      "createdAt": "2023-06-15T14:42:52Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1593202174",
+      "viewerDidAuthor": true
+    },
+    {
+      "id": "IC_kwDOAYyWqM5e-Gch",
+      "author": {
+        "login": "tghosth"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "Opened #1671 to include a better CWE",
+      "createdAt": "2023-06-15T15:57:54Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/1424#issuecomment-1593337633",
+      "viewerDidAuthor": true
+    }
+  ],
+  "createdAt": "2022-11-10T17:41:41Z",
+  "labels": [
+    {
+      "id": "MDU6TGFiZWwzMTY4NTg3Njg2",
+      "name": "1) Discussion ongoing",
+      "description": "Issue is opened and assigned but no clear proposal yet",
+      "color": "b60205"
+    },
+    {
+      "id": "MDU6TGFiZWwzMTY4NTkyNDY3",
+      "name": "4) proposal for review",
+      "description": "Issue contains clear proposal for add/change something",
+      "color": "D4B575"
+    },
+    {
+      "id": "LA_kwDOAYyWqM7PmM1u",
+      "name": "_5.0 - prep",
+      "description": "This needs to be addressed to prepare 5.0",
+      "color": "d4c5f9"
+    },
+    {
+      "id": "LA_kwDOAYyWqM8AAAABIyjV0g",
+      "name": "josh/elar",
+      "description": "",
+      "color": "83B524"
+    }
+  ],
+  "number": 1424,
+  "state": "CLOSED",
+  "title": "Remove symlinks in zip files",
+  "url": "https://github.com/OWASP/ASVS/issues/1424"
+}

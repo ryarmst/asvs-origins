@@ -1,0 +1,147 @@
+{
+  "body_edits": [
+    {
+      "editedAt": "2024-01-17T15:03:37Z",
+      "diff": "Use of claims other than the subject and issuer identifier to uniquely identify an end user in OpenID Connect is non-compliant with the [framework](https://openid.net/specs/openid-connect-core-1_0.html#ClaimStability). As per [a recent Microsoft report](https://msrc.microsoft.com/blog/2023/06/potential-risk-of-privilege-escalation-in-azure-ad-applications/), there is a false identifier anti-pattern being followed and [exploited in the wild](https://www.descope.com/blog/post/noauth) resulting in account takeover.\r\n\r\nTo keep it simple, the sub (subject) and iss (issuer) claims, when used together, are considered to be a unique primary identifier for OIDC, as the uniqueness across users is guaranteed. Other claims such as email, username or phone number should not be used, as they can change over time and an attacker can falsify these claims.\r\n\r\nI'm interested in contributing and happy to create a PR for this, as well as adding other OIDC requirements. Perhaps this is something I can help with as part of the OAuth2 changes being [discussed here ](https://github.com/OWASP/ASVS/issues/996)?"
+    },
+    {
+      "editedAt": "2024-01-17T15:07:03Z",
+      "diff": "Usage of claims other than the subject and issuer identifier to uniquely identify an end user in OpenID Connect is non-compliant with the [framework](https://openid.net/specs/openid-connect-core-1_0.html#ClaimStability). As per [a recent Microsoft report](https://msrc.microsoft.com/blog/2023/06/potential-risk-of-privilege-escalation-in-azure-ad-applications/), there is a false identifier anti-pattern being followed and [exploited in the wild](https://www.descope.com/blog/post/noauth) resulting in account takeover.\r\n\r\nTo keep it simple, the sub (subject) and iss (issuer) claims, when used together, are considered to be a unique primary identifier for OIDC, as the uniqueness across users is guaranteed. Other claims such as email, username or phone number should not be used, as they can change over time and an attacker can falsify these claims.\r\n\r\nI'm interested in contributing and happy to create a PR for this, as well as adding other OIDC requirements. Perhaps this is something I can help with as part of the OAuth2 changes being [discussed here ](https://github.com/OWASP/ASVS/issues/996)?"
+    }
+  ],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2124487402",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "Thank you, Gabriel (@randomstuff) for reaching out!\r\n\r\nProposal from Jordan https://github.com/OWASP/ASVS/issues/1826#issuecomment-1941874604\r\n\r\n> Verify that the unique identifier in the ID/access token for an end-user is a combination of the sub claim and the iss claim, if a unique identifier is needed. Avoid usage of other claims such as email, phone_number, preferred_username, or name , as they may be mutable and can be potentially falsified.\r\n\r\nIn general, it would be nice to set the requirement against the attack vector, or defining the principle that must be achieved, not saying directly \"use this configuration\". Then it's potentially more clear, why such a requirement exists.\r\n\r\nI think we can rephrase the proposal from Jordan to achieve this.",
+          "recorded_at": "2024-05-22T10:50:29Z"
+        },
+        {
+          "body": "Thank you, Gabriel (@randomstuff) for reaching out!\r\n\r\nProposal from Jordan https://github.com/OWASP/ASVS/issues/1826#issuecomment-1941874604\r\n\r\n> Verify that the unique identifier in the ID/access token for an end-user is a combination of the sub claim and the iss claim, if a unique identifier is needed. Avoid usage of other claims such as email, phone_number, preferred_username, or name , as they may be mutable and can be potentially falsified.\r\n\r\nIn general, it would be nice to set the requirement against the attack vector, not saying directly \"use this configuration\". Then it's potentially more clear, why such a requirement exists.\r\n\r\nI think we can rephrase the proposal from Jordan to achieve this.",
+          "recorded_at": "2024-05-22T10:46:43Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2374864602",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> you need to take into account that a token from one issuer can not produce the same unique key as a token from another issuer.\r\n\r\nActually that's not the problem being addresses, I think.\r\n\r\nThe problem is if the RP uses for example, the `email` claim in order to identify the user. If the user `foo@example.com` remove his account on the IdP/email-provider, someone might register a new account later take over the email address `foo@example.com` and take over the original user's account on the RP.\r\n\r\nSame is true for example for a `phone_number` claim.",
+          "recorded_at": "2024-09-25T18:33:51Z"
+        },
+        {
+          "body": "> you need to take into account that a token from one issuer can not produce the same unique key as a token from another issuer.\r\n\r\nActually that's not the problem being addresses, I think.\r\n\r\nThe problem is if the RP uses for example, the `email` claim in order to identify the user. If the user `foo@example.com` remove his account on the IdP/email-provider, someone might register a new account later take over the email address `foo@example.com` and take over the original user's account on the RP.\r\n\r\nSame is true for example for a phone number.",
+          "recorded_at": "2024-09-25T18:33:07Z"
+        },
+        {
+          "body": "> you need to take into account that a token from one issuer can not produce the same unique key as a token from another issuer.\r\n\r\nActually that's not the problem being addresses, I think.\r\n\r\nThe problem is if the RP uses for example, the `email` claim in order to identify the user. If the user `foo@example.com` remove his account on the IdP/email-provider, someone might register a new account later take over the email address `foo@example.com` and take over the original user's account on the RP.",
+          "recorded_at": "2024-09-25T18:28:17Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2374868644",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "On the topic of the `iss` claim, it should always be taken into account for identifying the account.",
+          "recorded_at": "2024-09-25T18:30:24Z"
+        },
+        {
+          "body": "On the topic of the `sub` claim, it should always be taken into account for identifying the account.",
+          "recorded_at": "2024-09-25T18:30:18Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2375474542",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "Maybe something like,\r\n\r\n> Verify that the users are scoped by issuer (\"iss\" claim) and that the claims used for identifying the users cannot be reattributed to another user. Typically the \"sub\" claim will be used but other claims could be used instead. The \"email\" and \"phone_number\" claims are not suitable for identifying the user because they might be reattributed to other users.",
+          "recorded_at": "2024-09-26T06:43:00Z"
+        },
+        {
+          "body": "> Verify that the users are scoped by issuer (\"iss\" claim) and that the claims used for identifying the users cannot be reattributed to another user. Typically the \"sub\" claim will be used but other claims could be used instead. The \"email\" and \"phone_number\" claims are not suitable for identifying the user because they might be reattributed to other users.",
+          "recorded_at": "2024-09-26T00:03:29Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2381283661",
+      "author": "TobiasAhnoff",
+      "previous_versions": [
+        {
+          "body": "For OAuth \"it depends\" so a suggestion is to have a more generic requirement, perhaps like this:\r\n\r\n> Verify that users and clients can be uniquely identified from the access token. Typically for a JWT by using the iss and sub claims, where subject is a unique identifier for the context of the issuer, but note that other token attributes (claims) can be used as well (depending on context and token format, in example client-id claim). \r\n\r\nFor OIDC ID Tokens this is given by the specs, see https://openid.net/specs/openid-connect-core-1_0.html#IDToken which states that sub is \"A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client...\". So the requirement for OIDC could be something like:\r\n\r\n> Verify that users can be uniquely identified from the ID token, where subject is a unique identifier for the context of the issuer. ",
+          "recorded_at": "2024-09-29T12:17:27Z"
+        },
+        {
+          "body": "For OAuth \"it depends\" so a suggestion is to have a more generic requirement, perhaps like this:\r\n\r\n> Verify that users and clients can be uniquely identified from the access token. Typically for a JWT by using the iss and sub claims, where subject is a unique identifier for the context of the issuer, but note that other token attributes (claims) can be used as well (depending on context and token format, in example client-id). \r\n\r\nFor OIDC ID Tokens this is given by the specs, see https://openid.net/specs/openid-connect-core-1_0.html#IDToken which states that sub is \"A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client...\". So the requirement for OIDC could be something like:\r\n\r\n> Verify that users can be uniquely identified from the ID token, where subject is a unique identifier for the context of the issuer. ",
+          "recorded_at": "2024-09-29T09:57:15Z"
+        },
+        {
+          "body": "For OAuth \"it depends\" so a suggestion is to have a more generic requirement, perhaps like this:\r\n\r\n> Verify that users and clients can be uniquely identified from the access token. Typically for a JWT by using the iss and sub claims, where subject is a unique identifier for the context of the issuer, but note that other token attributes (claims) can be used as well (depending on context, in example client-id). \r\n\r\nFor OIDC ID Tokens this is given by the specs, see https://openid.net/specs/openid-connect-core-1_0.html#IDToken which states that sub is \"A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client...\". So the requirement for OIDC could be something like:\r\n\r\n> Verify that users can be uniquely identified from the ID token, where subject is a unique identifier for the context of the issuer. ",
+          "recorded_at": "2024-09-29T09:56:46Z"
+        },
+        {
+          "body": "For OAuth \"it depends\" so a suggestion is to have a more generic requirement, perhaps like this:\r\n\r\n> Verify that users and clients can be uniquely identified from the access token. Typically by using the iss and sub claims, where subject is a unique identifier for the context of the issuer, but note that other token attributes (claims) can be used as well (depending on context, in example client-id). \r\n\r\nFor OIDC ID Tokens this is given by the specs, see https://openid.net/specs/openid-connect-core-1_0.html#IDToken which states that sub is \"A locally unique and never reassigned identifier within the Issuer for the End-User, which is intended to be consumed by the Client...\". So the requirement for OIDC could be something like:\r\n\r\n> Verify that users can be uniquely identified from the ID token, where subject is a unique identifier for the context of the issuer. ",
+          "recorded_at": "2024-09-29T09:33:28Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2393398094",
+      "author": "elarlang",
+      "previous_versions": [
+        {
+          "body": "> which are not reassigned to other users (for the scope of an IdP).\r\n\r\n\"are not reassigned\" > \"can not be reassigned\"?\r\n\r\n> Verify that the Client uniquely identifies the user from ID token claims, usually the 'sub' claim, which can not be reassigned to other users (for the scope of an IdP).",
+          "recorded_at": "2024-10-04T14:51:04Z"
+        },
+        {
+          "body": "> which are not reassigned to other users (for the scope of an IdP).\r\n\r\n\"are not reassigned\" > \"can not be reassigned\"?",
+          "recorded_at": "2024-10-04T10:38:43Z"
+        },
+        {
+          "body": "> which are not reassigned to other users (for the scope of an IdP).\r\n\r\n\"are not assigned\" > \"can not be assigned\"?",
+          "recorded_at": "2024-10-04T10:38:28Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2395022148",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> Verify that users and clients can be uniquely identified from the access token. Typically for a JWT by using the iss and sub claims, where subject is a unique identifier for the context of the issuer, but note that other token attributes (claims) can be used as well (depending on context and token format, in example client-id claim).\r\n\r\nWould it be worth mentioning that this is only *if user identification is required* (or is that clear enough as it is)? The resource server could very well receive (by design) an anonymous access token.",
+          "recorded_at": "2024-10-05T11:13:55Z"
+        },
+        {
+          "body": "> Verify that users and clients can be uniquely identified from the access token. Typically for a JWT by using the iss and sub claims, where subject is a unique identifier for the context of the issuer, but note that other token attributes (claims) can be used as well (depending on context and token format, in example client-id claim).\r\n\r\nWould it worth mentioning that this is only *if user identification is required*? The resource server could very well receive (by design) an anonymous access token.",
+          "recorded_at": "2024-10-05T11:13:15Z"
+        },
+        {
+          "body": "> Verify that users and clients can be uniquely identified from the access token. Typically for a JWT by using the iss and sub claims, where subject is a unique identifier for the context of the issuer, but note that other token attributes (claims) can be used as well (depending on context and token format, in example client-id claim).\r\n\r\nWould it worth mentioning that this is only if user identification is required. The resource server could very well receive (by design) an anonymous access token.",
+          "recorded_at": "2024-10-05T11:12:56Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/1826#issuecomment-2398910728",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> What if the same user uses 2 different IdP's but those should give the same user in the client?\r\n\r\nYes, that's why there was \"unless this is desired as a consequence of some functional requirement\". The goal being to say that this must not happen \"by mistake\" but only by design. Something in the line of:\r\n\r\n> Verify that, if multiple identity providers are used by a RP, the identity of a user from an identity provider cannot be *spoofed* by another identity provider [by using the same user identifier].",
+          "recorded_at": "2024-10-08T05:52:38Z"
+        },
+        {
+          "body": "> What if the same user uses 2 different IdP's but those should give the same user in the client?\r\n\r\nYes, that's why there was \"unless this is desired as a consequence of some functional requirement\". The goal being to say that this must not happen \"by mistake\". Something in the line of:\r\n\r\n> Verify that, if multiple identity providers are used by a RP, the identity of a user from an identity provider cannot be *spoofed* by another identity provider [by using the same user identifier].",
+          "recorded_at": "2024-10-08T05:52:14Z"
+        }
+      ]
+    }
+  ]
+}

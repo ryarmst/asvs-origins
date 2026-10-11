@@ -1,0 +1,122 @@
+{
+  "author": {
+    "id": "MDQ6VXNlcjQ3NTk3NzA3",
+    "is_bot": false,
+    "login": "elarlang",
+    "name": "Elar Lang"
+  },
+  "body": "**V5.2 \"Output Encoding\" and 5.3 \"Injection Prevention\"**\r\n\r\n  * V5.2 Output Encoding\r\n  * V5.3 Injection Prevention\r\n\r\n\r\n**previously...**\r\nFeedback - I like to have \"building output\" topic separated again from usual \"input validation\" requirement pool. I shared my opinion almoust 5 years ago: http://lists.owasp.org/pipermail/owasp-application-security-verification-standard/2014-June/000589.html\r\n\r\nTo give more detailed and valueable recommendations, I need to start with questons. Maybe it makes sense to have each question/recommendation as separate issue, but I'm afraid that then we lack overview.\r\n\r\n\r\n**question 1**\r\n\r\nWhat is the difference between V5.2 and V5.3 categories and the reason to keep them separately?\r\n\r\n\r\n**question 2**\r\n\r\nDo you consider \"escaping\" part of \"encoding\" and all requirements which are mentioning \"encoding\" are valid also for \"escaping\"?\r\n\r\n\r\n**question 3**\r\n\r\n  * 5.2.2 Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, URL Parameters, HTTP headers, SMTP, and others as the context requires.\r\n\r\nIt's nice abstract requirement. But there are chosen technologies/syntaxes which have separate requirements:\r\n\r\n  * 5.3.1 SQL\r\n  * 5.3.2 LDAP\r\n  * 5.3.3 OS command\r\n  * 5.3.4 LFI/RFI\r\n  * 5.3.5 XPath/XML\r\n  * 5.3.7 SMTP/IMAP\r\n\r\nHow the list of technologies is chosen and why most common ones (HTML injection, JavaScript injection) does not exist as separate points? \r\n",
+  "comments": [
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NDQ0MTg3Ng==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "@jmanico Allocating to you as you're our output encoding enthusiast. ",
+      "createdAt": "2019-02-17T10:55:17Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/449#issuecomment-464441876",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NDcyODU3Mg==",
+      "author": {
+        "login": "jmanico"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "1) 5.2 and 5.3 can be merged, potentially.\r\n2) I consider escaping and encoding to be functionality the same and do not wish to split them out.\r\n3) 5.2.2 is aimed to be specific to XSS\r\n\r\nI am ok to rearrange this. Can we give us more specific recommendations or suggestions? I am not sure how to take action from your very reasonable request.",
+      "createdAt": "2019-02-18T13:18:59Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/449#issuecomment-464728572",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NDc1ODAzNA==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "At the moment I just wanted to know the reasons, why it's made like it is. Maybe there are some patterns or reasons what I wasn't able to figure out myself.\r\n\r\nSo far I haven't find solution what I like myself, every way fires somehow back.\r\n\r\nIt's a bit confusing to have encoding requirements separated from injection prevention requirements as current encoding requirements matching to \"injection prevention\" subcategory also. \r\n\r\nNo actions to recommend yet.",
+      "createdAt": "2019-02-18T14:48:07Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/449#issuecomment-464758034",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NTEyMjExMw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "\r\nI try to move on with **question 1** (\"What is the difference between V5.2 and V5.3 categories and the reason to keep them separately?\") and put my idea here **for brainstorm** (not as recommendation yet).\r\n\r\nProposal for **V5 subcategories** (names and texts needs language corrections):\r\n\r\n  * **V5.1 Input validation** - requirements for accepting or/and not accepting user input.\r\nIt should contain requirements where output is boolean - is input valid or not.\r\n\r\n  * **V5.2 Sanitize** - automatic modification to (user input OR dynamically build command like path) to be sure, it's later safe, like input from wysiwyg, sanitize svg, sanitize for SMTP, sanitize filename.\r\nIt should contain requirements where output is sanitized to be safe for interpreter.\r\n\r\n  * **V5.3 Building dynamic content** - escaping and encoding content for next component (interpretator). \r\nIt should contain requirements where output is command to interpreter in correct encoding/escaping.\r\n\r\n  * **V5.4 Deserialization** - no changes, extracting data from serialized content like JSON.parse, php unserialize etc\r\n  * **V5.5 Unmanaged Code** - no changes (no L1 requirements, would like to see it as last subcategory)\r\n\r\nCurrent \"5.2 Output Encoding Requirements\" and \"V5.3 Injection Prevention Requirements\" is a bit confusing. In general, encoding/escaping IS defence against Injection attacks. To have 2 categories \"Encoding\" AND \"Injection prevention\" does not make sense for me.\r\n\r\n\r\nWhy?\r\nIt makes sense from defence point of view - where and what exactly is missing or done incorrectly that problem exists.\r\nIn my opinion (which is based on pen-test and 2500h security trainings for developers) a lot of security holes happen because defence is built to incorrect place - like input validation is not correct way to avoid HTML injection and JavaScript injection attacks. Input validation is business logic rule but HTML injection and JavaScript injection are output encoding problems. Between them is sanitize, where you try to eliminate bad things or allow good things. But they are all different. But they all MAY prevent injection attacks.\r\n\r\nDoes it makes any sense for you?",
+      "createdAt": "2019-02-19T13:10:13Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/449#issuecomment-465122113",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NTc1Mzk1OA==",
+      "author": {
+        "login": "vanderaj"
+      },
+      "authorAssociation": "MEMBER",
+      "body": "Hi folks, I've had a crack at it. One obvious thing to me is that I wanted to change the order of 5.2 and 5.3 so that penetration testers can stop at the end of 5.2. I've renamed it per the suggestions above, but also kept some of the names we've previously used. \r\n\r\n@elarlang @jmanico Please let me know if this is okay. Re-open if not. Otherwise, let's call it done and move on. ",
+      "createdAt": "2019-02-20T21:06:11Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/449#issuecomment-465753958",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NTc2MzM1Mw==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "It ended up a bit different way.\r\n\r\nMy idea was to separate Input sanitize and output encoding requirements. At the moment requirements really don't mach with subcategories.\r\n\r\nMy proposal:\r\n\r\n**Input validation**\r\n  * 5.1.1 Verify that input validation is enforced on the server-side.\r\n  * 5.1.2 Verify that the application has defenses against HTTP parameter pollution attacks, particularly if the application framework makes no distinction about the source of request parameters (GET, POST, cookies, headers, or environment variables).\r\n  * 5.1.3 Verify that frameworks protect against mass parameter assignment attacks, or that the application has countermeasures to protect against unsafe parameter assignment, such as marking fields private or similar.\r\n  * 5.1.5 Verify that all input (HTML form fields, REST requests, URL parameters, HTTP headers, cookies, batch files, RSS feeds, etc) is validated using positive validation (whitelisting).\r\n  * 5.1.6 Verify that structured data is strongly typed and validated against a defined schema including allowed characters, length and pattern (e.g. credit card numbers or telephone, or validating that two related fields are reasonable, such as checking that suburb and zip/postcode match).\r\n  * 5.1.7 Verify that unstructured data is sanitized to enforce safety measures such as allowed characters and length, and characters potentially harmful in given context should be escaped (e.g. names with Unicode or apostrophes, such as ねこ or O'Hara).\r\n\r\n\r\n**sanitize and sandbox**\r\n  * 5.1.4 Verify that all untrusted HTML input from WYSIWYG editors or similar is properly sanitized with an HTML sanitizer library or framework feature.\r\n  * 5.2.7 Verify that the application sanitizes user input before passing to mail systems to protect against SMTP or IMAP injection.\r\n  * 5.2.8 Verify that the application avoids the use of eval() or other dynamic code execution features. Where there is no alternative, any user input being included must be sanitized or sandboxed before being executed.\r\n  * 5.2.9 Verify that the application protects against template injection attacks by ensuring that any user input being included is sanitized or sandboxed.\r\n  * 5.2.10 Verify that the application protects against SSRF attacks, by validating or sanitizing untrusted data or HTTP file metadata, such as filenames and URL input fields, use whitelisting of protocols, domains, paths and ports.\r\n  * 5.2.11 Verify that the application sanitizes, disables, or sandboxes user-supplied SVG scriptable content, especially as they relate to XSS resulting from inline scripts, and foreignObject.\r\n  * 5.2.12 Verify that the application sanitizes, disables, or sandboxes user-supplied scriptable or expression template language content, such as Markdown, CSS or XSL stylesheets, BBCode, or similar.\r\n\r\n\r\n**Output encoding and Injection Prevention Requirements**\r\n  * 5.3.1 Verify that output encoding occurs close to or by the interpreter for which it is intended.\r\n  * 5.3.2 Verify that output encoding is relevant for the interpreter and context required. For example, use encoders specifically for HTML values, HTML attributes, URL Parameters, HTTP headers, SMTP, and others as the context requires.\r\n  * 5.3.3 Verify that output encoding preserves the user's chosen character set and locale, such that any Unicode character point is valid and safely handled.\r\n  * 5.3.4 Verify that context-aware, preferably automated - or at worst, manual - output escaping protects against reflected, stored, and DOM based XSS.\r\n  * 5.3.5 Verify that any user-supplied data included in the browser's DOM or web views protects against JavaScript code execution and XSS attacks.\r\n  * 5.2.6 Verify that where potentially untrusted data is copied one DOM context to another, the transfer uses safe JavaScript methods, such as using innerText or JQuery .val to ensure the application is not susceptible to DOM Cross-Site Scripting (XSS) attacks.\r\n  * 5.3.6 Verify that where parameterized or safer mechanisms are not present, context-specific output encoding is used to protect against injection attacks, such as the use of SQL escaping to protect against SQL injection.\r\n  * 5.2.1 Verify that data selection or database queries (e.g. SQL, HQL, ORM, NoSQL) use parameterized queries, ORMs, entity frameworks, or are otherwise protected from database injection attacks.\r\n  * 5.2.2 Verify that the application protects against LDAP Injection vulnerabilities, or that specific security controls to prevent LDAP Injection have been implemented.\r\n  * 5.2.3 Verify that the application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual command line output encoding.\r\n  * 5.2.4 Verify that the application protects against Local File Inclusion (LFI) or Remote File Inclusion (RFI) attacks.\r\n  * 5.2.5 Verify that the application protects against XPath injection or XML injection attacks.\r\n\r\n\r\n\r\nAdditional points/questions:\r\n  * 5.3.2 - mention JavaScript or separate requirement for JavaScript injection - it's widespread enought to have separate point.\r\n  * 5.2.6 - JQuery -> jQuery (this is how they write their own name)\r\n  * 5.3.4 - what is different compared to 5.3.2?\r\n  * 5.3.5 - what is the point of this requirement?",
+      "createdAt": "2019-02-20T21:34:19Z",
+      "includesCreatedEdit": false,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/449#issuecomment-465763353",
+      "viewerDidAuthor": false
+    },
+    {
+      "id": "MDEyOklzc3VlQ29tbWVudDQ2NTk2NDgzOQ==",
+      "author": {
+        "login": "elarlang"
+      },
+      "authorAssociation": "COLLABORATOR",
+      "body": "  * Re-grouping proposal is now in separate issue #523 (as this one is closed)\r\n  * Additional points (XSS related issues) is now in separate issue #524",
+      "createdAt": "2019-02-21T11:26:39Z",
+      "includesCreatedEdit": true,
+      "isMinimized": false,
+      "minimizedReason": "",
+      "reactionGroups": [],
+      "url": "https://github.com/OWASP/ASVS/issues/449#issuecomment-465964839",
+      "viewerDidAuthor": false
+    }
+  ],
+  "createdAt": "2019-02-16T22:41:14Z",
+  "labels": [],
+  "number": 449,
+  "state": "CLOSED",
+  "title": "Questions about V5.2 \"Output Encoding\" and 5.3 \"Injection Prevention\" categories",
+  "url": "https://github.com/OWASP/ASVS/issues/449"
+}

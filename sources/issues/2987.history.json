@@ -1,0 +1,90 @@
+{
+  "body_edits": [],
+  "deleted_comments": [],
+  "edited_comments": [
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2987#issuecomment-2816752575",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "Hey @danielcuthbert @elarlang @tghosth are we ok to go to PR on this one? I'm going to go for it but stop me if it's not appropriate.",
+          "recorded_at": "2025-04-19T17:54:14Z"
+        },
+        {
+          "body": "Hey @danielcuthbert @elarlang @tghosth are we ok to go to PR on this one?",
+          "recorded_at": "2025-04-19T15:26:42Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2987#issuecomment-2817047977",
+      "author": "jmanico",
+      "previous_versions": [
+        {
+          "body": "> @jmanico there was a fair amount of back and forth specifically about this requirement (formerly 6.7.1) and I don't think it is fair to dismiss my request that that is referenced. In fact, you even suggested merging this requirement into a larger TLS requirement.\n\nAh, the number change why I missed it when I searched in the issue tracker. It was not intentional.",
+          "recorded_at": "2025-04-20T07:51:21Z"
+        },
+        {
+          "body": "> @jmanico there was a fair amount of back and forth specifically about this requirement (formerly 6.7.1) and I don't think it is fair to dismiss my request that that is referenced. In fact, you even suggested merging this requirement into a larger TLS requirement.\n\nAh, that's why I missed it. It was not intentional.",
+          "recorded_at": "2025-04-20T07:50:38Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2987#issuecomment-2817382297",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> @randomstuff: It feels like https://github.com/OWASP/ASVS/issues/2695 you agreed that this was a niche issue outside TLS and you even supported @jmanico's proposal to merge into TLS. Do you have further thoughts on why we should reverse this requirement (which again is separate to TLS considerations) back to L2?\n\nAFAIU, after rereading all this is that the motivation/reasoning of making 11.6.2 L3 (and not L2) is that we are expected to have another requirement which requires resistance to MITM attacks *for TLS*. I am not sure we do. Reading V12, we do have 12.3.2 \"Verify that TLS clients validate certificates received before communicating with a TLS server.\". Roughly, this requirement is supposed to prevent MITM attacks so we might think we are OK.\n\nIt is still weird to have 11.6.2 which requires MITM-resistant KEX *for L3 only*. People will probably ask about this same question again (and I will probably ask myself the same question again) if we don't do something about it 😄 . If we want to keep this, maybe we might need to add a note clarifying that we *do* have another requirement which requires MITM-resistance for TLS.",
+          "recorded_at": "2025-04-20T23:12:32Z"
+        },
+        {
+          "body": "> @randomstuff: It feels like https://github.com/OWASP/ASVS/issues/2695 you agreed that this was a niche issue outside TLS and you even supported @jmanico's proposal to merge into TLS. Do you have further thoughts on why we should reverse this requirement (which again is separate to TLS considerations) back to L2?\n\nAFAIU, the motivation/reasoning of making 11.6.2 L3 (and not L2) is that we are expected to have another requirement which requires resistance to MITM attacks *for TLS*. I am not sure we do. Reading V12, we do have 12.3.2 \"Verify that TLS clients validate certificates received before communicating with a TLS server.\". Roughly, this requirement is supposed to prevent MITM attacks so we might think we are OK.\n\nIt is still weird to have 11.6.2 which requires MITM-resistant KEX *for L3 only*. People will probably ask about this same question again (and I will probably ask myself the same question again) if we don't do something about it 😄 . If we want to keep this, maybe we might need to add a note clarifying that we *do* have another requirement which requires MITM-resistance for TLS.",
+          "recorded_at": "2025-04-20T23:12:12Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2987#issuecomment-2817977721",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "> We have [requirement 12.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x21-V12-Communications.md#v121-general-tls-security-guidance) related to ciphers. Do I understand correctly that if you are using a secure cipher in TLS, that implies secure key exchange with no further thought required?\n\nIf you want to have MITM-resistance in TLS, you need to:\n\n* use a not broken TLS versions (12.1.1);\n* and use a not broken cipher suite (12.1.2);\n* and, when you are the client, check the server's identity (12.3.2);\n* and use a not broken group for the (EC)DHE key exchange (do we have an explicit requirement?);\n* (and a lots of other things like not using a broken implementation 😄).\n\n> Can you think of another common scenario where a developer will have to handle a situation of manually building an automated key exchange process which seems to be the only case where 11.6.2 would be relevant.\n\nOne example, is if you are building an application which features a form of end-to-end encryption between users. I'll try to expand on this if needed (though I am not the best qualified for that) but in this context, maybe it might make sense to allow an end-to-end key exchange which is not resistant to MITM (if we consider the application server to be a MITM).\n\nSo my conclusion is that maybe we don't need to change 11.6.2 but instead clarify in a note that this is required for HTTPS/TLS servers as part of another requirement.\n\n@danielcuthbert, @unprovable, @ingo-rauner, any feedback on that?",
+          "recorded_at": "2025-04-21T08:58:26Z"
+        },
+        {
+          "body": "> We have [requirement 12.1.2](https://github.com/OWASP/ASVS/blob/master/5.0/en/0x21-V12-Communications.md#v121-general-tls-security-guidance) related to ciphers. Do I understand correctly that if you are using a secure cipher in TLS, that implies secure key exchange with no further thought required?\n\nIf you want to have MITM-resistance in TLS, you need to:\n\n* use a not broken TLS versions (12.1.1);\n* and use a not broken cipher suite (12.1.2);\n* and, when you are the client, check the server's identity (12.3.2);\n* and use a not broken group for the (EC)DHE key exchange (do we have an explicit requirement?);\n* (and a lots of other things like not using a broken implementation 😄).\n\n> Can you think of another common scenario where a developer will have to handle a situation of manually building an automated key exchange process which seems to be the only case where 11.6.2 would be relevant.\n\nOne example, is if you are building an application which features a form of end-to-end encryption between users. I'll try to expand on this if needed (though I am not the best qualified for that) but in this context, maybe it might make sense to allow an end-to-end key exchange which is not resistant to MITM (if we consider the application server to be a MITM).\n\n@danielcuthbert, @unprovable, @ingo-rauner, any feedback on that?",
+          "recorded_at": "2025-04-21T08:57:36Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2987#issuecomment-2833452082",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "Possible note:\n\n> Additional requirements in V12 mandate protection against man-in-the-middle attackers for transport layer protection (such as TLS). For end-to-end protection, we do not require protection against man-in-the-middle attacks by the application server in general.\n\nIn this case, we would have 11.6.2 changed into:\n\n> Verify that approved cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. (L2)\n\ni.e. remove \"This will prevent attacks on the key establishment process which could lead to adversary-in-the-middle attacks or cryptographic breaks.\"\n\nI'm not sure about this one. Does it make sens? @danielcuthbert and @unprovable? and @ingo-rauner?\n",
+          "recorded_at": "2025-04-27T13:10:25Z"
+        },
+        {
+          "body": "Possible note:\n\n> Additional requirements in V12 mandate protection against man-in-the-middle attackers for transport layer protection (such as TLS). For end-to-end protection, we do not require protection against man-in-the-middle attacks by the application server in general.\n\nIn this case, we would have 11.6.2 changed into:\n\n> Verify that approved cryptographic algorithms are used for key exchange (such as Diffie-Hellman) with a focus on ensuring that key exchange mechanisms use secure parameters. (L2)\n\ni.e. remove \"This will prevent attacks on the key establishment process which could lead to adversary-in-the-middle attacks or cryptographic breaks.\"\n\nI'm not sure about this one. Does it make sens? @danielcuthbert and @unprovable?\n",
+          "recorded_at": "2025-04-27T13:09:18Z"
+        }
+      ]
+    },
+    {
+      "url": "https://github.com/OWASP/ASVS/issues/2987#issuecomment-2833609463",
+      "author": "randomstuff",
+      "previous_versions": [
+        {
+          "body": "Maybe the changes I was proposing in my previous comment are not needed.\n\nThere are two aspects of it:\n\n1. The requirement is currently L3. I think it would better be L2.\n2. The current wording requires MITM-resistance (for L3). I think it might make sense to avoid having a strong \"require\" on this part.\n\nTo summarize, I'd rather have a weaker requirement which is applicable for L2 than a stronger one that is only applicable for L3.\n\nThat being said, just adding the note works.",
+          "recorded_at": "2025-04-27T19:38:18Z"
+        },
+        {
+          "body": "Maybe the changes I was proposing in my previous comment are not needed.\n\nThere are two aspects of it:\n\n1. The requirement is currently L3. I think it would better be L2.\n2. The current wording requires MITM-resistance (for L3). I think it might make sense to avoid having a strong \"require\" on this part.\n\nTo summarize, I'd rather have a weaker requirement which is applicable for L3 than a stronger one that is only applicable for L3.\n\nThat being said, just adding the note works.",
+          "recorded_at": "2025-04-27T19:37:40Z"
+        }
+      ]
+    }
+  ]
+}
